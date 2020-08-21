@@ -7,6 +7,7 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models, connection
 
+from money.reusing.currency import Currency
 
 
 class Annualtargets(models.Model):
@@ -34,7 +35,7 @@ class Banks(models.Model):
             
             cursor.execute("SELECT accounts_balance(now(), 'EUR')")#, [self.baz])
             row = cursor.fetchone()
-            return row[0]
+            return Currency(row[0], "EUR")
 
 class Conceptos(models.Model):
     id_conceptos = models.AutoField(primary_key=True)
