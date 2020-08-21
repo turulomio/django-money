@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "My banks" %}</h1>
+
+    {% for bank in banks %}
+       {% include "objects/bank.html" with bank=bank %}
+    {% endfor %}
+{% endblock %}
+

@@ -33,6 +33,12 @@ urlpatterns = i18n_patterns(
     
     path('login/', LoginView.as_view(template_name='login.html'), name="login"), 
     path('logout/', logout_then_login, name="logout"), 
+    
+    path('bank/list/', money_views.bank_list, name='bank_list'),
+    path('bank/view/<slug:pk>/', money_views.bank_list, name='bank_view'),
+    path('bank/new/', money_views.bank_new, name='bank_new'),
+    path('bank/update/<slug:pk>', money_views.bank_update, name='bank_update'),
+    path('bank/delete/<slug:pk>', money_views.bank_delete, name='bank_delete'),
 
 
 )

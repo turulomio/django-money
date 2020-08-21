@@ -13,15 +13,15 @@
 
 from django.urls import reverse_lazy
 from django.contrib.auth import  login
-from django.shortcuts import render,  redirect
+from django.shortcuts import render,  redirect, get_object_or_404
 from django.contrib.sites.shortcuts import get_current_site
-
+from django.contrib.auth.decorators import login_required
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
+from .models import Banks
 
 from .tokens import account_activation_token
-from django.contrib.auth.models import Group
 
 from .forms import SignUpForm    
 
@@ -66,8 +66,6 @@ def activate(request, uidb64, token):
         user.is_active = True
         user.profile.email_confirmed = True
         user.save()
-        groupUser=Group.objects.get(name="Default library users")
-        groupUser.user_set.add(user)
         login(request, user)
         return render(request, 'account_activation_valid.html')
     else:
@@ -84,3 +82,24 @@ def error_403(request, exception):
 ## @todo Add a tab Widget, author, books, valorations with number in ttab
 def home(request):
     return render(request, 'home.html', locals())
+
+
+
+@login_required
+def bank_list(request):
+    banks= Banks.objects.all().order_by('name')
+    return render(request, 'bank_list.html', locals())
+    
+    
+    
+def bank_new(request, pk):
+    return render(request, 'money/bank_new.html', locals())
+def bank_view(request, pk):
+    bank=get_object_or_404(Banks, pk=pk)
+    return render(request, 'money/bank_view.html', locals())
+def bank_update(request, pk):
+    bank=get_object_or_404(Banks, pk=pk)
+    return render(request, 'money/bank_update.html', locals())
+def bank_delete(request, pk):
+    bank=get_object_or_404(Banks, pk=pk)
+    return render(request, 'money/bank_delete.html', locals())

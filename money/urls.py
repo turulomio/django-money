@@ -8,6 +8,6 @@
 #
 #)
 
-handler403 = 'books.views.error_403'
+#handler403 = 'books.views.error_403'
 
 
