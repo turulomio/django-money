@@ -184,20 +184,20 @@ def mypagetitle(context):
 
 global menu    
 menu=Menu(_("My Library"))
-menu.append(Action(_("Search"), None,  "home"))
-
-menu.append(Action(_("Add author"), ['books.add_author', ], "author-add"))
-
-menu.append(Action(_("My valorations"), ['books.search_valoration'], "valoration-list"))
-
-grQuerys=Group(1, _("Queries"), "12")
-grQuerys.append(Action(_("Most valued books"), ['books.create_valoration', ], "query_books_valued"))
-grQuerys.append(Action(_("Unfinished books"), ['books.create_valoration', ], "unfinished-books"))
-
-grStatistics=Group(1, _("Statistics"), "13")
-grStatistics.append(Action(_("Global"),['books.statistics_global',], "statistics-global"))
-grStatistics.append(Action(_("User"),['books.statistics_user',], "statistics-user"))
-
-menu.append(grQuerys)
-menu.append(grStatistics)
+menu.append(Action(_("Home"), None,  "home"))
+#
+#menu.append(Action(_("Add author"), ['books.add_author', ], "author-add"))
+#
+#menu.append(Action(_("My valorations"), ['books.search_valoration'], "valoration-list"))
+#
+#grQuerys=Group(1, _("Queries"), "12")
+#grQuerys.append(Action(_("Most valued books"), ['books.create_valoration', ], "query_books_valued"))
+#grQuerys.append(Action(_("Unfinished books"), ['books.create_valoration', ], "unfinished-books"))
+#
+#grStatistics=Group(1, _("Statistics"), "13")
+#grStatistics.append(Action(_("Global"),['books.statistics_global',], "statistics-global"))
+#grStatistics.append(Action(_("User"),['books.statistics_user',], "statistics-user"))
+#
+#menu.append(grQuerys)
+#menu.append(grStatistics)
 
