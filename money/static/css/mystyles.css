@@ -165,7 +165,7 @@ td {
 /* FOR DESKTOPS */
 @media all and (min-width: 800px){
     div.layHorizontal {
-        background: linear-gradient(#333333,#AAAAAA);
+        background: linear-gradient(#4a55b9,#AAAAAA);
         padding: 0px;
         margin: 0px;
         line-height: 1;
@@ -218,7 +218,7 @@ td {
 /* FOR MOBILES */
 @media all and (max-width: 800px){
     div.layHorizontal {
-        background: linear-gradient(#333333,#AAAAAA);
+        background: linear-gradient(#4a55b9,#AAAAAA);
         padding: 0px;
         margin: 0px;
         line-height: 1;
