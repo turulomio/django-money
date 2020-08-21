@@ -25,6 +25,9 @@ class Banks(models.Model):
     class Meta:
         managed = False
         db_table = 'banks'
+        
+    def __str__(self):
+        return self.name
 
     def balance(self):
         with connection.cursor() as cursor:
