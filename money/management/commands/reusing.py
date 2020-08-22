@@ -9,6 +9,10 @@ class Command(BaseCommand):
     help = 'Update reusing project'
 
     def handle(self, *args, **options):
+        download_from_github("turulomio", "reusingcode", "python_plain/casts.py", "money/reusing")
         download_from_github("turulomio", "reusingcode", "python_plain/currency.py", "money/reusing")
         download_from_github("turulomio", "reusingcode", "python_plain/github.py", "money/reusing")
+        download_from_github("turulomio", "reusingcode", "python/datetime_functions.py", "money/reusing")
+        download_from_github("turulomio", "reusingcode", "python_plain/myconfigparser.py", "money/reusing")
+        download_from_github("turulomio", "reusingcode", "python/text_inputs.py", "money/reusing")
 
