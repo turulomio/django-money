@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+{% if perms.books.add_valoration %}
+    <h1>{% trans "Add a Valoration" %}</h1>
+    <form method="post">
+        <table>
+        {% csrf_token %}
+        {{ form.as_table }}
+        </table>
+    <button type="submit">{% trans "Save" %}</button>
+    </form>
+    {% include "messages.html" %}
+{% else %}
+    <h1>{% trans "Error ading a new valoration" %}</h1>
+    <p>{% trans "You can't add valorations" %}</p>
+{% endif%}
+
+{% endblock %}
