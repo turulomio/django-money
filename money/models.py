@@ -19,6 +19,13 @@ class Accounts(models.Model):
     class Meta:
         managed = False
         db_table = 'accounts'
+        
+    ## @return Tuple (balance_account_currency | balance_user_currency)
+    def balance(self, dt):
+        with connection.cursor() as c:
+            c.execute("select * from account_balance(%s,%s,%s)", (self.id, dt, self.currency))
+            r=c.fetchone()
+        return Currency(r[2], self.currency), Currency(r[3], r[4])
 
 
 class Accountsoperations(models.Model):

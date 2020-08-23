@@ -1,16 +1,4 @@
-#from django import forms
-#from django.db import connection
-#from django.db.models import Q, Avg, F
-#from django.contrib.auth.decorators import login_required, permission_required
-#from django.http import HttpResponseRedirect
-#from django.urls import reverse_lazy
-#from django.utils.translation import gettext_lazy as _
-#from django.utils.decorators import method_decorator
-#from django.views.generic.edit import CreateView, UpdateView, DeleteView
-#
-#from books.forms import BookAddForm, ValorationAddForm
-#from books.models import Author,  Book, Valoration
-
+from datetime import datetime
 from django.urls import reverse_lazy
 from django.contrib.auth import  login
 from django.shortcuts import render,  redirect, get_object_or_404
@@ -19,10 +7,11 @@ from django.contrib.auth.decorators import login_required
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
-from .models import Banks
+from .models import Banks, Accounts, Investments
 from django.utils.decorators import method_decorator
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import UpdateView#, DeleteView
 
+from money.reusing.currency import Currency
 from .tokens import account_activation_token
 
 from .forms import SignUpForm    
@@ -88,11 +77,45 @@ def home(request):
 
 
 @login_required
-def bank_list(request):
-    banks= list(Banks.objects.all().order_by('name').values())
-    print(banks)
+def bank_list(request,  active=True):
+    banks= list(Banks.objects.all().filter(active=active).order_by('name').values())
     return render(request, 'bank_list.html', locals())
     
+@login_required
+def account_list(request,  active=True):
+    accounts= Accounts.objects.all().filter(active=active).order_by('name')
+    list_accounts=[]
+    for account in accounts:
+        balance=account.balance(datetime.now())
+        list_accounts.append({
+                "id": account.id, 
+                "active":str(account.active).lower(), 
+                "name": account.name, 
+                "number": account.number, 
+                "bank": account.banks.name, 
+                "currency": account.currency, 
+                "balance": float(balance[0].amount), 
+                "balance_user": float(balance[1].amount), 
+            }
+        )
+    return render(request, 'account_list.html', locals())
+        
+@login_required
+def investment_list(request,  active=True):
+    investments= Investments.objects.all().filter(active=active).order_by('name')
+    list_investments=[]
+    for investment in investments:
+        balance=Currency(0, 'EUR'),  Currency(0, 'EUR')
+        list_investments.append({
+                "id": investment.id, 
+                "active":str(investment.active).lower(), 
+                "name": investment.name, 
+                "bank": investment.accounts.banks.name, 
+                "balance": float(balance[0].amount), 
+                "balance_user": float(balance[1].amount), 
+            }
+        )
+    return render(request, 'investment_list.html', locals())
     
     
 def bank_new(request, pk):

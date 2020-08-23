@@ -40,7 +40,12 @@ urlpatterns = i18n_patterns(
     path('bank/update/<slug:pk>', money_views.bank_update.as_view(), name='bank_update'),
     path('bank/delete/<slug:pk>', money_views.bank_delete, name='bank_delete'),
 
-
+    path('account/list/', money_views.account_list, name='account_list'),
+    path('account/view/<slug:pk>/', money_views.account_list, name='account_view'),
+    
+    path('investment/list/', money_views.investment_list, name='investment_list'),
+    path('investment/view/<slug:pk>/', money_views.investment_list, name='investment_view'),
+    
 )
 
 handler403 = 'money.views.error_403'
