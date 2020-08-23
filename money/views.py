@@ -89,7 +89,8 @@ def home(request):
 
 @login_required
 def bank_list(request):
-    banks= Banks.objects.all().order_by('name')
+    banks= list(Banks.objects.all().order_by('name').values())
+    print(banks)
     return render(request, 'bank_list.html', locals())
     
     
