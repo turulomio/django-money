@@ -1,0 +1,84 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+
+<h1>{% trans "Investment " %}</h1>
+
+<script>
+  $( function() {
+    $( "#tabs" ).tabs();
+  } );
+  </script>
+ 
+<div id="tabs">
+  <ul>
+    <li><a href="#tabs-1">{% trans "Investment operations" %}</a></li>
+    <li><a href="#tabs-2">{% trans "Current investment operations" %}</a></li>
+    <li><a href="#tabs-3">{% trans "Historical investment operations" %}</a></li>
+  </ul>
+ 
+
+<div id="tabs-1">
+  <div id="table"></div>
+<script>
+    var False=false; var True=true;
+    var tabledata = {{list_oi|safe}};
+var table = new Tabulator("#table", {
+ 	data:tabledata, //assign data to table
+ 	layout:"fitDataTable", //fit columns to width of table (optional)
+ 	columns:[ //Define Table Columns
+	 	{title:"{% trans 'Date and time' %}", field:"datetime"},
+	 	{title:"{% trans 'Shares' %}", field:"shares"},
+	 	{title:"{% trans 'Price' %}", field:"price",},
+ 	],
+ 	rowClick:function(e, row){
+        window.location.href = "{% url 'bank_update' pk=-9999 %}".replace( -9999 , row.getData().id);
+ 	},
+});
+
+</script>
+</div>
+
+
+<div id="tabs-2">
+<div id="table2"></div>
+<script>
+    var False=false; var True=true;
+    var tabledata = {{list_oic|safe}};
+var table = new Tabulator("#table2", {
+ 	data:tabledata, //assign data to table
+ 	layout:"fitDataTable", //fit columns to width of table (optional)
+ 	columns:[ //Define Table Columns
+	 	{title:"{% trans 'Date and time' %}", field:"datetime"},
+	 	{title:"{% trans 'Shares' %}", field:"shares"},
+	 	{title:"{% trans 'Price' %}", field:"price",},
+ 	],
+ 	rowClick:function(e, row){
+        window.location.href = "{% url 'bank_update' pk=-9999 %}".replace( -9999 , row.getData().id);
+ 	},
+});
+</script>
+</div>
+
+<div id="tabs-3">
+<div id="table3"></div>
+<script>
+    var False=false; var True=true;
+    var tabledata = {{list_oih|safe}};
+var table = new Tabulator("#table3", {
+ 	data:tabledata, //assign data to table
+ 	layout:"fitDataTable", //fit columns to width of table (optional)
+ 	columns:[ //Define Table Columns
+	 	{title:"{% trans 'Date and time' %}", field:"dt_end"},
+	 	{title:"{% trans 'Shares' %}", field:"shares"},
+ 	],
+ 	rowClick:function(e, row){
+        window.location.href = "{% url 'bank_update' pk=-9999 %}".replace( -9999 , row.getData().id);
+ 	},
+});
+</script>
+</div>
+</div>
+{% endblock %}

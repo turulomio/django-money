@@ -7,7 +7,7 @@ def my_context(request):
     menu.append(Action(_("Home"), None,  "home"))
     menu.append(Action(_("Banks"), None,  "bank_list"))
     menu.append(Action(_("Accounts"), None,  "account_list"))
-    menu.append(Action(_("Investments"), None,  "investment_list"))
+    menu.append(Action(_("Investments"), None,  "investment_list_active"))
     
     return {
         'VERSION': __version__, 

@@ -7,14 +7,16 @@ from django.contrib.auth.decorators import login_required
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
-from .models import Banks, Accounts, Investments
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView#, DeleteView
 
+from money.connection_dj import cursor_rows
+from money.forms import SignUpForm    
+from money.models import Banks, Accounts, Investments, Investmentsoperations
 from money.reusing.currency import Currency
-from .tokens import account_activation_token
+from money.tables import tb_listdict
+from money.tokens import account_activation_token
 
-from .forms import SignUpForm    
 
 ## View to register a new user
 def signup(request):
@@ -101,7 +103,7 @@ def account_list(request,  active=True):
     return render(request, 'account_list.html', locals())
         
 @login_required
-def investment_list(request,  active=True):
+def investment_list(request,  active):
     investments= Investments.objects.all().filter(active=active).order_by('name')
     list_investments=[]
     for investment in investments:
@@ -117,14 +119,30 @@ def investment_list(request,  active=True):
         )
     return render(request, 'investment_list.html', locals())
     
+@login_required
+def investment_view(request, pk):
+    investment=get_object_or_404(Investments, pk=pk)
+    oi=Investmentsoperations.objects.all().filter(investments_id=pk).order_by('datetime')
+    list_oi=[]
+    for o in oi:
+        list_oi.append({
+                "id": o.id, 
+                "datetime": str(o.datetime), 
+                "price": float(o.price), 
+                "shares": float(o.shares), 
+            }
+        )
+    oic=cursor_rows("select * from investment_operations_current({},now());".format(pk))
+    list_oic=tb_listdict(oic)
+    oih=cursor_rows("select * from investment_operations_historical({},now());".format(pk))
+    list_oih=tb_listdict(oih)
+        
+    return render(request, 'investment_view.html', locals())
     
+@login_required
 def bank_new(request, pk):
     return render(request, 'bank_new.html', locals())
-
-def bank_view(request, pk):
-    bank=get_object_or_404(Banks, pk=pk)
-    return render(request, 'bank_view.html', locals())
-    
+  
 @method_decorator(login_required, name='dispatch')
 class bank_update(UpdateView):
     model = Banks
@@ -134,7 +152,13 @@ class bank_update(UpdateView):
     def get_success_url(self):
         return reverse_lazy('bank_list')
     
+@login_required
+def bank_view(request, pk):
+    bank=get_object_or_404(Banks, pk=pk)
+    return render(request, 'bank_view.html', locals())
+    
 
+@login_required
 def bank_delete(request, pk):
     bank=get_object_or_404(Banks, pk=pk)
     return render(request, 'bank_delete.html', locals())

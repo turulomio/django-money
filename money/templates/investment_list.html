@@ -4,6 +4,18 @@
 
 {% block content %}
 <h1>{% trans "Investments list" %}</h1>
+
+
+{% if active is True %}
+<form class="active_selection" action="{% url 'investment_list_inactive' %}" method="post">{% csrf_token %}
+<label>{% trans "Show inactive investments" %}</label>
+{% else %} 
+<form class="active_selection" action="{% url 'investment_list_active' %}" method="post">{% csrf_token %}
+<label>{% trans "Show active investments" %}</label>
+{% endif %}      
+<input type="checkbox" id="chkActive" value="first_checkbox" onchange="this.form.submit();">
+</form>
+<p></p>
 <div id="table"></div>
 <script>
     var False=false; var True=true; var None=null;
@@ -18,7 +30,7 @@ var table = new Tabulator("#table", {
 	 	{title:"{% trans 'Balance' %}", field:"balance", formatter:"money", formatterParams:{"symbol":" €","symbolAfter":true},align:"right", bottomCalc:"sum",bottomCalcFormatter:"money",bottomCalcFormatterParams:{"symbol":" €","symbolAfter":true}},
  	],
  	rowClick:function(e, row){
-        window.location.href = "{% url 'account_view' pk=-9999 %}".replace( -9999 , row.getData().id);
+        window.location.href = "{% url 'investment_view' pk=-9999 %}".replace( -9999 , row.getData().id);
  	},
 });
 </script>
