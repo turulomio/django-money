@@ -20,6 +20,8 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
 from .models import Banks
+from django.utils.decorators import method_decorator
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .tokens import account_activation_token
 
@@ -93,13 +95,22 @@ def bank_list(request):
     
     
 def bank_new(request, pk):
-    return render(request, 'money/bank_new.html', locals())
+    return render(request, 'bank_new.html', locals())
+
 def bank_view(request, pk):
     bank=get_object_or_404(Banks, pk=pk)
-    return render(request, 'money/bank_view.html', locals())
-def bank_update(request, pk):
-    bank=get_object_or_404(Banks, pk=pk)
-    return render(request, 'money/bank_update.html', locals())
+    return render(request, 'bank_view.html', locals())
+    
+@method_decorator(login_required, name='dispatch')
+class bank_update(UpdateView):
+    model = Banks
+    fields = ['name', 'active']
+    template_name="bank_update.html"
+
+    def get_success_url(self):
+        return reverse_lazy('bank_list')
+    
+
 def bank_delete(request, pk):
     bank=get_object_or_404(Banks, pk=pk)
-    return render(request, 'money/bank_delete.html', locals())
+    return render(request, 'bank_delete.html', locals())

@@ -6,8 +6,32 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models, connection
-
 from money.reusing.currency import Currency
+
+
+class Accounts(models.Model):
+    name = models.TextField(blank=True, null=True)
+    banks = models.ForeignKey('Banks', models.DO_NOTHING, blank=True, null=True)
+    active = models.BooleanField(blank=True, null=True)
+    number = models.CharField(max_length=24, blank=True, null=True)
+    currency = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = 'accounts'
+
+
+class Accountsoperations(models.Model):
+    concepts = models.ForeignKey('Concepts', models.DO_NOTHING)
+    operationstypes_id = models.IntegerField()
+    amount = models.DecimalField(max_digits=100, decimal_places=2)
+    comment = models.TextField(blank=True, null=True)
+    accounts = models.ForeignKey(Accounts, models.DO_NOTHING)
+    datetime = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'accountsoperations'
 
 
 class Annualtargets(models.Model):
@@ -19,14 +43,79 @@ class Annualtargets(models.Model):
         db_table = 'annualtargets'
 
 
+class AuthGroup(models.Model):
+    name = models.CharField(unique=True, max_length=150)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_group'
+
+
+class AuthGroupPermissions(models.Model):
+    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
+    permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_group_permissions'
+        unique_together = (('group', 'permission'),)
+
+
+class AuthPermission(models.Model):
+    name = models.CharField(max_length=255)
+    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)
+    codename = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_permission'
+        unique_together = (('content_type', 'codename'),)
+
+
+class AuthUser(models.Model):
+    password = models.CharField(max_length=128)
+    last_login = models.DateTimeField(blank=True, null=True)
+    is_superuser = models.BooleanField()
+    username = models.CharField(unique=True, max_length=150)
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+    email = models.CharField(max_length=254)
+    is_staff = models.BooleanField()
+    is_active = models.BooleanField()
+    date_joined = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user'
+
+
+class AuthUserGroups(models.Model):
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user_groups'
+        unique_together = (('user', 'group'),)
+
+
+class AuthUserUserPermissions(models.Model):
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+    permission = models.ForeignKey(AuthPermission, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user_user_permissions'
+        unique_together = (('user', 'permission'),)
+
+
 class Banks(models.Model):
     name = models.TextField()
     active = models.BooleanField()
 
     class Meta:
         managed = False
-        db_table = 'banks'
-        
+        db_table = 'banks'        
     def __str__(self):
         return self.name
 
@@ -36,47 +125,109 @@ class Banks(models.Model):
             cursor.execute("SELECT accounts_balance(now(), 'EUR')")#, [self.baz])
             row = cursor.fetchone()
             return Currency(row[0], "EUR")
+            
+    def accounts(self):
+        return Accounts.objects.all()
 
-class Conceptos(models.Model):
-    id_conceptos = models.AutoField(primary_key=True)
-    concepto = models.TextField(blank=True, null=True)
-    id_tiposoperaciones = models.IntegerField(blank=True, null=True)
+
+class Concepts(models.Model):
+    name = models.TextField(blank=True, null=True)
+    operationstypes_id = models.IntegerField(blank=True, null=True)
     editable = models.BooleanField()
 
     class Meta:
         managed = False
-        db_table = 'conceptos'
+        db_table = 'concepts'
 
 
-class Cuentas(models.Model):
-    id_cuentas = models.AutoField(primary_key=True)
-    cuenta = models.TextField(blank=True, null=True)
-    banks = models.ForeignKey(Banks, models.DO_NOTHING, blank=True, null=True)
+class Creditcards(models.Model):
+    name = models.TextField(blank=True, null=True)
+    accounts = models.ForeignKey(Accounts, models.DO_NOTHING, blank=True, null=True)
+    deferred = models.BooleanField(blank=True, null=True)
+    maximumbalance = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
     active = models.BooleanField(blank=True, null=True)
-    numerocuenta = models.CharField(max_length=24, blank=True, null=True)
-    currency = models.TextField()
+    number = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'cuentas'
+        db_table = 'creditcards'
+
+
+class Creditcardsoperations(models.Model):
+    concepts = models.ForeignKey(Concepts, models.DO_NOTHING)
+    operationstypes_id = models.IntegerField()
+    amount = models.DecimalField(max_digits=100, decimal_places=2)
+    comment = models.TextField(blank=True, null=True)
+    creditcards = models.ForeignKey(Creditcards, models.DO_NOTHING)
+    paid = models.BooleanField()
+    paid_datetime = models.DateTimeField(blank=True, null=True)
+    accountsoperations_id = models.BigIntegerField(blank=True, null=True)
+    datetime = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'creditcardsoperations'
 
 
 class Dividends(models.Model):
-    id_dividends = models.AutoField(primary_key=True)
-    id_inversiones = models.ForeignKey('Inversiones', models.DO_NOTHING, db_column='id_inversiones')
-    bruto = models.DecimalField(max_digits=100, decimal_places=2)
-    retencion = models.DecimalField(max_digits=100, decimal_places=2)
-    neto = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
-    valorxaccion = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
-    fecha = models.DateTimeField(blank=True, null=True)
-    id_opercuentas = models.IntegerField(blank=True, null=True)
-    comision = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
-    id_conceptos = models.ForeignKey(Conceptos, models.DO_NOTHING, db_column='id_conceptos')
+    investments = models.ForeignKey('Investments', models.DO_NOTHING)
+    gross = models.DecimalField(max_digits=100, decimal_places=2)
+    taxes = models.DecimalField(max_digits=100, decimal_places=2)
+    net = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
+    dps = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
+    datetime = models.DateTimeField(blank=True, null=True)
+    accountsoperations_id = models.IntegerField(blank=True, null=True)
+    commission = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
+    concepts = models.ForeignKey(Concepts, models.DO_NOTHING)
     currency_conversion = models.DecimalField(max_digits=10, decimal_places=6)
 
     class Meta:
         managed = False
         db_table = 'dividends'
+
+
+class DjangoAdminLog(models.Model):
+    action_time = models.DateTimeField()
+    object_id = models.TextField(blank=True, null=True)
+    object_repr = models.CharField(max_length=200)
+    action_flag = models.SmallIntegerField()
+    change_message = models.TextField()
+    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'django_admin_log'
+
+
+class DjangoContentType(models.Model):
+    app_label = models.CharField(max_length=100)
+    model = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'django_content_type'
+        unique_together = (('app_label', 'model'),)
+
+
+class DjangoMigrations(models.Model):
+    app = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    applied = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'django_migrations'
+
+
+class DjangoSession(models.Model):
+    session_key = models.CharField(primary_key=True, max_length=40)
+    session_data = models.TextField()
+    expire_date = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'django_session'
 
 
 class Dps(models.Model):
@@ -127,85 +278,50 @@ class Globals(models.Model):
         db_table = 'globals'
 
 
-class Inversiones(models.Model):
-    id_inversiones = models.AutoField(primary_key=True)
-    inversion = models.TextField()
+class Investments(models.Model):
+    name = models.TextField()
     active = models.BooleanField()
-    id_cuentas = models.ForeignKey(Cuentas, models.DO_NOTHING, db_column='id_cuentas')
-    venta = models.DecimalField(max_digits=100, decimal_places=6)
+    accounts = models.ForeignKey(Accounts, models.DO_NOTHING)
+    selling_price = models.DecimalField(max_digits=100, decimal_places=6)
     products = models.ForeignKey('Products', models.DO_NOTHING, blank=True, null=True)
     selling_expiration = models.DateField(blank=True, null=True)
     daily_adjustment = models.BooleanField()
 
     class Meta:
         managed = False
-        db_table = 'inversiones'
+        db_table = 'investments'
 
 
-class Opercuentas(models.Model):
-    id_opercuentas = models.AutoField(primary_key=True)
-    id_conceptos = models.ForeignKey(Conceptos, models.DO_NOTHING, db_column='id_conceptos')
-    id_tiposoperaciones = models.IntegerField()
-    importe = models.DecimalField(max_digits=100, decimal_places=2)
-    comentario = models.TextField(blank=True, null=True)
-    id_cuentas = models.ForeignKey(Cuentas, models.DO_NOTHING, db_column='id_cuentas')
+class Investmentsaccountsoperations(models.Model):
+    concepts_id = models.IntegerField()
+    operationstypes_id = models.IntegerField()
+    amount = models.DecimalField(max_digits=100, decimal_places=2)
+    comment = models.TextField(blank=True, null=True)
+    accounts_id = models.IntegerField()
     datetime = models.DateTimeField(blank=True, null=True)
+    investmentsoperations_id = models.IntegerField()
+    investments_id = models.IntegerField()
 
     class Meta:
         managed = False
-        db_table = 'opercuentas'
+        db_table = 'investmentsaccountsoperations'
 
 
-class Opercuentasdeoperinversiones(models.Model):
-    id_opercuentas = models.AutoField(primary_key=True)
-    id_conceptos = models.IntegerField()
-    id_tiposoperaciones = models.IntegerField()
-    importe = models.DecimalField(max_digits=100, decimal_places=2)
-    comentario = models.TextField(blank=True, null=True)
-    id_cuentas = models.IntegerField()
+class Investmentsoperations(models.Model):
+    operationstypes_id = models.IntegerField(blank=True, null=True)
+    investments = models.ForeignKey(Investments, models.DO_NOTHING, blank=True, null=True)
+    shares = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
+    taxes = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
+    commission = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
+    price = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
     datetime = models.DateTimeField(blank=True, null=True)
-    id_operinversiones = models.IntegerField()
-    id_inversiones = models.IntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'opercuentasdeoperinversiones'
-
-
-class Operinversiones(models.Model):
-    id_operinversiones = models.AutoField(primary_key=True)
-    id_tiposoperaciones = models.IntegerField(blank=True, null=True)
-    id_inversiones = models.ForeignKey(Inversiones, models.DO_NOTHING, db_column='id_inversiones', blank=True, null=True)
-    acciones = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
-    impuestos = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
-    comision = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
-    valor_accion = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
-    divisa = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
-    datetime = models.DateTimeField(blank=True, null=True)
-    comentario = models.TextField(blank=True, null=True)
+    comment = models.TextField(blank=True, null=True)
     show_in_ranges = models.BooleanField(blank=True, null=True)
     currency_conversion = models.DecimalField(max_digits=30, decimal_places=10)
 
     class Meta:
         managed = False
-        db_table = 'operinversiones'
-
-
-class Opertarjetas(models.Model):
-    id_opertarjetas = models.AutoField(primary_key=True)
-    id_conceptos = models.ForeignKey(Conceptos, models.DO_NOTHING, db_column='id_conceptos')
-    id_tiposoperaciones = models.IntegerField()
-    importe = models.DecimalField(max_digits=100, decimal_places=2)
-    comentario = models.TextField(blank=True, null=True)
-    id_tarjetas = models.ForeignKey('Tarjetas', models.DO_NOTHING, db_column='id_tarjetas')
-    pagado = models.BooleanField()
-    fechapago = models.DateTimeField(blank=True, null=True)
-    id_opercuentas = models.BigIntegerField(blank=True, null=True)
-    datetime = models.DateTimeField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'opertarjetas'
+        db_table = 'investmentsoperations'
 
 
 class Opportunities(models.Model):
@@ -228,7 +344,7 @@ class Orders(models.Model):
     expiration = models.DateField()
     shares = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
     price = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
-    investments = models.ForeignKey(Inversiones, models.DO_NOTHING)
+    investments = models.ForeignKey(Investments, models.DO_NOTHING)
     executed = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -264,8 +380,7 @@ class Products(models.Model):
 class Quotes(models.Model):
     datetime = models.DateTimeField(blank=True, null=True)
     quote = models.DecimalField(max_digits=18, decimal_places=6, blank=True, null=True)
-    id_quotes = models.AutoField(primary_key=True)
-    id = models.ForeignKey(Products, models.DO_NOTHING, db_column='id', blank=True, null=True)
+    products = models.ForeignKey(Products, models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -305,17 +420,3 @@ class Strategies(models.Model):
     class Meta:
         managed = False
         db_table = 'strategies'
-
-
-class Tarjetas(models.Model):
-    id_tarjetas = models.AutoField(primary_key=True)
-    tarjeta = models.TextField(blank=True, null=True)
-    id_cuentas = models.ForeignKey(Cuentas, models.DO_NOTHING, db_column='id_cuentas', blank=True, null=True)
-    pagodiferido = models.BooleanField(blank=True, null=True)
-    saldomaximo = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
-    active = models.BooleanField(blank=True, null=True)
-    numero = models.TextField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'tarjetas'

@@ -15,4 +15,5 @@ class Command(BaseCommand):
         download_from_github("turulomio", "reusingcode", "python/datetime_functions.py", "money/reusing")
         download_from_github("turulomio", "reusingcode", "python_plain/myconfigparser.py", "money/reusing")
         download_from_github("turulomio", "reusingcode", "python/text_inputs.py", "money/reusing")
-
+        download_from_github("turulomio", "reusingcode", "django/templatetags/mymenu.py", "money/templatetags")
+ 
