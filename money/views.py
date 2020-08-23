@@ -12,9 +12,9 @@ from django.views.generic.edit import UpdateView#, DeleteView
 
 from money.connection_dj import cursor_rows
 from money.forms import SignUpForm    
-from money.models import Banks, Accounts, Investments, Investmentsoperations
+from money.models import Banks, Accounts, Investments, Investmentsoperations, Dividends
 from money.reusing.currency import Currency
-from money.tables import tb_listdict
+from money.tables import tb_listdict, tb_queryset
 from money.tokens import account_activation_token
 
 
@@ -136,7 +136,8 @@ def investment_view(request, pk):
     list_oic=tb_listdict(oic)
     oih=cursor_rows("select * from investment_operations_historical({},now());".format(pk))
     list_oih=tb_listdict(oih)
-        
+    dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
+    list_dividends=tb_queryset(dividends)        
     return render(request, 'investment_view.html', locals())
     
 @login_required
