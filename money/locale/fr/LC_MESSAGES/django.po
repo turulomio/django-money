@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-21 08:07+0000\n"
+"POT-Creation-Date: 2020-08-24 11:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,395 +18,423 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: books/models.py:20
-msgid "Birth date"
+#: money/admin.py:22 money/admin.py:23
+msgid "Django money"
 msgstr ""
 
-#: books/models.py:44
-msgid "Name"
+#: money/admin.py:24
+msgid "My Django money administration"
 msgstr ""
 
-#: books/models.py:45
-msgid "Family name"
+#: money/context_processors.py:8 money/templates/base.html:64
+msgid "Django Money"
 msgstr ""
 
-#: books/models.py:46
-msgid "Birth year"
+#: money/context_processors.py:9
+msgid "Home"
 msgstr ""
 
-#: books/models.py:47
-msgid "Death year"
+#: money/context_processors.py:10
+msgid "Banks"
 msgstr ""
 
-#: books/models.py:50
-msgid "Man"
+#: money/context_processors.py:11
+msgid "Accounts"
 msgstr ""
 
-#: books/models.py:51
-msgid "Woman"
+#: money/context_processors.py:12
+msgid "Investments"
 msgstr ""
 
-#: books/models.py:54
-msgid "Gender"
+#: money/context_processors.py:13
+msgid "Management"
 msgstr ""
 
-#: books/models.py:78
-msgid "{}-"
+#: money/context_processors.py:14
+msgid "Concepts"
 msgstr ""
 
-#: books/models.py:86
-msgid "{} years"
-msgstr ""
-
-#: books/models.py:88
-msgid "Lived {} years"
-msgstr ""
-
-#: books/models.py:101 templates/objects/book.html:11
-msgid "Title"
-msgstr ""
-
-#: books/models.py:102 templates/objects/book.html:12
-msgid "Year"
-msgstr ""
-
-#: books/models.py:121 templates/objects/valoration.html:14
-msgid "Book"
-msgstr ""
-
-#: books/models.py:129
-msgid "Valoration of {} ({}) by {}: {}"
-msgstr ""
-
-#: books/templatetags/mymenu.py:186
-msgid "My Library"
-msgstr ""
-
-#: books/templatetags/mymenu.py:187 templates/home.html:14
-#: templates/home.html:15
-msgid "Search"
-msgstr ""
-
-#: books/templatetags/mymenu.py:189
-msgid "Add author"
-msgstr ""
-
-#: books/templatetags/mymenu.py:191
-msgid "My valorations"
-msgstr ""
-
-#: books/templatetags/mymenu.py:193
-msgid "Queries"
-msgstr ""
-
-#: books/templatetags/mymenu.py:194
-msgid "Most valued books"
-msgstr ""
-
-#: books/templatetags/mymenu.py:195 templates/unfinished_books.html:6
-msgid "Unfinished books"
-msgstr ""
-
-#: books/templatetags/mymenu.py:197
-msgid "Statistics"
-msgstr ""
-
-#: books/templatetags/mymenu.py:198
-msgid "Global"
-msgstr ""
-
-#: books/templatetags/mymenu.py:199 templates/objects/valoration.html:17
-msgid "User"
-msgstr ""
-
-#: books/views.py:25
-msgid "Looking for '{}' in Library database"
-msgstr ""
-
-#: dj_books/admin.py:38 dj_books/admin.py:41
-msgid "My library"
-msgstr ""
-
-#: dj_books/admin.py:44
-msgid "My library Django administration"
-msgstr ""
-
-#: dj_books/forms.py:24
+#: money/forms.py:12
 msgid "Required. Inform a valid email address."
 msgstr ""
 
-#: dj_books/views.py:79
-msgid "Your profile was successfully updated!"
-msgstr ""
-
-#: dj_books/views.py:88
-msgid "Your password was successfully updated!"
-msgstr ""
-
-#: settings_file.py:247
+#: money/reusing/text_inputs.py:80
 msgid "Y"
 msgstr ""
 
-#: settings_file.py:248
+#: money/reusing/text_inputs.py:81
 msgid "N"
 msgstr ""
 
-#: settings_file.py:261
+#: money/reusing/text_inputs.py:94
 msgid "Please enter '{}' or '{}'"
 msgstr ""
 
-#: templates/403.html:6 templates/403.html:10
+#: money/reusing/text_inputs.py:120
+msgid "Press a key to continue..."
+msgstr ""
+
+#: money/templates/403.html:6 money/templates/403.html:10
 msgid "Forbidden page"
 msgstr ""
 
-#: templates/403.html:12
+#: money/templates/403.html:12
 msgid "You don't have enough permissions to access this page"
 msgstr ""
 
-#: templates/account_activation_invalid.html:6
-#: templates/account_activation_sent.html:6
-#: templates/account_activation_valid.html:6
+#: money/templates/account_activation_invalid.html:6
+#: money/templates/account_activation_sent.html:6
+#: money/templates/account_activation_valid.html:6
 msgid "Account verification"
 msgstr ""
 
-#: templates/account_activation_invalid.html:7
+#: money/templates/account_activation_invalid.html:7
 msgid ""
 "The confirmation link was invalid, possibly because it has already been used."
 msgstr ""
 
-#: templates/account_activation_sent.html:7
+#: money/templates/account_activation_sent.html:7
 msgid ""
 "A mail have been sent to your signup email address. Please confirm it, "
 "clicking the url sent in that message."
 msgstr ""
 
-#: templates/account_activation_valid.html:7
+#: money/templates/account_activation_valid.html:7
 msgid "Your account verification has been successful. Now you're logged in."
 msgstr ""
 
-#: templates/base.html:61
-msgid "MY BOOKS LIBRARY"
+#: money/templates/account_list.html:6
+msgid "Accounts list"
 msgstr ""
 
-#: templates/base.html:62
-msgid "Version:"
+#: money/templates/account_list.html:16 money/templates/bank_list.html:15
+#: money/templates/concept_list.html:17 money/templates/investment_list.html:27
+#: money/templates/objects/bank.html:12
+msgid "Name"
 msgstr ""
 
-#: templates/base.html:87
-msgid "Logout"
+#: money/templates/account_list.html:17
+msgid "Number"
 msgstr ""
 
-#: templates/base.html:88 templates/profile.html:6
-msgid "Settings"
+#: money/templates/account_list.html:18 money/templates/bank_list.html:16
+#: money/templates/investment_list.html:28 money/templates/objects/bank.html:13
+msgid "Active"
 msgstr ""
 
-#: templates/base.html:90 templates/signup.html:7 templates/signup.html:24
-msgid "Sign up"
+#: money/templates/account_list.html:19
+msgid "Balance"
 msgstr ""
 
-#: templates/base.html:91
-msgid "Login"
+#: money/templates/account_list.html:20
+msgid "User balance"
 msgstr ""
 
-#: templates/base.html:94
-msgid "Administration"
+#: money/templates/account_view.html:6
+#, python-format
+msgid " Account details of %(account.name)s"
 msgstr ""
 
-#: templates/books/author_confirm_delete.html:6
-#: templates/books/author_edit.html:6
-#: templates/books/book_confirm_delete.html:6 templates/database.html:7
-#: templates/home.html:19
+#: money/templates/author_confirm_delete.html:6
+#: money/templates/author_edit.html:6
+#: money/templates/book_confirm_delete.html:6 money/templates/database.html:7
 msgid "Authors"
 msgstr ""
 
-#: templates/books/author_confirm_delete.html:6
-#: templates/books/author_confirm_delete.html:10
-#: templates/books/book_confirm_delete.html:6
-#: templates/books/book_confirm_delete.html:10
-#: templates/books/valoration_confirm_delete.html:7
+#: money/templates/author_confirm_delete.html:6
+#: money/templates/author_confirm_delete.html:10
+#: money/templates/bank_delete.html:7
+#: money/templates/book_confirm_delete.html:6
+#: money/templates/book_confirm_delete.html:10
 msgid "Confirm delete"
 msgstr ""
 
-#: templates/books/author_edit.html:6 templates/books/book_edit.html:6
+#: money/templates/author_edit.html:6 money/templates/book_edit.html:6
 msgid "New"
 msgstr ""
 
-#: templates/books/author_edit.html:10
+#: money/templates/author_edit.html:10
 msgid "Add or edit an Author"
 msgstr ""
 
-#: templates/books/author_edit.html:16 templates/books/book_edit.html:16
-#: templates/books/valoration_add.html:12
-#: templates/books/valoration_edit.html:12
+#: money/templates/author_edit.html:16 money/templates/bank_new.html:12
+#: money/templates/bank_update.html:12 money/templates/book_edit.html:16
 msgid "Save"
 msgstr ""
 
-#: templates/books/author_read.html:6
+#: money/templates/author_read.html:6
 msgid "Author details"
 msgstr ""
 
-#: templates/books/author_read.html:10 templates/books/book_read.html:16
-#: templates/objects/valoration.html:30
+#: money/templates/author_read.html:10 money/templates/objects/bank.html:18
 msgid "Update"
 msgstr ""
 
-#: templates/books/author_read.html:13 templates/books/book_read.html:19
-#: templates/objects/valoration.html:31
+#: money/templates/author_read.html:13 money/templates/objects/bank.html:19
 msgid "Delete"
 msgstr ""
 
-#: templates/books/author_read.html:16 templates/books/book_edit.html:6
-#: templates/database.html:12 templates/home.html:25
+#: money/templates/author_read.html:16 money/templates/book_edit.html:6
+#: money/templates/database.html:12
 msgid "Books"
 msgstr ""
 
-#: templates/books/author_read.html:19
+#: money/templates/author_read.html:19
 msgid "Add a book"
 msgstr ""
 
-#: templates/books/book_edit.html:10
-msgid "Add or edit a Book"
-msgstr ""
-
-#: templates/books/book_read.html:11
-msgid "Book details"
-msgstr ""
-
-#: templates/books/book_read.html:24
-msgid "Add a book valoration"
-msgstr ""
-
-#: templates/books/valoration_add.html:6
-msgid "Add a Valoration"
-msgstr ""
-
-#: templates/books/valoration_add.html:16
-msgid "Error ading a new valoration"
-msgstr ""
-
-#: templates/books/valoration_add.html:17
-msgid "You can't add valorations"
-msgstr ""
-
-#: templates/books/valoration_confirm_delete.html:15
+#: money/templates/bank_delete.html:15
 msgid "Error deleting"
 msgstr ""
 
-#: templates/books/valoration_confirm_delete.html:16
+#: money/templates/bank_delete.html:16
 msgid "You can't delete other users valorations"
 msgstr ""
 
-#: templates/books/valoration_edit.html:6
+#: money/templates/bank_list.html:6
+msgid "My banks"
+msgstr ""
+
+#: money/templates/bank_new.html:6
+msgid "Add a Valoration"
+msgstr ""
+
+#: money/templates/bank_new.html:16
+msgid "Error ading a new valoration"
+msgstr ""
+
+#: money/templates/bank_new.html:17
+msgid "You can't add valorations"
+msgstr ""
+
+#: money/templates/bank_update.html:6
 msgid "Edit a Valoration"
 msgstr ""
 
-#: templates/books/valoration_edit.html:16
-msgid "Error editing"
-msgstr ""
-
-#: templates/books/valoration_edit.html:17
-msgid "You can't update other users valorations"
-msgstr ""
-
-#: templates/books/valoration_read.html:10
+#: money/templates/bank_view.html:10
 msgid "Valoration details"
 msgstr ""
 
-#: templates/database.html:6
+#: money/templates/base.html:65
+msgid "Version:"
+msgstr ""
+
+#: money/templates/base.html:90
+msgid "Logout"
+msgstr ""
+
+#: money/templates/base.html:91
+msgid "Administration"
+msgstr ""
+
+#: money/templates/base.html:93
+msgid "Login"
+msgstr ""
+
+#: money/templates/book_edit.html:10
+msgid "Add or edit a Book"
+msgstr ""
+
+#: money/templates/concept_list.html:6
+msgid "Concept list"
+msgstr ""
+
+#: money/templates/concept_list.html:18
+msgid "Operation type"
+msgstr ""
+
+#: money/templates/concept_list.html:19
+msgid "Editable"
+msgstr ""
+
+#: money/templates/database.html:6
 msgid "Library database"
 msgstr ""
 
-#: templates/database.html:17 templates/home.html:31
+#: money/templates/database.html:17
 msgid "Valorations"
 msgstr ""
 
-#: templates/home.html:13
-msgid "Search for a Book or an Author:"
+#: money/templates/home.html:11
+msgid ""
+"Wellcome to Django-Money, your personal accounting and financial system."
 msgstr ""
 
-#: templates/most_valuated_books.html:6
+#: money/templates/investment_list.html:6
+msgid "Investments list"
+msgstr ""
+
+#: money/templates/investment_list.html:11
+msgid "Show inactive investments"
+msgstr ""
+
+#: money/templates/investment_list.html:14
+msgid "Show active investments"
+msgstr ""
+
+#: money/templates/investment_list.html:29
+msgid "Invested"
+msgstr ""
+
+#: money/templates/investment_list.html:30
+msgid "Gains"
+msgstr ""
+
+#: money/templates/investment_view.html:7
+#, python-format
+msgid "Investment details of '%(investment)s'"
+msgstr ""
+
+#: money/templates/investment_view.html:8
+#: money/templates/investment_view.html:18
+msgid "Investment operations"
+msgstr ""
+
+#: money/templates/investment_view.html:17
+msgid "Current investment operations"
+msgstr ""
+
+#: money/templates/investment_view.html:19
+msgid "Historical investment operations"
+msgstr ""
+
+#: money/templates/investment_view.html:33
+#: money/templates/investment_view.html:56
+#: money/templates/investment_view.html:77
+#: money/templates/investment_view.html:100
+msgid "Date and time"
+msgstr ""
+
+#: money/templates/investment_view.html:34
+#: money/templates/investment_view.html:57
+#: money/templates/investment_view.html:78
+msgid "Shares"
+msgstr ""
+
+#: money/templates/investment_view.html:35
+#: money/templates/investment_view.html:58
+msgid "Price"
+msgstr ""
+
+#: money/templates/investment_view.html:89
+msgid "Dividends"
+msgstr ""
+
+#: money/templates/investment_view.html:101
+msgid "Gross"
+msgstr ""
+
+#: money/templates/investment_view.html:102
+msgid "Taxes"
+msgstr ""
+
+#: money/templates/investment_view.html:103
+msgid "Net"
+msgstr ""
+
+#: money/templates/most_valuated_books.html:6
 msgid "Most valuated books"
 msgstr ""
 
-#: templates/most_valuated_books.html:8
+#: money/templates/most_valuated_books.html:8
 msgid "These are your most rated books:"
 msgstr ""
 
-#: templates/objects/author.html:13 templates/objects/book.html:8
-#: templates/objects/valoration.html:13
+#: money/templates/objects/author.html:13 money/templates/objects/book.html:8
 msgid "Author"
 msgstr ""
 
-#: templates/objects/author.html:14
+#: money/templates/objects/author.html:14
 msgid "Lifetime"
 msgstr ""
 
-#: templates/objects/author.html:15
+#: money/templates/objects/author.html:15
 msgid "Age"
 msgstr ""
 
-#: templates/objects/author.html:17
+#: money/templates/objects/author.html:17
 msgid "Search in wikipedia"
 msgstr ""
 
-#: templates/objects/valoration.html:29
+#: money/templates/objects/bank.html:14
+msgid "Accounts balance"
+msgstr ""
+
+#: money/templates/objects/bank.html:17
 msgid "View"
 msgstr ""
 
-#: templates/profile.html:7
+#: money/templates/objects/book.html:11
+msgid "Title"
+msgstr ""
+
+#: money/templates/objects/book.html:12
+msgid "Year"
+msgstr ""
+
+#: money/templates/profile.html:6
+msgid "Settings"
+msgstr ""
+
+#: money/templates/profile.html:7
 msgid "User profile"
 msgstr ""
 
-#: templates/profile.html:8
+#: money/templates/profile.html:8
 msgid "Set profile data:"
 msgstr ""
 
-#: templates/profile.html:15
+#: money/templates/profile.html:15
 msgid "Save profile changes"
 msgstr ""
 
-#: templates/profile.html:23 templates/profile.html:30
+#: money/templates/profile.html:23 money/templates/profile.html:30
 msgid "Change password"
 msgstr ""
 
-#: templates/profile.html:24
+#: money/templates/profile.html:24
 msgid "If you wish you can change your password here:"
 msgstr ""
 
-#: templates/statistics_global.html:6
+#: money/templates/signup.html:7 money/templates/signup.html:24
+msgid "Sign up"
+msgstr ""
+
+#: money/templates/statistics_global.html:6
 msgid "Global statistics"
 msgstr ""
 
-#: templates/statistics_global.html:8 templates/statistics_user.html:9
+#: money/templates/statistics_global.html:8
+#: money/templates/statistics_user.html:9
 #, python-format
 msgid " Your average book reading time is %(avg_reading_time_user)s days."
 msgstr ""
 
-#: templates/statistics_global.html:12
+#: money/templates/statistics_global.html:12
 msgid "Registers"
 msgstr ""
 
-#: templates/statistics_global.html:19
+#: money/templates/statistics_global.html:19
 msgid "Books read by all users"
 msgstr ""
 
-#: templates/statistics_user.html:6
+#: money/templates/statistics_user.html:6
 msgid "User statistics"
 msgstr ""
 
-#: templates/statistics_user.html:7
+#: money/templates/statistics_user.html:7
 #, python-format
 msgid " You have made %(valorations_number)s valorations."
 msgstr ""
 
-#: templates/statistics_user.html:13
+#: money/templates/statistics_user.html:13
 msgid "Books read by user"
 msgstr ""
 
-#: templates/unfinished_books.html:8
-msgid "These are your unfinished valorations"
+#: money/templates/unfinished_books.html:6
+msgid "Unfinished books"
 msgstr ""
 
-#: templates/valoration_list.html:6
-msgid "My Valorations"
+#: money/templates/unfinished_books.html:8
+msgid "These are your unfinished valorations"
 msgstr ""

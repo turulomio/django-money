@@ -4,8 +4,7 @@
 
 {% block content %}
 
-<h1>{% blocktrans %} Investment details of {{ investment.name }}{% endblocktrans %}</h1>
-
+<h1>{% blocktrans with investment=investment.name %}Investment details of '{{ investment }}'{% endblocktrans %}</h1>
 <h2>{% trans "Investment operations" %}</h2>
 <script>
   $( function() {
@@ -22,47 +21,12 @@
  
 
 <div id="tabs-1">
-  <div id="tableOI"></div>
-<script>
-    var False=false; var True=true;
-    var tabledata = {{list_oi|safe}};
-var table = new Tabulator("#tableOI", {
-    height:"311px",
- 	data:tabledata, //assign data to table
- 	layout:"fitDataTable", //fit columns to width of table (optional)
- 	columns:[ //Define Table Columns
-	 	{title:"{% trans 'Date and time' %}", field:"datetime"},
-	 	{title:"{% trans 'Shares' %}", field:"shares", bottomCalc:"sum", formatter:"money", formatterParams:{"symbol":" {{investment.product.currency_symbol}}","symbolAfter":true},align:"right", bottomCalc:"sum",bottomCalcFormatter:"money",bottomCalcFormatterParams:{"symbol":" {{investment.product.currency_symbol}}","symbolAfter":true}},
-	 	{title:"{% trans 'Price' %}", field:"price",},
- 	],
- 	rowClick:function(e, row){
-        window.location.href = "{% url 'bank_update' pk=-9999 %}".replace( -9999 , row.getData().id);
- 	},
-});
-
-</script>
+    {{ table_io | safe }}
 </div>
 
 
 <div id="tabs-2">
-<div id="tableOIC"></div>
-<script>
-    var False=false; var True=true;
-    var tabledata = {{list_oic|safe}};
-var table = new Tabulator("#tableOIC", {
-    height:"311px",
- 	data:tabledata, //assign data to table
- 	layout:"fitDataTable", //fit columns to width of table (optional)
- 	columns:[ //Define Table Columns
-	 	{title:"{% trans 'Date and time' %}", field:"datetime"},
-	 	{title:"{% trans 'Shares' %}", field:"shares",align:"right", bottomCalc:"sum"},
-	 	{title:"{% trans 'Price' %}", field:"price", formatter:"money", formatterParams:{"symbol":" {{investment.products.currency_symbol}}","symbolAfter":true},align:"right", bottomCalc:"sum",bottomCalcFormatter:"money",bottomCalcFormatterParams:{"symbol":" {{investment.products.currency_symbol}}","symbolAfter":true}},
- 	],
- 	rowClick:function(e, row){
-        window.location.href = "{% url 'bank_update' pk=-9999 %}".replace( -9999 , row.getData().id);
- 	},
-});
-</script>
+{{ table_ioc | safe }}
 </div>
 
 <div id="tabs-3">

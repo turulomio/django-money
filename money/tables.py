@@ -1,45 +1,47 @@
-from money.reusing.call_by_name import call_by_name
+from money.tabulator import TabulatorFromListDict, TabulatorFromQuerySet
+from django.utils.translation import ugettext_lazy as _
 
-def tb_datetime(dt):
-    return str(dt.date())
-    
-def tb_queryset(queryset):
-    l=[]
-    for o in queryset:
-        d={}
-        for field in queryset[0]._meta.fields:
-            d[field.name]=object_to_tb(getattr(o, field.name))
-        l.append(d)
-    return l
-    
-## @param call_by_name_list is a a list of call_by_name orders
-def tb_custom_queryset(queryset, headers,  call_by_name_list):
-    l=[]
-    for o in queryset:
-        d={}
-        for i,  cbn in enumerate(call_by_name_list):
-            d[headers[i]]=object_to_tb(call_by_name(o, cbn))
-        l.append(d)
-    return l
 
-## Addapt a listdict to a tabulation listdict
-def tb_listdict(listdict):
-    r=[]
-    for row in listdict:
-        d={}
-        for field in row.keys():
-            d[field]=object_to_tb(row[field])
-        r.append(d)
-    return r
-    
-def object_to_tb(object):
-        if object.__class__.__name__ in ["int",  "float", "str"]:
-            return object
-        elif object.__class__.__name__ in ["boolean", ]:
-            return str(object).lower()
-        elif object.__class__.__name__ in ["Decimal"]:
-            return float(object)
-        elif object.__class__.__name__ in ["Currency"]:
-            return object.amount
-        else:
-            return str(object)
+class TabulatorAccounts(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, local_currency):
+        TabulatorFromListDict.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setListDict(listdict)
+        self.setFields("id","name", "active", "number", "balance", "balance_user")
+        self.setHeaders("Id", _("Name"), _("Active"), _("Number"), _("Balance"), _("Local curr. B."))
+        self.setTypes("int","str", "bool", "str", "str", local_currency)
+        self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
+        
+
+class TabulatorInvestments(TabulatorFromQuerySet):
+    def __init__(self, name, destiny_url, queryset, local_currency):
+        TabulatorFromQuerySet.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setQuerySet(queryset)
+        self.setCallByNames("id", ("fullName", ()), "active", ("invested",()),("gains",()))
+        self.setHeaders(_("Id"), _("Name"), _("Active"), _("Invested"), _("Gains"))
+        self.setTypes("int", "str", "bool", local_currency, local_currency)
+        self.setBottomCalc(None, None, None, "sum", "sum")
+        self.generate_listdict()
+
+class TabulatorInvestmentsOperationsCurrent(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, investment):
+        TabulatorFromListDict.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setListDict(listdict)
+        self.setFields("id","datetime", "shares", "price", "price", "price", "price", "price", "price", "price")
+        self.setHeaders("Id", _("Date and time"), _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Pending"), _("% year"), _("% APR"), _("% Total"))
+        self.setTypes("int","datetime", "Decimal", investment.products.currency, investment.products.currency, investment.products.currency,  investment.products.currency, None, None, None)
+        self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
+        
+class TabulatorInvestmentsOperations(TabulatorFromQuerySet):
+    def __init__(self, name, destiny_url, queryset, investment):
+        TabulatorFromQuerySet.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setQuerySet(queryset)
+        self.setCallByNames("id","datetime", "shares", "price", "price", "price", "price", "price", "price", "price")
+        self.setHeaders("Id", _("Date and time"), _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Pending"), _("% year"), _("% APR"), _("% Total"))
+        self.setTypes("int","datetime", "Decimal", investment.products.currency, investment.products.currency, investment.products.currency,  investment.products.currency, None, None, None)
+        self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
+        self.generate_listdict()
+        

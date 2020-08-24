@@ -12,9 +12,10 @@ from django.views.generic.edit import UpdateView#, DeleteView
 
 from money.connection_dj import cursor_rows
 from money.forms import SignUpForm    
-from money.models import Banks, Accounts, Investments, Investmentsoperations, Dividends
-from money.settingsdb import settingsdb_currency_symbol
-from money.tables import tb_listdict, tb_queryset, tb_custom_queryset
+from money.models import Banks, Accounts, Investments, Investmentsoperations, Dividends, Concepts
+from money.settingsdb import settingsdb
+from money.tabulator import tb_listdict, tb_queryset
+from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts
 from money.tokens import account_activation_token
 
 
@@ -65,6 +66,10 @@ def activate(request, uidb64, token):
         return render(request, 'account_activation_invalid.html')
 
 
+@login_required
+def concept_list(request):
+    list_concepts= tb_queryset(Concepts.objects.all().order_by('name'))
+    return render(request, 'concept_list.html', locals())
 
 def error_403(request, exception):
         data = {}
@@ -85,53 +90,45 @@ def bank_list(request,  active=True):
     
 @login_required
 def account_list(request,  active=True):
-    local_currency_symbol=settingsdb_currency_symbol("mem/localcurrency")# perhaps i could acces context??
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     
     accounts= Accounts.objects.all().filter(active=active).order_by('name')
+    
     list_accounts=[]
     for account in accounts:
         balance=account.balance(datetime.now())
         list_accounts.append({
                 "id": account.id, 
-                "active":str(account.active).lower(), 
+                "active":account.active, 
                 "name": account.fullName(), 
                 "number": account.number,
                 "balance": balance[0].string(),  
-                "balance_user": float(balance[1].amount), 
+                "balance_user": balance[1], 
             }
         )
+    
+    table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, local_currency).render()
+    #balance is aligned left(text)
+    table_accounts=table_accounts.replace(', field:"balance"', ', field:"balance", align:"right"')
     return render(request, 'account_list.html', locals())
         
 @login_required
 def investment_list(request,  active):
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     investments= Investments.objects.all().filter(active=active).order_by('name')
-    print(investments.query)
-    list_investments=tb_custom_queryset(investments,
-        ["id", "active", "name", "invested", "gains", "lastquote_datetime", "lastquote"], 
-        [   "id", 
-            "active", 
-            ["fullName", ()], 
-            ["invested", ()], 
-            ["gains", ()], 
-        ]
-    )
+    table_inv=TabulatorInvestments("I", "investment_view", investments, local_currency).render()
 
     return render(request, 'investment_list.html', locals())
     
 @login_required
 def investment_view(request, pk):
-    investment=get_object_or_404(Investments, pk=pk)
+    investment=get_object_or_404(Investments, id=pk)
     oi=Investmentsoperations.objects.all().filter(investments_id=pk).order_by('datetime')
-    list_oi=tb_custom_queryset(oi,
-        ["id", "datetime", "price", "shares"], 
-        [   "id", 
-            "datetime", 
-            "price", 
-            "shares", 
-        ]
-    )
+    table_io=TabulatorInvestmentsOperations("IO", "bank_update", oi, investment).render()
+    
     oic=cursor_rows("select * from investment_operations_current({},now());".format(pk))
-    list_oic=tb_listdict(oic)
+    table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", "bank_update", oic, investment).render()
+
     oih=cursor_rows("select * from investment_operations_historical({},now());".format(pk))
     list_oih=tb_listdict(oih)
     dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')

@@ -47,6 +47,8 @@ urlpatterns = i18n_patterns(
     path('investment/list/inactive/', money_views.investment_list, {'active': False}, name='investment_list_inactive'),
     path('investment/view/<slug:pk>/', money_views.investment_view, name='investment_view'),
     
+    path('concept/list/', money_views.concept_list,  name='concept_list'),
+    
 )
 
 handler403 = 'money.views.error_403'
