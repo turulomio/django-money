@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.urls import reverse_lazy
 from django.contrib.auth import  login
 from django.shortcuts import render,  redirect, get_object_or_404
@@ -12,10 +12,10 @@ from django.views.generic.edit import UpdateView#, DeleteView
 
 from money.connection_dj import cursor_rows
 from money.forms import SignUpForm    
-from money.models import Banks, Accounts, Investments, Investmentsoperations, Dividends, Concepts
+from money.models import Banks, Accounts, Accountsoperations,  Investments, Investmentsoperations, Dividends, Concepts
 from money.settingsdb import settingsdb
-from money.tabulator import tb_listdict, tb_queryset
-from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts
+from money.tabulator import  tb_queryset
+from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations
 from money.tokens import account_activation_token
 
 
@@ -112,6 +112,19 @@ def account_list(request,  active=True):
     table_accounts=table_accounts.replace(', field:"balance"', ', field:"balance", align:"right"')
     return render(request, 'account_list.html', locals())
         
+        
+        
+@login_required        
+def account_view(request, pk):        
+    account=get_object_or_404(Accounts, pk=pk)
+    
+    dt_initial=datetime.now()-timedelta(days=60)
+    
+    accountoperations= Accountsoperations.objects.all().filter(accounts_id=pk, datetime__gt=dt_initial).order_by('datetime')
+  
+    table_accountoperations=TabulatorAccountOperations("table_accountoperations", "bank_update", accountoperations, account, dt_initial).render()
+  
+    return render(request, 'account_view.html', locals())
 @login_required
 def investment_list(request,  active):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
@@ -124,13 +137,14 @@ def investment_list(request,  active):
 def investment_view(request, pk):
     investment=get_object_or_404(Investments, id=pk)
     oi=Investmentsoperations.objects.all().filter(investments_id=pk).order_by('datetime')
-    table_io=TabulatorInvestmentsOperations("IO", "bank_update", oi, investment).render()
+    table_io=TabulatorInvestmentsOperations("IO", "investmentoperation_update", oi, investment).render()
     
     oic=cursor_rows("select * from investment_operations_current({},now());".format(pk))
-    table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", "bank_update", oic, investment).render()
+    table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, oic, investment).render()
 
     oih=cursor_rows("select * from investment_operations_historical({},now());".format(pk))
-    list_oih=tb_listdict(oih)
+    table_ioh=TabulatorInvestmentsOperationsHistorical("IOH", None, oih, investment).render()
+
     dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
     list_dividends=tb_queryset(dividends)        
     return render(request, 'investment_view.html', locals())

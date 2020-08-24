@@ -39,7 +39,6 @@ class TabulatorCommons:
         for d in self.listdict:
             new_d={}
             for field in self.fields:
-                print(field, d[field])
                 new_d[field]=object_to_tb(d[field], self.translate)
             tb_list.append(new_d)
             
@@ -57,17 +56,17 @@ class TabulatorCommons:
             if self.types[i]=="datetime":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""
             elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", align:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" }}, \n"""
             elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", align:"right", bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" €","symbolAfter":true}},align:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" €","symbolAfter":true}},hozAlign:"right" }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" €","symbolAfter":true}},align:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter:"money",bottomCalcFormatterParams:{{"symbol":" €","symbolAfter":true}}}}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" €","symbolAfter":true}},hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter:"money",bottomCalcFormatterParams:{{"symbol":" €","symbolAfter":true}}}}, \n"""
             elif self.types[i] =="USD" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" $","symbolAfter":true}},align:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" $","symbolAfter":true}},hozAlign:"right" }}, \n"""
             elif self.types[i] =="USD" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" $","symbolAfter":true}},align:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter:"money",bottomCalcFormatterParams:{{"symbol":" $","symbolAfter":true}}}}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" $","symbolAfter":true}},hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter:"money",bottomCalcFormatterParams:{{"symbol":" $","symbolAfter":true}}}}, \n"""
             elif self.types[i]=="str":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""            
             elif self.types[i]=="bool":
@@ -102,7 +101,7 @@ class TabulatorFromQuerySet(TabulatorCommons):
         self.fields=[]
         for cbn in self.callbyname:
             if cbn.__class__.__name__=="str":
-                self.fields.append(cbn)
+                self.fields.append(cbn.replace(".", "_"))
             else:#Tuple
                 self.fields.append(cbn[0])
 
@@ -138,13 +137,17 @@ def tb_queryset(queryset, translate=True):
         l.append(d)
     return l
 
+## If a field is not found as a None value
 ## @param call_by_name_list is a a list of call_by_name orders
 def tb_custom_queryset(queryset, fields,  call_by_name_list,  translate=True):
     l=[]
     for o in queryset:
         d={}
         for i,  cbn in enumerate(call_by_name_list):
-            d[fields[i]]=object_to_tb(call_by_name(o, cbn), translate)
+            try:
+                d[fields[i]]=object_to_tb(call_by_name(o, cbn), translate)
+            except:
+                d[fields[i]]=None
         l.append(d)
     return l
 

@@ -29,7 +29,6 @@ class Accounts(models.Model):
         ## @todo search other solution for local_currency
         local_currency=cursor_one_field("select value from globals where global='mem/localcurrency'")
         r=cursor_one_row("select * from account_balance(%s,%s,%s)", (self.id, dt, local_currency))
-        print(r)
         return Currency(r['balance_account_currency'], self.currency), Currency(r['balance_user_currency'], r['user_currency'])
 
     def currency_symbol(self):
