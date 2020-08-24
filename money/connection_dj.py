@@ -9,8 +9,16 @@ def dictfetchall(cursor):
         for row in cursor.fetchall()
     ]
 
-def cursor_rows(sql):
+def cursor_rows(sql, params=[]):
     with connection.cursor() as cursor:
-        cursor.execute(sql)
+        cursor.execute(sql, params)
         row = dictfetchall(cursor)
     return row
+    
+def cursor_one_row(sql, params=[]):
+    return cursor_rows(sql, params)[0]
+def cursor_one_field(sql, params=[]):
+    with connection.cursor() as cursor:
+        cursor.execute(sql, params)
+        row = cursor.fetchone()
+    return row[0]

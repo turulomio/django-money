@@ -1,16 +1,23 @@
 from money import __version__, __versiondate__
+from money.reusing.currency import currency_symbol
+from money.settingsdb import settingsdb
 from money.templatetags.mymenu import Menu, Action
 from django.utils.translation import gettext_lazy as _
 
 def my_context(request):
     menu=Menu(_("Django Money"))
-    menu.append(Action(_("Home"), None,  "home"))
-    menu.append(Action(_("Banks"), None,  "bank_list"))
-    menu.append(Action(_("Accounts"), None,  "account_list"))
-    menu.append(Action(_("Investments"), None,  "investment_list_active"))
+    menu.append(Action(_("Home"), None,  "home",  False))
+    menu.append(Action(_("Banks"), None,  "bank_list",  True))
+    menu.append(Action(_("Accounts"), None,  "account_list",  True))
+    menu.append(Action(_("Investments"), None,  "investment_list_active",  True))
+
+    local_currency=settingsdb("mem/localcurrency")
+    local_currency_symbol=currency_symbol(local_currency)
     
     return {
         'VERSION': __version__, 
         'VERSIONDATE': __versiondate__, 
         'menu': menu, 
+        'local_currency': local_currency, 
+        'local_currency_symbol': local_currency_symbol, 
     }

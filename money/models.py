@@ -6,7 +6,8 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models, connection
-from money.reusing.currency import Currency
+from money.reusing.currency import Currency, currency_symbol
+from money.connection_dj import cursor_one_row, cursor_one_field
 
 
 class Accounts(models.Model):
@@ -20,12 +21,19 @@ class Accounts(models.Model):
         managed = False
         db_table = 'accounts'
         
+    def fullName(self):
+        return "{} ({})".format(self.name, self.banks.name)
+        
     ## @return Tuple (balance_account_currency | balance_user_currency)
     def balance(self, dt):
-        with connection.cursor() as c:
-            c.execute("select * from account_balance(%s,%s,%s)", (self.id, dt, self.currency))
-            r=c.fetchone()
-        return Currency(r[2], self.currency), Currency(r[3], r[4])
+        ## @todo search other solution for local_currency
+        local_currency=cursor_one_field("select value from globals where global='mem/localcurrency'")
+        r=cursor_one_row("select * from account_balance(%s,%s,%s)", (self.id, dt, local_currency))
+        print(r)
+        return Currency(r['balance_account_currency'], self.currency), Currency(r['balance_user_currency'], r['user_currency'])
+
+    def currency_symbol(self):
+        return currency_symbol(self.currency)
 
 
 class Accountsoperations(models.Model):
@@ -299,6 +307,15 @@ class Investments(models.Model):
         db_table = 'investments'
 
 
+    def fullName(self):
+        return "{} ({})".format(self.name, self.accounts.name)
+        
+    def gains(self):
+        return 0
+        
+    def invested(self):
+        return 0
+
 class Investmentsaccountsoperations(models.Model):
     concepts_id = models.IntegerField()
     operationstypes_id = models.IntegerField()
@@ -382,6 +399,9 @@ class Products(models.Model):
     class Meta:
         managed = False
         db_table = 'products'
+        
+    def currency_symbol(self):
+        return currency_symbol(self.currency)
 
 
 class Quotes(models.Model):

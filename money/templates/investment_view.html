@@ -15,24 +15,24 @@
  
 <div id="tabs">
   <ul>
+      <li><a href="#tabs-2">{% trans "Current investment operations" %}</a></li>
     <li><a href="#tabs-1">{% trans "Investment operations" %}</a></li>
-    <li><a href="#tabs-2">{% trans "Current investment operations" %}</a></li>
     <li><a href="#tabs-3">{% trans "Historical investment operations" %}</a></li>
   </ul>
  
 
 <div id="tabs-1">
-  <div id="table"></div>
+  <div id="tableOI"></div>
 <script>
     var False=false; var True=true;
     var tabledata = {{list_oi|safe}};
-var table = new Tabulator("#table", {
+var table = new Tabulator("#tableOI", {
     height:"311px",
  	data:tabledata, //assign data to table
  	layout:"fitDataTable", //fit columns to width of table (optional)
  	columns:[ //Define Table Columns
 	 	{title:"{% trans 'Date and time' %}", field:"datetime"},
-	 	{title:"{% trans 'Shares' %}", field:"shares", bottomCalc:"sum"},
+	 	{title:"{% trans 'Shares' %}", field:"shares", bottomCalc:"sum", formatter:"money", formatterParams:{"symbol":" {{investment.product.currency_symbol}}","symbolAfter":true},align:"right", bottomCalc:"sum",bottomCalcFormatter:"money",bottomCalcFormatterParams:{"symbol":" {{investment.product.currency_symbol}}","symbolAfter":true}},
 	 	{title:"{% trans 'Price' %}", field:"price",},
  	],
  	rowClick:function(e, row){
@@ -45,18 +45,18 @@ var table = new Tabulator("#table", {
 
 
 <div id="tabs-2">
-<div id="table2"></div>
+<div id="tableOIC"></div>
 <script>
     var False=false; var True=true;
     var tabledata = {{list_oic|safe}};
-var table = new Tabulator("#table2", {
+var table = new Tabulator("#tableOIC", {
     height:"311px",
  	data:tabledata, //assign data to table
  	layout:"fitDataTable", //fit columns to width of table (optional)
  	columns:[ //Define Table Columns
 	 	{title:"{% trans 'Date and time' %}", field:"datetime"},
-	 	{title:"{% trans 'Shares' %}", field:"shares", bottomCalc:"sum"},
-	 	{title:"{% trans 'Price' %}", field:"price",},
+	 	{title:"{% trans 'Shares' %}", field:"shares",align:"right", bottomCalc:"sum"},
+	 	{title:"{% trans 'Price' %}", field:"price", formatter:"money", formatterParams:{"symbol":" {{investment.products.currency_symbol}}","symbolAfter":true},align:"right", bottomCalc:"sum",bottomCalcFormatter:"money",bottomCalcFormatterParams:{"symbol":" {{investment.products.currency_symbol}}","symbolAfter":true}},
  	],
  	rowClick:function(e, row){
         window.location.href = "{% url 'bank_update' pk=-9999 %}".replace( -9999 , row.getData().id);
@@ -66,17 +66,17 @@ var table = new Tabulator("#table2", {
 </div>
 
 <div id="tabs-3">
-<div id="table3"></div>
+<div id="tableIOH"></div>
 <script>
     var False=false; var True=true;
     var tabledata = {{list_oih|safe}};
-var table = new Tabulator("#table3", {
+var table = new Tabulator("#tableIOH", {
     height:"311px",
  	data:tabledata, //assign data to table
  	layout:"fitDataTable", //fit columns to width of table (optional)
  	columns:[ //Define Table Columns
 	 	{title:"{% trans 'Date and time' %}", field:"dt_end"},
-	 	{title:"{% trans 'Shares' %}", field:"shares", bottomCalc:"sum"},
+	 	{title:"{% trans 'Shares' %}", field:"shares", align:"right", bottomCalc:"sum"},
  	],
  	rowClick:function(e, row){
         window.location.href = "{% url 'bank_update' pk=-9999 %}".replace( -9999 , row.getData().id);

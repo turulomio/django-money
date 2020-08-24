@@ -25,9 +25,9 @@ var table = new Tabulator("#table", {
  	layout:"fitDataTable", //fit columns to width of table (optional)
  	columns:[ //Define Table Columns
 	 	{title:"{% trans 'Name' %}", field:"name",bottomCalc:"Total"},
-	 	{title:"{% trans 'Bank' %}", field:"bank"},
 	 	{title:"{% trans 'Active' %}", field:"active", formatter:"tickCross",},
-	 	{title:"{% trans 'Balance' %}", field:"balance", formatter:"money", formatterParams:{"symbol":" €","symbolAfter":true},align:"right", bottomCalc:"sum",bottomCalcFormatter:"money",bottomCalcFormatterParams:{"symbol":" €","symbolAfter":true}},
+	 	{title:"{% trans 'Invested' %}", field:"invested", formatter:"money", formatterParams:{"symbol":" €","symbolAfter":true},align:"right", bottomCalc:"sum",bottomCalcFormatter:"money",bottomCalcFormatterParams:{"symbol":" €","symbolAfter":true}},
+	 	{title:"{% trans 'Gains' %}", field:"gains", formatter:"money", formatterParams:{"symbol":" €","symbolAfter":true},align:"right", bottomCalc:"sum",bottomCalcFormatter:"money",bottomCalcFormatterParams:{"symbol":" €","symbolAfter":true}},
  	],
  	rowClick:function(e, row){
         window.location.href = "{% url 'investment_view' pk=-9999 %}".replace( -9999 , row.getData().id);

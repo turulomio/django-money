@@ -13,8 +13,8 @@ from django.views.generic.edit import UpdateView#, DeleteView
 from money.connection_dj import cursor_rows
 from money.forms import SignUpForm    
 from money.models import Banks, Accounts, Investments, Investmentsoperations, Dividends
-from money.reusing.currency import Currency
-from money.tables import tb_listdict, tb_queryset
+from money.settingsdb import settingsdb_currency_symbol
+from money.tables import tb_listdict, tb_queryset, tb_custom_queryset
 from money.tokens import account_activation_token
 
 
@@ -85,6 +85,8 @@ def bank_list(request,  active=True):
     
 @login_required
 def account_list(request,  active=True):
+    local_currency_symbol=settingsdb_currency_symbol("mem/localcurrency")# perhaps i could acces context??
+    
     accounts= Accounts.objects.all().filter(active=active).order_by('name')
     list_accounts=[]
     for account in accounts:
@@ -92,11 +94,9 @@ def account_list(request,  active=True):
         list_accounts.append({
                 "id": account.id, 
                 "active":str(account.active).lower(), 
-                "name": account.name, 
-                "number": account.number, 
-                "bank": account.banks.name, 
-                "currency": account.currency, 
-                "balance": float(balance[0].amount), 
+                "name": account.fullName(), 
+                "number": account.number,
+                "balance": balance[0].string(),  
                 "balance_user": float(balance[1].amount), 
             }
         )
@@ -105,33 +105,31 @@ def account_list(request,  active=True):
 @login_required
 def investment_list(request,  active):
     investments= Investments.objects.all().filter(active=active).order_by('name')
-    list_investments=[]
-    for investment in investments:
-        balance=Currency(0, 'EUR'),  Currency(0, 'EUR')
-        list_investments.append({
-                "id": investment.id, 
-                "active":str(investment.active).lower(), 
-                "name": investment.name, 
-                "bank": investment.accounts.banks.name, 
-                "balance": float(balance[0].amount), 
-                "balance_user": float(balance[1].amount), 
-            }
-        )
+    print(investments.query)
+    list_investments=tb_custom_queryset(investments,
+        ["id", "active", "name", "invested", "gains", "lastquote_datetime", "lastquote"], 
+        [   "id", 
+            "active", 
+            ["fullName", ()], 
+            ["invested", ()], 
+            ["gains", ()], 
+        ]
+    )
+
     return render(request, 'investment_list.html', locals())
     
 @login_required
 def investment_view(request, pk):
     investment=get_object_or_404(Investments, pk=pk)
     oi=Investmentsoperations.objects.all().filter(investments_id=pk).order_by('datetime')
-    list_oi=[]
-    for o in oi:
-        list_oi.append({
-                "id": o.id, 
-                "datetime": str(o.datetime), 
-                "price": float(o.price), 
-                "shares": float(o.shares), 
-            }
-        )
+    list_oi=tb_custom_queryset(oi,
+        ["id", "datetime", "price", "shares"], 
+        [   "id", 
+            "datetime", 
+            "price", 
+            "shares", 
+        ]
+    )
     oic=cursor_rows("select * from investment_operations_current({},now());".format(pk))
     list_oic=tb_listdict(oic)
     oih=cursor_rows("select * from investment_operations_historical({},now());".format(pk))
