@@ -108,7 +108,7 @@ def account_list(request,  active=True):
         )
     
     table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, local_currency).render()
-    #balance is aligned left(text)
+    #balance is aligned left(text) I can do it too with javascript.
     table_accounts=table_accounts.replace(', field:"balance"', ', field:"balance", align:"right"')
     return render(request, 'account_list.html', locals())
         
