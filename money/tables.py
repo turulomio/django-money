@@ -18,6 +18,7 @@ class TabulatorAccountOperations(TabulatorFromQuerySet):
         TabulatorFromQuerySet.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setQuerySet(queryset)
+        self.setHeight("400px")
         self.setCallByNames("id","datetime", "concepts.name","amount", "balance","comment")
         self.setHeaders("Id", _("Date and time"), _("Concept"), _("Amount"),_("Balance"),  _("Comment"))
         self.setTypes("int","datetime", "str", account.currency, account.currency,  "str")
@@ -25,8 +26,6 @@ class TabulatorAccountOperations(TabulatorFromQuerySet):
         for d in self.listdict:
             balance=balance+d["amount"]
             d["balance"]=balance
-        print(self.listdict[0:5])
-        
 
 class TabulatorInvestments(TabulatorFromQuerySet):
     def __init__(self, name, destiny_url, queryset, local_currency):
@@ -70,3 +69,12 @@ class TabulatorInvestmentsOperations(TabulatorFromQuerySet):
         self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
         self.generate_listdict()
         
+class TabulatorCreditCards(TabulatorFromQuerySet):
+    def __init__(self, name, destiny_url, queryset, account):
+        TabulatorFromQuerySet.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setQuerySet(queryset)
+        self.setCallByNames("id", "name", "number", "deferred", "maximumbalance")
+        self.setHeaders(_("Id"), _("Name"), _("Number"), _("Deferred pay"), _("Maximum balance"))
+        self.setTypes("int", "str", "str", "bool", account.currency)
+        self.generate_listdict()

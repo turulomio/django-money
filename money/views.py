@@ -12,10 +12,10 @@ from django.views.generic.edit import UpdateView#, DeleteView
 
 from money.connection_dj import cursor_rows
 from money.forms import SignUpForm    
-from money.models import Banks, Accounts, Accountsoperations,  Investments, Investmentsoperations, Dividends, Concepts
+from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts
 from money.settingsdb import settingsdb
 from money.tabulator import  tb_queryset
-from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations
+from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations, TabulatorCreditCards
 from money.tokens import account_activation_token
 
 
@@ -119,10 +119,12 @@ def account_view(request, pk):
     account=get_object_or_404(Accounts, pk=pk)
     
     dt_initial=datetime.now()-timedelta(days=60)
-    
     accountoperations= Accountsoperations.objects.all().filter(accounts_id=pk, datetime__gt=dt_initial).order_by('datetime')
-  
     table_accountoperations=TabulatorAccountOperations("table_accountoperations", "bank_update", accountoperations, account, dt_initial).render()
+  
+    creditcards= Creditcards.objects.all().filter(accounts_id=pk, active=True).order_by('name')
+    table_creditcards=TabulatorCreditCards("table_creditcards", "bank_update", creditcards, account).render()
+  
   
     return render(request, 'account_view.html', locals())
 @login_required
