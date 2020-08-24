@@ -4,11 +4,7 @@
 
 This app has the following profiles:
 
-1. Superuser. All permissions and admin site
-2. Is staff. Allows a user to see the admin site
-3. Default library workers. All books app permissions (author, book, valorations). Can't edit other valorations, but can delete them. It's the normal user and we trust him.
-4. Default library users. Can add, edit and delete valorations. Must be used only when there's no need to add books because all are in database. We don't trust him.
-5. Anonymous user. Can only see authors, books and valorations. We don't trust him
+1. Superuser. All permissions and admin site is available to the only system user.
 
 ## How to control permissions
 

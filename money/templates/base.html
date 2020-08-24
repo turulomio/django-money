@@ -63,7 +63,7 @@
         <div class="sidebar">
             <p class="title"><a href="{% url 'home' %}">{% trans "Django Money" %}</a></p>
             <p class="version">{% trans "Version:" %} {{VERSION}} ({{VERSIONDATE}})</p>
-            <p class="title"><a href="{% url 'home' %}"><img src='{% static "images/book.png" %}' height="50px" width="50px"/></a></p>
+            <p class="title"><a href="{% url 'home' %}"><img src='{% static "images/xulpymoney.png" %}' height="50px" width="50px"/></a></p>
             <div class="languages" style="display:flex; flex-direction: row; justify-content: center;">
             <form class="languages" action="{% url 'set_language' %}" method="post">{% csrf_token %}
                 <input type="hidden" name="next" value="{{redirect_to}}">
@@ -86,15 +86,11 @@
 
         <div class="layVertical">
             <div class="header">
-                {% if 0 %}
+                {% if user.is_authenticated %}
                     <div class="headeritem"><a href="{% url 'logout' %}">{% trans "Logout" %} {{ user.username|upper }}</a></div>
-                    <div class="headeritem"><a href="{% url 'profile' %}">{% trans "Settings" %}</a></div>
-                {% else %}
-                    <div class="headeritem"><a href="{% url 'signup' %}">{% trans "Sign up" %}</a></div>
-                    <div class="headeritem"><a href="{% url 'login' %}?next={%url 'home' %}">{% trans "Login" %}</a></div>
-                {% endif %}
-                {% if request.user.is_staff %}
                     <div class="headeritem"><a href="{% url 'admin:index' %}">{% trans "Administration" %}</a></div>
+                {% else %}
+                    <div class="headeritem"><a href="{% url 'login' %}?next={%url 'home' %}">{% trans "Login" %}</a></div>
                 {% endif %}
             </div> {# header #}
 

@@ -5,37 +5,11 @@
 
 {% block content %}
     <h1> </h1>
-    <h2> </h2>
-    <center><img src='{% static "images/book.png" %}' height="150px" width="150px"/></center>
-    <h2> </h2>
-    <center>
-    <form class="search" id="searchform" action="{# url 'blog_search_list_view' #}" method="get" accept-charset="utf-8">
-      <label>{% trans "Search for a Book or an Author:" %}</label>
-      <input class="searchfield" id="searchbox"  class="form-control" name="search" type="text" placeholder="{% trans "Search" %}">
-      <button class="searchbutton" type="submit">{% trans "Search" %}</button>
-    </form></center>
-{% if search %}
-<h1>{{ searchtitle }}</h1>
-    <h2>{% trans "Authors" %}</h2>
-    
-    {% for author in authors %}
-       {% include "objects/author.html" with author=author only %}
-    {% endfor %}
-    <br>
-    <h2>{% trans "Books" %}</h2>
-    {% for book in books %}
-       {% include "objects/book.html" with book=book author=book.author only%}
-    {% endfor %}
-    {% if perms.auth.search_valoration %}
-        <br>
-        <h2>{% trans "Valorations" %}</h2>
-        {% for valoration in valorations %}
-            {% include "objects/valoration.html" with valoration=valoration show_book=1 %}
-        {% endfor %}
-    {% endif %}
-
-{% endif %}
-
+    <center><img src='{% static "images/xulpymoney.png" %}' height="150px" width="150px"/>
+        <h1> </h1>
+        <h2> </h2>
+    <p>{% trans "Wellcome to Django-Money, your personal accounting and financial system." %}</p>
+</center>
 
 
 {% endblock %}
