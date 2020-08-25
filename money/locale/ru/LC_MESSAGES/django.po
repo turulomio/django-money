@@ -30,29 +30,29 @@ msgstr ""
 
 #: money/context_processors.py:8 money/templates/base.html:67
 msgid "Django Money"
-msgstr ""
+msgstr "Джанго Деньги"
 
 #: money/context_processors.py:9
 msgid "Banks"
-msgstr ""
+msgstr "банки"
 
 #: money/context_processors.py:10 money/templates/bank_view.html:8
 #: money/templates/order_view.html:8
 msgid "Accounts"
-msgstr ""
+msgstr "Счета"
 
 #: money/context_processors.py:11 money/templates/bank_view.html:10
 #: money/templates/order_view.html:10
 msgid "Investments"
-msgstr ""
+msgstr "Инвестиции"
 
 #: money/context_processors.py:12
 msgid "Orders"
-msgstr ""
+msgstr "Заказы"
 
 #: money/context_processors.py:13
 msgid "Management"
-msgstr ""
+msgstr "Управление"
 
 #: money/context_processors.py:14
 msgid "Concepts"
