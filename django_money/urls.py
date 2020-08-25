@@ -35,12 +35,13 @@ urlpatterns = i18n_patterns(
     path('logout/', logout_then_login, name="logout"), 
     
     path('bank/list/', money_views.bank_list, name='bank_list'),
-    path('bank/view/<slug:pk>/', money_views.bank_list, name='bank_view'),
+    path('bank/view/<slug:pk>/', money_views.bank_view, name='bank_view'),
     path('bank/new/', money_views.bank_new, name='bank_new'),
     path('bank/update/<slug:pk>', money_views.bank_update.as_view(), name='bank_update'),
     path('bank/delete/<slug:pk>', money_views.bank_delete, name='bank_delete'),
 
     path('account/list/', money_views.account_list, name='account_list'),
+    path('account/view/<slug:pk>/<int:year>/<int:month>/', money_views.account_view, name='account_view'),
     path('account/view/<slug:pk>/', money_views.account_view, name='account_view'),
     
     path('accountoperation/new/<int:accounts_id>/', money_views.accountoperation_new.as_view(), name='accountoperation_new'),
@@ -54,6 +55,8 @@ urlpatterns = i18n_patterns(
     path('investmentoperation/new/<int:investments_id>/', money_views.investmentoperation_new.as_view(), name='investmentoperation_new'),
     path('investmentoperation/update/<int:pk>', money_views.investmentoperation_update.as_view(), name='investmentoperation_update'),
     path('investmentoperation/delete/<int:pk>', money_views.investmentoperation_delete.as_view(), name='investmentoperation_delete'),
+        
+    path('product/view/<slug:pk>/', money_views.product_view, name='product_view'),
     
     path('concept/list/', money_views.concept_list,  name='concept_list'),
     

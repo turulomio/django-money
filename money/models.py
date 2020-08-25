@@ -76,9 +76,13 @@ class Banks(models.Model):
             row = cursor.fetchone()
             return Currency(row[0], "EUR")
             
-    def accounts(self):
-        return Accounts.objects.all()
+    def accounts(self, active):
+        return Accounts.objects.all().filter(banks_id=self.id, active=active)
 
+    def investments(self, active):
+        investments= Investments.objects.raw('SELECT investments.* FROM investments, accounts where accounts.id=investments.accounts_id and accounts.banks_id=%s and investments.active=%s', (self.id, active))
+        print(investments)
+        return investments
 
 class Concepts(models.Model):
     name = models.TextField(blank=True, null=True)

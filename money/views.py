@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import  timedelta, date
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib.auth import  login
@@ -15,13 +15,29 @@ from django import forms
 
 from money.connection_dj import cursor_rows
 from money.forms import SignUpForm
-from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts
+from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products
 from money.settingsdb import settingsdb
 from money.tabulator import  tb_queryset
-from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations, TabulatorCreditCards,  TabulatorConcepts
+from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations, TabulatorCreditCards,  TabulatorConcepts, TabulatorBanks
 from money.tokens import account_activation_token
 
-
+    
+@login_required
+def product_view(request, pk):
+    product=get_object_or_404(Products, id=pk)
+#    oi=Investmentsoperations.objects.all().filter(investments_id=pk).order_by('datetime')
+#    table_io=TabulatorInvestmentsOperations("IO", "investmentoperation_update", oi, investment).render()
+#    
+#    oic=cursor_rows("select * from investment_operations_current({},now());".format(pk))
+#    table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, oic, investment).render()
+#
+#    oih=cursor_rows("select * from investment_operations_historical({},now());".format(pk))
+#    table_ioh=TabulatorInvestmentsOperationsHistorical("IOH", None, oih, investment).render()
+#
+#    dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
+#    list_dividends=tb_queryset(dividends)        
+    return render(request, 'product_view.html', locals())
+    
 ## View to register a new user
 def signup(request):
     if request.method == 'POST':
@@ -87,18 +103,16 @@ def home(request):
 
 @login_required
 def bank_list(request,  active=True):
-    banks= list(Banks.objects.all().filter(active=active).order_by('name').values())
+    banks= Banks.objects.all().filter(active=active).order_by('name')
+    table_banks=TabulatorBanks("table_banks", 'bank_view', banks).render()
+    table_banks=TabulatorBanks("table_banks", 'bank_view', banks).render()
     return render(request, 'bank_list.html', locals())
     
-@login_required
-def account_list(request,  active=True):
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
-    
-    accounts= Accounts.objects.all().filter(active=active).order_by('name')
+def Accounts_listdict(accounts_queryset):    
     
     list_accounts=[]
-    for account in accounts:
-        balance=account.balance(datetime.now())
+    for account in accounts_queryset:
+        balance=account.balance(timezone.now())
         list_accounts.append({
                 "id": account.id, 
                 "active":account.active, 
@@ -108,6 +122,14 @@ def account_list(request,  active=True):
                 "balance_user": balance[1], 
             }
         )
+    return list_accounts
+
+@login_required
+def account_list(request,  active=True):
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    
+    accounts= Accounts.objects.all().filter(active=active).order_by('name')
+    list_accounts=Accounts_listdict(accounts)
     
     table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, local_currency).render()
     #balance is aligned left(text) I can do it too with javascript.
@@ -117,11 +139,11 @@ def account_list(request,  active=True):
         
         
 @login_required        
-def account_view(request, pk):        
+def account_view(request, pk, year=date.today().year, month=date.today().month):        
     account=get_object_or_404(Accounts, pk=pk)
     
-    dt_initial=datetime.now()-timedelta(days=60)
-    accountoperations= Accountsoperations.objects.all().filter(accounts_id=pk, datetime__gt=dt_initial).order_by('datetime')
+    dt_initial=timezone.now()-timedelta(days=60)
+    accountoperations= Accountsoperations.objects.all().filter(accounts_id=pk, datetime__year=year, datetime__month=month).order_by('datetime')
     table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", accountoperations, account, dt_initial).render()
   
     creditcards= Creditcards.objects.all().filter(accounts_id=pk, active=True).order_by('name')
@@ -320,6 +342,18 @@ class bank_update(UpdateView):
 @login_required
 def bank_view(request, pk):
     bank=get_object_or_404(Banks, pk=pk)
+#    investments= Investments.objects.all().filter(active=active, accounts_id=bank).order_by('name')
+
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+
+
+    investments=bank.investments(True)
+    table_investments=TabulatorInvestments("table_investments", "investment_view", investments, local_currency).render()
+    
+
+    accounts= bank.accounts(True)
+    list_accounts=Accounts_listdict(accounts)
+    table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, local_currency).render()
     return render(request, 'bank_view.html', locals())
     
 

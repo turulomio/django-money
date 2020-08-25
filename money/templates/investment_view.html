@@ -34,9 +34,10 @@
 </div>
 </div>
 
-<p>
-    <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">Add an investment operation</a>
-  </p>
+  <p>
+      <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">Add an investment operation</a>
+      <a href="{% url 'product_view' pk=investment.products.id %}">Show product</a>
+    </p>
 
 <h2>{% trans "Dividends" %}</h2>
 

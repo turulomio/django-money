@@ -4,21 +4,8 @@
 
 {% block content %}
 <h1>{% trans "My banks" %}</h1>
-<div id="table"></div>
-<script>
-    var False=false; var True=true;
-    var tabledata = {{banks|safe}};
-var table = new Tabulator("#table", {
- 	data:tabledata, //assign data to table
- 	layout:"fitDataTable", //fit columns to width of table (optional)
- 	columns:[ //Define Table Columns
-	 	{title:"{% trans 'Name' %}", field:"name", width:150},
-	 	{title:"{% trans 'Active' %}", field:"active", formatter:"tickCross",},
- 	],
- 	rowClick:function(e, row){
-        window.location.href = "{% url 'bank_update' pk=-9999 %}".replace( -9999 , row.getData().id);
- 	},
-});
-</script>
+
+{{ table_banks|safe}}
+
 {% endblock %}
 

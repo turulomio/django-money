@@ -18,7 +18,6 @@ class TabulatorAccountOperations(TabulatorFromQuerySet):
         TabulatorFromQuerySet.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setQuerySet(queryset)
-        self.setHeight("400px")
         self.setCallByNames("id","datetime", "concepts.name","amount", "balance","comment")
         self.setHeaders("Id", _("Date and time"), _("Concept"), _("Amount"),_("Balance"),  _("Comment"))
         self.setTypes("int","datetime", "str", account.currency, account.currency,  "str")
@@ -26,6 +25,17 @@ class TabulatorAccountOperations(TabulatorFromQuerySet):
         for d in self.listdict:
             balance=balance+d["amount"]
             d["balance"]=balance
+
+
+class TabulatorBanks(TabulatorFromQuerySet):
+    def __init__(self, name, destiny_url, queryset):
+        TabulatorFromQuerySet.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setQuerySet(queryset)
+        self.setCallByNames("id", "name", "active")
+        self.setHeaders(_("Id"), _("Name"), _("Active"))
+        self.setTypes("int", "str", "bool")
+        self.generate_listdict()
 
 class TabulatorConcepts(TabulatorFromQuerySet):
     def __init__(self, name, destiny_url, queryset):
