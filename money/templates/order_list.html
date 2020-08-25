@@ -7,7 +7,7 @@
 
 {% url 'order_list_active' as url_unchecked %}
 {% url 'order_list_inactive' as url_checked %}
-{% trans "Check to show inactive orders" as mylabel %}
+{% trans "Check to show old orders" as mylabel %}
 {% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
 
 <p></p>

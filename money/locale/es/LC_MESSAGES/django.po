@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-25 05:23+0000\n"
+"POT-Creation-Date: 2020-08-25 22:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,25 +26,27 @@ msgstr "Django money"
 msgid "My Django money administration"
 msgstr "Administración de mi Django Money"
 
-#: money/context_processors.py:8 money/templates/base.html:64
+#: money/context_processors.py:8 money/templates/base.html:67
 msgid "Django Money"
 msgstr "Django Money"
 
 #: money/context_processors.py:9
-msgid "Home"
-msgstr "Inicio"
-
-#: money/context_processors.py:10
 msgid "Banks"
 msgstr "Bancos"
 
-#: money/context_processors.py:11
+#: money/context_processors.py:10 money/templates/bank_view.html:8
+#: money/templates/order_view.html:8
 msgid "Accounts"
 msgstr "Cuentas"
 
-#: money/context_processors.py:12
+#: money/context_processors.py:11 money/templates/bank_view.html:10
+#: money/templates/order_view.html:10
 msgid "Investments"
 msgstr "Inversiones"
+
+#: money/context_processors.py:12
+msgid "Orders"
+msgstr "Órdenes"
 
 #: money/context_processors.py:13
 msgid "Management"
@@ -68,15 +70,15 @@ msgstr "Comisiones bancarias"
 
 #: money/hardcoded_strings.py:4
 msgid "Bonds. Coupon collection"
-msgstr "Bonos. Cobro de cupón"
+msgstr "Renta fija. Cobro de cupón"
 
 #: money/hardcoded_strings.py:5
 msgid "Bonds. Running coupon collection"
-msgstr ""
+msgstr "Renta fija. Cobro del cupón corrido"
 
 #: money/hardcoded_strings.py:6
 msgid "Bonds. Running coupon payment"
-msgstr ""
+msgstr "Renta fija. Pago del cupón corrido"
 
 #: money/hardcoded_strings.py:7 money/hardcoded_strings.py:53
 msgid "Credit card billing"
@@ -96,19 +98,19 @@ msgstr "Derivados. Ajuste diario"
 
 #: money/hardcoded_strings.py:11
 msgid "Derivatives. Daily guarantee"
-msgstr ""
+msgstr "Derivados. Garantía diaria"
 
 #: money/hardcoded_strings.py:12
 msgid "Derivatives. Operation commission"
-msgstr ""
+msgstr "Derivados. Comisión de la operación"
 
-#: money/hardcoded_strings.py:13 money/templates/investment_view.html:37
+#: money/hardcoded_strings.py:13 money/templates/investment_view.html:42
 msgid "Dividends"
 msgstr "Dividendos"
 
 #: money/hardcoded_strings.py:14
 msgid "Dividends. Sale of rights"
-msgstr ""
+msgstr "Dividendos. Venta de derechos"
 
 #: money/hardcoded_strings.py:15
 msgid "Gasoline"
@@ -123,10 +125,8 @@ msgid "Leisure"
 msgstr "Ocio"
 
 #: money/hardcoded_strings.py:18
-#, fuzzy
-#| msgid "Current investment operations"
 msgid "Purchase investment product"
-msgstr "Operaciones de inversión actuales"
+msgstr "Compra de producto de inversión"
 
 #: money/hardcoded_strings.py:19
 msgid "Restaurant"
@@ -134,17 +134,15 @@ msgstr "Restaurante"
 
 #: money/hardcoded_strings.py:20
 msgid "Rollover Paid"
-msgstr ""
+msgstr "Rollover pagado"
 
 #: money/hardcoded_strings.py:21
 msgid "Rollover Received"
-msgstr ""
+msgstr "Rollover recibido"
 
 #: money/hardcoded_strings.py:22
-#, fuzzy
-#| msgid "Historical investment operations"
 msgid "Sale investment product"
-msgstr "Operaciones de inversión históricas"
+msgstr "Venta de producto de inversión"
 
 #: money/hardcoded_strings.py:23
 msgid "Supermarket"
@@ -160,47 +158,47 @@ msgstr "Impuestos. Devueltos"
 
 #: money/hardcoded_strings.py:26
 msgid "Transfer. Destination"
-msgstr ""
+msgstr "Transferencia. Destino"
 
 #: money/hardcoded_strings.py:27
 msgid "Transfer. Origin"
-msgstr ""
+msgstr "Transferencia. Origen"
 
 #: money/hardcoded_strings.py:28
 msgid "Leverage x10"
-msgstr ""
+msgstr "Apalancamiento x10"
 
 #: money/hardcoded_strings.py:29 money/hardcoded_strings.py:30
 msgid "Leverage x100"
-msgstr ""
+msgstr "Apalancamiento x100"
 
 #: money/hardcoded_strings.py:31
 msgid "Leverage x2"
-msgstr ""
+msgstr "Apalancamiento x2"
 
 #: money/hardcoded_strings.py:32
 msgid "Leverage x20"
-msgstr ""
+msgstr "Apalancamiento x20"
 
 #: money/hardcoded_strings.py:33
 msgid "Leverage x25"
-msgstr ""
+msgstr "Apalancamiento x25"
 
 #: money/hardcoded_strings.py:34
 msgid "Leverage x3"
-msgstr ""
+msgstr "Apalancamiento x3"
 
 #: money/hardcoded_strings.py:35
 msgid "Leverage x4"
-msgstr ""
+msgstr "Apalancamiento x4"
 
 #: money/hardcoded_strings.py:36
 msgid "Leverage x5"
-msgstr ""
+msgstr "Apalancamiento x5"
 
 #: money/hardcoded_strings.py:37
 msgid "Leverage x50"
-msgstr ""
+msgstr "Apalancamiento x50"
 
 #: money/hardcoded_strings.py:38
 msgid "Variable leverage"
@@ -260,7 +258,7 @@ msgstr "Acción"
 
 #: money/hardcoded_strings.py:52
 msgid "Warrant"
-msgstr ""
+msgstr "Warrant"
 
 #: money/hardcoded_strings.py:54
 msgid "Derivative management"
@@ -292,15 +290,15 @@ msgstr "Transferencia"
 
 #: money/hardcoded_strings.py:61
 msgid "Transfer of funds"
-msgstr ""
+msgstr "Transferencia de fondos"
 
 #: money/hardcoded_strings.py:62
 msgid "Transfer of shares destiny"
-msgstr ""
+msgstr "Transferencia de acciones. Destino"
 
 #: money/hardcoded_strings.py:63
 msgid "Transfer of shares origin"
-msgstr ""
+msgstr "Transferencia de acciones. Origen"
 
 #: money/reusing/text_inputs.py:80
 msgid "Y"
@@ -318,101 +316,116 @@ msgstr "Por favor introduzca '{}' o '{}'"
 msgid "Press a key to continue..."
 msgstr "Pulse una tecla para continuar..."
 
-#: money/tables.py:11 money/tables.py:36 money/tables.py:78
-#: money/templates/bank_list.html:15 money/templates/concept_list.html:17
-#: money/templates/objects/bank.html:12
+#: money/tables.py:11 money/tables.py:36 money/tables.py:46 money/tables.py:56
+#: money/tables.py:98
 msgid "Name"
 msgstr "Nombre"
 
-#: money/tables.py:11 money/tables.py:36 money/templates/bank_list.html:16
-#: money/templates/objects/bank.html:13
+#: money/tables.py:11 money/tables.py:36 money/tables.py:56
 msgid "Active"
 msgstr "Activa"
 
-#: money/tables.py:11 money/tables.py:78
+#: money/tables.py:11 money/tables.py:98
 msgid "Number"
 msgstr "Número"
 
-#: money/tables.py:11 money/tables.py:23
+#: money/tables.py:11 money/tables.py:22
 msgid "Balance"
 msgstr "Saldo"
 
 #: money/tables.py:11
 msgid "Local curr. B."
-msgstr ""
+msgstr "B. divisa local"
 
-#: money/tables.py:23 money/tables.py:47 money/tables.py:57 money/tables.py:67
-#: money/templates/investment_view.html:48
+#: money/tables.py:22 money/tables.py:67 money/tables.py:77 money/tables.py:87
+#: money/templates/investment_view.html:53
 msgid "Date and time"
 msgstr "Fecha y hora"
 
-#: money/tables.py:23
-#, fuzzy
-#| msgid "Concepts"
+#: money/tables.py:22
 msgid "Concept"
-msgstr "Conceptos"
+msgstr "Concepto"
 
-#: money/tables.py:23
-#, fuzzy
-#| msgid "Accounts"
+#: money/tables.py:22
 msgid "Amount"
-msgstr "Cuentas"
+msgstr "Cantidad"
 
-#: money/tables.py:23
+#: money/tables.py:22
 msgid "Comment"
-msgstr ""
+msgstr "Comentario"
 
-#: money/tables.py:36 money/tables.py:78
+#: money/tables.py:36 money/tables.py:46 money/tables.py:56 money/tables.py:98
+#: money/tables.py:108
 msgid "Id"
-msgstr ""
+msgstr "Id"
 
-#: money/tables.py:36 money/tables.py:47 money/tables.py:67
+#: money/tables.py:46
+msgid "Operation type"
+msgstr "Tipo de operación"
+
+#: money/tables.py:46
+msgid "Editable"
+msgstr "Modificable"
+
+#: money/tables.py:56 money/tables.py:67 money/tables.py:87
 msgid "Invested"
-msgstr ""
+msgstr "Invertido"
 
-#: money/tables.py:36
+#: money/tables.py:56
 msgid "Gains"
-msgstr ""
+msgstr "Ganancias"
 
-#: money/tables.py:47 money/tables.py:57 money/tables.py:67
+#: money/tables.py:67 money/tables.py:77 money/tables.py:87 money/tables.py:108
 msgid "Shares"
 msgstr "Acciones"
 
-#: money/tables.py:47 money/tables.py:67
+#: money/tables.py:67 money/tables.py:87 money/tables.py:108
 msgid "Price"
 msgstr "Precio"
 
-#: money/tables.py:47 money/tables.py:67
-#, fuzzy
-#| msgid "Accounts balance"
+#: money/tables.py:67 money/tables.py:87
 msgid "Current balance"
-msgstr "Saldo de las cuentas"
+msgstr "Saldo actual"
 
-#: money/tables.py:47 money/tables.py:67
+#: money/tables.py:67 money/tables.py:87
 msgid "Pending"
-msgstr ""
+msgstr "Pendiente"
 
-#: money/tables.py:47 money/tables.py:67
-#, fuzzy
-#| msgid "{} years"
+#: money/tables.py:67 money/tables.py:87
 msgid "% year"
-msgstr "{} años"
+msgstr "% anual"
 
-#: money/tables.py:47 money/tables.py:67
+#: money/tables.py:67 money/tables.py:87
 msgid "% APR"
-msgstr ""
+msgstr "% TAE"
 
-#: money/tables.py:47 money/tables.py:67
+#: money/tables.py:67 money/tables.py:87
 msgid "% Total"
-msgstr ""
+msgstr "% Total"
 
-#: money/tables.py:78
+#: money/tables.py:98
 msgid "Deferred pay"
-msgstr ""
+msgstr "Pago diferido"
 
-#: money/tables.py:78
+#: money/tables.py:98
 msgid "Maximum balance"
-msgstr ""
+msgstr "Saldo máximo"
+
+#: money/tables.py:108
+msgid "Date"
+msgstr "Fecha"
+
+#: money/tables.py:108
+msgid "Expiration"
+msgstr "Expiración"
+
+#: money/tables.py:108
+msgid "Investment"
+msgstr "Inversión"
+
+#: money/tables.py:108
+msgid "Executed"
+msgstr "Ejecutada"
 
 #: money/templates/403.html:6 money/templates/403.html:10
 msgid "Forbidden page"
@@ -451,20 +464,26 @@ msgstr ""
 msgid "Accounts list"
 msgstr "Listado de cuentas"
 
+#: money/templates/account_list.html:10
+msgid "Check to show inactive accounts"
+msgstr "Marca para mostrar las cuentas inactivas"
+
 #: money/templates/account_view.html:6
 #, python-format
 msgid " Account details of %(account_name)s"
 msgstr ""
 
 #: money/templates/account_view.html:8
-#, fuzzy
-#| msgid "Account verification"
 msgid "Account operations"
-msgstr "Comprobación de cuenta"
+msgstr "Operaciones de cuenta"
 
-#: money/templates/account_view.html:15
+#: money/templates/account_view.html:18
 msgid "Credit cards"
-msgstr ""
+msgstr "Tarjetas de crédito"
+
+#: money/templates/accountoperation_delete.html:6
+msgid "Confirm account operation delete"
+msgstr "Confirmar el borrado de la operación de cuenta"
 
 #: money/templates/accountoperation_new.html:5
 #, fuzzy
@@ -473,53 +492,23 @@ msgid "Add a new account operation"
 msgstr "Comprobación de cuenta"
 
 #: money/templates/accountoperation_new.html:18
-#: money/templates/author_edit.html:16 money/templates/bank_new.html:12
-#: money/templates/bank_update.html:12 money/templates/book_edit.html:16
+#: money/templates/accountoperation_update.html:18
+#: money/templates/bank_new.html:12 money/templates/bank_update.html:12
+#: money/templates/investmentoperation_new.html:18
+#: money/templates/investmentoperation_update.html:18
 msgid "Save"
 msgstr "Guardar"
 
-#: money/templates/author_confirm_delete.html:6
-#: money/templates/author_edit.html:6
-#: money/templates/book_confirm_delete.html:6 money/templates/database.html:7
-msgid "Authors"
-msgstr "Autores"
+#: money/templates/accountoperation_update.html:5
+#, fuzzy
+#| msgid "Account verification"
+msgid "Update an account operation"
+msgstr "Comprobación de cuenta"
 
-#: money/templates/author_confirm_delete.html:6
-#: money/templates/author_confirm_delete.html:10
 #: money/templates/bank_delete.html:7
-#: money/templates/book_confirm_delete.html:6
-#: money/templates/book_confirm_delete.html:10
+#: money/templates/investmentoperation_delete.html:6
 msgid "Confirm delete"
 msgstr "Confirmación de borrado"
-
-#: money/templates/author_edit.html:6 money/templates/book_edit.html:6
-msgid "New"
-msgstr "Nuevo"
-
-#: money/templates/author_edit.html:10
-msgid "Add or edit an Author"
-msgstr "Añade o actualiza un autor"
-
-#: money/templates/author_read.html:6
-msgid "Author details"
-msgstr "Detalles del autor"
-
-#: money/templates/author_read.html:10 money/templates/objects/bank.html:18
-msgid "Update"
-msgstr "Editar"
-
-#: money/templates/author_read.html:13 money/templates/objects/bank.html:19
-msgid "Delete"
-msgstr "Borrar"
-
-#: money/templates/author_read.html:16 money/templates/book_edit.html:6
-#: money/templates/database.html:12
-msgid "Books"
-msgstr "Libros"
-
-#: money/templates/author_read.html:19
-msgid "Add a book"
-msgstr "Añade un libro"
 
 #: money/templates/bank_delete.html:15
 msgid "Error deleting"
@@ -532,6 +521,10 @@ msgstr "No puede borrar las valoraciones de otros usuarios"
 #: money/templates/bank_list.html:6
 msgid "My banks"
 msgstr "Mis bancos"
+
+#: money/templates/bank_list.html:10
+msgid "Check to show inactive banks"
+msgstr ""
 
 #: money/templates/bank_new.html:6
 msgid "Add a Valoration"
@@ -546,52 +539,36 @@ msgid "You can't add valorations"
 msgstr "No puede añadir valoraciones"
 
 #: money/templates/bank_update.html:6
-msgid "Edit a Valoration"
+#, fuzzy
+#| msgid "Edit a Valoration"
+msgid "Edit a bank"
 msgstr "Actualiza una valoración"
 
-#: money/templates/bank_view.html:10
-msgid "Valoration details"
-msgstr "Detalle de la valoración"
+#: money/templates/bank_view.html:6
+#, fuzzy
+#| msgid "Book details"
+msgid "Bank details"
+msgstr "Detalles del libro"
 
-#: money/templates/base.html:65
+#: money/templates/base.html:68
 msgid "Version:"
 msgstr "Versión:"
 
-#: money/templates/base.html:90
+#: money/templates/base.html:93
 msgid "Logout"
 msgstr "Salir"
 
-#: money/templates/base.html:91
+#: money/templates/base.html:94
 msgid "Administration"
 msgstr "Administración"
 
-#: money/templates/base.html:93
+#: money/templates/base.html:96
 msgid "Login"
 msgstr "Entrar"
 
-#: money/templates/book_edit.html:10
-msgid "Add or edit a Book"
-msgstr "Añade o actualiza un libro"
-
 #: money/templates/concept_list.html:6
 msgid "Concept list"
-msgstr ""
-
-#: money/templates/concept_list.html:18
-msgid "Operation type"
-msgstr ""
-
-#: money/templates/concept_list.html:19
-msgid "Editable"
-msgstr ""
-
-#: money/templates/database.html:6
-msgid "Library database"
-msgstr "Toda la base de datos"
-
-#: money/templates/database.html:17
-msgid "Valorations"
-msgstr "Valoraciones"
+msgstr "Listado de conceptos"
 
 #: money/templates/home.html:11
 msgid ""
@@ -603,11 +580,7 @@ msgid "Investments list"
 msgstr "Listado de inversiones"
 
 #: money/templates/investment_list.html:11
-msgid "Show inactive investments"
-msgstr ""
-
-#: money/templates/investment_list.html:14
-msgid "Show active investments"
+msgid "Check to show inactive investments"
 msgstr ""
 
 #: money/templates/investment_view.html:7
@@ -628,57 +601,53 @@ msgstr "Operaciones de inversión actuales"
 msgid "Historical investment operations"
 msgstr "Operaciones de inversión históricas"
 
-#: money/templates/investment_view.html:49
+#: money/templates/investment_view.html:54
 msgid "Gross"
 msgstr "Bruto"
 
-#: money/templates/investment_view.html:50
+#: money/templates/investment_view.html:55
 msgid "Taxes"
 msgstr "Impuestos"
 
-#: money/templates/investment_view.html:51
+#: money/templates/investment_view.html:56
 msgid "Net"
 msgstr "Neto"
 
-#: money/templates/most_valuated_books.html:6
-msgid "Most valuated books"
-msgstr "Libros mejor valorados"
+#: money/templates/investmentoperation_new.html:5
+#, fuzzy
+#| msgid "Account verification"
+msgid "Add a new investment operation"
+msgstr "Comprobación de cuenta"
 
-#: money/templates/most_valuated_books.html:8
-msgid "These are your most rated books:"
-msgstr "Estos son sus libros más valorados:"
+#: money/templates/investmentoperation_update.html:5
+#, fuzzy
+#| msgid "Current investment operations"
+msgid "Update an investment operation"
+msgstr "Operaciones de inversión actuales"
 
-#: money/templates/objects/author.html:13 money/templates/objects/book.html:8
-msgid "Author"
-msgstr "Autor"
+#: money/templates/objects/year_month.html:30
+msgid "Select a year and a month"
+msgstr ""
 
-#: money/templates/objects/author.html:14
-msgid "Lifetime"
-msgstr "Vida"
+#: money/templates/order_list.html:6
+msgid "My orders"
+msgstr ""
 
-#: money/templates/objects/author.html:15
-msgid "Age"
-msgstr "Edad"
+#: money/templates/order_list.html:10
+msgid "Check to show old orders"
+msgstr ""
 
-#: money/templates/objects/author.html:17
-msgid "Search in wikipedia"
-msgstr "Buscar en Wikipedia"
+#: money/templates/order_view.html:6
+#, fuzzy
+#| msgid "Author details"
+msgid "Order details"
+msgstr "Detalles del autor"
 
-#: money/templates/objects/bank.html:14
-msgid "Accounts balance"
-msgstr "Saldo de las cuentas"
-
-#: money/templates/objects/bank.html:17
-msgid "View"
-msgstr "Ver"
-
-#: money/templates/objects/book.html:11
-msgid "Title"
-msgstr "Título"
-
-#: money/templates/objects/book.html:12
-msgid "Year"
-msgstr "Año"
+#: money/templates/product_view.html:6
+#, fuzzy
+#| msgid "Author details"
+msgid "Product details"
+msgstr "Detalles del autor"
 
 #: money/templates/profile.html:6
 msgid "Settings"
@@ -713,7 +682,6 @@ msgid "Global statistics"
 msgstr "Estadísticas globales"
 
 #: money/templates/statistics_global.html:8
-#: money/templates/statistics_user.html:9
 #, python-format
 msgid " Your average book reading time is %(avg_reading_time_user)s days."
 msgstr ""
@@ -727,19 +695,6 @@ msgstr "Registros"
 msgid "Books read by all users"
 msgstr "Libros leídos por todos los usuarios"
 
-#: money/templates/statistics_user.html:6
-msgid "User statistics"
-msgstr "Estadísticas de usuario"
-
-#: money/templates/statistics_user.html:7
-#, python-format
-msgid " You have made %(valorations_number)s valorations."
-msgstr " Ha realizado %(valorations_number)s valoraciones."
-
-#: money/templates/statistics_user.html:13
-msgid "Books read by user"
-msgstr "Libros leídos por el usuario"
-
 #: money/templates/unfinished_books.html:6
 msgid "Unfinished books"
 msgstr "Libros sin acabar"
@@ -747,6 +702,82 @@ msgstr "Libros sin acabar"
 #: money/templates/unfinished_books.html:8
 msgid "These are your unfinished valorations"
 msgstr "Estos son sus libros con una valoración no acabada"
+
+#~ msgid "Home"
+#~ msgstr "Inicio"
+
+#~ msgid "Authors"
+#~ msgstr "Autores"
+
+#~ msgid "New"
+#~ msgstr "Nuevo"
+
+#~ msgid "Add or edit an Author"
+#~ msgstr "Añade o actualiza un autor"
+
+#~ msgid "Update"
+#~ msgstr "Editar"
+
+#~ msgid "Delete"
+#~ msgstr "Borrar"
+
+#~ msgid "Books"
+#~ msgstr "Libros"
+
+#~ msgid "Add a book"
+#~ msgstr "Añade un libro"
+
+#~ msgid "Valoration details"
+#~ msgstr "Detalle de la valoración"
+
+#~ msgid "Add or edit a Book"
+#~ msgstr "Añade o actualiza un libro"
+
+#~ msgid "Library database"
+#~ msgstr "Toda la base de datos"
+
+#~ msgid "Valorations"
+#~ msgstr "Valoraciones"
+
+#~ msgid "Most valuated books"
+#~ msgstr "Libros mejor valorados"
+
+#~ msgid "These are your most rated books:"
+#~ msgstr "Estos son sus libros más valorados:"
+
+#~ msgid "Author"
+#~ msgstr "Autor"
+
+#~ msgid "Lifetime"
+#~ msgstr "Vida"
+
+#~ msgid "Age"
+#~ msgstr "Edad"
+
+#~ msgid "Search in wikipedia"
+#~ msgstr "Buscar en Wikipedia"
+
+#~ msgid "Accounts balance"
+#~ msgstr "Saldo de las cuentas"
+
+#~ msgid "View"
+#~ msgstr "Ver"
+
+#~ msgid "Title"
+#~ msgstr "Título"
+
+#~ msgid "Year"
+#~ msgstr "Año"
+
+#~ msgid "User statistics"
+#~ msgstr "Estadísticas de usuario"
+
+#, python-format
+#~ msgid " You have made %(valorations_number)s valorations."
+#~ msgstr " Ha realizado %(valorations_number)s valoraciones."
+
+#~ msgid "Books read by user"
+#~ msgstr "Libros leídos por el usuario"
 
 #, fuzzy
 #~| msgid "User mail"
@@ -827,9 +858,6 @@ msgstr "Estos son sus libros con una valoración no acabada"
 
 #~ msgid "MY BOOKS LIBRARY"
 #~ msgstr "MI BIBLIOTECA"
-
-#~ msgid "Book details"
-#~ msgstr "Detalles del libro"
 
 #~ msgid "Add a book valoration"
 #~ msgstr "Añade una valoración del libro"
