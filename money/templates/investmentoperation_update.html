@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <h1>{% trans "Update an investment operation" %}</h1>
+    <form method="post">
+        <table>
+        {% csrf_token %}
+        {{ form.as_table }}
+        </table>
+        <script type="text/javascript">
+            $(function () {
+                $('#datetimepicker1').datetimepicker({
+                    format: 'LT'
+                });
+            });
+        </script>
+    <button type="submit">{% trans "Save" %}</button>
+    </form>
+    {% include "messages.html" %}
+
+    <p>
+            <a href="{% url 'investmentoperation_delete' pk=object.id %}">Delete this investment operation</a>
+    </p>
+
+{% endblock %}

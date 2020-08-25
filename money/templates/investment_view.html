@@ -32,7 +32,11 @@
 <div id="tabs-3">
 {{ table_ioh |safe}}
 </div>
+</div>
 
+<p>
+    <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">Add an investment operation</a>
+  </p>
 
 <h2>{% trans "Dividends" %}</h2>
 

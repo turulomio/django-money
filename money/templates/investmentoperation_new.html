@@ -2,13 +2,19 @@
 {% load i18n %}
 
 {% block content %}
-
-    <h1>{% trans "Edit a bank" %}</h1>
+    <h1>{% trans "Add a new investment operation" %}</h1>
     <form method="post">
         <table>
         {% csrf_token %}
         {{ form.as_table }}
         </table>
+        <script type="text/javascript">
+            $(function () {
+                $('#datetimepicker1').datetimepicker({
+                    format: 'LT'
+                });
+            });
+        </script>
     <button type="submit">{% trans "Save" %}</button>
     </form>
     {% include "messages.html" %}

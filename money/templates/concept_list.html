@@ -5,22 +5,6 @@
 {% block content %}
 <h1>{% trans "Concept list" %}</h1>
 
-
-<div id="tblConcepts"></div>
-<script>
-    var False=false; var True=true; var None=null;
-    var tabledata = {{list_concepts|safe}};
-var table = new Tabulator("#tblConcepts", {
- 	data:tabledata, //assign data to table
- 	layout:"fitDataTable", //fit columns to width of table (optional)
- 	columns:[ //Define Table Columns
-	 	{title:"{% trans 'Name' %}", field:"name",bottomCalc:"Total"},
-	 	{title:"{% trans 'Operation type' %}", field:"operationstypes_id"},
-	 	{title:"{% trans 'Editable' %}", field:"editable", formatter:"tickCross"}, 	],
- 	rowClick:function(e, row){
-        window.location.href = "{% url 'investment_view' pk=-9999 %}".replace( -9999 , row.getData().id);
- 	},
-});
-</script>
+{{table_conceptos|safe}}
 {% endblock %}
 

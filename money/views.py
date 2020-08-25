@@ -18,7 +18,7 @@ from money.forms import SignUpForm
 from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts
 from money.settingsdb import settingsdb
 from money.tabulator import  tb_queryset
-from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations, TabulatorCreditCards
+from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations, TabulatorCreditCards,  TabulatorConcepts
 from money.tokens import account_activation_token
 
 
@@ -71,7 +71,8 @@ def activate(request, uidb64, token):
 
 @login_required
 def concept_list(request):
-    list_concepts= tb_queryset(Concepts.objects.all().order_by('name'))
+    concepts= Concepts.objects.all().order_by('name')
+    table_conceptos=TabulatorConcepts("table_conceptos", None, concepts).render()
     return render(request, 'concept_list.html', locals())
 
 def error_403(request, exception):
@@ -83,8 +84,6 @@ def error_403(request, exception):
 ## @todo Add a tab Widget, author, books, valorations with number in ttab
 def home(request):
     return render(request, 'home.html', locals())
-
-
 
 @login_required
 def bank_list(request,  active=True):
@@ -252,7 +251,59 @@ def investment_view(request, pk):
     dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
     list_dividends=tb_queryset(dividends)        
     return render(request, 'investment_view.html', locals())
+
+
+@method_decorator(login_required, name='dispatch')
+class investmentoperation_new(CreateView):
+    model = Investmentsoperations
+    fields = ( 'datetime', 'operationstypes',  'shares', 'price',  'taxes',  'commission', 'comment', 'investments', 'currency_conversion')
+    template_name="investmentoperation_new.html"
+    investments_id=None
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(investmentoperation_new, self).get_form(form_class)
+        form.fields['datetime'].initial=timezone.now()
+        form.fields['currency_conversion'].initial=1
+        form.fields['taxes'].initial=0
+        form.fields['commission'].initial=0
+        form.fields['investments'].widget = forms.HiddenInput()
+        return form
+        
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.investments.id,))
+  
+    def form_valid(self, form):
+        form.instance.investments= Investments.objects.get(pk=self.kwargs['investments_id'])
+        return super().form_valid(form)
+
+@method_decorator(login_required, name='dispatch')
+class investmentoperation_update(UpdateView):
+    model = Investmentsoperations
+    fields = ( 'datetime', 'operationstypes',  'shares', 'price',  'taxes',  'commission', 'comment', 'investments', 'currency_conversion')
+    template_name="investmentoperation_update.html"
+        
+
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.investments.id,))
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(investmentoperation_update, self).get_form(form_class)
+        form.fields['investments'].widget = forms.HiddenInput()
+        return form
     
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+class investmentoperation_delete(DeleteView):
+    model = Investmentsoperations
+    template_name = 'investmentoperation_delete.html'
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.investments.id,))
+
 @login_required
 def bank_new(request, pk):
     return render(request, 'bank_new.html', locals())

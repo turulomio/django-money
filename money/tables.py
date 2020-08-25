@@ -27,6 +27,16 @@ class TabulatorAccountOperations(TabulatorFromQuerySet):
             balance=balance+d["amount"]
             d["balance"]=balance
 
+class TabulatorConcepts(TabulatorFromQuerySet):
+    def __init__(self, name, destiny_url, queryset):
+        TabulatorFromQuerySet.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setQuerySet(queryset)
+        self.setCallByNames("id", "name", "operationstypes", "editable")
+        self.setHeaders(_("Id"), _("Name"), _("Operation type"), _("Editable"))
+        self.setTypes("int", "str", "str", "bool")
+        self.generate_listdict()
+
 class TabulatorInvestments(TabulatorFromQuerySet):
     def __init__(self, name, destiny_url, queryset, local_currency):
         TabulatorFromQuerySet.__init__(self, name)

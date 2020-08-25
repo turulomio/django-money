@@ -42,9 +42,13 @@ class TabulatorCommons:
                 new_d[field]=object_to_tb(d[field], self.translate)
             tb_list.append(new_d)
             
-        str_url=reverse( self.destiny_url, kwargs={"pk":9999999999})
         str_height="" if self.height is None else f'height: "{self.height}",'
-        str_destiny_url="" if self.destiny_url is None else f"""        rowClick:function(e, row){{
+        
+        if self.destiny_url is None:
+            str_destiny_url=""
+        else:
+            str_url=reverse( self.destiny_url, kwargs={"pk":9999999999})
+            str_destiny_url=f"""        rowClick:function(e, row){{
             window.location.href = "{str_url}".replace( 9999999999 , row.getData().id);
             }},"""
 

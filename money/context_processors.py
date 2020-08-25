@@ -6,7 +6,6 @@ from django.utils.translation import gettext_lazy as _
 
 def my_context(request):
     menu=Menu(_("Django Money"))
-    menu.append(Action(_("Home"), None,  "home",  False))
     menu.append(Action(_("Banks"), None,  "bank_list",  True))
     menu.append(Action(_("Accounts"), None,  "account_list",  True))
     menu.append(Action(_("Investments"), None,  "investment_list_active",  True))
