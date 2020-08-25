@@ -15,14 +15,26 @@ from django import forms
 
 from money.connection_dj import cursor_rows
 from money.forms import SignUpForm
-from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products
+from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products,  Orders
 from money.settingsdb import settingsdb
 from money.tabulator import  tb_queryset
-from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations, TabulatorCreditCards,  TabulatorConcepts, TabulatorBanks
+from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations, TabulatorCreditCards,  TabulatorConcepts, TabulatorBanks, TabulatorOrders
 from money.tokens import account_activation_token
 from money.reusing.datetime_functions import dtaware_month_start
 
+@login_required
+def order_list(request,  active):
+    if active is True:
+        orders= Orders.objects.all().filter(executed__isnull=True ,  expiration__gte=date.today()).order_by('date')
+    else:
+        orders= Orders.objects.all().filter(executed__isnull=False ,  expiration__lt=date.today()).order_by('-date')[:20]
+    table_orders=TabulatorOrders("table_orders", 'order_view', orders).render()
+    return render(request, 'order_list.html', locals())
     
+@login_required
+def order_view(request, pk):
+    order=get_object_or_404(Orders, id=pk)
+    return render(request, 'order_view.html', locals())
 @login_required
 def product_view(request, pk):
     product=get_object_or_404(Products, id=pk)

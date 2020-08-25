@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "My orders" %}</h1>
+
+{% url 'order_list_active' as url_unchecked %}
+{% url 'order_list_inactive' as url_checked %}
+{% trans "Check to show inactive orders" as mylabel %}
+{% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
+
+<p></p>
+{{ table_orders|safe}}
+
+{% endblock %}
+

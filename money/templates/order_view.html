@@ -1,0 +1,12 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+  <h1>{% trans "Order details" %}</h1>
+
+  <h2>{% trans "Accounts" %}</h2>
+  {{ table_accounts|safe}}
+  <h2>{% trans "Investments" %}</h2>
+  {{ table_investments|safe}}
+{% endblock %}

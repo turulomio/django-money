@@ -59,7 +59,7 @@ class TabulatorCommons:
             
             if self.types[i]=="datetime":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""
-            elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is None:
+            elif self.types[i] in ("Decimal", "float", "int", "date") and self.bottomcalc[i] is None:
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" }}, \n"""
             elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is not None:
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
@@ -108,7 +108,7 @@ class TabulatorFromQuerySet(TabulatorCommons):
             if cbn.__class__.__name__=="str":
                 self.fields.append(cbn.replace(".", "_"))
             else:#Tuple
-                self.fields.append(cbn[0])
+                self.fields.append(cbn[0].replace(".", "_"))
 
         
     def setQuerySet(self, queryset):
