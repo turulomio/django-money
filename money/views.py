@@ -210,6 +210,7 @@ class accountoperation_new(CreateView):
             form_class = self.get_form_class()
         form = super(accountoperation_new, self).get_form(form_class)
         form.fields['datetime'].initial=timezone.now()
+        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
         return form
         
     def get_success_url(self):

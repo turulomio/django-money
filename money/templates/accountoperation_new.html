@@ -9,10 +9,10 @@
         {{ form.as_table }}
         </table>
         <script type="text/javascript">
-            $(function () {
-                $('#datetimepicker1').datetimepicker({
-                    format: 'LT'
-                });
+            jQuery('#datetimepicker').datetimepicker({
+                inline:false,
+                format:'d/m/Y H:i:s',
+                lang:'{{LANGUAGE_CODE}}',
             });
         </script>
     <button type="submit">{% trans "Save" %}</button>
