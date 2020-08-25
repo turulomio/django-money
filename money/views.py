@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.contrib.auth import  login
 from django.shortcuts import render,  redirect, get_object_or_404
 from django.contrib.sites.shortcuts import get_current_site
@@ -8,10 +9,12 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
-from django.views.generic.edit import UpdateView#, DeleteView
+from django.views.generic.edit import UpdateView, CreateView, DeleteView
+#from django.http import HttpResponseRedirect
+from django import forms
 
 from money.connection_dj import cursor_rows
-from money.forms import SignUpForm    
+from money.forms import SignUpForm
 from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts
 from money.settingsdb import settingsdb
 from money.tabulator import  tb_queryset
@@ -120,13 +123,112 @@ def account_view(request, pk):
     
     dt_initial=datetime.now()-timedelta(days=60)
     accountoperations= Accountsoperations.objects.all().filter(accounts_id=pk, datetime__gt=dt_initial).order_by('datetime')
-    table_accountoperations=TabulatorAccountOperations("table_accountoperations", "bank_update", accountoperations, account, dt_initial).render()
+    table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", accountoperations, account, dt_initial).render()
   
     creditcards= Creditcards.objects.all().filter(accounts_id=pk, active=True).order_by('name')
     table_creditcards=TabulatorCreditCards("table_creditcards", "bank_update", creditcards, account).render()
   
-  
     return render(request, 'account_view.html', locals())
+
+
+#@login_required
+#def accountoperation_update(request, accounts_id):
+#    if request.method == 'POST':
+#        form = AccountsoperationsAddForm(request.POST)
+#        if form.is_valid():
+#            accountoperation=Accountsoperations()
+#            accountoperation.comment= form.cleaned_data['comment']
+#            accountoperation.concepts=form.cleaned_data['concepts']
+#            accountoperation.amount=form.cleaned_data['amount']
+#            accountoperation.datetime=form.cleaned_data['datetime']
+#            accountoperation.operationstypes=accountoperation.concepts.operationstypes.id
+#            accountoperation.accounts=form.cleaned_data['accounts']
+#            accountoperation.save()
+#            return HttpResponseRedirect( reverse_lazy('account_view', args=(accounts_id,)))
+#    else:
+#        form = AccountsoperationsAddForm()
+#        form.fields['datetime'].widget.attrs['class'] ='form-control datetimepicker-input'
+#        form.fields['datetime'].widget.attrs['data-target'] ='#datetimepicker1'
+#        form.fields['accounts'].widget = forms.HiddenInput()
+##        form.fields['operationstypes'].widget = forms.HiddenInput()
+#        form.fields['accounts'].initial=accounts_id
+#        form.fields['datetime'].initial=timezone.now()
+#    return render(request, 'accountoperation_update.html', {'form': form})
+
+@method_decorator(login_required, name='dispatch')
+class accountoperation_update(UpdateView):
+    model = Accountsoperations
+    fields = ( 'datetime', 'amount', 'concepts',  'accounts', 'comment')
+    template_name="accountoperation_update.html"
+        
+
+    def get_success_url(self):
+        return reverse_lazy('account_view',args=(self.object.accounts.id,))
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(accountoperation_update, self).get_form(form_class)
+        form.fields['accounts'].widget = forms.HiddenInput()
+        return form
+    
+    def form_valid(self, form):
+        form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
+        return super().form_valid(form)
+
+
+@method_decorator(login_required, name='dispatch')
+class accountoperation_new(CreateView):
+    model = Accountsoperations
+    fields = ['datetime', 'concepts', 'amount', 'comment']
+    template_name="accountoperation_new.html"
+    accounts_id=None
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(accountoperation_new, self).get_form(form_class)
+        form.fields['datetime'].initial=timezone.now()
+        return form
+        
+    def get_success_url(self):
+        return reverse_lazy('account_view',args=(self.object.accounts.id,))
+  
+    def form_valid(self, form):
+        form.instance.accounts= Accounts.objects.get(pk=self.kwargs['accounts_id'])
+        form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
+        return super().form_valid(form)
+
+
+#@login_required
+#def accountoperation_new(request, accounts_id):
+#    if request.method == 'POST':
+#        form = AccountsoperationsAddForm(request.POST)
+#        if form.is_valid():
+#            accountoperation=Accountsoperations()
+#            accountoperation.comment= form.cleaned_data['comment']
+#            accountoperation.concepts=form.cleaned_data['concepts']
+#            accountoperation.amount=form.cleaned_data['amount']
+#            accountoperation.datetime=form.cleaned_data['datetime']
+#            accountoperation.operationstypes=form.cleaned_data['concepts'].operationstypes
+#            accountoperation.accounts=form.cleaned_data['accounts']
+#            accountoperation.save()
+#            return HttpResponseRedirect( reverse_lazy('account_view', args=(accounts_id,)))
+#    else:
+#        form = AccountsoperationsAddForm()
+#        form.fields['datetime'].widget.attrs['class'] ='form-control datetimepicker-input'
+#        form.fields['datetime'].widget.attrs['data-target'] ='#datetimepicker1'
+#        form.fields['accounts'].initial=accounts_id
+#        form.fields['accounts'].widget = forms.HiddenInput()
+#        form.fields['datetime'].initial=timezone.now()
+#    return render(request, 'accountoperation_new.html', {'form': form})
+
+class accountoperation_delete(DeleteView):
+    model = Accountsoperations
+    template_name = 'accountoperation_delete.html'
+    def get_success_url(self):
+        return reverse_lazy('account_view',args=(self.object.accounts.id,))
+
 @login_required
 def investment_list(request,  active):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??

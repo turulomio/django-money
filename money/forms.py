@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+#from money.models import Accountsoperations
 
     
 from django.utils.translation import gettext_lazy as _
@@ -14,3 +15,9 @@ class SignUpForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2', )
+
+#                
+#class AccountsoperationsAddForm(forms.ModelForm):
+#    class Meta:
+#        model = Accountsoperations
+#        fields = ( 'datetime', 'concepts',  'amount', 'accounts', 'comment')

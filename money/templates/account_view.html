@@ -9,6 +9,9 @@
 
   {{ table_accountoperations|safe }}
 
+  <p>
+    <a href="{% url 'accountoperation_new' accounts_id=account.id %}">Add an account operation</a>
+  </p>
   <h2>{% trans "Credit cards" %}</h2>
   {{ table_creditcards|safe }}
 {% endblock %}

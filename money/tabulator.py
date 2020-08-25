@@ -1,6 +1,6 @@
 from money.reusing.call_by_name import call_by_name
 from django.utils.translation import gettext
-from django.urls import reverse_lazy
+from django.urls import reverse
 
 class TabulatorCommons:
     def __init__(self, name):
@@ -42,10 +42,10 @@ class TabulatorCommons:
                 new_d[field]=object_to_tb(d[field], self.translate)
             tb_list.append(new_d)
             
-        str_url=reverse_lazy( self.destiny_url, kwargs={"pk":-9999})
+        str_url=reverse( self.destiny_url, kwargs={"pk":9999999999})
         str_height="" if self.height is None else f'height: "{self.height}",'
         str_destiny_url="" if self.destiny_url is None else f"""        rowClick:function(e, row){{
-            window.location.href = "{str_url}".replace( -9999 , row.getData().id);
+            window.location.href = "{str_url}".replace( 9999999999 , row.getData().id);
             }},"""
 
         columns=""
@@ -84,6 +84,7 @@ class TabulatorCommons:
         ],
         {str_destiny_url}
     }});
+    table.scrollToRow(5, "top", true);
     </script>
     """
     

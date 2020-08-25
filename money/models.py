@@ -8,6 +8,7 @@
 from django.db import models, connection
 from money.reusing.currency import Currency, currency_symbol
 from money.connection_dj import cursor_one_row, cursor_one_field
+from django.utils.translation import gettext as _
 
 
 class Accounts(models.Model):
@@ -37,7 +38,7 @@ class Accounts(models.Model):
 
 class Accountsoperations(models.Model):
     concepts = models.ForeignKey('Concepts', models.DO_NOTHING)
-    operationstypes_id = models.IntegerField()
+    operationstypes = models.ForeignKey('Operationstypes', models.DO_NOTHING)
     amount = models.DecimalField(max_digits=100, decimal_places=2)
     comment = models.TextField(blank=True, null=True)
     accounts = models.ForeignKey(Accounts, models.DO_NOTHING)
@@ -81,12 +82,15 @@ class Banks(models.Model):
 
 class Concepts(models.Model):
     name = models.TextField(blank=True, null=True)
-    operationstypes_id = models.IntegerField(blank=True, null=True)
+    operationstypes = models.ForeignKey('Operationstypes', models.DO_NOTHING, blank=True, null=True)
     editable = models.BooleanField()
 
     class Meta:
         managed = False
         db_table = 'concepts'
+        
+    def __str__(self):
+        return "{} - {}".format(_(self.name), _(self.operationstypes.name))
 
 
 class Creditcards(models.Model):
@@ -104,7 +108,7 @@ class Creditcards(models.Model):
 
 class Creditcardsoperations(models.Model):
     concepts = models.ForeignKey(Concepts, models.DO_NOTHING)
-    operationstypes_id = models.IntegerField()
+    operationstypes = models.ForeignKey('Operationstypes', models.DO_NOTHING)
     amount = models.DecimalField(max_digits=100, decimal_places=2)
     comment = models.TextField(blank=True, null=True)
     creditcards = models.ForeignKey(Creditcards, models.DO_NOTHING)
@@ -223,7 +227,7 @@ class Investmentsaccountsoperations(models.Model):
 
 
 class Investmentsoperations(models.Model):
-    operationstypes_id = models.IntegerField(blank=True, null=True)
+    operationstypes = models.ForeignKey('Operationstypes', models.DO_NOTHING, blank=True, null=True)
     investments = models.ForeignKey(Investments, models.DO_NOTHING, blank=True, null=True)
     shares = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
     taxes = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
@@ -238,6 +242,26 @@ class Investmentsoperations(models.Model):
         managed = False
         db_table = 'investmentsoperations'
 
+
+class Leverages(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.TextField()
+    multiplier = models.DecimalField(max_digits=65535, decimal_places=65535)
+
+    class Meta:
+        managed = False
+        db_table = 'leverages'
+
+class Operationstypes(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = 'operationstypes'
+        
+    def __str__(self):
+        return _(self.name)
 
 class Opportunities(models.Model):
     date = models.DateField()
@@ -271,7 +295,7 @@ class Products(models.Model):
     name = models.TextField(blank=True, null=True)
     isin = models.TextField(blank=True, null=True)
     currency = models.TextField(blank=True, null=True)
-    type = models.IntegerField(blank=True, null=True)
+    productstypes = models.ForeignKey('Productstypes', models.DO_NOTHING, blank=True, null=True)
     agrupations = models.TextField(blank=True, null=True)
     web = models.TextField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)
@@ -279,7 +303,7 @@ class Products(models.Model):
     mail = models.TextField(blank=True, null=True)
     percentage = models.IntegerField()
     pci = models.CharField(max_length=1)
-    leveraged = models.IntegerField()
+    leverages = models.ForeignKey(Leverages, models.DO_NOTHING)
     stockmarkets_id = models.IntegerField()
     comment = models.TextField(blank=True, null=True)
     obsolete = models.BooleanField()
@@ -294,6 +318,13 @@ class Products(models.Model):
     def currency_symbol(self):
         return currency_symbol(self.currency)
 
+class Productstypes(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = 'productstypes'
 
 class Quotes(models.Model):
     datetime = models.DateTimeField(blank=True, null=True)

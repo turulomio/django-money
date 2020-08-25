@@ -43,6 +43,11 @@ urlpatterns = i18n_patterns(
     path('account/list/', money_views.account_list, name='account_list'),
     path('account/view/<slug:pk>/', money_views.account_view, name='account_view'),
     
+    
+    path('accountoperation/new/<int:accounts_id>/', money_views.accountoperation_new.as_view(), name='accountoperation_new'),
+    path('accountoperation/update/<int:pk>/', money_views.accountoperation_update.as_view(), name='accountoperation_update'),
+    path('accountoperation/delete/<int:pk>', money_views.accountoperation_delete.as_view(), name='accountoperation_delete'),
+    
     path('investment/list/', money_views.investment_list, {'active':True}, name='investment_list_active'),
     path('investment/list/inactive/', money_views.investment_list, {'active': False}, name='investment_list_inactive'),
     path('investment/view/<slug:pk>/', money_views.investment_view, name='investment_view'),
