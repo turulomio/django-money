@@ -74,7 +74,7 @@ class TabulatorCommons:
             elif self.types[i]=="str":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""            
             elif self.types[i]=="bool":
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"tickCross" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"tickCross", hozAlign:"center" }}, \n"""
         
         return f"""
     <div id="{self.name}"></div>
