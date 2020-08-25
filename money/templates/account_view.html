@@ -6,27 +6,8 @@
   <h1>{% blocktrans with account_name=account.name %} Account details of {{ account_name }}{% endblocktrans %}</h1>
 
   <h2>{% trans "Account operations" %}</h2>
-  <script type="text/javascript">
-    $(function() {
-        $('.date-picker').datepicker( {
-        changeMonth: true,
-        changeYear: true,
-        showButtonPanel: true,
-        dateFormat: 'MM yy',
-        onClose: function(dateText, inst) { 
-            $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
-            window.location.href = "{% url 'account_view' account.id %}".concat(inst.selectedYear.toString()).concat("/").concat((inst.selectedMonth+1).toString() ); 
-        }
-        });
-    });
-</script>
-<style>
-.ui-datepicker-calendar {
-    display: none;
-}
-</style>
-  <label>{% trans "Select a year and a month" %}</label>
-  <input name="startDate" id="startDate" class="date-picker" />
+  {% url 'account_view' account.id  as the_url %}
+  {% include "objects/year_month.html" with url_string=the_url only %}
   <p></p>
 
   {{ table_accountoperations|safe }}
