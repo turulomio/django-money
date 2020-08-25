@@ -5,6 +5,12 @@
 {% block content %}
 <h1>{% trans "My banks" %}</h1>
 
+{% url 'bank_list_active' as url_unchecked %}
+{% url 'bank_list_inactive' as url_checked %}
+{% trans "Check to show inactive banks" as mylabel %}
+{% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
+
+<p></p>
 {{ table_banks|safe}}
 
 {% endblock %}

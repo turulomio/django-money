@@ -34,13 +34,15 @@ urlpatterns = i18n_patterns(
     path('login/', LoginView.as_view(template_name='login.html'), name="login"), 
     path('logout/', logout_then_login, name="logout"), 
     
-    path('bank/list/', money_views.bank_list, name='bank_list'),
+    path('bank/list/', money_views.bank_list,  {'active':True}, name='bank_list_active'),
+    path('bank/list/inactive/', money_views.bank_list,  {'active':False}, name='bank_list_inactive'),
     path('bank/view/<slug:pk>/', money_views.bank_view, name='bank_view'),
     path('bank/new/', money_views.bank_new, name='bank_new'),
     path('bank/update/<slug:pk>', money_views.bank_update.as_view(), name='bank_update'),
     path('bank/delete/<slug:pk>', money_views.bank_delete, name='bank_delete'),
 
-    path('account/list/', money_views.account_list, name='account_list'),
+    path('account/list/', money_views.account_list,   {'active':True}, name='account_list_active'),
+    path('account/list/inactive/', money_views.account_list,   {'active':False}, name='account_list_inactive'),
     path('account/view/<slug:pk>/<int:year>/<int:month>/', money_views.account_view, name='account_view'),
     path('account/view/<slug:pk>/', money_views.account_view, name='account_view'),
     

@@ -1,4 +1,4 @@
-from datetime import  timedelta, date
+from datetime import  date
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib.auth import  login
@@ -20,6 +20,7 @@ from money.settingsdb import settingsdb
 from money.tabulator import  tb_queryset
 from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations, TabulatorCreditCards,  TabulatorConcepts, TabulatorBanks
 from money.tokens import account_activation_token
+from money.reusing.datetime_functions import dtaware_month_start
 
     
 @login_required
@@ -102,9 +103,8 @@ def home(request):
     return render(request, 'home.html', locals())
 
 @login_required
-def bank_list(request,  active=True):
+def bank_list(request,  active):
     banks= Banks.objects.all().filter(active=active).order_by('name')
-    table_banks=TabulatorBanks("table_banks", 'bank_view', banks).render()
     table_banks=TabulatorBanks("table_banks", 'bank_view', banks).render()
     return render(request, 'bank_list.html', locals())
     
@@ -140,9 +140,10 @@ def account_list(request,  active=True):
         
 @login_required        
 def account_view(request, pk, year=date.today().year, month=date.today().month):        
+    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     account=get_object_or_404(Accounts, pk=pk)
     
-    dt_initial=timezone.now()-timedelta(days=60)
+    dt_initial=dtaware_month_start(year, month, local_zone)
     accountoperations= Accountsoperations.objects.all().filter(accounts_id=pk, datetime__year=year, datetime__month=month).order_by('datetime')
     table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", accountoperations, account, dt_initial).render()
   
@@ -338,7 +339,7 @@ class bank_update(UpdateView):
     template_name="bank_update.html"
 
     def get_success_url(self):
-        return reverse_lazy('bank_list')
+        return reverse_lazy('bank_list_active')
     
 @login_required
 def bank_view(request, pk):

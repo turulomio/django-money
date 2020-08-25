@@ -5,6 +5,11 @@
 {% block content %}
 <h1>{% trans "Accounts list" %}</h1>
 
+{% url 'account_list_active' as url_unchecked %}
+{% url 'account_list_inactive' as url_checked %}
+{% trans "Check to show inactive accounts" as mylabel %}
+{% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
+
 {{table_accounts|safe}}
 {% endblock %}
 

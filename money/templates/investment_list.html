@@ -6,15 +6,11 @@
 <h1>{% trans "Investments list" %}</h1>
 
 
-{% if active is True %}
-<form class="active_selection" action="{% url 'investment_list_inactive' %}" method="post">{% csrf_token %}
-<label>{% trans "Show inactive investments" %}</label>
-{% else %} 
-<form class="active_selection" action="{% url 'investment_list_active' %}" method="post">{% csrf_token %}
-<label>{% trans "Show active investments" %}</label>
-{% endif %}      
-<input type="checkbox" id="chkActive" value="first_checkbox" onchange="this.form.submit();">
-</form>
+{% url 'investment_list_active' as url_unchecked %}
+{% url 'investment_list_inactive' as url_checked %}
+{% trans "Check to show inactive investments" as mylabel %}
+{% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
+
 <p></p>
 
 {{table_inv|safe}}
