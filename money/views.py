@@ -12,15 +12,16 @@ from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
 #from django.http import HttpResponseRedirect
 from django import forms
-
 from money.connection_dj import cursor_rows
-from money.forms import SignUpForm
+from money.forms import SignUpForm, AccountsOperationsForm
 from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products,  Orders
 from money.settingsdb import settingsdb
 from money.tabulator import  tb_queryset
 from money.tables import TabulatorInvestmentsOperationsCurrent, TabulatorInvestmentsOperations, TabulatorInvestments, TabulatorAccounts, TabulatorInvestmentsOperationsHistorical, TabulatorAccountOperations, TabulatorCreditCards,  TabulatorConcepts, TabulatorBanks, TabulatorOrders
 from money.tokens import account_activation_token
 from money.reusing.datetime_functions import dtaware_month_start
+#from django.utils.translation import ugettext_lazy as _
+from money.querysets import *
 
 @login_required
 def order_list(request,  active):
@@ -116,32 +117,18 @@ def home(request):
 
 @login_required
 def bank_list(request,  active):
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     banks= Banks.objects.all().filter(active=active).order_by('name')
-    table_banks=TabulatorBanks("table_banks", 'bank_view', banks).render()
+    banks_list=qs_banks_tabulator(banks, timezone.now(), active)
+    table_banks=TabulatorBanks("table_banks", 'bank_view', banks_list, local_currency).render()
     return render(request, 'bank_list.html', locals())
-    
-def Accounts_listdict(accounts_queryset):    
-    
-    list_accounts=[]
-    for account in accounts_queryset:
-        balance=account.balance(timezone.now())
-        list_accounts.append({
-                "id": account.id, 
-                "active":account.active, 
-                "name": account.fullName(), 
-                "number": account.number,
-                "balance": balance[0].string(),  
-                "balance_user": balance[1], 
-            }
-        )
-    return list_accounts
 
 @login_required
 def account_list(request,  active=True):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     
     accounts= Accounts.objects.all().filter(active=active).order_by('name')
-    list_accounts=Accounts_listdict(accounts)
+    list_accounts=qs_accounts_tabulator(accounts)
     
     table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, local_currency).render()
     #balance is aligned left(text) I can do it too with javascript.
@@ -189,39 +176,18 @@ def account_view(request, pk, year=date.today().year, month=date.today().month):
 #        form.fields['datetime'].initial=timezone.now()
 #    return render(request, 'accountoperation_update.html', {'form': form})
 
-@method_decorator(login_required, name='dispatch')
-class accountoperation_update(UpdateView):
-    model = Accountsoperations
-    fields = ( 'datetime', 'amount', 'concepts',  'accounts', 'comment')
-    template_name="accountoperation_update.html"
-        
-
-    def get_success_url(self):
-        return reverse_lazy('account_view',args=(self.object.accounts.id,))
-
-    def get_form(self, form_class=None): 
-        if form_class is None: 
-            form_class = self.get_form_class()
-        form = super(accountoperation_update, self).get_form(form_class)
-        form.fields['accounts'].widget = forms.HiddenInput()
-        return form
-    
-    def form_valid(self, form):
-        form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
-        return super().form_valid(form)
 
 
 @method_decorator(login_required, name='dispatch')
 class accountoperation_new(CreateView):
     model = Accountsoperations
-    fields = ['datetime', 'concepts', 'amount', 'comment']
     template_name="accountoperation_new.html"
-    accounts_id=None
+    form_class=AccountsOperationsForm
 
     def get_form(self, form_class=None): 
-        if form_class is None: 
-            form_class = self.get_form_class()
         form = super(accountoperation_new, self).get_form(form_class)
+        form.fields['accounts'].widget = forms.HiddenInput()
+        form.fields['accounts'].initial=Accounts.objects.get(pk=self.kwargs['accounts_id'])
         form.fields['datetime'].initial=timezone.now()
         form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
         return form
@@ -230,7 +196,26 @@ class accountoperation_new(CreateView):
         return reverse_lazy('account_view',args=(self.object.accounts.id,))
   
     def form_valid(self, form):
-        form.instance.accounts= Accounts.objects.get(pk=self.kwargs['accounts_id'])
+        form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
+        return super().form_valid(form)
+
+
+@method_decorator(login_required, name='dispatch')
+class accountoperation_update(UpdateView):
+    model = Accountsoperations
+    template_name="accountoperation_update.html"
+    form_class=AccountsOperationsForm
+
+    def get_success_url(self):
+        return reverse_lazy('account_view',args=(self.object.accounts.id,))
+
+    def get_form(self, form_class=None): 
+        form = super(accountoperation_update, self).get_form(form_class)
+        form.fields['accounts'].widget = forms.HiddenInput()
+        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        return form
+    
+    def form_valid(self, form):
         form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
         return super().form_valid(form)
 
@@ -261,6 +246,7 @@ class accountoperation_new(CreateView):
 class accountoperation_delete(DeleteView):
     model = Accountsoperations
     template_name = 'accountoperation_delete.html'
+    
     def get_success_url(self):
         return reverse_lazy('account_view',args=(self.object.accounts.id,))
 
@@ -268,7 +254,8 @@ class accountoperation_delete(DeleteView):
 def investment_list(request,  active):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     investments= Investments.objects.all().filter(active=active).order_by('name')
-    table_inv=TabulatorInvestments("I", "investment_view", investments, local_currency).render()
+    listdict=qs_investments_tabulator(investments, timezone.now(), local_currency)
+    table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, local_currency).render()
 
     return render(request, 'investment_list.html', locals())
     
@@ -356,17 +343,15 @@ class bank_update(UpdateView):
 @login_required
 def bank_view(request, pk):
     bank=get_object_or_404(Banks, pk=pk)
-#    investments= Investments.objects.all().filter(active=active, accounts_id=bank).order_by('name')
-
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
 
-
     investments=bank.investments(True)
-    table_investments=TabulatorInvestments("table_investments", "investment_view", investments, local_currency).render()
+    listdic=qs_investments_tabulator(investments, timezone.now(), local_currency)
+    table_investments=TabulatorInvestments("table_investments", "investment_view", listdic, local_currency).render()
     
 
     accounts= bank.accounts(True)
-    list_accounts=Accounts_listdict(accounts)
+    list_accounts=qs_accounts_tabulator(accounts)
     table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, local_currency).render()
     return render(request, 'bank_view.html', locals())
     

@@ -9,6 +9,8 @@ from django.db import models, connection
 from money.reusing.currency import Currency, currency_symbol
 from money.connection_dj import cursor_one_row, cursor_one_field
 from django.utils.translation import gettext as _
+from django.utils import timezone
+from xulpymoney.libxulpymoneytypes import eProductType
 
 
 class Accounts(models.Model):
@@ -81,8 +83,8 @@ class Banks(models.Model):
 
     def investments(self, active):
         investments= Investments.objects.raw('SELECT investments.* FROM investments, accounts where accounts.id=investments.accounts_id and accounts.banks_id=%s and investments.active=%s', (self.id, active))
-        print(investments)
         return investments
+        
 
 class Concepts(models.Model):
     name = models.TextField(blank=True, null=True)
@@ -200,6 +202,8 @@ class Investments(models.Model):
     products = models.ForeignKey('Products', models.DO_NOTHING, blank=True, null=True)
     selling_expiration = models.DateField(blank=True, null=True)
     daily_adjustment = models.BooleanField()
+    guarantee_percentage = models.DecimalField(max_digits=18, decimal_places=6)
+
 
     class Meta:
         managed = False
@@ -209,11 +213,8 @@ class Investments(models.Model):
     def fullName(self):
         return "{} ({})".format(self.name, self.accounts.name)
         
-    def gains(self):
-        return 0
-        
-    def invested(self):
-        return 0
+    def totals(self, dt, local_currency):
+        return cursor_one_row("select * from investment_totals(%s,%s,%s)", (self.id, dt, local_currency))
 
 class Investmentsaccountsoperations(models.Model):
     concepts_id = models.IntegerField()
@@ -321,6 +322,14 @@ class Products(models.Model):
         
     def currency_symbol(self):
         return currency_symbol(self.currency)
+    def basic_results(self):
+        return cursor_one_row("select * from last_penultimate_lastyear(%s,%s)", (self.id, timezone.now() ))
+    ## IBEXA es x2 pero esta en el pricio
+    ## CFD DAX no está en el precio
+    def real_leveraged_multiplier(self):
+        if self.productstypes.id in (eProductType.CFD, eProductType.Future):
+            return self.leverages.multiplier
+        return 1
 
 class Productstypes(models.Model):
     id = models.IntegerField(primary_key=True)

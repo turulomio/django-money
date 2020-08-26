@@ -75,7 +75,9 @@ class TabulatorCommons:
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""            
             elif self.types[i]=="bool":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"tickCross", hozAlign:"center" }}, \n"""
-        
+            elif self.types[i] =="percentage" and self.bottomcalc[i] is None:
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" %","symbolAfter":true}},hozAlign:"right" }}, \n"""
+
         return f"""
     <div id="{self.name}"></div>
     <script>
@@ -177,6 +179,11 @@ def object_to_tb(object, translate):
             return float(object)
         elif object.__class__.__name__ in ["Currency"]:
             return float(object.amount)
+        elif object.__class__.__name__ in ["Percentage"]:
+            try:
+                return float(object.value_100())
+            except:
+                return ""
         else:
             return str(object)
 

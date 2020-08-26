@@ -26,16 +26,15 @@ class TabulatorAccountOperations(TabulatorFromQuerySet):
             balance=balance+d["amount"]
             d["balance"]=balance
 
-
-class TabulatorBanks(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset):
-        TabulatorFromQuerySet.__init__(self, name)
+class TabulatorBanks(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, local_currency):
+        TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
-        self.setQuerySet(queryset)
-        self.setCallByNames("id", "name", "active")
-        self.setHeaders(_("Id"), _("Name"), _("Active"))
-        self.setTypes("int", "str", "bool")
-        self.generate_listdict()
+        self.setListDict(listdict)
+        self.setFields("id","name", "active", "accounts_balance", "investments_balance", "total_balance")
+        self.setHeaders("Id", _("Name"), _("Active"), _("Accounts balance"), _("Investments balance"), _("Total balance"))
+        self.setTypes("int","str", "bool", local_currency,  local_currency, local_currency)
+        self.setBottomCalc(None,  None, None, "sum", "sum", "sum")
 
 class TabulatorConcepts(TabulatorFromQuerySet):
     def __init__(self, name, destiny_url, queryset):
@@ -47,16 +46,15 @@ class TabulatorConcepts(TabulatorFromQuerySet):
         self.setTypes("int", "str", "str", "bool")
         self.generate_listdict()
 
-class TabulatorInvestments(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset, local_currency):
-        TabulatorFromQuerySet.__init__(self, name)
+class TabulatorInvestments(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, local_currency):
+        TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
-        self.setQuerySet(queryset)
-        self.setCallByNames("id", ("fullName", ()), "active", ("invested",()),("gains",()))
-        self.setHeaders(_("Id"), _("Name"), _("Active"), _("Invested"), _("Gains"))
-        self.setTypes("int", "str", "bool", local_currency, local_currency)
-        self.setBottomCalc(None, None, None, "sum", "sum")
-        self.generate_listdict()
+        self.setListDict(listdict)
+        self.setFields("id","name", "last_datetime","last_quote","daily_difference", "daily_percentage",  "balance", "gains", "percentage_invested", "percentage_sellingpoint", "invested_local", "deposit_local")
+        self.setHeaders(_("Id"), _("Name"), _("Last dt.") ,  _("Last quote"), _("Daily diff"), _("% daily"),_("Balance"),  _("Gains"), _("% Invested"), _("% selling point"), _("Invested"), _("Deposit"))
+        self.setTypes("int", "str", "str", "float",  local_currency, "percentage", local_currency, local_currency, "percentage", "percentage", local_currency, local_currency)
+        self.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", None, None, "sum", "sum")
 
 class TabulatorInvestmentsOperationsCurrent(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, investment):
