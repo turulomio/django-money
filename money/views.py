@@ -302,6 +302,25 @@ class investmentoperation_new(CreateView):
         return super().form_valid(form)
 
 @method_decorator(login_required, name='dispatch')
+class investment_update(UpdateView):
+    model = Investments
+    fields = ( 'name', 'accounts',  'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
+    template_name="investment_update.html"
+        
+
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.id,))
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(investment_update, self).get_form(form_class)
+        return form
+    
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+@method_decorator(login_required, name='dispatch')
 class investmentoperation_update(UpdateView):
     model = Investmentsoperations
     fields = ( 'datetime', 'operationstypes',  'shares', 'price',  'taxes',  'commission', 'comment', 'investments', 'currency_conversion')

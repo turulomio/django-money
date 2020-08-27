@@ -1,4 +1,4 @@
-from money.connection_dj import cursor_one_field, cursor_rows
+from money.connection_dj import cursor_one_field
 from django.utils import timezone
 
 from money.reusing.percentage import percentage_between, Percentage
@@ -54,13 +54,12 @@ def qs_investments_tabulator(queryset, dt,  local_currency):
                 "last_datetime": basic_quotes['last_datetime'], 
                 "last_quote": basic_quotes['last'], 
                 "daily_difference":(basic_quotes['last']-basic_quotes['penultimate'])*totals['shares']*investment.products.real_leveraged_multiplier(), 
-                "daily_percentage":percentage_between(basic_quotes['penultimate'], basic_quotes['last']), 
+                "daily_percentage":percentage_between(basic_quotes['penultimate'], basic_quotes['last']),             
+                "invested_local": totals["invested_local"], 
                 "balance": totals["balance_local"], 
                 "gains": totals["gains_local"], 
                 "percentage_invested": Percentage(totals['gains'], totals['invested']), 
                 "percentage_sellingpoint": percentage_to_selling_point(totals["shares"], investment.selling_price, basic_quotes['last']), 
-                "invested_local": totals["invested_local"], 
-                "deposit_local": totals["deposit_local"], 
             }
         )
     return list_

@@ -6,6 +6,13 @@
 
 <h1>{% blocktrans with investment=investment.name %}Investment details of '{{ investment }}'{% endblocktrans %}</h1>
 <h2>{% trans "Investment operations" %}</h2>
+
+<p><strong>Id: </strong>{{ investment.id }}</p>
+<p><strong>Product Id: </strong>{{ investment.products.id }}</p>
+
+<p>
+  <a href="{% url 'investment_update' pk=investment.id %}">Update this investment</a>
+</p>
 <script>
   $( function() {
     $( "#tabs" ).tabs();
