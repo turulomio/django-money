@@ -59,6 +59,10 @@ class TabulatorInvestments(TabulatorFromListDict):
             self.setHeaders(_("Id"), _("Name"))
         self.setTypes("int", "str", "str", "float",  local_currency, "percentage", local_currency, local_currency, local_currency,"percentage", "percentage")
         self.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
+        self.setInitialOptions("""
+    initialSort:[
+    {column:"percentage_sellingpoint", dir:"asc"}, //sort by this first
+    ],""")
 
 class TabulatorInvestmentsOperationsCurrent(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, investment):

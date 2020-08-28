@@ -5,7 +5,7 @@
 {% block content %}
 <h1>{% trans "Total report" %}</h1>
 
-<p>Last year balance ({{last_year}}) is {{ last_year_balance}}</p>
+<p>Last year balance ({{last_year|date:"Y-m-d"}}) is {{ str_last_year_balance }}</p>
 
 {{table_report_total|safe}}
 <p>

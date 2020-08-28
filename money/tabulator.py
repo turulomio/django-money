@@ -12,11 +12,15 @@ class TabulatorCommons:
         self.bottomcalc=None #Is filled in render
         self.field_pk="id"
         self.show_field_pk=False
+        self.initial_options=None
     
     def setDestinyUrl(self, destiny_url):
         self.destiny_url=destiny_url
     def setHeaders(self, *args):
         self.headers=args
+        
+    def setInitialOptions(self, s):
+        self.initial_options=s
         
     def setBottomCalc(self, *args):
         self.bottomcalc=args
@@ -43,6 +47,7 @@ class TabulatorCommons:
             tb_list.append(new_d)
             
         str_height="" if self.height is None else f'height: "{self.height}",'
+        str_initialoptions="" if self.initial_options is None else self.initial_options
         
         if self.destiny_url is None:
             str_destiny_url=""
@@ -88,6 +93,7 @@ class TabulatorCommons:
         layout:"fitDataTable", //fit columns to width of table (optional)
         columns:[ {columns}
         ],
+        {str_initialoptions}
         {str_destiny_url}
     }});
     table.scrollToRow(5, "top", true);

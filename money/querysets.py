@@ -5,6 +5,8 @@ from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, 
 from xulpymoney.libxulpymoneytypes import eOperationType
 from money.otherstuff import balance_user_by_operationstypes, netgains_dividends, money_convert, get_investmentsoperations_totals_of_all_investments, total_balance, percentage_to_selling_point
 from money.reusing.percentage import percentage_between, Percentage
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import cpu_count
 
 
 def qs_list_of_ids(qs):
@@ -89,25 +91,41 @@ def qs_banks_tabulator(queryset, dt, active, local_currency):
 
 
 def qs_total_report_tabulator(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone):
+    def month_results(month_end, month_name, local_currency):
+        return month_end, month_name, total_balance(month_end, local_currency)
+    #####################
     list_=[]
-    last_month=last_year_balance
-    for month_name, month in (
-        (_("January"), 1), 
-        (_("February"), 2), 
-        (_("March"), 3), 
-        (_("April"), 4), 
-        (_("May"), 5), 
-        (_("June"), 6), 
-        (_("July"), 7), 
-        (_("August"), 8), 
-        (_("September"), 9), 
-        (_("October"), 10), 
-        (_("November"), 11), 
-        (_("December"), 12), 
-    ):
-        month_end=dtaware_month_end(year, month, local_zone)
-        total=total_balance(month_end, local_currency)
+    futures=[]
+    
+    # HA MEJORADO UNOS 5 segundos de 7 a 2
+    with ThreadPoolExecutor(max_workers=cpu_count()+1) as executor:
+        for month_name, month in (
+            (_("January"), 1), 
+            (_("February"), 2), 
+            (_("March"), 3), 
+            (_("April"), 4), 
+            (_("May"), 5), 
+            (_("June"), 6), 
+            (_("July"), 7), 
+            (_("August"), 8), 
+            (_("September"), 9), 
+            (_("October"), 10), 
+            (_("November"), 11), 
+            (_("December"), 12), 
+        ):
+        
+            month_end=dtaware_month_end(year, month, local_zone)
+            futures.append(executor.submit(month_results, month_end,  month_name, local_currency))
+#            
+#        for future in as_completed(futures): 
+#            #print(future, future.result())
+
+    futures= sorted(futures, key=lambda future: future.result()[0])#month_end
+    last_month=last_year_balance 
+    for future in futures:
+        month_end, month_name,  total = future.result()
         list_.append({
+            "month_number":month_end, 
             "month": month_name,
             "account_balance":total['accounts_user'], 
             "investment_balance":total['investments_user'], 
@@ -121,21 +139,7 @@ def qs_total_report_tabulator(qs_investments, qs_accounts, year, last_year_balan
     
 
 def qs_total_report_income_tabulator(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone):
-    list_=[]
-    for month_name, month in (
-        (_("January"), 1), 
-        (_("February"), 2), 
-        (_("March"), 3), 
-        (_("April"), 4), 
-        (_("May"), 5), 
-        (_("June"), 6), 
-        (_("July"), 7), 
-        (_("August"), 8), 
-        (_("September"), 9), 
-        (_("October"), 10), 
-        (_("November"), 11), 
-        (_("December"), 12), 
-    ):
+    def month_results(year,  month, month_name):
         dividends=netgains_dividends(year, month)
         incomes=balance_user_by_operationstypes(year,  month,  eOperationType.Income, local_currency, local_zone)-dividends
         expenses=balance_user_by_operationstypes(year,  month,  eOperationType.Expense, local_currency, local_zone)
@@ -145,15 +149,44 @@ def qs_total_report_income_tabulator(qs_investments, qs_accounts, year, last_yea
         print("Loading list netgains opt took {} (CUELLO BOTELLA UNICO)".format(timezone.now()-start))        
         
         total=incomes+gains+expenses+dividends
-        list_.append({
-            "month": month_name,
-            "incomes":incomes, 
-            "expenses":expenses, 
-            "gains":gains, 
-            "dividends":dividends, 
-            "total":total,  
-        })
+        
+        return month_name, month,  year,  incomes, expenses, gains, dividends, total
+    list_=[]
+    futures=[]
     
+    
+    # HA MEJORADO UNOS 3 segundos de 16 a 13
+    with ThreadPoolExecutor(max_workers=cpu_count()+1) as executor:
+        for month_name, month in (
+            (_("January"), 1), 
+            (_("February"), 2), 
+            (_("March"), 3), 
+            (_("April"), 4), 
+            (_("May"), 5), 
+            (_("June"), 6), 
+            (_("July"), 7), 
+            (_("August"), 8), 
+            (_("September"), 9), 
+            (_("October"), 10), 
+            (_("November"), 11), 
+            (_("December"), 12), 
+        ):
+            futures.append(executor.submit(month_results, year, month, month_name))
+        
+        for future in as_completed(futures):
+            #print(future, future.result())
+            month_name, month,  year,  incomes, expenses, gains, dividends, total = future.result()
+            list_.append({
+                "month_number":month, 
+                "month": month_name,
+                "incomes":incomes, 
+                "expenses":expenses, 
+                "gains":gains, 
+                "dividends":dividends, 
+                "total":total,  
+            })
+            
+    list_= sorted(list_, key=lambda item: item["month_number"])
     return list_
     
 def qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, month, local_currency):

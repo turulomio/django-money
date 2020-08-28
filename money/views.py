@@ -20,6 +20,7 @@ from money.tabulator import  tb_queryset
 from money.tables import TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
 from money.tokens import account_activation_token
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end
+from money.reusing.currency import Currency
 #from django.utils.translation import ugettext_lazy as _
 from money.querysets import qs_accounts_tabulator, qs_banks_tabulator, qs_investments_tabulator, qs_total_report_income_tabulator, qs_total_report_tabulator
 from money.otherstuff import total_balance
@@ -364,8 +365,8 @@ def bank_view(request, pk):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
 
     investments=bank.investments(True)
-    listdic=qs_investments_tabulator(investments, timezone.now(), local_currency)
-    table_investments=TabulatorInvestments("table_investments", "investment_view", listdic, local_currency).render()
+    listdic=qs_investments_tabulator(investments, timezone.now(), local_currency, True)
+    table_investments=TabulatorInvestments("table_investments", "investment_view", listdic, local_currency, True).render()
     
 
     accounts= bank.accounts(True)
@@ -392,6 +393,7 @@ def report_total(request, year=date.today().year):
     
     start=timezone.now()
     last_year_balance=total_balance(last_year, local_currency)['total_user']
+    str_last_year_balance=Currency(last_year_balance, local_currency).string()
     print("Loading alltotals last_year took {}".format(timezone.now()-start))
     
     start=timezone.now()

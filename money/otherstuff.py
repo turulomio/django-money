@@ -77,7 +77,7 @@ def balance_user_by_operationstypes(year,  month,  operationstypes_id, local_cur
                 accounts.id=creditcards.accounts_id and
                 creditcards.id=creditcardsoperations.creditcards_id""", (operationstypes_id, year, month,  currency, operationstypes_id, year, month,  currency))
 
-        print(currency, balance)
+#        print(currency, balance)
         if balance is not None:
             r=r+money_convert(dtaware_month_end(year, month, local_zone), balance, currency, local_currency)
     return r
