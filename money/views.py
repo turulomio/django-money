@@ -149,7 +149,7 @@ def account_view(request, pk, year=date.today().year, month=date.today().month):
     table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", accountoperations, account, dt_initial).render()
   
     creditcards= Creditcards.objects.all().filter(accounts_id=pk, active=True).order_by('name')
-    table_creditcards=TabulatorCreditCards("table_creditcards", "bank_update", creditcards, account).render()
+    table_creditcards=TabulatorCreditCards("table_creditcards", "creditcard_view", creditcards, account).render()
   
     return render(request, 'account_view.html', locals())
 
@@ -408,3 +408,52 @@ def report_total(request, year=date.today().year):
     print("Loading list report income took {}".format(timezone.now()-start))
 
     return render(request, 'report_total.html', locals())
+    
+@login_required
+def creditcard_view(request, pk):
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    creditcard=get_object_or_404(Creditcards, id=pk)
+    return render(request, 'creditcard_view.html', locals())
+    
+class creditcard_delete(DeleteView):
+    model = Creditcards
+    template_name = 'creditcard_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('creditcard_view',args=(self.object.accounts.id,))
+        
+        
+@method_decorator(login_required, name='dispatch')
+class creditcard_new(CreateView):
+    model = Creditcards
+    template_name="creditcard_new.html"
+    fields=("id","name",  "accounts", "number", "maximumbalance", "deferred", "active")
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(creditcard_new, self).get_form(form_class)
+        form.fields['accounts'].widget = forms.HiddenInput()
+        form.fields['accounts'].initial=Accounts.objects.get(pk=self.kwargs['accounts_id'])
+        return form
+        
+    def get_success_url(self):
+        return reverse_lazy('account_view',args=(self.object.accounts.id,))
+        
+@method_decorator(login_required, name='dispatch')
+class creditcard_update(UpdateView):
+    model = Creditcards
+    template_name="creditcard_update.html"
+    fields=("id","name",  "accounts", "number", "maximumbalance", "deferred", "active")
+
+
+    def get_success_url(self):
+        return reverse_lazy('account_view',kwargs={"pk":self.object.accounts.id})
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(creditcard_update, self).get_form(form_class)
+        form.fields['accounts'].widget = forms.HiddenInput()
+        return form
+

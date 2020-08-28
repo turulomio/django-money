@@ -1,0 +1,26 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+  <h1>{% blocktrans with creditcard_name=creditcard.name %} '{{ creditcard_name }}' details{% endblocktrans %}</h1>
+
+  <p class="orders">
+    <a href="{% url 'creditcard_update' pk=creditcard.id %}">{% trans "Update this credit card" %}</a>
+  </p>
+
+  {% if creditcard.deferred is True %}
+
+  <h2>{% trans "Credit card deferred operations" %}</h2>
+  {% url 'account_view' account.id  as the_url %}
+  {% include "objects/year_month.html" with url_string=the_url only %}
+  <p></p>
+
+  {{ table_accountoperations|safe }}
+
+
+  {% else %}
+  {% trans "Credit card operations are added directly to its account" %}
+
+  {% endif %}
+{% endblock %}

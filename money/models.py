@@ -104,11 +104,11 @@ class Concepts(models.Model):
 
 
 class Creditcards(models.Model):
-    name = models.TextField(blank=True, null=True)
-    accounts = models.ForeignKey(Accounts, models.DO_NOTHING, blank=True, null=True)
-    deferred = models.BooleanField(blank=True, null=True)
+    name = models.TextField()
+    accounts = models.ForeignKey(Accounts, models.DO_NOTHING)
+    deferred = models.BooleanField()
     maximumbalance = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
-    active = models.BooleanField(blank=True, null=True)
+    active = models.BooleanField()
     number = models.TextField(blank=True, null=True)
 
     class Meta:
