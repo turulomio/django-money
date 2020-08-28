@@ -24,6 +24,10 @@ def get_investmentsoperations_totals_of_all_investments(dt, local_currency):
 
 def currencies_in_accounts():
     return cursor_one_column("select distinct(currency) from accounts")
+    
+## @return accounts, investments, totals
+def total_balance(dt, local_currency):
+    return cursor_one_row("select * from total_balance(%s,%s)", (dt, local_currency, ))
 
 
 
@@ -37,17 +41,16 @@ def money_convert(dt, amount, from_,  to_):
 def balance_user_by_operationstypes(year,  month,  operationstypes_id, local_currency, local_zone):
     r=0
     for currency in currencies_in_accounts():
-        print(currency)
         balance=cursor_one_field("""
             select sum(amount) as amount 
             from 
                 accountsoperations,
                 accounts
             where 
-                operationstypes_id={0} and 
-                date_part('year',datetime)={1} and
-                date_part('month',datetime)={2} and
-                accounts.currency='{3}' and
+                operationstypes_id=%s and 
+                date_part('year',datetime)=%s and
+                date_part('month',datetime)=%s and
+                accounts.currency=%s and
                 accounts.id=accountsoperations.accounts_id   
         union all 
             select sum(amount) as amount 
@@ -56,19 +59,20 @@ def balance_user_by_operationstypes(year,  month,  operationstypes_id, local_cur
                 creditcards,
                 accounts
             where 
-                operationstypes_id={0} and 
-                date_part('year',datetime)={1} and
-                date_part('month',datetime)={2} and
-                accounts.currency='{3}' and
+                operationstypes_id=%s and 
+                date_part('year',datetime)=%s and
+                date_part('month',datetime)=%s and
+                accounts.currency=%s and
                 accounts.id=creditcards.accounts_id and
-                creditcards.id=creditcardsoperations.creditcards_id""".format(operationstypes_id, year, month,  currency))
+                creditcards.id=creditcardsoperations.creditcards_id""", (operationstypes_id, year, month,  currency, operationstypes_id, year, month,  currency))
 
+        print(currency, balance)
         if balance is not None:
             r=r+money_convert(dtaware_month_end(year, month, local_zone), balance, currency, local_currency)
     return r
 
 ## TODO This method should take care of diffrent currencies in accounts. Dividens are in account currency
-def net_dividends(year, month):
+def netgains_dividends(year, month):
     dividends=cursor_one_field("""
 select 
     sum(net) 

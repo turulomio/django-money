@@ -1,4 +1,5 @@
 from datetime import  date
+from decorators import timeit
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib.auth import  login
@@ -16,11 +17,12 @@ from money.forms import SignUpForm, AccountsOperationsForm
 from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products,  Orders
 from money.settingsdb import settingsdb
 from money.tabulator import  tb_queryset
-from money.tables import *
+from money.tables import TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
 from money.tokens import account_activation_token
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end
 #from django.utils.translation import ugettext_lazy as _
-from money.querysets import *
+from money.querysets import qs_accounts_tabulator, qs_banks_tabulator, qs_investments_tabulator, qs_total_report_income_tabulator, qs_total_report_tabulator
+from money.otherstuff import total_balance
 
 @login_required
 def order_list(request,  active):
@@ -378,20 +380,30 @@ def bank_delete(request, pk):
     bank=get_object_or_404(Banks, pk=pk)
     return render(request, 'bank_delete.html', locals())
     
-    
+@timeit
 @login_required
 def report_total(request, year=date.today().year):
+    start=timezone.now()
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
     local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     qs_investments=Investments.objects.all()
     qs_accounts=Accounts.objects.all()
+    print("Loading querysets took {}".format(timezone.now()-start))
     last_year=dtaware_month_end(year-1, 12, local_zone)
-    lm_io,  lm_current, lm_historical=get_investments_alltotals(last_year, local_currency, only_active=False)
-    last_year_balance=lm_current['balance_user']+qs_accounts_balance_user(qs_accounts, last_year)
     
+    start=timezone.now()
+    last_year_balance=total_balance(last_year, local_currency)['total_user']
+    print("Loading alltotals last_year took {}".format(timezone.now()-start))
+    
+    start=timezone.now()
     list_report=qs_total_report_tabulator(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone)
     table_report_total=TabulatorReportTotal("table_report_total", None, list_report, local_currency).render()
+    print("Loading list report took {}".format(timezone.now()-start))
+    
+    
+    start=timezone.now()
     list_report2=qs_total_report_income_tabulator(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone)
     table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", None, list_report2, local_currency).render()
+    print("Loading list report income took {}".format(timezone.now()-start))
 
     return render(request, 'report_total.html', locals())

@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware
 from xulpymoney.libxulpymoneytypes import eOperationType
-from money.otherstuff import balance_user_by_operationstypes, net_dividends, money_convert, get_investmentsoperations_totals_of_all_investments, get_investments_alltotals
+from money.otherstuff import balance_user_by_operationstypes, netgains_dividends, money_convert, get_investmentsoperations_totals_of_all_investments, total_balance
 from money.reusing.percentage import percentage_between, Percentage
 
 
@@ -12,24 +12,6 @@ def qs_list_of_ids(qs):
     for o in qs:
         r.append(o.id)
     return tuple(r)
-
-#def qs_investments_balance(qs, dt):
-##    return cursor_one_field("select sum((investment_totals(investments.id,now(),'EUR')).balance) from   investments where id in %s", (qs_list_of_ids(qs)))
-#    ## Crash al hacerlo así, sin embargo funciona con qs_accounts_balance_user, raro, sumo luego
-#    r =0
-#    for investment in qs:#("select (investment_totals(id, now(),'EUR')).balance from   investments where id in %s", (qs_list_of_ids(qs))):
-#        totals=investment.totals(dt, 'EUR')
-#        r=r+totals["balance"]
-#    return r
-
-#def qs_investments_balance_user(qs, dt):
-##    return cursor_one_field("select sum((investment_totals(investments.id,now(),'EUR')).balance) from   investments where id in %s", (qs_list_of_ids(qs)))
-#    ## Crash al hacerlo así, sin embargo funciona con qs_accounts_balance_user, raro, sumo luego
-#    r =0
-#    for investment in qs:#("select (investment_totals(id, now(),'EUR')).balance from   investments where id in %s", (qs_list_of_ids(qs))):
-#        totals=investment.totals(dt, 'EUR')
-#        r=r+totals["balance_local"]
-#    return r
 
 def qs_accounts_tabulator(queryset):    
     
@@ -46,8 +28,8 @@ def qs_accounts_tabulator(queryset):
             }
         )
     return list_    
+
 def qs_investments_tabulator(queryset, dt,  local_currency):    
-    
     def percentage_to_selling_point(shares, selling_price, last_quote):       
         """Función que calcula el tpc selling_price partiendo de las el last y el valor_venta
         Necesita haber cargado mq getbasic y operinversionesactual"""
@@ -79,7 +61,6 @@ def qs_investments_tabulator(queryset, dt,  local_currency):
     return list_
     
 def qs_accounts_balance_user(qs, dt):
-    print(qs_list_of_ids(qs))
     return cursor_one_field("select sum((account_balance(accounts.id,%s,'EUR')).balance_user_currency) from  accounts where id in %s", (dt, qs_list_of_ids(qs)))
     
 def qs_banks_tabulator(queryset, dt, active, local_currency):
@@ -105,9 +86,6 @@ def qs_banks_tabulator(queryset, dt, active, local_currency):
 
 def qs_total_report_tabulator(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone):
     list_=[]
-    #Header of months    header={"title": _("Concepts"), "1":_("January"), "2":_("February
-#    list_.append(header)
-    #Incomes
     last_month=last_year_balance
     for month_name, month in (
         (_("January"), 1), 
@@ -124,21 +102,20 @@ def qs_total_report_tabulator(qs_investments, qs_accounts, year, last_year_balan
         (_("December"), 12), 
     ):
         month_end=dtaware_month_end(year, month, local_zone)
-        account_balance=qs_accounts_balance_user(qs_accounts, month_end)
-        alltotals_io, alltotals_io_current, alltotals_io_historical=get_investments_alltotals(month_end, local_currency, only_active=False)
-        investment_balance=alltotals_io_current['balance_user']
-        total_balance=account_balance+investment_balance
+        total=total_balance(month_end, local_currency)
         list_.append({
             "month": month_name,
-            "account_balance":account_balance, 
-            "investment_balance":investment_balance, 
-            "total":total_balance, 
-            "percentage_year": percentage_between(last_year_balance, total_balance ), 
-            "diff_lastmonth": total_balance-last_month, 
+            "account_balance":total['accounts_user'], 
+            "investment_balance":total['investments_user'], 
+            "total":total['total_user'] , 
+            "percentage_year": percentage_between(last_year_balance, total['total_user'] ), 
+            "diff_lastmonth": total['total_user']-last_month, 
         })
-        last_month=total_balance
+        last_month=total['total_user']
     
     return list_
+    
+
 def qs_total_report_income_tabulator(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone):
     list_=[]
     for month_name, month in (
@@ -157,8 +134,10 @@ def qs_total_report_income_tabulator(qs_investments, qs_accounts, year, last_yea
     ):
         incomes=balance_user_by_operationstypes(year,  month,  eOperationType.Income, local_currency, local_zone)
         expenses=balance_user_by_operationstypes(year,  month,  eOperationType.Expense, local_currency, local_zone)
+        start=timezone.now()
         gains=qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, month, local_currency)
-        dividends=net_dividends(year, month)
+        print("Loading list netgains opt took {} (CUELLO BOTELLA UNICO)".format(timezone.now()-start))        
+        dividends=netgains_dividends(year, month)
         total=incomes+gains+expenses+dividends
         list_.append({
             "month": month_name,

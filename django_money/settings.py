@@ -147,7 +147,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR+ "/money/static/"
 
 ## Sets session timeout in seconds.
-SESSION_COOKIE_AGE = 600
+SESSION_COOKIE_AGE = 3600
 
 ## Session cookie age is renewed in every request
 SESSION_SAVE_EVERY_REQUEST = True

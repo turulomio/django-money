@@ -123,6 +123,6 @@ class TabulatorReportIncomeTotal(TabulatorFromListDict):
         self.setDestinyUrl(destiny_url)
         self.setListDict(listdict)
         self.setFields("month", "incomes","expenses", "gains", "dividends", "total")
-        self.setHeaders(_("Month"), _("Incomes"), _("Expenses"), _("Gains"), _("Dividends"), _("Total"))
+        self.setHeaders(_("Month"), _("Incomes"), _("Expenses"), _("Net gains"), _("Net dividends"), _("Total"))
         self.setTypes("str","EUR", "EUR", "EUR", "EUR","EUR")
         self.setBottomCalc(None, "sum", "sum", "sum", "sum", "sum")

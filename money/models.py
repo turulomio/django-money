@@ -225,20 +225,20 @@ class Investments(models.Model):
         io= eval(row_io["io"])
         current= eval(row_io['io_current'])
         historical= eval(row_io['io_historical'])
-        print(io, current, historical)
+        #print(io, current, historical)
         return io,  current, historical
     
     def get_investmentsoperations(self, dt, local_currency):
         row_io=cursor_one_row("select * from investment_operations(%s,%s,%s)", (self.id, dt, local_currency))
         io= eval(row_io["io"])
-        for row in io:
-            print (row['id'],  row['datetime'],  row['shares'], row['price'])
+#        for row in io:
+#            print (row['id'],  row['datetime'],  row['shares'], row['price'])
         current= eval(row_io['io_current'])
-        for row in current:
-            print (row['id'],  row['datetime'],  row['shares'], row['price_investment'])
+#        for row in current:
+#            print (row['id'],  row['datetime'],  row['shares'], row['price_investment'])
         historical= eval(row_io['io_historical'])
-        for row in historical:
-            print (row['id'],  row['dt_end'],  row['shares'])
+#        for row in historical:
+#            print (row['id'],  row['dt_end'],  row['shares'])
         return io,  current, historical
 
         

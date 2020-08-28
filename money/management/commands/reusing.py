@@ -10,6 +10,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         download_from_github("turulomio", "reusingcode", "python/call_by_name.py", "money/reusing")
+        download_from_github("turulomio", "reusingcode", "python/decorators.py", "money/reusing")
         download_from_github("turulomio", "reusingcode", "python_plain/casts.py", "money/reusing")
         download_from_github("turulomio", "reusingcode", "python_plain/currency.py", "money/reusing")
         download_from_github("turulomio", "reusingcode", "python_plain/github.py", "money/reusing")
