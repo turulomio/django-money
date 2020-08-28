@@ -47,12 +47,16 @@ class TabulatorConcepts(TabulatorFromQuerySet):
         self.generate_listdict()
 
 class TabulatorInvestments(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, local_currency):
+    def __init__(self, name, destiny_url, listdict, local_currency, active):
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setListDict(listdict)
-        self.setFields("id","name", "last_datetime","last_quote","daily_difference", "daily_percentage", "invested_local",  "balance", "gains", "percentage_invested", "percentage_sellingpoint")
-        self.setHeaders(_("Id"), _("Name"), _("Last dt.") ,  _("Last quote"), _("Daily diff"), _("% daily"), _("Invested"),_("Balance"),  _("Gains"), _("% Invested"), _("% selling point"))
+        if active is True:
+            self.setFields("id","name", "last_datetime","last_quote","daily_difference", "daily_percentage", "invested_local",  "balance", "gains", "percentage_invested", "percentage_sellingpoint")
+            self.setHeaders(_("Id"), _("Name"), _("Last dt.") ,  _("Last quote"), _("Daily diff"), _("% daily"), _("Invested"),_("Balance"),  _("Gains"), _("% Invested"), _("% selling point"))
+        else:
+            self.setFields("id","name")
+            self.setHeaders(_("Id"), _("Name"))
         self.setTypes("int", "str", "str", "float",  local_currency, "percentage", local_currency, local_currency, local_currency,"percentage", "percentage")
         self.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
 

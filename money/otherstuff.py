@@ -1,8 +1,19 @@
 from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows
 from money.reusing.datetime_functions import dtaware_month_end
 from decimal import Decimal
+from money.reusing.percentage import Percentage
 Decimal()
 
+
+def percentage_to_selling_point(shares, selling_price, last_quote):       
+    """Función que calcula el tpc selling_price partiendo de las el last y el valor_venta
+    Necesita haber cargado mq getbasic y operinversionesactual"""
+    if selling_price==0 or selling_price==None:
+        return Percentage()
+    if shares>0:
+        return Percentage(selling_price-last_quote, last_quote)
+    else:#Long short products
+        return Percentage(-(selling_price-last_quote), last_quote)
 
 ## Genera una fila (io, io_current, io_historical) con los totales de todas las inversiones
 def get_investments_alltotals(dt, local_currency, only_active):

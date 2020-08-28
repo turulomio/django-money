@@ -241,6 +241,7 @@ class Investments(models.Model):
 #            print (row['id'],  row['dt_end'],  row['shares'])
         return io,  current, historical
 
+
         
 
 class Investmentsaccountsoperations(models.Model):

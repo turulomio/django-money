@@ -255,8 +255,8 @@ class accountoperation_delete(DeleteView):
 def investment_list(request,  active):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     investments= Investments.objects.all().filter(active=active).order_by('name')
-    listdict=qs_investments_tabulator(investments, timezone.now(), local_currency)
-    table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, local_currency).render()
+    listdict=qs_investments_tabulator(investments, timezone.now(), local_currency, active)
+    table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, local_currency, active).render()
 
     return render(request, 'investment_list.html', locals())
     
@@ -265,8 +265,7 @@ def investment_view(request, pk):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     investment=get_object_or_404(Investments, id=pk)
     io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), local_currency)
-    print(io)
-    
+   
     table_io=TabulatorInvestmentsOperations("IO", "investmentoperation_update", io, investment).render()
     table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, io_current, investment).render()
     table_ioh=TabulatorInvestmentsOperationsHistorical("IOH", None, io_historical, investment).render()

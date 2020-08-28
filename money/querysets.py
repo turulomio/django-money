@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware
 from xulpymoney.libxulpymoneytypes import eOperationType
-from money.otherstuff import balance_user_by_operationstypes, netgains_dividends, money_convert, get_investmentsoperations_totals_of_all_investments, total_balance
+from money.otherstuff import balance_user_by_operationstypes, netgains_dividends, money_convert, get_investmentsoperations_totals_of_all_investments, total_balance, percentage_to_selling_point
 from money.reusing.percentage import percentage_between, Percentage
 
 
@@ -29,35 +29,39 @@ def qs_accounts_tabulator(queryset):
         )
     return list_    
 
-def qs_investments_tabulator(queryset, dt,  local_currency):    
-    def percentage_to_selling_point(shares, selling_price, last_quote):       
-        """Función que calcula el tpc selling_price partiendo de las el last y el valor_venta
-        Necesita haber cargado mq getbasic y operinversionesactual"""
-        if selling_price==0 or selling_price==None:
-            return Percentage()
-        if shares>0:
-            return Percentage(selling_price-last_quote, last_quote)
-        else:#Long short products
-            return Percentage(-(selling_price-last_quote), last_quote)
+def qs_investments_tabulator(queryset, dt,  local_currency, active):
     list_=[]
-    for investment in queryset:
-        t_io,  t_io_current, t_io_historical=investment.get_investmentsoperations_totals(dt, local_currency)
-        basic_quotes=investment.products.basic_results()
-        list_.append({
+    
+    if active is True:
+        for investment in queryset:
+            t_io,  t_io_current, t_io_historical=investment.get_investmentsoperations_totals(dt, local_currency)
+            basic_quotes=investment.products.basic_results()
+            try:
+                daily_diff=(basic_quotes['last']-basic_quotes['penultimate'])*t_io_current["shares"]*investment.products.real_leveraged_multiplier()
+            except:
+                daily_diff=0
+            list_.append({
+                    "id": investment.id, 
+                    "active":investment.active, 
+                    "name": investment.fullName(), 
+                    "last_datetime": basic_quotes['last_datetime'], 
+                    "last_quote": basic_quotes['last'], 
+                    "daily_difference": daily_diff, 
+                    "daily_percentage":percentage_between(basic_quotes['penultimate'], basic_quotes['last']),             
+                    "invested_local": t_io_current["invested_user"], 
+                    "balance": t_io_current["balance_user"], 
+                    "gains": t_io_current["gains_gross_user"],  
+                    "percentage_invested": Percentage(t_io_current["gains_gross_user"], t_io_current["invested_user"]), 
+                    "percentage_sellingpoint": percentage_to_selling_point(t_io_current["shares"], investment.selling_price, basic_quotes['last']), 
+                }
+            )
+    else:        
+        for investment in queryset:
+            list_.append({
                 "id": investment.id, 
                 "active":investment.active, 
                 "name": investment.fullName(), 
-                "last_datetime": basic_quotes['last_datetime'], 
-                "last_quote": basic_quotes['last'], 
-                "daily_difference":(basic_quotes['last']-basic_quotes['penultimate'])*t_io_current["shares"]*investment.products.real_leveraged_multiplier(), 
-                "daily_percentage":percentage_between(basic_quotes['penultimate'], basic_quotes['last']),             
-                "invested_local": t_io_current["invested_user"], 
-                "balance": t_io_current["balance_user"], 
-                "gains": t_io_current["gains_gross_user"],  
-                "percentage_invested": Percentage(t_io_current["gains_gross_user"], t_io_current["invested_user"]), 
-                "percentage_sellingpoint": percentage_to_selling_point(t_io_current["shares"], investment.selling_price, basic_quotes['last']), 
-            }
-        )
+            })
     return list_
     
 def qs_accounts_balance_user(qs, dt):
@@ -132,12 +136,14 @@ def qs_total_report_income_tabulator(qs_investments, qs_accounts, year, last_yea
         (_("November"), 11), 
         (_("December"), 12), 
     ):
-        incomes=balance_user_by_operationstypes(year,  month,  eOperationType.Income, local_currency, local_zone)
+        dividends=netgains_dividends(year, month)
+        incomes=balance_user_by_operationstypes(year,  month,  eOperationType.Income, local_currency, local_zone)-dividends
         expenses=balance_user_by_operationstypes(year,  month,  eOperationType.Expense, local_currency, local_zone)
+        
         start=timezone.now()
         gains=qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, month, local_currency)
         print("Loading list netgains opt took {} (CUELLO BOTELLA UNICO)".format(timezone.now()-start))        
-        dividends=netgains_dividends(year, month)
+        
         total=incomes+gains+expenses+dividends
         list_.append({
             "month": month_name,
@@ -168,80 +174,3 @@ def qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, mon
                 net_user_currency=money_convert(dt_end, net_account_currency, investment.accounts.currency, local_currency)
                 r=r+net_user_currency
     return r
-                
-                
-                
-#        
-#    def consolidado_bruto(self, type=eMoneyCurrency.Product):
-#        return self.bruto_venta(type)-self.bruto_compra(type)
-#        
-#    def consolidado_neto(self, type=eMoneyCurrency.Product):
-#        currency=self.investment.resultsCurrency(type)
-#        if self.tipooperacion.id in (eOperationType.TransferSharesOrigin, eOperationType.TransferSharesDestiny):
-#            return Money(self.mem, 0, currency)
-#        return self.consolidado_bruto(type)-self.money_commission(type)-self.taxes(type)
-#
-#    def consolidado_neto_antes_impuestos(self, type=eMoneyCurrency.Product):
-#        currency=self.investment.resultsCurrency(type)
-#        if self.tipooperacion.id in (eOperationType.TransferSharesOrigin, eOperationType.TransferSharesDestiny):
-#            return Money(self.mem, 0, currency)
-#        return self.consolidado_bruto(type)-self.money_commission(type)
-#
-#    def bruto_compra(self, type=eMoneyCurrency.Product):
-#        if self.tipooperacion.id in (eOperationType.TransferSharesOrigin, eOperationType.TransferSharesDestiny):
-#            value=0
-#        if self.investment.product.high_low==True:
-#            value=abs(self.shares)*self.valor_accion_compra*self.investment.product.leveraged.multiplier
-#        else:
-#            value=abs(self.shares)*self.valor_accion_compra
-#            
-#        money=Money(self.mem, value, self.investment.product.currency)
-#        dt=dtaware_day_end_from_date(self.dt_start, self.mem.localzone_name)
-#        if type==eMoneyCurrency.Product:
-#            return money
-#        elif type==eMoneyCurrency.Account:
-#            return money.convert_from_factor(self.investment.account.currency, self.currency_conversion_compra)
-#        elif type==eMoneyCurrency.User:
-#            return money.convert_from_factor(self.investment.account.currency, self.currency_conversion_compra).local(dt)
-#    
-#    def bruto_venta(self, type=eMoneyCurrency.Product):
-#        if self.tipooperacion.id in (eOperationType.TransferSharesOrigin, eOperationType.TransferSharesDestiny):
-#            value=0
-#        elif self.investment.product.high_low==True:
-#            if self.shares<0:# Sell after a primary bought
-#                value=abs(self.shares)*self.valor_accion_venta*self.investment.product.leveraged.multiplier
-#            else:# Bought after a primary sell
-#                diff=(self.valor_accion_venta-self.valor_accion_compra)*abs(self.shares)*self.investment.product.leveraged.multiplier
-#                init_balance=self.valor_accion_compra*abs(self.shares)*self.investment.product.leveraged.multiplier
-#                value=init_balance-diff
-#        else: #HL False
-#            value=abs(self.shares)*self.valor_accion_venta
-#
-#        money=Money(self.mem, value, self.investment.product.currency)
-#        dt=dtaware_day_end_from_date(self.dt_end, self.mem.localzone_name)
-#        if type==eMoneyCurrency.Product:
-#            return money
-#        elif type==eMoneyCurrency.Account:
-#            return money.convert_from_factor(self.investment.account.currency, self.currency_conversion_venta)
-#        elif type==eMoneyCurrency.User:
-#            return money.convert_from_factor(self.investment.account.currency, self.currency_conversion_venta).local(dt)
-#            def taxes(self, type=eMoneyCurrency.Product):
-#        money=Money(self.mem, self._taxes, self.investment.product.currency)
-#        dt=dtaware_day_end_from_date(self.dt_end, self.mem.localzone_name)
-#        if type==eMoneyCurrency.Product:
-#            return money
-#        elif type==eMoneyCurrency.Account:
-#            return money.convert_from_factor(self.investment.account.currency, self.currency_conversion_venta)
-#        elif type==eMoneyCurrency.User:
-#            return money.convert_from_factor(self.investment.account.currency, self.currency_conversion_venta).local(dt)
-#    
-#    def money_commission(self, type=eMoneyCurrency.Product):
-#        money=Money(self.mem, self.commission, self.investment.product.currency)
-#        dt=dtaware_day_end_from_date(self.dt_end, self.mem.localzone_name)
-#        if type==eMoneyCurrency.Product:
-#            return money
-#        elif type==eMoneyCurrency.Account:
-#            return money.convert_from_factor(self.investment.account.currency, self.currency_conversion_venta)
-#        elif type==eMoneyCurrency.User:
-#            return money.convert_from_factor(self.investment.account.currency, self.currency_conversion_venta).local(dt)
-#    
