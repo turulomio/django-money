@@ -10,8 +10,11 @@ def my_context(request):
     menu.append(Action(_("Accounts"), None,  "account_list_active",  True))
     menu.append(Action(_("Investments"), None,  "investment_list_active",  True))
     menu.append(Action(_("Orders"), None,  "order_list_active",  True))
-    grAdministration=Group(1, _("Management"), "11",  True)
+    grReport=Group(1, _("Reports"), "10",  True)
+    grReport.append(Action(_("Total"), None, "report_total", True))
+    grAdministration=Group(1, _("Management"), "20",  True)
     grAdministration.append(Action(_("Concepts"), None, "concept_list", True))
+    menu.append(grReport)
     menu.append(grAdministration)
 
     local_currency=settingsdb("mem/localcurrency")

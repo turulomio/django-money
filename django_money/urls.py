@@ -73,6 +73,9 @@ urlpatterns=urlpatterns+ i18n_patterns(
     
     path('concept/list/', money_views.concept_list,  name='concept_list'),
     
+    path('report/total/', money_views.report_total,  name='report_total'),
+    path('report/total/<int:year>', money_views.report_total,  name='report_total'),
+    
 )
 
 handler403 = 'money.views.error_403'

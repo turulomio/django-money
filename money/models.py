@@ -11,7 +11,8 @@ from money.connection_dj import cursor_one_row, cursor_one_field
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from xulpymoney.libxulpymoneytypes import eProductType
-
+from decimal import Decimal
+Decimal()#Internal eval
 
 class Accounts(models.Model):
     name = models.TextField(blank=True, null=True)
@@ -214,9 +215,33 @@ class Investments(models.Model):
 
     def fullName(self):
         return "{} ({})".format(self.name, self.accounts.name)
+            
+
         
-    def totals(self, dt, local_currency):
-        return cursor_one_row("select * from investment_totals(%s,%s,%s)", (self.id, dt, local_currency))
+        
+    ## Lista los id, io, io_current_totals, io_historical_current  de esta inversion
+    def get_investmentsoperations_totals(self, dt, local_currency):
+        row_io= cursor_one_row("select * from investment_operations_totals(%s,%s,%s)", (self.id, dt, local_currency))
+        io= eval(row_io["io"])
+        current= eval(row_io['io_current'])
+        historical= eval(row_io['io_historical'])
+        print(io, current, historical)
+        return io,  current, historical
+    
+    def get_investmentsoperations(self, dt, local_currency):
+        row_io=cursor_one_row("select * from investment_operations(%s,%s,%s)", (self.id, dt, local_currency))
+        io= eval(row_io["io"])
+        for row in io:
+            print (row['id'],  row['datetime'],  row['shares'], row['price'])
+        current= eval(row_io['io_current'])
+        for row in current:
+            print (row['id'],  row['datetime'],  row['shares'], row['price_investment'])
+        historical= eval(row_io['io_historical'])
+        for row in historical:
+            print (row['id'],  row['dt_end'],  row['shares'])
+        return io,  current, historical
+
+        
 
 class Investmentsaccountsoperations(models.Model):
     concepts_id = models.IntegerField()

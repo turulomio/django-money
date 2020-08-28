@@ -61,7 +61,7 @@ class TabulatorInvestmentsOperationsCurrent(TabulatorFromListDict):
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setListDict(listdict)
-        self.setFields("id","datetime", "shares", "price", "price", "price", "price", "price", "price", "price")
+        self.setFields("id","datetime", "shares", "price_investment", "invested_investment", "balance_investment", "gains_net_investment", "gains_net_investment", "gains_net_investment", "gains_net_investment")
         self.setHeaders("Id", _("Date and time"), _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Pending"), _("% year"), _("% APR"), _("% Total"))
         self.setTypes("int","datetime", "Decimal", investment.products.currency, investment.products.currency, investment.products.currency,  investment.products.currency, None, None, None)
         self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
@@ -76,16 +76,15 @@ class TabulatorInvestmentsOperationsHistorical(TabulatorFromListDict):
         self.setTypes("int","datetime", "Decimal")
         self.setBottomCalc(None, None, None,)
         
-class TabulatorInvestmentsOperations(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset, investment):
-        TabulatorFromQuerySet.__init__(self, name)
+class TabulatorInvestmentsOperations(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, investment):
+        TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
-        self.setQuerySet(queryset)
-        self.setCallByNames("id","datetime", "shares", "price", "price", "price", "price", "price", "price", "price")
-        self.setHeaders("Id", _("Date and time"), _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Pending"), _("% year"), _("% APR"), _("% Total"))
-        self.setTypes("int","datetime", "Decimal", investment.products.currency, investment.products.currency, investment.products.currency,  investment.products.currency, None, None, None)
-        self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
-        self.generate_listdict()
+        self.setListDict(listdict)
+        self.setFields("id","datetime", "shares", "price", "commission", "taxes")
+        self.setHeaders("Id", _("Date and time"), _("Shares"), _("Price"), _("Commission"), _("Taxes"))
+        self.setTypes("int","datetime", "Decimal", investment.products.currency, investment.accounts.currency, investment.accounts.currency)
+        self.setBottomCalc(None, "sum", None, None, "sum", "sum")
         
 class TabulatorCreditCards(TabulatorFromQuerySet):
     def __init__(self, name, destiny_url, queryset, account):
@@ -106,3 +105,24 @@ class TabulatorOrders(TabulatorFromQuerySet):
         self.setHeaders(_("Id"), _("Date"),_("Expiration"), _("Investment"),  _("Shares"), _("Price"), _("Executed"))
         self.setTypes("int", "str", "str", "str",   "Decimal", "Decimal", "str")
         self.generate_listdict()
+        
+        
+class TabulatorReportTotal(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, investment):
+        TabulatorFromListDict.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setListDict(listdict)
+        self.setFields("month", "account_balance","investment_balance", "total", "diff_lastmonth", "percentage_year")
+        self.setHeaders(_("Month"), _("Account balance"), _("Investment balance"), _("Total balance"), _("Last month diff"), _("% year to date"))
+        self.setTypes("str","EUR", "EUR", "EUR", "EUR","percentage")
+        self.setBottomCalc(None, None, None, None, "sum", None)        
+
+class TabulatorReportIncomeTotal(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, investment):
+        TabulatorFromListDict.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setListDict(listdict)
+        self.setFields("month", "incomes","expenses", "gains", "dividends", "total")
+        self.setHeaders(_("Month"), _("Incomes"), _("Expenses"), _("Gains"), _("Dividends"), _("Total"))
+        self.setTypes("str","EUR", "EUR", "EUR", "EUR","EUR")
+        self.setBottomCalc(None, "sum", "sum", "sum", "sum", "sum")

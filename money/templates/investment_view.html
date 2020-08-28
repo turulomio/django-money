@@ -9,6 +9,18 @@
 
 <p><strong>Id: </strong>{{ investment.id }}</p>
 <p><strong>Product Id: </strong>{{ investment.products.id }}</p>
+<p><strong>Active: </strong>{{ investment.active }}</p>
+
+
+
+
+
+
+
+
+
+
+
 
 <p>
   <a href="{% url 'investment_update' pk=investment.id %}">Update this investment</a>
