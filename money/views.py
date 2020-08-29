@@ -14,10 +14,10 @@ from django.views.generic.edit import UpdateView, CreateView, DeleteView
 #from django.http import HttpResponseRedirect
 from django import forms
 from money.forms import SignUpForm, AccountsOperationsForm
-from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products,  Orders
+from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products,  Orders, Creditcardsoperations
 from money.settingsdb import settingsdb
 from money.tabulator import  tb_queryset
-from money.tables import TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
+from money.tables import TabulatorCreditCardsOperations, TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
 from money.tokens import account_activation_token
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end
 from money.reusing.currency import Currency
@@ -413,6 +413,9 @@ def report_total(request, year=date.today().year):
 def creditcard_view(request, pk):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     creditcard=get_object_or_404(Creditcards, id=pk)
+    creditcardoperations=Creditcardsoperations.objects.all().filter(creditcards_id=pk,  paid=False)
+    table_creditcardoperations=TabulatorCreditCardsOperations("table_creditcardoperations", 'creditcardoperation_update', creditcardoperations, creditcard).render()
+
     return render(request, 'creditcard_view.html', locals())
     
 class creditcard_delete(DeleteView):
@@ -457,3 +460,58 @@ class creditcard_update(UpdateView):
         form.fields['accounts'].widget = forms.HiddenInput()
         return form
 
+
+class creditcardoperation_delete(DeleteView):
+    model = Creditcardsoperations
+    template_name = 'creditcardoperation_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('creditcard_view',args=(self.object.creditcards.id,))
+        
+        
+@method_decorator(login_required, name='dispatch')
+class creditcardoperation_new(CreateView):
+    model = Creditcardsoperations
+    template_name="creditcardoperation_new.html"
+    fields=("id","datetime",  "concepts", "amount", "comment", "creditcards", "paid")
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(creditcardoperation_new, self).get_form(form_class)
+        form.fields['creditcards'].widget = forms.HiddenInput()
+        form.fields['creditcards'].initial=Creditcards.objects.get(pk=self.kwargs['creditcards_id'])
+        form.fields['datetime'].initial=timezone.now()
+        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        form.fields['paid'].widget = forms.HiddenInput()
+        form.fields['paid'].initial=False
+        return form
+        
+    def get_success_url(self):
+        return reverse_lazy('creditcard_view',args=(self.object.creditcards.id,))
+          
+    def form_valid(self, form):
+        form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
+        return super().form_valid(form)
+@method_decorator(login_required, name='dispatch')
+class creditcardoperation_update(UpdateView):
+    model = Creditcardsoperations
+    template_name="creditcardoperation_update.html"
+    fields=("id","datetime",  "concepts", "amount", "comment", "creditcards", "paid")
+
+
+    def get_success_url(self):
+        return reverse_lazy('creditcard_view',kwargs={"pk":self.object.creditcards.id})
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(creditcardoperation_update, self).get_form(form_class)
+        form.fields['creditcards'].widget = forms.HiddenInput()
+        form.fields['paid'].widget = forms.HiddenInput()
+        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        return form
+  
+    def form_valid(self, form):
+        form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
+        return super().form_valid(form)

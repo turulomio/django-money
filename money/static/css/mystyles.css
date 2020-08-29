@@ -70,7 +70,26 @@ p.object{
     line-height: 120%;
     margin-bottom: 0rem;
 }
+p.orders > a, p.orders{
+    text-decoration: none;
+    background-color: transparent;
+    text-align: justify;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    font-size: 110%;
+    line-height: 120%;
+    margin-bottom: 0rem;
+    font-weight: bold;
+    color: #1a215f;
+}
 
+
+p.orders > a:hover {
+    color: orangered;
+    background-color: transparent;
+    font-size:110%;
+    text-decoration: none;
+}
 /* DJANGO ALERTS
  */
 .errorlist {

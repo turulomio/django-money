@@ -82,6 +82,11 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('creditcard/update/<slug:pk>', money_views.creditcard_update.as_view(), name='creditcard_update'),
     path('creditcard/delete/<slug:pk>', money_views.creditcard_delete.as_view(), name='creditcard_delete'),
     
+    
+    path('creditcardoperation/new/<int:creditcards_id>', money_views.creditcardoperation_new.as_view(), name='creditcardoperation_new'),
+    path('creditcardoperation/update/<int:pk>', money_views.creditcardoperation_update.as_view(), name='creditcardoperation_update'),
+    path('creditcardoperation/delete/<int:pk>', money_views.creditcardoperation_delete.as_view(), name='creditcardoperation_delete'),
+    
 )
 
 handler403 = 'money.views.error_403'

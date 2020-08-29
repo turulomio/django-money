@@ -102,6 +102,15 @@ class TabulatorCreditCards(TabulatorFromQuerySet):
         self.setCallByNames("id", "name", "number", "deferred", "maximumbalance")
         self.setHeaders(_("Id"), _("Name"), _("Number"), _("Deferred pay"), _("Maximum balance"))
         self.setTypes("int", "str", "str", "bool", account.currency)
+        self.generate_listdict()        
+class TabulatorCreditCardsOperations(TabulatorFromQuerySet):
+    def __init__(self, name, destiny_url, queryset, creditcard):
+        TabulatorFromQuerySet.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setQuerySet(queryset)
+        self.setCallByNames("id", "datetime", "concepts", "operationstypes", "amount", "comment")
+        self.setHeaders(_("Id"), _("Date and time"), _("Concept"), _("Operation type"), _("Amount"), _("Comment"))
+        self.setTypes("int", "datetime","str", "str", creditcard.accounts.currency, "str")
         self.generate_listdict()
 
 class TabulatorOrders(TabulatorFromQuerySet):

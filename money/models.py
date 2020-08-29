@@ -98,9 +98,12 @@ class Concepts(models.Model):
     class Meta:
         managed = False
         db_table = 'concepts'
+        ordering = ['name']
         
     def __str__(self):
         return "{} - {}".format(_(self.name), _(self.operationstypes.name))
+        
+
 
 
 class Creditcards(models.Model):

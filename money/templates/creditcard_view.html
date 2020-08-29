@@ -9,18 +9,20 @@
     <a href="{% url 'creditcard_update' pk=creditcard.id %}">{% trans "Update this credit card" %}</a>
   </p>
 
+  <h2>{% trans "Credit card operations" %}</h2>
   {% if creditcard.deferred is True %}
 
-  <h2>{% trans "Credit card deferred operations" %}</h2>
-  {% url 'account_view' account.id  as the_url %}
-  {% include "objects/year_month.html" with url_string=the_url only %}
-  <p></p>
+  {{ table_creditcardoperations|safe }}
 
-  {{ table_accountoperations|safe }}
-
+  <p class="orders">
+    <a href="{% url 'creditcardoperation_new' creditcards_id=creditcard.id %}">{% trans "Add a credit card operation"%}</a>
+  </p>
 
   {% else %}
   {% trans "Credit card operations are added directly to its account" %}
 
+  <p class="orders">
+    <a href="{% url 'accountoperation_new' accounts_id=creditcard.accounts.id %}">Add an account operation</a>
+  </p>
   {% endif %}
 {% endblock %}
