@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "Monthly report concepts" %}</h1>
+
+{% include "objects/year_month.html" with url_string="report_concepts" only %}
+<p></p>
+{{table_report_concepts|safe}}
+
+{% endblock %}
+

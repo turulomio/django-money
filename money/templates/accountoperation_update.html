@@ -19,8 +19,9 @@
     </form>
     {% include "messages.html" %}
 
-    <p>
-            <a href="{% url 'accountoperation_delete' pk=object.id %}">Delete this account operation</a>
+    <p class="orders">
+        <a href="{% url 'accountoperation_delete' pk=object.id %}">{% trans "Delete this account operation" %}</a>
+        <a href="{% url 'report_concepts' %}">{% trans "Monthly concepts report" %}</a>
     </p>
 
 {% endblock %}

@@ -1,5 +1,5 @@
 from datetime import  date
-from decorators import timeit
+
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib.auth import  login
@@ -11,16 +11,18 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
-#from django.http import HttpResponseRedirect
 from django import forms
+
+from money.connection_dj import cursor_rows
 from money.forms import SignUpForm, AccountsOperationsForm
 from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products,  Orders, Creditcardsoperations
 from money.settingsdb import settingsdb
 from money.tabulator import  tb_queryset
-from money.tables import TabulatorCreditCardsOperations, TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
+from money.tables import TabulatorReportConcepts, TabulatorCreditCardsOperations, TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
 from money.tokens import account_activation_token
-from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end
 from money.reusing.currency import Currency
+from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end
+from money.reusing.decorators import timeit
 #from django.utils.translation import ugettext_lazy as _
 from money.querysets import qs_accounts_tabulator, qs_banks_tabulator, qs_investments_tabulator, qs_total_report_income_tabulator, qs_total_report_tabulator
 from money.otherstuff import total_balance
@@ -408,6 +410,42 @@ def report_total(request, year=date.today().year):
     print("Loading list report income took {}".format(timezone.now()-start))
 
     return render(request, 'report_total.html', locals())
+    
+@timeit
+@login_required
+def report_concepts(request, year=date.today().year, month=date.today().month):
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
+#    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    list_report_concepts=[]
+    for row in cursor_rows("""
+select
+    concepts.id, 
+    concepts.name,
+    sum(amount) as total
+from 
+    accountsoperations, 
+    concepts 
+where 
+    date_part('year', datetime)=%s and
+    date_part('month', datetime)=%s and
+    accountsoperations.concepts_id=concepts.id
+group by 
+    concepts.id, 
+    concepts.name
+order by
+    concepts.name
+""", (year, month)):
+        list_report_concepts.append({
+            "id": row['id'], 
+            "name":row['name'], 
+            "total": row['total'], 
+        })
+    
+    
+
+    table_report_concepts=TabulatorReportConcepts("table_report_concepts", None, list_report_concepts, local_currency).render()
+
+    return render(request, 'report_concepts.html', locals())
     
 @login_required
 def creditcard_view(request, pk):
