@@ -194,16 +194,13 @@ def qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, mon
     for investment in qs_investments:
         io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), 'EUR')
         for ioh in io_historical:
-            str_dt_end=ioh['dt_end'][:19]            
-            dt_end_naive=string2dtnaive(str_dt_end, "%Y-%m-%d %H:%M:%S")#Es un string desde postgres
-            dt_end=dtaware(dt_end_naive.date(), dt_end_naive.time(), 'UTC')
-            if dt_end.year==year and dt_end.month==month:
+            if ioh['dt_end'].year==year and ioh['dt_end'].month==month:
                 if ioh['shares']>=0:
                     gross_product_currency=ioh['shares']*(ioh['sellprice_investment']-ioh['buyprice_investment'])*investment.products.real_leveraged_multiplier()
                 else:
                     gross_product_currency=ioh['shares']*(-ioh['sellprice_investment']+ioh['buyprice_investment'])*investment.products.real_leveraged_multiplier()
-                gross_account_currency=money_convert(dt_end, gross_product_currency, investment.products.currency, investment.accounts.currency)
+                gross_account_currency=money_convert(ioh['dt_end'], gross_product_currency, investment.products.currency, investment.accounts.currency)
                 net_account_currency=gross_account_currency-ioh['taxes_account']-ioh['commissions_account']
-                net_user_currency=money_convert(dt_end, net_account_currency, investment.accounts.currency, local_currency)
+                net_user_currency=money_convert(ioh['dt_end'], net_account_currency, investment.accounts.currency, local_currency)
                 r=r+net_user_currency
     return r

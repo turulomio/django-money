@@ -5,21 +5,39 @@
 {% block content %}
   <h1>{% blocktrans with account_name=account.name %} Account details of {{ account_name }}{% endblocktrans %}</h1>
 
-  <h2>{% trans "Account operations" %}</h2>
   {% url 'account_view' account.id  as the_url %}
   {% include "objects/year_month.html" with url_string=the_url only %}
   <p></p>
-
-  {{ table_accountoperations|safe }}
+  <script>
+    $( function() {
+      $( "#tabs" ).tabs();
+    } );
+  </script>
+   
+  <div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">{% trans "Account operations" %}</a></li>
+        <li><a href="#tabs-2">{% trans "Credit cards" %}</a></li>
+    </ul>
+   
+  
+  <div id="tabs-1">
+    {{ table_accountoperations|safe }}
 
   <p class="orders">
     <a href="{% url 'accountoperation_new' accounts_id=account.id %}">Add an account operation</a>
   </p>
-  <h2>{% trans "Credit cards" %}</h2>
-  {{ table_creditcards|safe }}
+  </div>
   
-  <p class="orders">
-    <a href="{% url 'creditcard_new' accounts_id=account.id %}">Add a credit card</a>
-  </p>
+  
+  <div id="tabs-2">
+    {{ table_creditcards|safe }}
+    <p class="orders">
+      <a href="{% url 'creditcard_new' accounts_id=account.id %}">Add a credit card</a>
+    </p>
+  </div>
+  </div>
+
+  
   
 {% endblock %}

@@ -271,12 +271,12 @@ def investment_view(request, pk):
     investment=get_object_or_404(Investments, id=pk)
     io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), local_currency)
    
-    table_io=TabulatorInvestmentsOperations("IO", "investmentoperation_update", io, investment).render()
+    table_io=TabulatorInvestmentsOperations("IO", "investmentoperation_update", io, investment, local_zone).render()
     table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, io_current, investment, local_zone).render()
-    table_ioh=TabulatorInvestmentsOperationsHistorical("IOH", None, io_historical, investment).render()
+    table_ioh=TabulatorInvestmentsOperationsHistorical("IOH", None, io_historical, investment, local_zone).render()
 
     qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
-    table_dividends=TabulatorDividends("table_dividends", None, qs_dividends, local_currency, investment).render()
+    table_dividends=TabulatorDividends("table_dividends", None, qs_dividends, local_currency, investment, local_zone).render()
    
     return render(request, 'investment_view.html', locals())
 
@@ -492,9 +492,10 @@ group by
 @login_required
 def creditcard_view(request, pk):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     creditcard=get_object_or_404(Creditcards, id=pk)
     creditcardoperations=Creditcardsoperations.objects.all().filter(creditcards_id=pk,  paid=False)
-    table_creditcardoperations=TabulatorCreditCardsOperations("table_creditcardoperations", 'creditcardoperation_update', creditcardoperations, creditcard).render()
+    table_creditcardoperations=TabulatorCreditCardsOperations("table_creditcardoperations", 'creditcardoperation_update', creditcardoperations, creditcard, local_zone).render()
 
     return render(request, 'creditcard_view.html', locals())
     

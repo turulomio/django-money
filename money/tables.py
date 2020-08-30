@@ -80,9 +80,10 @@ class TabulatorInvestmentsOperationsCurrent(TabulatorFromListDict):
         self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
 
 class TabulatorInvestmentsOperationsHistorical(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, investment):
+    def __init__(self, name, destiny_url, listdict, investment, local_zone):
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
+        self.setLocalZone(local_zone)
         self.setListDict(listdict)
         self.setFields("id","dt_end", "shares")
         self.setHeaders("Id", _("Date and time"), _("Shares"))
@@ -90,9 +91,10 @@ class TabulatorInvestmentsOperationsHistorical(TabulatorFromListDict):
         self.setBottomCalc(None, None, None,)
         
 class TabulatorInvestmentsOperations(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, investment):
+    def __init__(self, name, destiny_url, listdict, investment, local_zone):
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
+        self.setLocalZone(local_zone)
         self.setListDict(listdict)
         self.setFields("id","datetime", "shares", "price", "commission", "taxes")
         self.setHeaders("Id", _("Date and time"), _("Shares"), _("Price"), _("Commission"), _("Taxes"))
@@ -110,10 +112,11 @@ class TabulatorCreditCards(TabulatorFromQuerySet):
         self.generate_listdict()        
 
 class TabulatorCreditCardsOperations(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset, creditcard):
+    def __init__(self, name, destiny_url, queryset, creditcard, local_zone):
         TabulatorFromQuerySet.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setQuerySet(queryset)
+        self.setLocalZone(local_zone)
         self.setCallByNames("id", "datetime", "concepts", "amount", "comment")
         self.setHeaders(_("Id"), _("Date and time"), _("Concept"), _("Amount"), _("Comment"))
         self.setTypes("int", "datetime","str", creditcard.accounts.currency, "str")
@@ -121,10 +124,11 @@ class TabulatorCreditCardsOperations(TabulatorFromQuerySet):
         self.generate_listdict()
 
 class TabulatorDividends(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset, local_currency, investment):
+    def __init__(self, name, destiny_url, queryset, local_currency, investment, local_zone):
         TabulatorFromQuerySet.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setQuerySet(queryset)
+        self.setLocalZone(local_zone)
         self.setCallByNames("id", "datetime", "concepts", "gross", "taxes", "commission", "net")
         self.setHeaders(_("Id"), _("Date and time"), _("Concept"), _("Gross"), _("Taxes"), _("Commission"), _("Net"))
         self.setTypes("int", "datetime","str", investment.accounts.currency, investment.accounts.currency, investment.accounts.currency, investment.accounts.currency)
