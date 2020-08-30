@@ -26,7 +26,7 @@
     <li><a href="#tabs-2">{% trans "Current investment operations" %}</a></li>
     <li><a href="#tabs-1">{% trans "Investment operations" %}</a></li>
     <li><a href="#tabs-3">{% trans "Historical investment operations" %}</a></li>
-    <li><a href="#tabs-3">{% trans "Dividends" %}</a></li>
+    <li><a href="#tabs-4">{% trans "Dividends" %}</a></li>
   </ul>
  
 
@@ -40,35 +40,15 @@
 </div>
 
 <div id="tabs-3">
-{{ table_ioh |safe}}
+  {{ table_ioh |safe}}
+</div>
+<div id="tabs-4">
+  {{ table_dividends |safe}}
 </div>
 </div>
 
-  <p>
-      <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">Add an investment operation</a>
+  <p class="orders">
+      <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">Add an investment operation</a> | 
       <a href="{% url 'product_view' pk=investment.products.id %}">Show product</a>
-    </p>
-
-<h2>{% trans "Dividends" %}</h2>
-
-<div id="tableDividends"></div>
-<script>
-    var False=false; var True=true;
-    var tabledata = {{list_dividends|safe}};
-var table = new Tabulator("#tableDividends", {
-    height:"311px",
- 	data:tabledata, //assign data to table
- 	layout:"fitDataTable", //fit columns to width of table (optional)
- 	columns:[ //Define Table Columns
-	 	{title:"{% trans 'Date and time' %}", field:"datetime"},
-	 	{title:"{% trans 'Gross' %}", field:"gross", bottomCalc:"sum"},
-	 	{title:"{% trans 'Taxes' %}", field:"taxes", bottomCalc:"sum"},
-	 	{title:"{% trans 'Net' %}", field:"net", bottomCalc:"sum"},
- 	],
- 	rowClick:function(e, row){
-        window.location.href = "{% url 'bank_update' pk=-9999 %}".replace( -9999 , row.getData().id);
- 	},
-});
-</script>
-</div>
+  </p>
 {% endblock %}

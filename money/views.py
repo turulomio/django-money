@@ -17,8 +17,7 @@ from money.connection_dj import cursor_rows
 from money.forms import SignUpForm, AccountsOperationsForm
 from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products,  Orders, Creditcardsoperations
 from money.settingsdb import settingsdb
-from money.tabulator import  tb_queryset
-from money.tables import TabulatorReportConcepts, TabulatorCreditCardsOperations, TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
+from money.tables import TabulatorDividends, TabulatorReportConcepts, TabulatorCreditCardsOperations, TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
 from money.tokens import account_activation_token
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end
@@ -274,8 +273,9 @@ def investment_view(request, pk):
     table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, io_current, investment).render()
     table_ioh=TabulatorInvestmentsOperationsHistorical("IOH", None, io_historical, investment).render()
 
-    dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
-    list_dividends=tb_queryset(dividends)        
+    qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
+    table_dividends=TabulatorDividends("table_dividends", None, qs_dividends, local_currency, investment).render()
+   
     return render(request, 'investment_view.html', locals())
 
 
