@@ -5,15 +5,20 @@
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
-from django.db import models, connection
-from money.reusing.currency import Currency, currency_symbol
-from money.connection_dj import cursor_one_row, cursor_one_field
-from money.otherstuff import postgres_datetime_string_2_dtaware
-from django.utils.translation import gettext as _
-from django.utils import timezone
-from xulpymoney.libxulpymoneytypes import eProductType
+from datetime import date
 from decimal import Decimal
 Decimal()#Internal eval
+
+from django.utils.translation import gettext as _
+from django.utils import timezone
+from django.db import models, connection
+
+from money.reusing.currency import Currency, currency_symbol
+from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows
+from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware
+from money.reusing.percentage import Percentage
+
+from xulpymoney.libxulpymoneytypes import eProductType
 
 class Accounts(models.Model):
     name = models.TextField(blank=True, null=True)
@@ -41,7 +46,11 @@ class Accounts(models.Model):
 
     def currency_symbol(self):
         return currency_symbol(self.currency)
-
+    
+    @staticmethod
+    def accounts_balance_user_currency(qs, dt):
+        return cursor_one_field("select sum((account_balance(accounts.id,%s,'EUR')).balance_user_currency) from  accounts where id in %s", (dt, qs_list_of_ids(qs)))
+    
 
 class Accountsoperations(models.Model):
     concepts = models.ForeignKey('Concepts', models.DO_NOTHING)
@@ -105,9 +114,17 @@ class Concepts(models.Model):
         ordering = ['name']
         
     def __str__(self):
+        return self.fullName()
+        
+    def fullName(self):
         return "{} - {}".format(_(self.name), _(self.operationstypes.name))
         
-
+    @staticmethod
+    def dict():
+        d={}
+        for o in Concepts.objects.all():
+            d[o.id]=o.fullName()
+        return d
 
 
 class Creditcards(models.Model):
@@ -156,6 +173,21 @@ class Dividends(models.Model):
         db_table = 'dividends'
 
 
+    ## TODO This method should take care of diffrent currencies in accounts. Dividens are in account currency
+    @staticmethod
+    def netgains_dividends(year, month):
+        dividends=cursor_one_field("""
+    select 
+        sum(net) 
+    from 
+        dividends 
+    where 
+        date_part('year',datetime)=%s and
+        date_part('month',datetime)=%s
+    """, (year, month))
+        if dividends is None:
+            dividends=0
+        return dividends
 
 class Dps(models.Model):
     date = models.DateField(blank=True, null=True)
@@ -288,6 +320,43 @@ class Investmentsoperations(models.Model):
     class Meta:
         managed = False
         db_table = 'investmentsoperations'
+    
+    ## @param d Dict with investmentsoperationscurrent
+    ## @param d Dict with basic results of investment product
+    @staticmethod
+    def investmentsoperationscurrent_percentage_annual(d_ioc, d_basic):
+        print(d_ioc)
+        print(d_basic)
+        if d_ioc["datetime"].year==date.today().year:
+            lastyear=d_ioc["price_investment"] #Product value, self.money_price(type) not needed.
+        else:
+            lastyear=d_basic["lastyear"]
+        print(lastyear, d_basic["lastyear"])
+        if d_basic["lastyear"] is None or lastyear is None:
+            return Percentage()
+
+        if d_ioc["shares"]>0:
+            return Percentage(d_basic["last"]-lastyear, lastyear)
+        else:
+            return Percentage(-(d_basic["last"]-lastyear), lastyear)
+        
+    @staticmethod
+    def investmentsoperationscurrent_age(d_ioc):
+            return (date.today()-d_ioc["datetime"].date()).days
+
+    @staticmethod
+    def investmentsoperationscurrent_percentage_apr(d_ioc):
+            dias=Investmentsoperations.investmentsoperationscurrent_age(d_ioc)
+            if dias==0:
+                dias=1
+            return Percentage(Investmentsoperations.investmentsoperationscurrent_percentage_total(d_ioc)*365,  dias)
+
+
+    @staticmethod
+    def investmentsoperationscurrent_percentage_total(d_ioc):
+        if d_ioc["invested_investment"] is None:#initiating xulpymoney
+            return Percentage()
+        return Percentage(d_ioc['gains_gross_investment'], d_ioc["invested_investment"])
 
 
 class Leverages(models.Model):
@@ -439,3 +508,118 @@ class Strategies(models.Model):
     class Meta:
         managed = False
         db_table = 'strategies'
+
+
+
+
+
+## Converting dates to string in postgres functions return a string datetime instead of a dtaware. Here we convert it
+def postgres_datetime_string_2_dtaware(s):
+    str_dt_end=s[:19]            
+    dt_end_naive=string2dtnaive(str_dt_end, "%Y-%m-%d %H:%M:%S")#Es un string desde postgres
+    dt_end=dtaware(dt_end_naive.date(), dt_end_naive.time(), 'UTC')
+    return dt_end
+
+def percentage_to_selling_point(shares, selling_price, last_quote):       
+    """Función que calcula el tpc selling_price partiendo de las el last y el valor_venta
+    Necesita haber cargado mq getbasic y operinversionesactual"""
+    if selling_price==0 or selling_price==None:
+        return Percentage()
+    if shares>0:
+        return Percentage(selling_price-last_quote, last_quote)
+    else:#Long short products
+        return Percentage(-(selling_price-last_quote), last_quote)
+
+## Genera una fila (io, io_current, io_historical) con los totales de todas las inversiones
+def get_investments_alltotals(dt, local_currency, only_active):
+    row_io= cursor_one_row("select * from  investment_operations_alltotals( %s,%s,%s)", (dt, local_currency, only_active))
+    io= eval(row_io["io"])
+    current= eval(row_io['io_current'])
+    historical= eval(row_io['io_historical'])
+    return io,  current, historical
+    
+## Lista los id, io, io_current_totals, io_historical_current de todas las inversiones
+## Devuelve un diccionario d[id][
+##        investments_totals_all_investments=get_investmentsoperations_totals_of_all_investments(dt, local_currency)
+## investments_totals_all_investments[str(investment.id)]["io_current"]["balance_user"]
+def get_investmentsoperations_totals_of_all_investments(dt, local_currency):
+    d={}
+    for row in cursor_rows("select id, (investment_operations_totals(id, %s,%s)).io, (investment_operations_totals(id, %s, %s)).io_current, (investment_operations_totals(id, %s, %s)).io_historical from  investments;", (dt, local_currency, dt, local_currency, dt, local_currency)):
+        d[str(row['id'])]={"io": eval(row['io']),"io_current": eval(row['io_current']),"io_historical": eval(row['io_historical']), }
+    return d
+
+def currencies_in_accounts():
+    return cursor_one_column("select distinct(currency) from accounts")
+    
+## @return accounts, investments, totals
+def total_balance(dt, local_currency):
+    return cursor_one_row("select * from total_balance(%s,%s)", (dt, local_currency, ))
+
+
+
+
+
+
+def money_convert(dt, amount, from_,  to_):   
+    return cursor_one_field("select * from money_convert(%s, %s, %s, %s)", (dt, amount, from_,  to_))
+
+
+
+
+## This method should take care of diffrent currencies
+def balance_user_by_operationstypes(year,  month,  operationstypes_id, local_currency, local_zone):
+    r=0
+    for currency in currencies_in_accounts():
+        balance=cursor_one_field("""
+            select sum(amount) as amount 
+            from 
+                accountsoperations,
+                accounts
+            where 
+                operationstypes_id=%s and 
+                date_part('year',datetime)=%s and
+                date_part('month',datetime)=%s and
+                accounts.currency=%s and
+                accounts.id=accountsoperations.accounts_id   
+        union all 
+            select sum(amount) as amount 
+            from 
+                creditcardsoperations ,
+                creditcards,
+                accounts
+            where 
+                operationstypes_id=%s and 
+                date_part('year',datetime)=%s and
+                date_part('month',datetime)=%s and
+                accounts.currency=%s and
+                accounts.id=creditcards.accounts_id and
+                creditcards.id=creditcardsoperations.creditcards_id""", (operationstypes_id, year, month,  currency, operationstypes_id, year, month,  currency))
+
+        if balance is not None:
+            r=r+money_convert(dtaware_month_end(year, month, local_zone), balance, currency, local_currency)
+    return r
+
+
+    
+def qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, month, local_currency):
+    r =0
+    for investment in qs_investments:
+        io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), 'EUR')
+        for ioh in io_historical:
+            if ioh['dt_end'].year==year and ioh['dt_end'].month==month:
+                if ioh['shares']>=0:
+                    gross_product_currency=ioh['shares']*(ioh['sellprice_investment']-ioh['buyprice_investment'])*investment.products.real_leveraged_multiplier()
+                else:
+                    gross_product_currency=ioh['shares']*(-ioh['sellprice_investment']+ioh['buyprice_investment'])*investment.products.real_leveraged_multiplier()
+                gross_account_currency=money_convert(ioh['dt_end'], gross_product_currency, investment.products.currency, investment.accounts.currency)
+                net_account_currency=gross_account_currency-ioh['taxes_account']-ioh['commissions_account']
+                net_user_currency=money_convert(ioh['dt_end'], net_account_currency, investment.accounts.currency, local_currency)
+                r=r+net_user_currency
+    return r
+
+
+def qs_list_of_ids(qs):
+    r=[]
+    for o in qs:
+        r.append(o.id)
+    return tuple(r)

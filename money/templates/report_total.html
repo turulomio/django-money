@@ -24,18 +24,17 @@ $(document).ready(function() {
     e.preventDefault();
     $.ajax({
       type: "POST",
-      url: "{% url 'report_total_div_income' %}",
+      url: "{% url 'report_total_income__div' %}",
       data: {
             csrfmiddlewaretoken: "{{csrf_token}}",
       },
       success: function(result) {
-        alert('ok');
         $("#income").html(result);    
         $("#form_income").css("display", "none");
 
       },
       error: function(result) {
-        alert('error');
+        $("#income").html('<p>{% trans "Somethng is wrong" %}</p>');          
       }
     });
   });

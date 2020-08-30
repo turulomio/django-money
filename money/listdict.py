@@ -1,6 +1,265 @@
+
+from decimal import Decimal
+from money.connection_dj import  cursor_rows
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
+from xulpymoney.libxulpymoneytypes import eOperationType
+
+from money.models import (
+    Accounts, 
+    Concepts, 
+    Dividends, 
+    balance_user_by_operationstypes, 
+    get_investmentsoperations_totals_of_all_investments, 
+    percentage_to_selling_point, total_balance, 
+    currencies_in_accounts, 
+    qs_investments_netgains_usercurrency_in_year_month, 
+)
+from money.reusing.datetime_functions import dtaware_month_end
+
+from money.reusing.percentage import percentage_between, Percentage
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import cpu_count
+
 def listdict_sum(listdict, key):
     r=0
     for d in listdict:
         r=r+d[key]
     return r
         
+
+def listdict_accounts(queryset):    
+    
+    list_=[]
+    for account in queryset:
+        balance=account.balance(timezone.now())
+        list_.append({
+                "id": account.id, 
+                "active":account.active, 
+                "name": account.fullName(), 
+                "number": account.number,
+                "balance": balance[0].string(),  
+                "balance_user": balance[1], 
+            }
+        )
+    return list_    
+
+def listdict_investments(queryset, dt,  local_currency, active):
+    list_=[]
+    
+    if active is True:
+        for investment in queryset:
+            t_io,  t_io_current, t_io_historical=investment.get_investmentsoperations_totals(dt, local_currency)
+            basic_quotes=investment.products.basic_results()
+            try:
+                daily_diff=(basic_quotes['last']-basic_quotes['penultimate'])*t_io_current["shares"]*investment.products.real_leveraged_multiplier()
+            except:
+                daily_diff=0
+            list_.append({
+                    "id": investment.id, 
+                    "active":investment.active, 
+                    "name": investment.fullName(), 
+                    "last_datetime": basic_quotes['last_datetime'], 
+                    "last_quote": basic_quotes['last'], 
+                    "daily_difference": daily_diff, 
+                    "daily_percentage":percentage_between(basic_quotes['penultimate'], basic_quotes['last']),             
+                    "invested_local": t_io_current["invested_user"], 
+                    "balance": t_io_current["balance_user"], 
+                    "gains": t_io_current["gains_gross_user"],  
+                    "percentage_invested": Percentage(t_io_current["gains_gross_user"], t_io_current["invested_user"]), 
+                    "percentage_sellingpoint": percentage_to_selling_point(t_io_current["shares"], investment.selling_price, basic_quotes['last']), 
+                }
+            )
+    else:        
+        for investment in queryset:
+            list_.append({
+                "id": investment.id, 
+                "active":investment.active, 
+                "name": investment.fullName(), 
+            })
+    return list_
+
+def listdict_banks(queryset, dt, active, local_currency):
+    list_=[]
+    
+    investments_totals_all_investments=get_investmentsoperations_totals_of_all_investments(dt, local_currency)
+    for bank in queryset:
+        accounts_balance=Accounts.accounts_balance_user_currency(bank.accounts(active), timezone.now())
+        investments_balance =0
+        for investment in bank.investments(active):
+            investments_balance=investments_balance+investments_totals_all_investments[str(investment.id)]["io_current"]["balance_user"]
+        list_.append({
+                "id": bank.id, 
+                "active":bank.active, 
+                "name": bank.name, 
+                "accounts_balance": accounts_balance, 
+                "investments_balance": investments_balance, 
+                "total_balance": accounts_balance+investments_balance
+            }
+        )
+    return list_
+
+
+
+
+def listdict_report_total_income(qs_investments, year, local_currency, local_zone):
+    def month_results(year,  month, month_name):
+        dividends=Dividends.netgains_dividends(year, month)
+        incomes=balance_user_by_operationstypes(year,  month,  eOperationType.Income, local_currency, local_zone)-dividends
+        expenses=balance_user_by_operationstypes(year,  month,  eOperationType.Expense, local_currency, local_zone)
+        
+        start=timezone.now()
+        gains=qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, month, local_currency)
+        print("Loading list netgains opt took {} (CUELLO BOTELLA UNICO)".format(timezone.now()-start))        
+        
+        total=incomes+gains+expenses+dividends
+        
+        return month_name, month,  year,  incomes, expenses, gains, dividends, total
+    list_=[]
+    futures=[]
+    
+    
+    # HA MEJORADO UNOS 3 segundos de 16 a 13
+    with ThreadPoolExecutor(max_workers=cpu_count()+1) as executor:
+        for month_name, month in (
+            (_("January"), 1), 
+            (_("February"), 2), 
+            (_("March"), 3), 
+            (_("April"), 4), 
+            (_("May"), 5), 
+            (_("June"), 6), 
+            (_("July"), 7), 
+            (_("August"), 8), 
+            (_("September"), 9), 
+            (_("October"), 10), 
+            (_("November"), 11), 
+            (_("December"), 12), 
+        ):
+            futures.append(executor.submit(month_results, year, month, month_name))
+        
+        for future in as_completed(futures):
+            #print(future, future.result())
+            month_name, month,  year,  incomes, expenses, gains, dividends, total = future.result()
+            list_.append({
+                "month_number":month, 
+                "month": month_name,
+                "incomes":incomes, 
+                "expenses":expenses, 
+                "gains":gains, 
+                "dividends":dividends, 
+                "total":total,  
+            })
+            
+    list_= sorted(list_, key=lambda item: item["month_number"])
+    return list_
+def listdict_report_total(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone):
+    def month_results(month_end, month_name, local_currency):
+        return month_end, month_name, total_balance(month_end, local_currency)
+    #####################
+    list_=[]
+    futures=[]
+    
+    # HA MEJORADO UNOS 5 segundos de 7 a 2
+    with ThreadPoolExecutor(max_workers=cpu_count()+1) as executor:
+        for month_name, month in (
+            (_("January"), 1), 
+            (_("February"), 2), 
+            (_("March"), 3), 
+            (_("April"), 4), 
+            (_("May"), 5), 
+            (_("June"), 6), 
+            (_("July"), 7), 
+            (_("August"), 8), 
+            (_("September"), 9), 
+            (_("October"), 10), 
+            (_("November"), 11), 
+            (_("December"), 12), 
+        ):
+        
+            month_end=dtaware_month_end(year, month, local_zone)
+            futures.append(executor.submit(month_results, month_end,  month_name, local_currency))
+#            
+#        for future in as_completed(futures): 
+#            #print(future, future.result())
+
+    futures= sorted(futures, key=lambda future: future.result()[0])#month_end
+    last_month=last_year_balance 
+    for future in futures:
+        month_end, month_name,  total = future.result()
+        list_.append({
+            "month_number":month_end, 
+            "month": month_name,
+            "account_balance":total['accounts_user'], 
+            "investment_balance":total['investments_user'], 
+            "total":total['total_user'] , 
+            "percentage_year": percentage_between(last_year_balance, total['total_user'] ), 
+            "diff_lastmonth": total['total_user']-last_month, 
+        })
+        last_month=total['total_user']
+    
+    return list_
+    
+    
+
+def listdict_dividends_from_queryset(qs_dividends):
+    r=[]
+    for o in qs_dividends:
+        r.append({"id":o.id, "datetime":o.datetime, "concepts":o.concepts.name, "gross":o.gross, "net":o.net, "taxes":o.taxes, "commission":o.commission})
+    return r
+
+def listdict_dividends_by_month(year, month):
+    qs_dividends=Dividends.objects.all().filter(datetime__year=year, datetime__month=month).order_by('datetime')
+    return listdict_dividends_from_queryset(qs_dividends)
+
+    
+def listdict_accountsoperations_from_queryset(qs_accountsoperations, initial):
+    r=[]
+    balance=Decimal(initial)
+    for op in qs_accountsoperations:
+        balance=balance+op.amount
+        r.append({"id":op.id, "datetime": op.datetime,"concepts": op.concepts.name,"amount":op.amount,"balance": balance,"comment":op.comment})
+    r= sorted(r,  key=lambda item: item['datetime'])
+    return r
+
+
+def listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, operationstypes_id, local_currency, local_zone):
+    
+    r=[]
+    dict_concepts=Concepts.dict()
+    balance=0
+    for currency in currencies_in_accounts():
+        for op in cursor_rows("""
+            select datetime,concepts_id, amount, comment
+            from 
+                accountsoperations,
+                accounts
+            where 
+                operationstypes_id=%s and 
+                date_part('year',datetime)=%s and
+                date_part('month',datetime)=%s and
+                accounts.currency=%s and
+                accounts.id=accountsoperations.accounts_id   
+        union all 
+            select datetime,concepts_id, amount, comment
+            from 
+                creditcardsoperations ,
+                creditcards,
+                accounts
+            where 
+                operationstypes_id=%s and 
+                date_part('year',datetime)=%s and
+                date_part('month',datetime)=%s and
+                accounts.currency=%s and
+                accounts.id=creditcards.accounts_id and
+                creditcards.id=creditcardsoperations.creditcards_id""", (operationstypes_id, year, month,  currency, operationstypes_id, year, month,  currency)):
+            if local_currency==currency:
+                balance=balance+op["amount"]
+                r.append({"id":-1, "datetime": op['datetime'], "concepts":dict_concepts[op['concepts_id']], "amount":op['amount'], "balance": balance,"comment":op["comment"]})
+            else:
+                print("TODO")
+            
+        r= sorted(r,  key=lambda item: item['datetime'])
+#            r=r+money_convert(dtaware_month_end(year, month, local_zone), balance, currency, local_currency)
+    return r
+
+    

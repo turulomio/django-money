@@ -77,7 +77,9 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('report/concepts/<int:year>/<int:month>/',  money_views.report_concepts,  name='report_concepts'), 
     path('report/total/', money_views.report_total,  name='report_total'),
     path('report/total/<int:year>', money_views.report_total,  name='report_total'),
-    path('report/total/div/income/', money_views.report_total_div_income,  name='report_total_div_income'),
+    path('report/total/div/income/', money_views.report_total_income__div,  name='report_total_income__div'),
+    path('report/total/income/details/', money_views.report_total_income_details,  name='report_total_income_details'),
+    path('report/total/income/details/<int:year>/<int:month>/', money_views.report_total_income_details,  name='report_total_income_details'),
     
     
     path('creditcard/view/<slug:pk>/', money_views.creditcard_view, name='creditcard_view'),

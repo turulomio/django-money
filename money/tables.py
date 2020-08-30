@@ -11,23 +11,34 @@ class TabulatorAccounts(TabulatorFromListDict):
         self.setHeaders("Id", _("Name"), _("Active"), _("Number"), _("Balance"), _("Local curr. B."))
         self.setTypes("int","str", "bool", "str", "str", local_currency)
         self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
-                
-class TabulatorAccountOperations(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset, account, dt_initial, local_zone):
-        balance=float(account.balance( dt_initial)[0].amount)
-        print(balance)
-        TabulatorFromQuerySet.__init__(self, name)
+
+#class TabulatorAccountOperations(TabulatorFromQuerySet):
+#    def __init__(self, name, destiny_url, queryset, account, dt_initial, local_zone):
+#        balance=float(account.balance( dt_initial)[0].amount)
+#        print(balance)
+#        TabulatorFromQuerySet.__init__(self, name)
+#        self.setDestinyUrl(destiny_url)
+#        self.setQuerySet(queryset)
+#        self.setLocalZone(local_zone)
+#        self.setCallByNames("id","datetime", "concepts.name","amount", "balance","comment")
+#        self.setHeaders("Id", _("Date and time"), _("Concept"), _("Amount"),_("Balance"),  _("Comment"))
+#        self.setTypes("int","datetime", "str", account.currency, account.currency,  "str")
+#        self.generate_listdict()
+#        for d in self.listdict:
+#            balance=balance+d["amount"]
+#            d["balance"]=balance
+
+
+class TabulatorAccountOperations(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, currency,  local_zone):
+        TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
-        self.setQuerySet(queryset)
+        self.setListDict(listdict)
         self.setLocalZone(local_zone)
-        self.setCallByNames("id","datetime", "concepts.name","amount", "balance","comment")
+        self.setFields("id","datetime", "concepts","amount", "balance","comment")
         self.setHeaders("Id", _("Date and time"), _("Concept"), _("Amount"),_("Balance"),  _("Comment"))
-        self.setTypes("int","datetime", "str", account.currency, account.currency,  "str")
-        self.generate_listdict()
-        for d in self.listdict:
-            print(d)
-            balance=balance+d["amount"]
-            d["balance"]=balance
+        self.setTypes("int","datetime", "str", currency, currency,  "str")
+        self.setBottomCalc(None,  None, None, "sum", None, None)
 
 class TabulatorBanks(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency):
@@ -123,17 +134,16 @@ class TabulatorCreditCardsOperations(TabulatorFromQuerySet):
         self.setBottomCalc(None, None, None, "sum", None)        
         self.generate_listdict()
 
-class TabulatorDividends(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset, local_currency, investment, local_zone):
-        TabulatorFromQuerySet.__init__(self, name)
+class TabulatorDividends(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, currency, local_zone):
+        TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
-        self.setQuerySet(queryset)
+        self.setListDict(listdict)
         self.setLocalZone(local_zone)
-        self.setCallByNames("id", "datetime", "concepts", "gross", "taxes", "commission", "net")
+        self.setFields("id", "datetime","concepts", "gross", "taxes", "commission", "net")
         self.setHeaders(_("Id"), _("Date and time"), _("Concept"), _("Gross"), _("Taxes"), _("Commission"), _("Net"))
-        self.setTypes("int", "datetime","str", investment.accounts.currency, investment.accounts.currency, investment.accounts.currency, investment.accounts.currency)
+        self.setTypes("int", "datetime","str", currency, currency, currency, currency)
         self.setBottomCalc(None, None, None, "sum", "sum", "sum", "sum")        
-        self.generate_listdict()
 
 class TabulatorReportConcepts(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency):

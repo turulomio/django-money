@@ -15,8 +15,7 @@ from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from django import forms
 
 from money.connection_dj import cursor_rows
-from money.forms import SignUpForm, AccountsOperationsForm
-from money.models import Operationstypes, Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products,  Orders, Creditcardsoperations
+from money.forms import SignUpForm, AccountsOperationsForm 
 from money.settingsdb import settingsdb
 from money.tables import TabulatorDividends, TabulatorReportConcepts, TabulatorCreditCardsOperations, TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
 from money.tokens import account_activation_token
@@ -25,12 +24,32 @@ from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_
 from money.reusing.decorators import timeit
 from money.reusing.percentage import Percentage
 #from django.utils.translation import ugettext_lazy as _
-from money.querysets import qs_accounts_tabulator, qs_banks_tabulator, qs_investments_tabulator, qs_total_report_income_tabulator, qs_total_report_tabulator
-from money.otherstuff import (
+from money.listdict import (
+    listdict_accounts, 
+    listdict_banks, 
+    listdict_investments, 
+    listdict_report_total_income, 
+    listdict_report_total,     
+    listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month, 
+    listdict_accountsoperations_from_queryset, 
+    listdict_dividends_by_month, 
+    listdict_dividends_from_queryset, 
+)
+from money.models import (
+    Operationstypes, 
+    Banks, 
+    Accounts, 
+    Accountsoperations, 
+    Creditcards,  
+    Investments, 
+    Investmentsoperations, 
+    Dividends, 
+    Concepts, 
+    Products,  
+    Orders, 
+    Creditcardsoperations, 
+
     total_balance, 
-    investmentsoperationscurrent_percentage_annual, 
-    investmentsoperationscurrent_percentage_apr, 
-    investmentsoperationscurrent_percentage_total,
 )
 
 @login_required
@@ -129,7 +148,7 @@ def home(request):
 def bank_list(request,  active):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     banks= Banks.objects.all().filter(active=active).order_by('name')
-    banks_list=qs_banks_tabulator(banks, timezone.now(), active, local_currency)
+    banks_list=listdict_banks(banks, timezone.now(), active, local_currency)
     table_banks=TabulatorBanks("table_banks", 'bank_view', banks_list, local_currency).render()
     return render(request, 'bank_list.html', locals())
 
@@ -138,7 +157,7 @@ def account_list(request,  active=True):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     
     accounts= Accounts.objects.all().filter(active=active).order_by('name')
-    list_accounts=qs_accounts_tabulator(accounts)
+    list_accounts=listdict_accounts(accounts)
     
     table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, local_currency).render()
     table_accounts=table_accounts.replace(', field:"balance"', ', field:"balance", align:"right"')
@@ -153,8 +172,10 @@ def account_view(request, pk, year=date.today().year, month=date.today().month):
     account=get_object_or_404(Accounts, pk=pk)
     
     dt_initial=dtaware_month_start(year, month, local_zone)
-    accountoperations= Accountsoperations.objects.all().filter(accounts_id=pk, datetime__year=year, datetime__month=month).order_by('datetime')
-    table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", accountoperations, account, dt_initial, local_zone).render()
+    initial_balance=float(account.balance( dt_initial)[0].amount)
+    qsaccountoperations= Accountsoperations.objects.all().filter(accounts_id=pk, datetime__year=year, datetime__month=month).order_by('datetime')
+    listdic_accountsoperations=listdict_accountsoperations_from_queryset(qsaccountoperations, initial_balance)
+    table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", listdic_accountsoperations, account.currency, local_zone).render()
   
     creditcards= Creditcards.objects.all().filter(accounts_id=pk, active=True).order_by('name')
     table_creditcards=TabulatorCreditCards("table_creditcards", "creditcard_view", creditcards, account).render()
@@ -265,7 +286,7 @@ def investment_list(request,  active):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     investments= Investments.objects.all().filter(active=active).order_by('name')
-    listdict=qs_investments_tabulator(investments, timezone.now(), local_currency, active)
+    listdict=listdict_investments(investments, timezone.now(), local_currency, active)
     table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, local_currency, active, local_zone).render()
 
     return render(request, 'investment_list.html', locals())
@@ -280,9 +301,9 @@ def investment_view(request, pk):
     io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), local_currency)
     
     for ioc in io_current:
-        ioc["percentage_annual"]=investmentsoperationscurrent_percentage_annual(ioc, basic_results)
-        ioc["percentage_apr"]=investmentsoperationscurrent_percentage_apr(ioc)
-        ioc["percentage_total"]=investmentsoperationscurrent_percentage_total(ioc)
+        ioc["percentage_annual"]=Investmentsoperations.investmentsoperationscurrent_percentage_annual(ioc, basic_results)
+        ioc["percentage_apr"]=Investmentsoperations.investmentsoperationscurrent_percentage_apr(ioc)
+        ioc["percentage_total"]=Investmentsoperations.investmentsoperationscurrent_percentage_total(ioc)
         ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
         
     for o in io:
@@ -298,7 +319,8 @@ def investment_view(request, pk):
     table_ioh=TabulatorInvestmentsOperationsHistorical("IOH", None, io_historical, investment, local_zone).render()
 
     qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
-    table_dividends=TabulatorDividends("table_dividends", None, qs_dividends, local_currency, investment, local_zone).render()
+    listdict_dividends=listdict_dividends_from_queryset(qs_dividends)
+    table_dividends=TabulatorDividends("table_dividends", None, listdict_dividends, investment.accounts.currency,  local_zone).render()
    
     return render(request, 'investment_view.html', locals())
 
@@ -393,12 +415,12 @@ def bank_view(request, pk):
     local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
 
     investments=bank.investments(True)
-    listdic=qs_investments_tabulator(investments, timezone.now(), local_currency, True)
+    listdic=listdict_investments(investments, timezone.now(), local_currency, True)
     table_investments=TabulatorInvestments("table_investments", "investment_view", listdic, local_currency, True, local_zone).render()
     
 
     accounts= bank.accounts(True)
-    list_accounts=qs_accounts_tabulator(accounts)
+    list_accounts=listdict_accounts(accounts)
     table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, local_currency).render()
     return render(request, 'bank_view.html', locals())
     
@@ -425,7 +447,7 @@ def report_total(request, year=date.today().year):
     print("Loading alltotals last_year took {}".format(timezone.now()-start))
     
     start=timezone.now()
-    list_report=qs_total_report_tabulator(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone)
+    list_report=listdict_report_total(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone)
     table_report_total=TabulatorReportTotal("table_report_total", None, list_report, local_currency).render()
     print("Loading list report took {}".format(timezone.now()-start))
     
@@ -434,15 +456,32 @@ def report_total(request, year=date.today().year):
 
 @timeit
 @login_required
-def report_total_div_income(request, year=date.today().year):
+def report_total_income__div(request, year=date.today().year):
     start=timezone.now()
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
     local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     qs_investments=Investments.objects.all()
-    list_report2=qs_total_report_income_tabulator(qs_investments, year, local_currency, local_zone)
+    list_report2=listdict_report_total_income(qs_investments, year, local_currency, local_zone)
     table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", None, list_report2, local_currency).render()
     print("Loading list report income took {}".format(timezone.now()-start))
     return HttpResponse(table_report_total_income)
+
+@timeit
+@login_required
+def report_total_income_details(request, year=date.today().year, month=date.today()):
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
+    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    
+    expenses=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 2,  local_currency, local_zone)
+    table_expenses=TabulatorAccountOperations("table_expenses", None, expenses, local_currency,  local_zone).render()
+    incomes=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 1,  local_currency, local_zone)
+    table_incomes=TabulatorAccountOperations("table_incomes", None, incomes, local_currency,  local_zone).render()
+    
+    dividends=listdict_dividends_by_month(year, month)
+    table_dividends=TabulatorDividends("table_dividends", None, dividends, local_currency,  local_zone).render()
+    
+
+    return render(request, 'report_total_income_details.html', locals())
 
 
 @login_required
