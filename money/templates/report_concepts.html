@@ -5,9 +5,33 @@
 {% block content %}
 <h1>{% trans "Monthly report concepts" %}</h1>
 
-{% include "objects/year_month.html" with url_string="report_concepts" only %}
+
+{% url 'report_concepts' as the_url %}
+{% include "objects/year_month.html" with url_string=the_url only %}
 <p></p>
-{{table_report_concepts|safe}}
+
+<script>
+    $( function() {
+      $( "#tabs" ).tabs();
+    } );
+  </script>
+   
+  <div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">{% trans "Positive balance concepts" %}</a></li>
+         <li><a href="#tabs-2">{% trans "Negative balance concepts" %}</a></li>
+    </ul>
+   
+  
+  <div id="tabs-1">
+        {{table_report_concepts_positive|safe}}
+  </div>
+  
+  
+  <div id="tabs-2">
+        {{table_report_concepts_negative|safe}}
+  </div>
+  </div>
 
 {% endblock %}
 

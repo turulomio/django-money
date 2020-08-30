@@ -130,10 +130,14 @@ class TabulatorReportConcepts(TabulatorFromListDict):
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setListDict(listdict)
-        self.setFields("id", "name","total")
-        self.setHeaders(_("id"), _("Name"), _("Total"))
-        self.setTypes("int","str", local_currency, )
-        self.setBottomCalc(None, None, None, None, "sum", None)              
+        self.setFields("id", "name", "operationstypes","total","percentage_total",  "median")
+        self.setHeaders(_("id"), _("Name"), _("Operation type"),  _("Total"), _("% total"),  _("Median"))
+        self.setTypes("int","str", "str", local_currency, "percentage", local_currency)
+        self.setBottomCalc(None, None, None,"sum", None, None)   
+        self.setInitialOptions("""
+    initialSort:[
+    {column:"total", dir:"desc"}, //sort by this first
+    ],""")        
 class TabulatorReportTotal(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, investment):
         TabulatorFromListDict.__init__(self, name)

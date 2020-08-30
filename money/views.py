@@ -23,6 +23,7 @@ from money.tokens import account_activation_token
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end
 from money.reusing.decorators import timeit
+from money.reusing.percentage import Percentage
 #from django.utils.translation import ugettext_lazy as _
 from money.querysets import qs_accounts_tabulator, qs_banks_tabulator, qs_investments_tabulator, qs_total_report_income_tabulator, qs_total_report_tabulator
 from money.otherstuff import total_balance
@@ -410,40 +411,78 @@ def report_total(request, year=date.today().year):
     print("Loading list report income took {}".format(timezone.now()-start))
 
     return render(request, 'report_total.html', locals())
-    
-@timeit
+
 @login_required
 def report_concepts(request, year=date.today().year, month=date.today().month):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
-#    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
-    list_report_concepts=[]
+    list_report_concepts_positive=[]
+    month_balance_positive=0
+    dict_month_positive={}
+    list_report_concepts_negative=[]
+    month_balance_negative=0
+    dict_month_negative={}
+    dict_median={}
+    
+    concepts=Concepts.objects.all()   
+    
+    ## median
     for row in cursor_rows("""
 select
-    concepts.id, 
-    concepts.name,
+    concepts_id as id, 
+    median(amount) as median
+from 
+    accountsoperations
+group by 
+    concepts_id
+"""):
+        dict_median[row['id']]=row['median']
+    ## Data
+    for row in cursor_rows("""
+select
+    concepts_id as id, 
     sum(amount) as total
 from 
-    accountsoperations, 
-    concepts 
+    accountsoperations
 where 
     date_part('year', datetime)=%s and
     date_part('month', datetime)=%s and
-    accountsoperations.concepts_id=concepts.id
+    operationstypes_id in (1,2)
 group by 
-    concepts.id, 
-    concepts.name
-order by
-    concepts.name
+    concepts_id
 """, (year, month)):
-        list_report_concepts.append({
-            "id": row['id'], 
-            "name":row['name'], 
-            "total": row['total'], 
-        })
-    
+        if row['total']>=0:
+            month_balance_positive+=row['total']
+            dict_month_positive[row['id']]=row['total']
+        else:
+            month_balance_negative+=row['total']
+            dict_month_negative[row['id']]=row['total']
+
+    ## list
+    for concept in concepts:
+        if concept.id in dict_month_positive.keys():
+            list_report_concepts_positive.append({
+                "id": concept.id, 
+                "name": concept.name, 
+                "operationstypes": concept.operationstypes.name, 
+                "total": dict_month_positive.get(concept.id, 0), 
+                "percentage_total": Percentage(dict_month_positive.get(concept.id, 0), month_balance_positive), 
+                "median":dict_median.get(concept.id, 0), 
+            })   
+    ## list negative
+    for concept in concepts:
+        if concept.id in dict_month_negative.keys():
+            list_report_concepts_negative.append({
+                "id": concept.id, 
+                "name": concept.name, 
+                "operationstypes": concept.operationstypes.name, 
+                "total": dict_month_negative.get(concept.id, 0), 
+                "percentage_total": Percentage(dict_month_negative.get(concept.id, 0), month_balance_negative), 
+                "median":dict_median.get(concept.id, 0), 
+            })
     
 
-    table_report_concepts=TabulatorReportConcepts("table_report_concepts", None, list_report_concepts, local_currency).render()
+    table_report_concepts_positive=TabulatorReportConcepts("table_report_concepts_positive", None, list_report_concepts_positive, local_currency).render()
+    table_report_concepts_negative=TabulatorReportConcepts("table_report_concepts_negative", None, list_report_concepts_negative, local_currency).render()
 
     return render(request, 'report_concepts.html', locals())
     
