@@ -1,9 +1,15 @@
 from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows
-from money.reusing.datetime_functions import dtaware_month_end
+from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware
 from decimal import Decimal
 from money.reusing.percentage import Percentage
 Decimal()
 
+## Converting dates to string in postgres functions return a string datetime instead of a dtaware. Here we convert it
+def postgres_datetime_string_2_dtaware(s):
+    str_dt_end=s[:19]            
+    dt_end_naive=string2dtnaive(str_dt_end, "%Y-%m-%d %H:%M:%S")#Es un string desde postgres
+    dt_end=dtaware(dt_end_naive.date(), dt_end_naive.time(), 'UTC')
+    return dt_end
 
 def percentage_to_selling_point(shares, selling_price, last_quote):       
     """Función que calcula el tpc selling_price partiendo de las el last y el valor_venta

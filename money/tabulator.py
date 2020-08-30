@@ -1,4 +1,5 @@
 from money.reusing.call_by_name import call_by_name
+from money.reusing.datetime_functions import dtaware_changes_tz
 from django.utils.translation import gettext
 from django.urls import reverse
 
@@ -13,6 +14,11 @@ class TabulatorCommons:
         self.field_pk="id"
         self.show_field_pk=False
         self.initial_options=None
+        
+        self.localzone="UTC"
+        
+    def setLocalZone(self, s):
+        self.localzone=s
     
     def setDestinyUrl(self, destiny_url):
         self.destiny_url=destiny_url
@@ -43,7 +49,7 @@ class TabulatorCommons:
         for d in self.listdict:
             new_d={}
             for field in self.fields:
-                new_d[field]=object_to_tb(d[field], self.translate)
+                new_d[field]=object_to_tb(d[field], self.translate, self.localzone)
             tb_list.append(new_d)
             
         str_height="" if self.height is None else f'height: "{self.height}",'
@@ -124,7 +130,7 @@ class TabulatorFromQuerySet(TabulatorCommons):
         
         
     def generate_listdict(self):
-            self.listdict=tb_custom_queryset(self.queryset, self.fields,  self.callbyname, translate=self.translate)      
+            self.listdict=tb_custom_queryset(self.queryset, self.fields,  self.callbyname, self.translate, self.localzone)      
         
 
 class TabulatorFromListDict(TabulatorCommons):
@@ -140,41 +146,41 @@ class TabulatorFromListDict(TabulatorCommons):
         self.fields=args
         
         
-def tb_queryset(queryset, translate=True):
+def tb_queryset(queryset, translate, localzone):
     l=[]
     for o in queryset:
         d={}
         for field in queryset[0]._meta.fields:
-            d[field.name]=object_to_tb(getattr(o, field.name), translate)
+            d[field.name]=object_to_tb(getattr(o, field.name), translate, localzone)
                 
         l.append(d)
     return l
 
 ## If a field is not found as a None value
 ## @param call_by_name_list is a a list of call_by_name orders
-def tb_custom_queryset(queryset, fields,  call_by_name_list,  translate=True):
+def tb_custom_queryset(queryset, fields,  call_by_name_list,  translate, localzone):
     l=[]
     for o in queryset:
         d={}
         for i,  cbn in enumerate(call_by_name_list):
             try:
-                d[fields[i]]=object_to_tb(call_by_name(o, cbn), translate)
+                d[fields[i]]=object_to_tb(call_by_name(o, cbn), translate, localzone)
             except:
                 d[fields[i]]=None
         l.append(d)
     return l
 
 ## Addapt a listdict to a tabulation listdict
-def tb_listdict(listdict, translate=True):
+def tb_listdict(listdict, translate, localzone):
     r=[]
     for row in listdict:
         d={}
         for field in row.keys():
-            d[field]=object_to_tb(row[field], translate)
+            d[field]=object_to_tb(row[field], translate, localzone)
         r.append(d)
     return r
     
-def object_to_tb(object, translate):
+def object_to_tb(object, translate, localzone):
         if object.__class__.__name__ in ["str"]:
             return object if translate is False else gettext(object)
         elif object.__class__.__name__ in ["int",  "float"]:
@@ -185,6 +191,8 @@ def object_to_tb(object, translate):
             return float(object)
         elif object.__class__.__name__ in ["Currency"]:
             return float(object.amount)
+        elif object.__class__.__name__ in ["datetime"]:
+            return str(dtaware_changes_tz(object,  localzone))[:19]
         elif object.__class__.__name__ in ["Percentage"]:
             try:
                 return float(object.value_100())

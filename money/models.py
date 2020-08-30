@@ -8,6 +8,7 @@
 from django.db import models, connection
 from money.reusing.currency import Currency, currency_symbol
 from money.connection_dj import cursor_one_row, cursor_one_field
+from money.otherstuff import postgres_datetime_string_2_dtaware
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from xulpymoney.libxulpymoneytypes import eProductType
@@ -234,12 +235,19 @@ class Investments(models.Model):
     def get_investmentsoperations(self, dt, local_currency):
         row_io=cursor_one_row("select * from investment_operations(%s,%s,%s)", (self.id, dt, local_currency))
         io= eval(row_io["io"])
+        for d in io:
+            d['datetime']=postgres_datetime_string_2_dtaware(d['datetime'])
 #        for row in io:
 #            print (row['id'],  row['datetime'],  row['shares'], row['price'])
         current= eval(row_io['io_current'])
+        for d in current:
+            d['datetime']=postgres_datetime_string_2_dtaware(d['datetime'])
 #        for row in current:
 #            print (row['id'],  row['datetime'],  row['shares'], row['price_investment'])
         historical= eval(row_io['io_historical'])
+        for d in historical:
+            d['dt_start']=postgres_datetime_string_2_dtaware(d['dt_start'])
+            d['dt_end']=postgres_datetime_string_2_dtaware(d['dt_end'])
 #        for row in historical:
 #            print (row['id'],  row['dt_end'],  row['shares'])
         return io,  current, historical

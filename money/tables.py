@@ -13,16 +13,19 @@ class TabulatorAccounts(TabulatorFromListDict):
         self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
                 
 class TabulatorAccountOperations(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset, account, dt_initial):
+    def __init__(self, name, destiny_url, queryset, account, dt_initial, local_zone):
         balance=float(account.balance( dt_initial)[0].amount)
+        print(balance)
         TabulatorFromQuerySet.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setQuerySet(queryset)
+        self.setLocalZone(local_zone)
         self.setCallByNames("id","datetime", "concepts.name","amount", "balance","comment")
         self.setHeaders("Id", _("Date and time"), _("Concept"), _("Amount"),_("Balance"),  _("Comment"))
         self.setTypes("int","datetime", "str", account.currency, account.currency,  "str")
         self.generate_listdict()
         for d in self.listdict:
+            print(d)
             balance=balance+d["amount"]
             d["balance"]=balance
 
@@ -47,10 +50,11 @@ class TabulatorConcepts(TabulatorFromQuerySet):
         self.generate_listdict()
 
 class TabulatorInvestments(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, local_currency, active):
+    def __init__(self, name, destiny_url, listdict, local_currency, active, local_zone):
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setListDict(listdict)
+        self.setLocalZone(local_zone)
         if active is True:
             self.setFields("id","name", "last_datetime","last_quote","daily_difference", "daily_percentage", "invested_local",  "balance", "gains", "percentage_invested", "percentage_sellingpoint")
             self.setHeaders(_("Id"), _("Name"), _("Last dt.") ,  _("Last quote"), _("Daily diff"), _("% daily"), _("Invested"),_("Balance"),  _("Gains"), _("% Invested"), _("% selling point"))
@@ -65,9 +69,10 @@ class TabulatorInvestments(TabulatorFromListDict):
     ],""")
 
 class TabulatorInvestmentsOperationsCurrent(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, investment):
+    def __init__(self, name, destiny_url, listdict, investment, local_zone):
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
+        self.setLocalZone(local_zone)
         self.setListDict(listdict)
         self.setFields("id","datetime", "shares", "price_investment", "invested_investment", "balance_investment", "gains_net_investment", "gains_net_investment", "gains_net_investment", "gains_net_investment")
         self.setHeaders("Id", _("Date and time"), _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Pending"), _("% year"), _("% APR"), _("% Total"))

@@ -148,7 +148,7 @@ def account_view(request, pk, year=date.today().year, month=date.today().month):
     
     dt_initial=dtaware_month_start(year, month, local_zone)
     accountoperations= Accountsoperations.objects.all().filter(accounts_id=pk, datetime__year=year, datetime__month=month).order_by('datetime')
-    table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", accountoperations, account, dt_initial).render()
+    table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", accountoperations, account, dt_initial, local_zone).render()
   
     creditcards= Creditcards.objects.all().filter(accounts_id=pk, active=True).order_by('name')
     table_creditcards=TabulatorCreditCards("table_creditcards", "creditcard_view", creditcards, account).render()
@@ -257,20 +257,22 @@ class accountoperation_delete(DeleteView):
 @login_required
 def investment_list(request,  active):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     investments= Investments.objects.all().filter(active=active).order_by('name')
     listdict=qs_investments_tabulator(investments, timezone.now(), local_currency, active)
-    table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, local_currency, active).render()
+    table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, local_currency, active, local_zone).render()
 
     return render(request, 'investment_list.html', locals())
     
 @login_required
 def investment_view(request, pk):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     investment=get_object_or_404(Investments, id=pk)
     io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), local_currency)
    
     table_io=TabulatorInvestmentsOperations("IO", "investmentoperation_update", io, investment).render()
-    table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, io_current, investment).render()
+    table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, io_current, investment, local_zone).render()
     table_ioh=TabulatorInvestmentsOperationsHistorical("IOH", None, io_historical, investment).render()
 
     qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
@@ -366,10 +368,11 @@ class bank_update(UpdateView):
 def bank_view(request, pk):
     bank=get_object_or_404(Banks, pk=pk)
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
 
     investments=bank.investments(True)
     listdic=qs_investments_tabulator(investments, timezone.now(), local_currency, True)
-    table_investments=TabulatorInvestments("table_investments", "investment_view", listdic, local_currency, True).render()
+    table_investments=TabulatorInvestments("table_investments", "investment_view", listdic, local_currency, True, local_zone).render()
     
 
     accounts= bank.accounts(True)
