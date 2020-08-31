@@ -444,7 +444,10 @@ class Products(models.Model):
         db_table = 'products'
         
     def __str__(self):
-        return self.name
+        return self.fullName()
+        
+    def fullName(self):
+        return "{} ({})".format(self.name, self.id)
         
     def currency_symbol(self):
         return currency_symbol(self.currency)

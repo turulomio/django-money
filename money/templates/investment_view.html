@@ -8,11 +8,15 @@
 <h2>{% trans "Investment operations" %}</h2>
 
 <p><strong>Id: </strong>{{ investment.id }}</p>
-<p><strong>Product Id: </strong>{{ investment.products.id }}</p>
+<p><strong>Name: </strong>{{ investment.fullName }}</p>
+<p><strong>Product Id: </strong>{{ investment.products.fullName }}</p>
 <p><strong>Active: </strong>{{ investment.active }}</p>
+<p><strong>Selling point: </strong>{{ investment.sellling_point }}</p>
+<p><strong>Selling expiration: </strong>{{ investment.sellling_expiration }}</p>
+<p><strong>Daily adjustment: </strong>{{ investment.daily_adjustment }}</p>
 
 
-<p>
+<p class="orders">
   <a href="{% url 'investment_update' pk=investment.id %}">Update this investment</a>
 </p>
 <script>
