@@ -71,29 +71,71 @@ class TabulatorCommons:
             if self.types[i]=="datetime":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""
             elif self.types[i] in ("Decimal", "float", "int", "date") and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , "formatter": NUMBER}}, \n"""
             elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right",  "formatter": NUMBER,  "bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" €","symbolAfter":true}},hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter: EUR ,hozAlign:"right" }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" €","symbolAfter":true}},hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter:"money",bottomCalcFormatterParams:{{"symbol":" €","symbolAfter":true}}}}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter: EUR, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter:EUR}}, \n"""
             elif self.types[i] =="USD" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" $","symbolAfter":true}},hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter: USD, ,hozAlign:"right" }}, \n"""
             elif self.types[i] =="USD" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" $","symbolAfter":true}},hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter:"money",bottomCalcFormatterParams:{{"symbol":" $","symbolAfter":true}}}}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter: USD, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: USD}}, \n"""
             elif self.types[i]=="str":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""            
             elif self.types[i]=="bool":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"tickCross", hozAlign:"center" }}, \n"""
             elif self.types[i] =="percentage" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"money", formatterParams:{{"symbol":" %","symbolAfter":true}},hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:PERCENTAGE, hozAlign:"right" }}, \n"""
+
 
         return f"""
     <div id="{self.name}"></div>
     <script>
-        var tabledata = {tb_list};
-    var table = new Tabulator("#{self.name}", {{
+        var NUMBER = function(cell, formatterParams){{
+    var value = cell.getValue();
+    if (value === null) {{return "";}}
+    if(value  <0){{
+       cell.getElement().style.color="#ff0000";
+       return value;
+    }}else{{
+        return value;
+    }}
+}};    
+    var EUR = function(cell, formatterParams){{
+    var value = cell.getValue();
+    if (value === null) {{return "";}}
+    if(value  <0){{
+       cell.getElement().style.color="#ff0000";
+       return value.toFixed(2) + " €";
+    }}else{{
+        return value.toFixed(2) + " €";
+    }}
+}};    
+    var USD = function(cell, formatterParams){{
+    var value = cell.getValue();
+    if (value === null) {{return "";}}
+    if(value  <0){{
+       cell.getElement().style.color="#ff0000";
+       return value.toFixed(2) + " €";
+    }}else{{
+        return value.toFixed(2) + " €";
+    }}
+}};    
+    var PERCENTAGE = function(cell, formatterParams){{
+    var value = cell.getValue();
+    if (value === "") {{return "";}}
+    if(value  <0){{
+       cell.getElement().style.color="#ff0000";
+       return value.toFixed(2) + " %";
+    }}else{{
+        return value.toFixed(2) + " %";
+    }}
+}};
+    
+        var tabledata = {tb_list};  
+        var table = new Tabulator("#{self.name}", {{
         {str_height}
         data:tabledata, //assign data to table
         layout:"fitDataTable", //fit columns to width of table (optional)
@@ -101,11 +143,19 @@ class TabulatorCommons:
         ],
         {str_initialoptions}
         {str_destiny_url}
-    }});
-    table.scrollToRow(5, "top", true);
+        }});
+      
+
     </script>
     """
-    
+#            for (let i = 0; i < tabledata.length; i++) {{
+#      if (tabledata[i].amount < 0) {{
+#      alert(tabledata[i].amount);
+#        tabledata[i].amount = "<span class='red'>" + tabledata[i].amount*100 + "</span>";
+#      }} else {{
+#        tabledata[i].amount = '$' + tabledata[i].amount;
+#      }}
+#    }}
 class TabulatorFromQuerySet(TabulatorCommons):
     def __init__(self, name):
         TabulatorCommons.__init__(self, name)
