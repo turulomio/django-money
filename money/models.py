@@ -570,7 +570,7 @@ def money_convert(dt, amount, from_,  to_):
 def balance_user_by_operationstypes(year,  month,  operationstypes_id, local_currency, local_zone):
     r=0
     for currency in currencies_in_accounts():
-        balance=cursor_one_field("""
+        for row in cursor_rows("""
             select sum(amount) as amount 
             from 
                 accountsoperations,
@@ -593,10 +593,13 @@ def balance_user_by_operationstypes(year,  month,  operationstypes_id, local_cur
                 date_part('month',datetime)=%s and
                 accounts.currency=%s and
                 accounts.id=creditcards.accounts_id and
-                creditcards.id=creditcardsoperations.creditcards_id""", (operationstypes_id, year, month,  currency, operationstypes_id, year, month,  currency))
+                creditcards.id=creditcardsoperations.creditcards_id""", (operationstypes_id, year, month,  currency, operationstypes_id, year, month,  currency)):
 
-        if balance is not None:
-            r=r+money_convert(dtaware_month_end(year, month, local_zone), balance, currency, local_currency)
+            if row['amount'] is not None:
+                if local_currency==currency:
+                    r=r+row['amount']
+                else:
+                    r=r+money_convert(dtaware_month_end(year, month, local_zone), row['amount'], currency, local_currency)
     return r
 
 
@@ -607,14 +610,7 @@ def qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, mon
         io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), 'EUR')
         for ioh in io_historical:
             if ioh['dt_end'].year==year and ioh['dt_end'].month==month:
-                if ioh['shares']>=0:
-                    gross_product_currency=ioh['shares']*(ioh['sellprice_investment']-ioh['buyprice_investment'])*investment.products.real_leveraged_multiplier()
-                else:
-                    gross_product_currency=ioh['shares']*(-ioh['sellprice_investment']+ioh['buyprice_investment'])*investment.products.real_leveraged_multiplier()
-                gross_account_currency=money_convert(ioh['dt_end'], gross_product_currency, investment.products.currency, investment.accounts.currency)
-                net_account_currency=gross_account_currency-ioh['taxes_account']-ioh['commissions_account']
-                net_user_currency=money_convert(ioh['dt_end'], net_account_currency, investment.accounts.currency, local_currency)
-                r=r+net_user_currency
+                    r=r+ioh['net_gains_user']
     return r
 
 

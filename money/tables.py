@@ -96,10 +96,10 @@ class TabulatorInvestmentsOperationsHistorical(TabulatorFromListDict):
         self.setDestinyUrl(destiny_url)
         self.setLocalZone(local_zone)
         self.setListDict(listdict)
-        self.setFields("id","dt_end", "years","operationstypes","shares")
-        self.setHeaders("Id", _("Date and time"), _("Years"), _("Operation type"),  _("Shares"))
-        self.setTypes("int","datetime", "int",  "str", "Decimal")
-        self.setBottomCalc(None, None, None,None, None)
+        self.setFields("id","dt_end", "years","operationstypes","shares", "gross_start_investment", "gross_end_investment", "gross_gains_investment", "commissions_account", "taxes_account", "net_gains_investment")
+        self.setHeaders("Id", _("Date and time"), _("Years"), _("Operation type"),  _("Shares"), _("Gross start"), _("Gross end"), _("Gross gains"), _("Commissions"), _("Taxes"), _("Net gains"))
+        self.setTypes("int","datetime", "int",  "str", "Decimal", investment.products.currency, investment.products.currency, investment.products.currency, investment.products.currency, investment.products.currency, investment.products.currency)
+        self.setBottomCalc(None, None, None,None, None, "sum", "sum", "sum", "sum", "sum", "sum")
         
 class TabulatorInvestmentsOperations(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, investment, local_zone):

@@ -152,6 +152,7 @@ def listdict_report_total_income(qs_investments, year, local_currency, local_zon
             
     list_= sorted(list_, key=lambda item: item["month_number"])
     return list_
+
 def listdict_report_total(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone):
     def month_results(month_end, month_name, local_currency):
         return month_end, month_name, total_balance(month_end, local_currency)
