@@ -54,6 +54,9 @@ class Accountsoperations(models.Model):
     class Meta:
         managed = False
         db_table = 'accountsoperations'
+        
+    def __str__(self):
+        return "{} {} {}".format(self.datetime, self.concepts.name, self.amount)
 
 
 class Annualtargets(models.Model):
@@ -305,7 +308,19 @@ class Operationstypes(models.Model):
         db_table = 'operationstypes'
         
     def __str__(self):
+        self.fullName()
+        
+    def fullName(self):
         return _(self.name)
+        
+    @staticmethod
+    def dict():
+        d={}
+        for ot in Operationstypes.objects.all():
+            d[ot.id]=ot.fullName()
+        return d
+        
+
 
 class Opportunities(models.Model):
     date = models.DateField()

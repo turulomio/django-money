@@ -11,6 +11,36 @@
 <p>
 </p>
 
+
+
+<form method="post" id="form_income">{% csrf_token %}
+<button id="button_income" type="submit">{% trans "Get income report" %}</button>
+</form>
+
+<div id="income"></div>
+<script>
+$(document).ready(function() {
+  $("#button_income").click(function(e) {
+    e.preventDefault();
+    $.ajax({
+      type: "POST",
+      url: "{% url 'report_total_div_income' %}",
+      data: {
+            csrfmiddlewaretoken: "{{csrf_token}}",
+      },
+      success: function(result) {
+        alert('ok');
+        $("#income").html(result);    
+        $("#form_income").css("display", "none");
+
+      },
+      error: function(result) {
+        alert('error');
+      }
+    });
+  });
+});
+</script>
 {{table_report_total_income|safe}}
 {% endblock %}
 

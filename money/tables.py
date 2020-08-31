@@ -74,10 +74,10 @@ class TabulatorInvestmentsOperationsCurrent(TabulatorFromListDict):
         self.setDestinyUrl(destiny_url)
         self.setLocalZone(local_zone)
         self.setListDict(listdict)
-        self.setFields("id","datetime", "shares", "price_investment", "invested_investment", "balance_investment", "gains_net_investment", "gains_net_investment", "gains_net_investment", "gains_net_investment")
-        self.setHeaders("Id", _("Date and time"), _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Pending"), _("% year"), _("% APR"), _("% Total"))
-        self.setTypes("int","datetime", "Decimal", investment.products.currency, investment.products.currency, investment.products.currency,  investment.products.currency, None, None, None)
-        self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
+        self.setFields("id","datetime", "operationstypes",  "shares", "price_investment", "invested_investment", "balance_investment", "gains_gross_investment", "percentage_annual", "percentage_apr", "percentage_total")
+        self.setHeaders("Id", _("Date and time"), _("Operation type"),  _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Gross gains"), _("% year"), _("% APR"), _("% Total"))
+        self.setTypes("int","datetime", "str",  "Decimal", investment.products.currency, investment.products.currency, investment.products.currency,  investment.products.currency, "percentage", "percentage", "percentage")
+        self.setBottomCalc(None, None, None, None, None, "sum", "sum", "sum", None, None, None)
 
 class TabulatorInvestmentsOperationsHistorical(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, investment, local_zone):
@@ -85,10 +85,10 @@ class TabulatorInvestmentsOperationsHistorical(TabulatorFromListDict):
         self.setDestinyUrl(destiny_url)
         self.setLocalZone(local_zone)
         self.setListDict(listdict)
-        self.setFields("id","dt_end", "shares")
-        self.setHeaders("Id", _("Date and time"), _("Shares"))
-        self.setTypes("int","datetime", "Decimal")
-        self.setBottomCalc(None, None, None,)
+        self.setFields("id","dt_end", "years","operationstypes","shares")
+        self.setHeaders("Id", _("Date and time"), _("Years"), _("Operation type"),  _("Shares"))
+        self.setTypes("int","datetime", "int",  "str", "Decimal")
+        self.setBottomCalc(None, None, None,None, None)
         
 class TabulatorInvestmentsOperations(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, investment, local_zone):
@@ -96,10 +96,10 @@ class TabulatorInvestmentsOperations(TabulatorFromListDict):
         self.setDestinyUrl(destiny_url)
         self.setLocalZone(local_zone)
         self.setListDict(listdict)
-        self.setFields("id","datetime", "shares", "price", "commission", "taxes")
-        self.setHeaders("Id", _("Date and time"), _("Shares"), _("Price"), _("Commission"), _("Taxes"))
-        self.setTypes("int","datetime", "Decimal", investment.products.currency, investment.accounts.currency, investment.accounts.currency)
-        self.setBottomCalc(None, "sum", None, None, "sum", "sum")
+        self.setFields("id","datetime", "operationstypes","shares", "price", "commission", "taxes")
+        self.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Commission"), _("Taxes"))
+        self.setTypes("int","datetime", "str","Decimal", investment.products.currency, investment.accounts.currency, investment.accounts.currency)
+        self.setBottomCalc(None, None, None, "sum", None, "sum", "sum")
         
 class TabulatorCreditCards(TabulatorFromQuerySet):
     def __init__(self, name, destiny_url, queryset, account):
@@ -172,7 +172,7 @@ class TabulatorReportTotal(TabulatorFromListDict):
         
 
 class TabulatorReportIncomeTotal(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, investment):
+    def __init__(self, name, destiny_url, listdict, local_currency):
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setListDict(listdict)

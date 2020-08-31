@@ -1,6 +1,8 @@
+from datetime import date
+from decimal import Decimal
+
 from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows
 from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware
-from decimal import Decimal
 from money.reusing.percentage import Percentage
 Decimal()
 
@@ -103,6 +105,35 @@ where
         dividends=0
     return dividends
     
+## @param d Dict with investmentsoperationscurrent
+## @param d Dict with basic results of investment product
+def investmentsoperationscurrent_percentage_annual(d_ioc, d_basic):
+    print(d_ioc)
+    print(d_basic)
+    if d_ioc["datetime"].year==date.today().year:
+        lastyear=d_ioc["price_investment"] #Product value, self.money_price(type) not needed.
+    else:
+        lastyear=d_basic["lastyear"]
+    print(lastyear, d_basic["lastyear"])
+    if d_basic["lastyear"] is None or lastyear is None:
+        return Percentage()
+
+    if d_ioc["shares"]>0:
+        return Percentage(d_basic["last"]-lastyear, lastyear)
+    else:
+        return Percentage(-(d_basic["last"]-lastyear), lastyear)
     
-    
-    
+def investmentsoperationscurrent_age(d_ioc):
+        return (date.today()-d_ioc["datetime"].date()).days
+
+def investmentsoperationscurrent_percentage_apr(d_ioc):
+        dias=investmentsoperationscurrent_age(d_ioc)
+        if dias==0:
+            dias=1
+        return Percentage(investmentsoperationscurrent_percentage_total(d_ioc)*365,  dias)
+
+
+def investmentsoperationscurrent_percentage_total(d_ioc):
+    if d_ioc["invested_investment"] is None:#initiating xulpymoney
+        return Percentage()
+    return Percentage(d_ioc['gains_gross_investment'], d_ioc["invested_investment"])

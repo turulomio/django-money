@@ -1,7 +1,7 @@
 from money.connection_dj import cursor_one_field
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware
+from money.reusing.datetime_functions import dtaware_month_end
 from xulpymoney.libxulpymoneytypes import eOperationType
 from money.otherstuff import balance_user_by_operationstypes, netgains_dividends, money_convert, get_investmentsoperations_totals_of_all_investments, total_balance, percentage_to_selling_point
 from money.reusing.percentage import percentage_between, Percentage
@@ -138,7 +138,7 @@ def qs_total_report_tabulator(qs_investments, qs_accounts, year, last_year_balan
     return list_
     
 
-def qs_total_report_income_tabulator(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone):
+def qs_total_report_income_tabulator(qs_investments, year, local_currency, local_zone):
     def month_results(year,  month, month_name):
         dividends=netgains_dividends(year, month)
         incomes=balance_user_by_operationstypes(year,  month,  eOperationType.Income, local_currency, local_zone)-dividends

@@ -6,6 +6,7 @@ from django.contrib.auth import  login
 from django.shortcuts import render,  redirect, get_object_or_404
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
@@ -15,7 +16,7 @@ from django import forms
 
 from money.connection_dj import cursor_rows
 from money.forms import SignUpForm, AccountsOperationsForm
-from money.models import Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products,  Orders, Creditcardsoperations
+from money.models import Operationstypes, Banks, Accounts, Accountsoperations, Creditcards,  Investments, Investmentsoperations, Dividends, Concepts, Products,  Orders, Creditcardsoperations
 from money.settingsdb import settingsdb
 from money.tables import TabulatorDividends, TabulatorReportConcepts, TabulatorCreditCardsOperations, TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
 from money.tokens import account_activation_token
@@ -25,7 +26,12 @@ from money.reusing.decorators import timeit
 from money.reusing.percentage import Percentage
 #from django.utils.translation import ugettext_lazy as _
 from money.querysets import qs_accounts_tabulator, qs_banks_tabulator, qs_investments_tabulator, qs_total_report_income_tabulator, qs_total_report_tabulator
-from money.otherstuff import total_balance
+from money.otherstuff import (
+    total_balance, 
+    investmentsoperationscurrent_percentage_annual, 
+    investmentsoperationscurrent_percentage_apr, 
+    investmentsoperationscurrent_percentage_total,
+)
 
 @login_required
 def order_list(request,  active):
@@ -269,7 +275,23 @@ def investment_view(request, pk):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     investment=get_object_or_404(Investments, id=pk)
+    basic_results=investment.products.basic_results()
+    dict_ot=Operationstypes.dict()
     io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), local_currency)
+    
+    for ioc in io_current:
+        ioc["percentage_annual"]=investmentsoperationscurrent_percentage_annual(ioc, basic_results)
+        ioc["percentage_apr"]=investmentsoperationscurrent_percentage_apr(ioc)
+        ioc["percentage_total"]=investmentsoperationscurrent_percentage_total(ioc)
+        ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
+        
+    for o in io:
+        o["operationstypes"]=dict_ot[o["operationstypes_id"]]
+    for ioh in io_historical:
+        ioh["operationstypes"]=dict_ot[ioh["operationstypes_id"]]
+        ioh["years"]=0
+        
+        
    
     table_io=TabulatorInvestmentsOperations("IO", "investmentoperation_update", io, investment, local_zone).render()
     table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, io_current, investment, local_zone).render()
@@ -407,13 +429,21 @@ def report_total(request, year=date.today().year):
     table_report_total=TabulatorReportTotal("table_report_total", None, list_report, local_currency).render()
     print("Loading list report took {}".format(timezone.now()-start))
     
-    
+    return render(request, 'report_total.html', locals())
+
+
+@timeit
+@login_required
+def report_total_div_income(request, year=date.today().year):
     start=timezone.now()
-    list_report2=qs_total_report_income_tabulator(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone)
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
+    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    qs_investments=Investments.objects.all()
+    list_report2=qs_total_report_income_tabulator(qs_investments, year, local_currency, local_zone)
     table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", None, list_report2, local_currency).render()
     print("Loading list report income took {}".format(timezone.now()-start))
+    return HttpResponse(table_report_total_income)
 
-    return render(request, 'report_total.html', locals())
 
 @login_required
 def report_concepts(request, year=date.today().year, month=date.today().month):
