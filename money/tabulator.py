@@ -14,6 +14,7 @@ class TabulatorCommons:
         self.field_pk="id"
         self.show_field_pk=False
         self.initial_options=None
+        self.layout="fitDataTable"
         
         self.localzone="UTC"
         
@@ -38,6 +39,9 @@ class TabulatorCommons:
     ## @param string 121px
     def setHeight(self, height):
         self.height=height
+        
+    def setLayout(self, layout):
+        self.layout=layout
     
     ## Render from listdict
     def render(self):
@@ -71,23 +75,23 @@ class TabulatorCommons:
             if self.types[i]=="datetime":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""
             elif self.types[i] in ("Decimal", "float", "int", "date") and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , "formatter": NUMBER}}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , formatter: NUMBER}}, \n"""
             elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right",  "formatter": NUMBER,  "bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right",  formatter: NUMBER, bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter: EUR ,hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100,  formatter: EUR ,hozAlign:"right" }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter: EUR, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter:EUR}}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: EUR, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter:EUR}}, \n"""
             elif self.types[i] =="USD" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter: USD, ,hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: USD, ,hozAlign:"right" }}, \n"""
             elif self.types[i] =="USD" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter: USD, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: USD}}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: USD, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: USD}}, \n"""
             elif self.types[i]=="str":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""            
             elif self.types[i]=="bool":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"tickCross", hozAlign:"center" }}, \n"""
             elif self.types[i] =="percentage" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:PERCENTAGE, hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter:PERCENTAGE, hozAlign:"right" }}, \n"""
 
 
         return f"""
@@ -136,19 +140,32 @@ class TabulatorCommons:
     
         var tabledata = {tb_list};  
         var table = new Tabulator("#{self.name}", {{
+        selectable:true,
         {str_height}
         data:tabledata, //assign data to table
-        layout:"fitDataTable", //fit columns to width of table (optional)
+        layout:"{self.layout}", //fit columns to width of table (optional)
         columns:[ {columns}
         ],
         {str_initialoptions}
         {str_destiny_url}
-        }});
-      
 
+        }});
+        
+        var last = table.getRowFromPosition(tabledata.length-1, true);
+
+        
+        table.scrollToRow(last.getData().id, "top", true);
     </script>
     """
-#            for (let i = 0; i < tabledata.length; i++) {{
+    
+#            alert(last.getData().id)
+#        table.selectRow(last.getData().id);
+#        rows = table.getRows(true);
+#        last=rows[rows.length -1].getData()
+#       
+#        scrollToRowPosition: "bottom", //position row in the center of the table when scrolled to
+#        table.selectRow(69);
+#        table.selectRow(table.getRows().length);    for (let i = 0; i < tabledata.length; i++) {{
 #      if (tabledata[i].amount < 0) {{
 #      alert(tabledata[i].amount);
 #        tabledata[i].amount = "<span class='red'>" + tabledata[i].amount*100 + "</span>";
@@ -156,6 +173,9 @@ class TabulatorCommons:
 #        tabledata[i].amount = '$' + tabledata[i].amount;
 #      }}
 #    }}
+#        dataSorted:function(sorters, rows){{
+#            this.scrollToRow(rows[rows.length -1].id, "bottom", true)
+#        }},
 class TabulatorFromQuerySet(TabulatorCommons):
     def __init__(self, name):
         TabulatorCommons.__init__(self, name)
