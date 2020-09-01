@@ -7,6 +7,10 @@
 
   {% url 'account_view' account.id  as the_url %}
   {% include "objects/year_month.html" with url_string=the_url only %}
+
+  <p></p>
+  <selector-yearmonth title="{% trans 'Select a year and a month' %}" year_start="2010" month_start="1" year_end="2023" month_end="12" year="2020" month="9"></selector-yearmonth>
+<p></p>
   <p></p>
   <script>
     $( function() {
