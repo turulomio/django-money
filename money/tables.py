@@ -34,6 +34,7 @@ class TabulatorAccountOperations(TabulatorFromListDict):
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setListDict(listdict)
+        self.setLayout("fitDataStretch")
         self.setHeight("400px")
         self.setLayout("fitDataTable")
         self.setLocalZone(local_zone)
