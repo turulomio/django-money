@@ -189,11 +189,13 @@ class TabulatorReportTotal(TabulatorFromListDict):
 class TabulatorReportIncomeTotal(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency):
         TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
+        self.setDestinyUrl(destiny_url, destiny_type=2, new_tab=True)##Type=2 year, month as parameter in id in the form "year/month/"
         self.setListDict(listdict)
         self.setLayout("fitColumns")
-        self.setFields("month", "incomes","expenses", "gains", "dividends", "total")
-        self.setHeaders(_("Month"), _("Incomes"), _("Expenses"), _("Net gains"), _("Net dividends"), _("Total"))
-        self.setTypes("str","EUR", "EUR", "EUR", "EUR","EUR")
-        self.setBottomCalc(None, "sum", "sum", "sum", "sum", "sum")
+        self.setFields("id","month", "incomes","expenses", "gains", "dividends", "total")
+        self.setHeaders("Id", _("Month"), _("Incomes"), _("Expenses"), _("Net gains"), _("Net dividends"), _("Total"))
+        self.setTypes("int","str","EUR", "EUR", "EUR", "EUR","EUR")
+        self.setBottomCalc(None, None, "sum", "sum", "sum", "sum", "sum")
         self.showLastRecord(False)
+        
+        

@@ -465,7 +465,7 @@ def report_total_income__div(request, year=date.today().year):
     local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     qs_investments=Investments.objects.all()
     list_report2=listdict_report_total_income(qs_investments, year, local_currency, local_zone)
-    table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", None, list_report2, local_currency).render()
+    table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", "report_total_income_details", list_report2, local_currency).render()
     print("Loading list report income took {}".format(timezone.now()-start))
     return HttpResponse(table_report_total_income)
 

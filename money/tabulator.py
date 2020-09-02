@@ -6,7 +6,10 @@ from django.urls import reverse
 class TabulatorCommons:
     def __init__(self, name):
         self.name=name
+        
         self.destiny_url=None
+        self.destiny_type=None # To render different click functions
+        
         self.headers=[] #Table column headers
         self.height=None
         self.translate=True
@@ -22,8 +25,11 @@ class TabulatorCommons:
     def setLocalZone(self, s):
         self.localzone=s
     
-    def setDestinyUrl(self, destiny_url):
+    def setDestinyUrl(self, destiny_url, destiny_type=1, new_tab=False):
         self.destiny_url=destiny_url
+        self.destiny_type=destiny_type
+        self.destiny_new_tab=new_tab
+        
     def setHeaders(self, *args):
         self.headers=args
         
@@ -75,10 +81,23 @@ class TabulatorCommons:
         if self.destiny_url is None:
             str_destiny_url=""
         else:
-            str_url=reverse( self.destiny_url, kwargs={"pk":9999999999})
-            str_destiny_url=f"""        rowClick:function(e, row){{
-            window.location.href = "{str_url}".replace( 9999999999 , row.getData().id);
-            }},"""
+            if self.destiny_type==1: #Normal with id field as pk
+                str_url=reverse( self.destiny_url, kwargs={"pk":9999999999})
+                str_destiny_url=f"""
+                    rowClick:function(e, row){{
+                        window.location.href = "{str_url}".replace(9999999999 , row.getData().id);
+                    }},"""
+            elif self.destiny_type==2:#Type=2 year, month as parameter in id in the form "year/month/"
+                str_url=reverse( self.destiny_url)## Needs default year month in url view (today(), to allow it
+                if self.destiny_new_tab==True:
+                    where=f"window.open('{str_url}'.concat(row.getData().id), '_blank');"
+                else:
+                    where=f'window.location.href = "{str_url}".concat(row.getData().id);'
+                str_destiny_url=f"""
+                    rowClick:function(e, row){{
+                        {where}
+                    }},"""
+                print(str_destiny_url)
 
         columns=""
         for i in range(len(self.headers)):

@@ -141,6 +141,7 @@ def listdict_report_total_income(qs_investments, year, local_currency, local_zon
             #print(future, future.result())
             month_name, month,  year,  incomes, expenses, gains, dividends, total = future.result()
             list_.append({
+                "id": f"{year}/{month}/", 
                 "month_number":month, 
                 "month": month_name,
                 "incomes":incomes, 
