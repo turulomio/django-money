@@ -489,6 +489,8 @@ def report_total_income_details(request, year=date.today().year, month=date.toda
 
 @login_required
 def report_concepts(request, year=date.today().year, month=date.today().month):
+    year_start=1970
+    year_end=date.today().year+10
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
     list_report_concepts_positive=[]
     month_balance_positive=0

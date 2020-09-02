@@ -1,13 +1,18 @@
 {% extends "base.html" %}
 
 {% load i18n %}
+{% load static %}
+{% load random_numbers %}
+{% block head_js_section%}
+<script type="text/javascript" src='{% static "js/component.yearmonthpicker.js" %}?dev={% random_integer 0 10000 %}'></script>
+{% endblock %}
+
 
 {% block content %}
 <h1>{% trans "Monthly report concepts" %}</h1>
 
+<selector-yearmonth title="{% trans 'Select a year and a month' %}" year_start="{{ year_start }}" year_end="{{ year_end }}" year="{{ year }}" month="{{ month }}" url="{% url 'report_concepts'  %}"></selector-yearmonth>
 
-{% url 'report_concepts' as the_url %}
-{% include "objects/year_month.html" with url_string=the_url only %}
 <p></p>
 
 <script>
@@ -19,7 +24,7 @@
   <div id="tabs">
     <ul>
         <li><a href="#tabs-1">{% trans "Positive balance concepts" %}</a></li>
-         <li><a href="#tabs-2">{% trans "Negative balance concepts" %}</a></li>
+        <li><a href="#tabs-2">{% trans "Negative balance concepts" %}</a></li>
     </ul>
    
   
