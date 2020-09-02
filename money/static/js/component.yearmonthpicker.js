@@ -1,10 +1,8 @@
+// This component is part of the https://github.com/turulomio/reusingcode project
+// Make a pull request to this project to update this file
 
 class SelectorYearMonth extends HTMLElement {
-
-  // Can define constructor arguments if you wish.
   constructor() {
-    // If you define a constructor, always call super() first!
-    // This is specific to CE and required by the spec.
     super();
   }
 
@@ -54,11 +52,10 @@ class SelectorYearMonth extends HTMLElement {
     if (this.hasAttribute("month")==true){
       this.month=parseInt(this.getAttribute("month"));
     }else {
-      this.month=today.getMonth();
+      this.month=today.getMonth()+1;
     }
 
     this.label=document.createElement("label");
-    //var t = document.createTextNode(this.title);
     this.label.innerHTML=this.title + " ";
 
     this.selYear=document.createElement("select");
@@ -94,6 +91,18 @@ class SelectorYearMonth extends HTMLElement {
     this.cmdMonthPrevious.innerHTML = "<";
     this.cmdMonthNext=document.createElement("button");
     this.cmdMonthNext.innerHTML = ">";
+    this.cmdCurrent=document.createElement("button");
+    this.cmdCurrent.innerHTML = "Current";
+    if (this.url != null){
+      this.cmdGo=document.createElement("button");
+      this.cmdGo.innerHTML = "Go";
+
+      this.cmdGo.addEventListener('click', (event) => {
+
+        var newurl=this.url.concat(this.year.toString()).concat("/").concat((this.month).toString());
+        window.location.replace(newurl);
+      });
+    }
 
 
 
@@ -104,6 +113,8 @@ class SelectorYearMonth extends HTMLElement {
     this.appendChild(this.selYear);
     this.appendChild(this.cmdMonthNext);
     this.appendChild(this.cmdYearNext);
+    this.appendChild(this.cmdCurrent);
+    this.appendChild(this.cmdGo);
     this.selYear.value=this.year;
     this.selMonth.value=this.month;
 
@@ -128,16 +139,16 @@ class SelectorYearMonth extends HTMLElement {
         this._render(this.year,this.month,this.year,this.month+1);
       }
     });
+    this.cmdCurrent.addEventListener('click', (event) => {
+        this._render(this.year,this.month,today.getFullYear(),today.getMonth()+1);
+    });
+    this.selMonth.addEventListener('change', (event) => {
+        this._render(this.year,this.month,this.selYear.value,this.selMonth.value);
+    });
+    this.selYear.addEventListener('change', (event) => {
+        this._render(this.year,this.month,this.selYear.value,this.selMonth.value);
+    });
     
-  }
-
-
-  getMonth(){
-    return this.month;
-  }
-
-  getYear(){
-    return this.year;
   }
 
   //Try to change or return the old position with an alert
@@ -169,10 +180,6 @@ class SelectorYearMonth extends HTMLElement {
     }
     this.selYear.value=this.year;
     this.selMonth.value=this.month;
-    var newurl=this.url.concat(this.year.toString()).concat("/").concat((this.month).toString());
-    if (this.url != null && this.url != newurl){
-      window.location.replace(newurl);
-    }
   }
 
 }

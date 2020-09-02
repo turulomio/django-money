@@ -167,7 +167,8 @@ def account_list(request,  active=True):
         
 @login_required        
 def account_view(request, pk, year=date.today().year, month=date.today().month): 
-
+    year_start=1970
+    year_end=date.today().year + 10
     local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     account=get_object_or_404(Accounts, pk=pk)
     
@@ -433,6 +434,8 @@ def bank_delete(request, pk):
 @timeit
 @login_required
 def report_total(request, year=date.today().year):
+    year_start=1970
+    year_end=date.today().year + 10
     start=timezone.now()
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
     local_zone=settingsdb("mem/localzone")# perhaps i could acces context??

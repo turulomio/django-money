@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "bootstrap": "^4.5.2",
+    "gettext-js": "0.0.3",
     "jquery": "^3.5.1",
     "jquery-datetimepicker": "^2.5.21",
     "jquery-ui": "^1.12.1",

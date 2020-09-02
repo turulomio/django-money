@@ -15,6 +15,7 @@ class TabulatorCommons:
         self.show_field_pk=False
         self.initial_options=None
         self.layout="fitDataTable"
+        self.show_last_record=True
         
         self.localzone="UTC"
         
@@ -43,11 +44,15 @@ class TabulatorCommons:
     def setLayout(self, layout):
         self.layout=layout
     
+    def showLastRecord(self, b):
+        self.show_last_record=b
+    
     ## Render from listdict
     def render(self):
         ## Fills bottomCalc if None
         if self.bottomcalc is None:
             self.bottomcalc=[None]*len(self.fields)
+
         
         tb_list=[]
         for d in self.listdict:
@@ -55,7 +60,15 @@ class TabulatorCommons:
             for field in self.fields:
                 new_d[field]=object_to_tb(d[field], self.translate, self.localzone)
             tb_list.append(new_d)
-            
+                        
+        if self.show_last_record is True and len(tb_list)>0:
+            str_show_last_record="""        
+                var last = table.getRowFromPosition(tabledata.length-1, true);
+                table.scrollToRow(last.getData().id, "top", true);
+            """
+        else:
+            str_show_last_record=""
+
         str_height="" if self.height is None else f'height: "{self.height}",'
         str_initialoptions="" if self.initial_options is None else self.initial_options
         
@@ -151,10 +164,7 @@ class TabulatorCommons:
 
         }});
         
-        var last = table.getRowFromPosition(tabledata.length-1, true);
-
-        
-        table.scrollToRow(last.getData().id, "top", true);
+        {str_show_last_record}
     </script>
     """
     

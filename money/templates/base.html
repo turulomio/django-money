@@ -28,16 +28,11 @@
 
         {% block head_js %}
             {% block head_js_site %}
-                <!--
-                -->
                 <script type="text/javascript" src='{% static "js/jquery.js" %}'></script>
                 <script type="text/javascript" src='{% static "js/jquery-ui.js" %}'></script>
                 <script type="text/javascript" src='{% static "js/bootstrap.js" %}'></script>
-                <!--<script type="text/javascript" src='{% static "js/moment.js" %}'></script>-->
                 <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script>
                 <script type="text/javascript" src='{% static "js/jquery.datetimepicker.full.min.js" %}'></script>
-                <script type="text/javascript" src='{% static "js/jquery_my.js" %}?dev={% random_integer 0 10000 %}'></script>
-
             {% endblock head_js_site %}
             {% block head_js_section %}
             {% endblock head_js_section %}

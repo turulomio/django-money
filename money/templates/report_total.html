@@ -1,10 +1,17 @@
 {% extends "base.html" %}
+{% load static %}
+{% load random_numbers %}
+{% block head_js_section%}
+<script type="text/javascript" src='{% static "js/component.yearpicker.js" %}?dev={% random_integer 0 10000 %}'></script>
+{% endblock %}
 
 {% load i18n %}
 
 {% block content %}
 <h1>{% trans "Total report" %}</h1>
 
+<selector-year title="{% trans 'Select a year' %}" year_start="{{ year_start }}" year_end="{{ year_end }}" year="{{ year }}" url="{% url 'report_total' %}"></selector-year>
+<p></p>
 <p>Last year balance ({{last_year|date:"Y-m-d"}}) is {{ str_last_year_balance }}</p>
 
 {{table_report_total|safe}}
@@ -24,7 +31,7 @@ $(document).ready(function() {
     e.preventDefault();
     $.ajax({
       type: "POST",
-      url: "{% url 'report_total_income__div' %}",
+      url: "{% url 'report_total_income__div' year %}",
       data: {
             csrfmiddlewaretoken: "{{csrf_token}}",
       },

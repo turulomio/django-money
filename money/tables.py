@@ -182,6 +182,7 @@ class TabulatorReportTotal(TabulatorFromListDict):
         self.setFields("month", "account_balance","investment_balance", "total", "diff_lastmonth", "percentage_year")
         self.setHeaders(_("Month"), _("Account balance"), _("Investment balance"), _("Total balance"), _("Last month diff"), _("% year to date"))
         self.setTypes("str","EUR", "EUR", "EUR", "EUR","percentage")
+        self.showLastRecord(False)
         self.setBottomCalc(None, None, None, None, "sum", None)      
         
 
@@ -195,3 +196,4 @@ class TabulatorReportIncomeTotal(TabulatorFromListDict):
         self.setHeaders(_("Month"), _("Incomes"), _("Expenses"), _("Net gains"), _("Net dividends"), _("Total"))
         self.setTypes("str","EUR", "EUR", "EUR", "EUR","EUR")
         self.setBottomCalc(None, "sum", "sum", "sum", "sum", "sum")
+        self.showLastRecord(False)
