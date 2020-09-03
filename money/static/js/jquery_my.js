@@ -1,6 +1,5 @@
 
-
- class SelectorYearMonth extends HTMLElement {
+class SelectorYearMonth extends HTMLElement {
 
   // Can define constructor arguments if you wish.
   constructor() {
@@ -14,6 +13,12 @@
         this.title=this.getAttribute("title");
     } else{
       this.title="Select a year and a month";
+    }
+
+    if (this.hasAttribute("url")==true){
+      this.url=this.getAttribute("url");
+    } else{
+      this.title=null;
     }
 
     var today=new Date();
@@ -99,15 +104,33 @@
     this.appendChild(this.selYear);
     this.appendChild(this.cmdMonthNext);
     this.appendChild(this.cmdYearNext);
+    this.selYear.value=this.year;
+    this.selMonth.value=this.month;
 
 
     this.cmdYearPrevious.addEventListener('click', (event) => {
-      this.year=this.year -1;
-      this._render();
+      this._render(this.year,this.month,this.year-1,this.month);
     });
-
-    this._render();
+    this.cmdYearNext.addEventListener('click', (event) => {
+      this._render(this.year,this.month,this.year+1,this.month);
+    });
+    this.cmdMonthPrevious.addEventListener('click', (event) => {
+      if (this.month==1){
+        this._render(this.year,this.month,this.year-1,12);
+      } else {
+        this._render(this.year,this.month,this.year,this.month-1);
+      }
+    });
+    this.cmdMonthNext.addEventListener('click', (event) => {
+      if (this.month==12){
+        this._render(this.year,this.month,this.year+1,1);
+      } else {
+        this._render(this.year,this.month,this.year,this.month+1);
+      }
+    });
+    
   }
+
 
   getMonth(){
     return this.month;
@@ -118,13 +141,38 @@
   }
 
   //Try to change or return the old position with an alert
-  try_change( old_year,old_month, new_year, new_month){
+  _render( old_year,old_month, new_year, new_month){
+    if (new_year>this.year_end){
+      this.year=old_year;
+      this.month=old_month;
+      alert("You can't set the next year");
+    }
+    else if (new_year==this.year_end && new_month>this.month_end){
+      this.year=old_year;
+      this.month=old_month;
+      alert("You can't set the next month");
+    }
+    else if (new_year<this.year_start){
+      this.year=old_year;
+      this.month=old_month;
+      alert("You can't set the previous year");
+    }
+    else if (new_year==this.year_start && new_month<this.month_start){
+      this.year=old_year;
+      this.month=old_month;
+      alert("You can't set the previous month");
+    }
+    else {
+      this.year=new_year;
+      this.month=new_month;
 
-  }
-
-  _render(){
+    }
     this.selYear.value=this.year;
     this.selMonth.value=this.month;
+    var newurl=this.url.concat(this.year.toString()).concat("/").concat((this.month).toString());
+    if (this.url != null && this.url != newurl){
+      window.location.replace(newurl);
+    }
   }
 
 }
