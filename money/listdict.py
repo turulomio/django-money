@@ -9,6 +9,8 @@ from money.models import (
     Accounts, 
     Concepts, 
     Dividends, 
+    Investments, 
+    Operationstypes, 
     balance_user_by_operationstypes, 
     get_investmentsoperations_totals_of_all_investments, 
     percentage_to_selling_point, total_balance, 
@@ -100,6 +102,22 @@ def listdict_banks(queryset, dt, active, local_currency):
     return list_
 
 
+## Gets all ioh from all investments 
+def listdict_investmentsoperationshistorical(year, month, local_currency, local_zone):
+    #Git investments with investmentsoperations in this year, month
+    list_ioh=[]
+    dict_ot=Operationstypes.dict()
+    dt_year_month=dtaware_month_end(year, month, local_zone)
+    for investment in Investments.objects.raw("select distinct(investments.*) from investmentsoperations, investments where date_part('year', datetime)=%s and date_part('month', datetime)=%s and investments.id=investmentsoperations.investments_id", (year, month)):
+        io, io_current, io_historical=investment.get_investmentsoperations(dt_year_month, local_currency)
+        
+        for ioh in io_historical:
+            if ioh['dt_end'].year==year and ioh['dt_end'].month==month:
+                ioh["name"]=investment.fullName()
+                ioh["operationstypes"]=dict_ot[ioh["operationstypes_id"]]
+                ioh["years"]=0
+                list_ioh.append(ioh)
+    return list_ioh
 
 
 def listdict_report_total_income(qs_investments, year, local_currency, local_zone):
@@ -109,7 +127,7 @@ def listdict_report_total_income(qs_investments, year, local_currency, local_zon
         expenses=balance_user_by_operationstypes(year,  month,  eOperationType.Expense, local_currency, local_zone)
         
         start=timezone.now()
-        gains=qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, month, local_currency)
+        gains=qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, month, local_currency, local_zone)
         print("Loading list netgains opt took {} (CUELLO BOTELLA UNICO)".format(timezone.now()-start))        
         
         total=incomes+gains+expenses+dividends

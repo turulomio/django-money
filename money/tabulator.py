@@ -97,7 +97,6 @@ class TabulatorCommons:
                     rowClick:function(e, row){{
                         {where}
                     }},"""
-                print(str_destiny_url)
 
         columns=""
         for i in range(len(self.headers)):

@@ -17,6 +17,7 @@
       <li><a href="#tabs-2">{% trans "Incomes" %}</a></li>
       <li><a href="#tabs-1">{% trans "Expenses" %}</a></li>
       <li><a href="#tabs-3">{% trans "Dividends" %}</a></li>
+      <li><a href="#tabs-4">{% trans "Gains" %}</a></li>
     </ul>
    
   
@@ -31,6 +32,10 @@
 
   <div id="tabs-3">
     {{table_dividends|safe}}
+  </div>
+
+  <div id="tabs-4">
+    {{table_gains|safe}}
   </div>
 </div>
 

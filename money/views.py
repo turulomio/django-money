@@ -6,7 +6,7 @@ from django.contrib.auth import  login
 from django.shortcuts import render,  redirect, get_object_or_404
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
@@ -14,10 +14,28 @@ from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from django import forms
 
+
 from money.connection_dj import cursor_rows
 from money.forms import SignUpForm, AccountsOperationsForm 
 from money.settingsdb import settingsdb
-from money.tables import TabulatorDividends, TabulatorReportConcepts, TabulatorCreditCardsOperations, TabulatorAccountOperations, TabulatorAccounts, TabulatorBanks, TabulatorConcepts, TabulatorCreditCards, TabulatorInvestments, TabulatorInvestmentsOperations, TabulatorInvestmentsOperationsCurrent, TabulatorOrders, TabulatorReportIncomeTotal, TabulatorReportTotal, TabulatorInvestmentsOperationsHistorical
+from money.tables import (
+    TabulatorDividends, 
+    TabulatorReportConcepts, 
+    TabulatorCreditCardsOperations, 
+    TabulatorAccountOperations, 
+    TabulatorAccounts, 
+    TabulatorBanks, 
+    TabulatorConcepts, 
+    TabulatorCreditCards, 
+    TabulatorInvestments, 
+    TabulatorInvestmentsOperations, 
+    TabulatorInvestmentsOperationsCurrent, 
+    TabulatorOrders, 
+    TabulatorReportIncomeTotal, 
+    TabulatorReportTotal, 
+    TabulatorInvestmentsOperationsHistoricalHomogeneus, 
+    TabulatorInvestmentsOperationsHistoricalHeterogeneus
+)
 from money.tokens import account_activation_token
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end
@@ -34,6 +52,7 @@ from money.listdict import (
     listdict_accountsoperations_from_queryset, 
     listdict_dividends_by_month, 
     listdict_dividends_from_queryset, 
+    listdict_investmentsoperationshistorical, 
 )
 from money.models import (
     Operationstypes, 
@@ -75,7 +94,7 @@ def product_view(request, pk):
 #    table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, oic, investment).render()
 #
 #    oih=cursor_rows("select * from investment_operations_historical({},now());".format(pk))
-#    table_ioh=TabulatorInvestmentsOperationsHistorical("IOH", None, oih, investment).render()
+#    table_ioh=TabulatorInvestmentsOperationsHistoricalHomogeneus("IOH", None, oih, investment).render()
 #
 #    dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
 #    list_dividends=tb_queryset(dividends)        
@@ -317,7 +336,7 @@ def investment_view(request, pk):
    
     table_io=TabulatorInvestmentsOperations("IO", "investmentoperation_update", io, investment, local_zone).render()
     table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, io_current, investment, local_zone).render()
-    table_ioh=TabulatorInvestmentsOperationsHistorical("IOH", None, io_historical, investment, local_zone).render()
+    table_ioh=TabulatorInvestmentsOperationsHistoricalHomogeneus("IOH", None, io_historical, investment, local_zone).render()
 
     qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
     listdict_dividends=listdict_dividends_from_queryset(qs_dividends)
@@ -349,6 +368,10 @@ class investmentoperation_new(CreateView):
   
     def form_valid(self, form):
         form.instance.investments= Investments.objects.get(pk=self.kwargs['investments_id'])
+        self.object = form.save()##This method is used in this way to save an Accountsoperations
+        # do something with self.object
+        # remember the import: from django.http import HttpResponseRedirect
+        return HttpResponseRedirect(self.get_success_url())
         return super().form_valid(form)
 
 @method_decorator(login_required, name='dispatch')
@@ -483,7 +506,8 @@ def report_total_income_details(request, year=date.today().year, month=date.toda
     dividends=listdict_dividends_by_month(year, month)
     table_dividends=TabulatorDividends("table_dividends", None, dividends, local_currency,  local_zone).render()
     
-
+    gains=listdict_investmentsoperationshistorical(year, month, local_currency, local_zone)
+    table_gains=TabulatorInvestmentsOperationsHistoricalHeterogeneus("table_gains", None, gains, local_currency, local_zone).render()
     return render(request, 'report_total_income_details.html', locals())
 
 
