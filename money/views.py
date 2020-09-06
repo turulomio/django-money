@@ -341,18 +341,14 @@ def investment_pairs(request, worse, better, accounts_id):
     for ioc in list_ioc_worse:
         datetimes.append(ioc["datetime"])
     datetimes.sort()
-    
-    for ioc in list_ioc_better:
-        print(ioc)
 
     list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, list_ioc_worse, list_ioc_better, basic_results_worse,  basic_results_better, local_currency, local_zone)
     table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, local_currency, local_zone).render()
     
-    list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, dtaware_month_start(2017, 1, local_zone), basic_results_worse,  basic_results_better, local_currency, local_zone)
+    list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, dtaware_month_start(2012, 1, local_zone), basic_results_worse,  basic_results_better, local_currency, local_zone)
     table_products_pair_evolution_from=TabulatorProductsPairsEvolution("table_products_pair_evolution_from", None, list_products_evolution, local_currency, local_zone).render()
-    
-    gains=listdict_sum(list_ioc_better, "gains_gross_user")+listdict_sum(list_ioc_worse, "gains_gross_user")
     #Variables to next reinvestment calcs
+    gains=listdict_sum(list_ioc_better, "gains_gross_user")+listdict_sum(list_ioc_worse, "gains_gross_user")
     better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
     better_leverages_real=product_better.real_leveraged_multiplier()
     better_average_price=str(Investmentsoperations.invesmentsoperationscurrent_average_price_investment(list_ioc_better)).replace(",", ".")
