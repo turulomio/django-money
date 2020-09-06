@@ -18,25 +18,35 @@
 
 <h2>{% trans "Products evolution" %}</h2>
 {{table_products_pair_evolution|safe}}
+<p>
+{{table_products_pair_evolution_from|safe}}
 
 <h2>{% trans "Loses of next reinvestment" %}</h2>
 
+
+<p><strong>{% trans "Gains" %}: </strong>{{ gains }}</p>
+<p><strong>{% trans "Shares" %}: </strong>{{ better_shares }}</p>
+<p><strong>{% trans "Average price" %}: </strong>{{ better_average_price }}</p>
+
+
+
+<input id="percentage" type="text" name="next" value="2" onchange="calculate_reinvest_loses();" onkeydown="calculate_reinvest_loses();">
+<label id="result" gains="{{gains}}" better_shares="{{better_shares}}" better_average_price="{{better_average_price}}" better_leverages_real="{{better_leverages_real}}"></label>
 <script>
     function calculate_reinvest_loses(){
         var label = document.getElementById('result');
         var input=document.getElementById('percentage');
         var percentage=parseFloat(input.value);
         var shares=parseFloat(label.getAttribute("better_shares"));
+        var gains=parseFloat(label.getAttribute("gains"));
         var average_price=parseFloat(label.getAttribute("better_average_price"));
         var leverage=parseFloat(label.getAttribute("better_leverages_real"));
-        label.innerHTML=shares*average_price*leverage*(percentage/100);
+        var diff=shares*average_price*leverage*(percentage/100) ;
+        label.innerHTML="".concat(gains).concat("-").concat(diff).concat("=").concat(gains-diff).concat(" {{local_currency}}");
     }
     calculate_reinvest_loses();
 
 </script>
-<input id="percentage" type="text" name="next" value="2" onchange="calculate_reinvest_loses();" onkeydown="calculate_reinvest_loses();">
-<label id="result" better_shares="{{better_shares}}" better_average_price="{{better_average_price}}" better_leverages_real="{{better_leverages_real}}">REsultado</label>
-
 
 {% endblock %}
 

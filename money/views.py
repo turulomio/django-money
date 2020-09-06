@@ -58,6 +58,7 @@ from money.listdict import (
     listdict_investmentsoperationshistorical, 
     listdict_investmentsoperationscurrent_homogeneus_merging_same_product, 
     listdict_products_pairs_evolution, 
+    listdict_products_pairs_evolution_from_datetime, 
 )
 from money.models import (
     Operationstypes, 
@@ -345,9 +346,12 @@ def investment_pairs(request, worse, better, accounts_id):
         print(ioc)
 
     list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, list_ioc_worse, list_ioc_better, basic_results_worse,  basic_results_better, local_currency, local_zone)
-
     table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, local_currency, local_zone).render()
     
+    list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, dtaware_month_start(2017, 1, local_zone), basic_results_worse,  basic_results_better, local_currency, local_zone)
+    table_products_pair_evolution_from=TabulatorProductsPairsEvolution("table_products_pair_evolution_from", None, list_products_evolution, local_currency, local_zone).render()
+    
+    gains=listdict_sum(list_ioc_better, "gains_gross_user")+listdict_sum(list_ioc_worse, "gains_gross_user")
     #Variables to next reinvestment calcs
     better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
     better_leverages_real=product_better.real_leveraged_multiplier()

@@ -1,4 +1,4 @@
-
+from datetime import timedelta
 from decimal import Decimal
 from money.connection_dj import  cursor_rows
 from django.utils import timezone
@@ -136,10 +136,9 @@ def listdict_investmentsoperationscurrent_homogeneus_merging_same_product(produc
 
 def listdict_products_pairs_evolution(product_worse, product_better, datetimes, ioc_worse, ioc_better, basic_results_worse,   basic_results_better, local_currency, local_zone):
     l=[]
-    print(basic_results_better)
     for i in range(len(ioc_better)):
-        percentage_year_worse=percentage_between(basic_results_worse["lastyear"], ioc_worse[i]["price_investment"])
-        percentage_year_better=percentage_between(basic_results_better["lastyear"], ioc_better[i]["price_investment"])
+        percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], ioc_worse[i]["price_investment"])
+        percentage_year_better=percentage_between(ioc_better[0]["price_investment"], ioc_better[i]["price_investment"])
         l.append({
             "datetime":ioc_better[i ]["datetime"], 
             "price_ratio":ioc_worse[i]["price_investment"]/ioc_better[i]["price_investment"], 
@@ -147,8 +146,8 @@ def listdict_products_pairs_evolution(product_worse, product_better, datetimes, 
             "percentage_year_better": percentage_year_better, 
             "percentage_year_diff": percentage_year_worse-percentage_year_better, 
         })
-    percentage_year_worse=percentage_between(basic_results_worse["lastyear"], basic_results_worse["last"]) 
-    percentage_year_better=percentage_between(basic_results_better["lastyear"], basic_results_better["last"])
+    percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], basic_results_worse["last"]) 
+    percentage_year_better=percentage_between(ioc_better[0]["price_investment"], basic_results_better["last"])
     l.append({
         "datetime":timezone.now(), 
         "price_ratio": basic_results_worse["last"]/basic_results_better["last"], 
@@ -158,6 +157,26 @@ def listdict_products_pairs_evolution(product_worse, product_better, datetimes, 
         
     })
     l= sorted(l,  key=lambda item: item['datetime'])
+    return l
+
+def listdict_products_pairs_evolution_from_datetime(product_worse, product_better, from_, basic_results_worse,   basic_results_better, local_currency, local_zone):
+    l=[]
+    dt=from_
+    worse_first=product_worse.quote(dt)
+    better_first=product_better.quote(dt)
+    while dt<timezone.now():
+        worse_at_dt=product_worse.quote(dt)
+        better_at_dt=product_better.quote(dt)
+        percentage_year_worse=percentage_between(worse_first["quote"], worse_at_dt["quote"])
+        percentage_year_better=percentage_between(better_first["quote"], better_at_dt["quote"])
+        l.append({
+            "datetime": dt, 
+            "price_ratio":worse_at_dt["quote"]/better_at_dt["quote"], 
+            "percentage_year_worse": percentage_year_worse, 
+            "percentage_year_better": percentage_year_better, 
+            "percentage_year_diff": percentage_year_worse-percentage_year_better, 
+        })
+        dt=dt+timedelta(days=30)
     return l
 
 
