@@ -28,13 +28,15 @@ from money.tables import (
     TabulatorConcepts, 
     TabulatorCreditCards, 
     TabulatorInvestments, 
-    TabulatorInvestmentsOperations, 
-    TabulatorInvestmentsOperationsCurrent, 
+    TabulatorInvestmentsOperationsHomogeneus, 
+    TabulatorInvestmentsOperationsCurrentHomogeneus, 
+    TabulatorInvestmentsOperationsCurrentHeterogeneus, 
     TabulatorOrders, 
     TabulatorReportIncomeTotal, 
     TabulatorReportTotal, 
     TabulatorInvestmentsOperationsHistoricalHomogeneus, 
-    TabulatorInvestmentsOperationsHistoricalHeterogeneus
+    TabulatorInvestmentsOperationsHistoricalHeterogeneus, 
+    TabulatorProductsPairsEvolution, 
 )
 from money.tokens import account_activation_token
 from money.reusing.currency import Currency
@@ -42,6 +44,7 @@ from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_
 from money.reusing.decorators import timeit
 from money.reusing.percentage import Percentage
 #from django.utils.translation import ugettext_lazy as _
+from money.listdict_functions import listdict_sum
 from money.listdict import (
     listdict_accounts, 
     listdict_banks, 
@@ -53,6 +56,8 @@ from money.listdict import (
     listdict_dividends_by_month, 
     listdict_dividends_from_queryset, 
     listdict_investmentsoperationshistorical, 
+    listdict_investmentsoperationscurrent_homogeneus_merging_same_product, 
+    listdict_products_pairs_evolution, 
 )
 from money.models import (
     Operationstypes, 
@@ -88,10 +93,10 @@ def order_view(request, pk):
 def product_view(request, pk):
     product=get_object_or_404(Products, id=pk)
 #    oi=Investmentsoperations.objects.all().filter(investments_id=pk).order_by('datetime')
-#    table_io=TabulatorInvestmentsOperations("IO", "investmentoperation_update", oi, investment).render()
+#    table_io=TabulatorInvestmentsOperationsHomogeneus("IO", "investmentoperation_update", oi, investment).render()
 #    
 #    oic=cursor_rows("select * from investment_operations_current({},now());".format(pk))
-#    table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, oic, investment).render()
+#    table_ioc=TabulatorInvestmentsOperationsCurrentHomogeneus("IOC", None, oic, investment).render()
 #
 #    oih=cursor_rows("select * from investment_operations_historical({},now());".format(pk))
 #    table_ioh=TabulatorInvestmentsOperationsHistoricalHomogeneus("IOH", None, oih, investment).render()
@@ -312,6 +317,44 @@ def investment_list(request,  active):
     return render(request, 'investment_list.html', locals())
     
 @login_required
+def investment_pairs(request, worse, better, accounts_id):
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    product_better=Products.objects.all().filter(id=better)[0]
+    product_worse=Products.objects.all().filter(id=worse)[0]
+    basic_results_better=product_better.basic_results()
+    basic_results_worse=product_worse.basic_results()
+    dict_ot=Operationstypes.dict()
+    account=Accounts.objects.all().filter(id=accounts_id)[0]
+    
+    
+    list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, local_currency, local_zone)
+    
+    table_ioc_better=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_better", None, list_ioc_better, local_currency, local_zone).render()
+    list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, local_currency, local_zone)
+    table_ioc_worse=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_worse", None, list_ioc_worse, local_currency, local_zone).render()
+    
+    datetimes=[]
+    for ioc in list_ioc_better:
+        datetimes.append(ioc["datetime"])
+    for ioc in list_ioc_worse:
+        datetimes.append(ioc["datetime"])
+    datetimes.sort()
+    
+    for ioc in list_ioc_better:
+        print(ioc)
+
+    list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, list_ioc_worse, list_ioc_better, basic_results_worse,  basic_results_better, local_currency, local_zone)
+
+    table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, local_currency, local_zone).render()
+    
+    #Variables to next reinvestment calcs
+    better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
+    better_leverages_real=product_better.real_leveraged_multiplier()
+    better_average_price=str(Investmentsoperations.invesmentsoperationscurrent_average_price_investment(list_ioc_better)).replace(",", ".")
+    return render(request, 'investment_pairs.html', locals())
+
+@login_required
 def investment_view(request, pk):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
     local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
@@ -334,8 +377,8 @@ def investment_view(request, pk):
         
         
    
-    table_io=TabulatorInvestmentsOperations("IO", "investmentoperation_update", io, investment, local_zone).render()
-    table_ioc=TabulatorInvestmentsOperationsCurrent("IOC", None, io_current, investment, local_zone).render()
+    table_io=TabulatorInvestmentsOperationsHomogeneus("IO", "investmentoperation_update", io, investment, local_zone).render()
+    table_ioc=TabulatorInvestmentsOperationsCurrentHomogeneus("IOC", None, io_current, investment, local_zone).render()
     table_ioh=TabulatorInvestmentsOperationsHistoricalHomogeneus("IOH", None, io_historical, investment, local_zone).render()
 
     qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')

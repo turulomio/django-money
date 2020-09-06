@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "Investments pairs" %}</h1>
+
+<h2>{% trans "Information" %}</h2>
+
+<p>Worse: {{product_worse.fullName}}</p>
+<p>Better: {{product_better.fullName}}</p>
+
+<h2>{% trans "Current investment operations" %}</h2>
+
+{{ table_ioc_worse  |safe }}
+<p></p>
+{{table_ioc_better|safe}}
+
+<h2>{% trans "Products evolution" %}</h2>
+{{table_products_pair_evolution|safe}}
+
+<h2>{% trans "Loses of next reinvestment" %}</h2>
+
+<script>
+    function calculate_reinvest_loses(){
+        var label = document.getElementById('result');
+        var input=document.getElementById('percentage');
+        var percentage=parseFloat(input.value);
+        var shares=parseFloat(label.getAttribute("better_shares"));
+        var average_price=parseFloat(label.getAttribute("better_average_price"));
+        var leverage=parseFloat(label.getAttribute("better_leverages_real"));
+        label.innerHTML=shares*average_price*leverage*(percentage/100);
+    }
+    calculate_reinvest_loses();
+
+</script>
+<input id="percentage" type="text" name="next" value="2" onchange="calculate_reinvest_loses();" onkeydown="calculate_reinvest_loses();">
+<label id="result" better_shares="{{better_shares}}" better_average_price="{{better_average_price}}" better_leverages_real="{{better_leverages_real}}">REsultado</label>
+
+
+{% endblock %}
+

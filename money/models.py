@@ -17,6 +17,7 @@ from money.reusing.currency import Currency, currency_symbol
 from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows
 from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware
 from money.reusing.percentage import Percentage
+from money.listdict_functions import listdict_average_ponderated
 
 from xulpymoney.libxulpymoneytypes import eProductType
 
@@ -358,6 +359,9 @@ class Investmentsoperations(models.Model):
             return Percentage()
         return Percentage(d_ioc['gains_gross_investment'], d_ioc["invested_investment"])
 
+    #Investment price 
+    def invesmentsoperationscurrent_average_price_investment(listdict_ioc, price_key="price_user"):
+        return listdict_average_ponderated(listdict_ioc, "shares", price_key)
 
 class Leverages(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -460,6 +464,8 @@ class Products(models.Model):
             return self.leverages.multiplier
         return 1
 
+    def quote(self, dt):
+        return cursor_one_row("select * from quote(%s,%s)", (self.id, dt ))
 class Productstypes(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.TextField()

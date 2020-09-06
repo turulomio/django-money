@@ -10,6 +10,7 @@ from money.models import (
     Concepts, 
     Dividends, 
     Investments, 
+    Investmentsoperations, 
     Operationstypes, 
     balance_user_by_operationstypes, 
     get_investmentsoperations_totals_of_all_investments, 
@@ -23,12 +24,6 @@ from money.reusing.percentage import percentage_between, Percentage
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
 
-def listdict_sum(listdict, key):
-    r=0
-    for d in listdict:
-        r=r+d[key]
-    return r
-        
 
 def listdict_accounts(queryset):    
     
@@ -118,6 +113,52 @@ def listdict_investmentsoperationshistorical(year, month, local_currency, local_
                 ioh["years"]=0
                 list_ioh.append(ioh)
     return list_ioh
+    
+    
+## Gets all ioh from all investments 
+def listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product, account, dt, basic_results, local_currency, local_zone):
+    #Git investments with investmentsoperations in this year, month
+    list_ioc=[]
+    dict_ot=Operationstypes.dict()
+    for investment in Investments.objects.raw("select distinct(investments.*) from investmentsoperations, investments where datetime <=%s and investments.products_id=%s and investments.accounts_id=%s and investments.id=investmentsoperations.investments_id", (dt,  product.id, account.id)):
+        io, io_current, io_historical=investment.get_investmentsoperations(dt, local_currency)
+        
+        for ioc in io_current:
+            ioc["name"]=investment.fullName()
+            ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
+            ioc["percentage_annual"]=Investmentsoperations.investmentsoperationscurrent_percentage_annual(ioc, basic_results)
+            ioc["percentage_apr"]=Investmentsoperations.investmentsoperationscurrent_percentage_apr(ioc)
+            ioc["percentage_total"]=Investmentsoperations.investmentsoperationscurrent_percentage_total(ioc)
+            ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
+            list_ioc.append(ioc)
+    return list_ioc
+
+
+def listdict_products_pairs_evolution(product_worse, product_better, datetimes, ioc_worse, ioc_better, basic_results_worse,   basic_results_better, local_currency, local_zone):
+    l=[]
+    print(basic_results_better)
+    for i in range(len(ioc_better)):
+        percentage_year_worse=percentage_between(basic_results_worse["lastyear"], ioc_worse[i]["price_investment"])
+        percentage_year_better=percentage_between(basic_results_better["lastyear"], ioc_better[i]["price_investment"])
+        l.append({
+            "datetime":ioc_better[i ]["datetime"], 
+            "price_ratio":ioc_worse[i]["price_investment"]/ioc_better[i]["price_investment"], 
+            "percentage_year_worse": percentage_year_worse, 
+            "percentage_year_better": percentage_year_better, 
+            "percentage_year_diff": percentage_year_worse-percentage_year_better, 
+        })
+    percentage_year_worse=percentage_between(basic_results_worse["lastyear"], basic_results_worse["last"]) 
+    percentage_year_better=percentage_between(basic_results_better["lastyear"], basic_results_better["last"])
+    l.append({
+        "datetime":timezone.now(), 
+        "price_ratio": basic_results_worse["last"]/basic_results_better["last"], 
+        "percentage_year_worse": percentage_year_worse, 
+        "percentage_year_better": percentage_year_better, 
+        "percentage_year_diff": percentage_year_worse-percentage_year_better, 
+        
+    })
+    l= sorted(l,  key=lambda item: item['datetime'])
+    return l
 
 
 def listdict_report_total_income(qs_investments, year, local_currency, local_zone):

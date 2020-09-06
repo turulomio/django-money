@@ -59,6 +59,8 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('investment/view/<slug:pk>/', money_views.investment_view, name='investment_view'),
     path('investment/update/<int:pk>', money_views.investment_update.as_view(), name='investment_update'),
     
+    path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/', money_views.investment_pairs, name='investment_pairs'),
+    
     path('investmentoperation/new/<int:investments_id>/', money_views.investmentoperation_new.as_view(), name='investmentoperation_new'),
     path('investmentoperation/update/<int:pk>', money_views.investmentoperation_update.as_view(), name='investmentoperation_update'),
     path('investmentoperation/delete/<int:pk>', money_views.investmentoperation_delete.as_view(), name='investmentoperation_delete'),
