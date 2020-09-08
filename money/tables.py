@@ -79,6 +79,7 @@ class TabulatorInvestments(TabulatorFromListDict):
         self.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
         self.setInitialOptions("""
     initialSort:[
+    {column:"gains", dir:"desc"}, //then sort by this second
     {column:"percentage_sellingpoint", dir:"asc"}, //sort by this first
     ],""")
 
