@@ -112,6 +112,7 @@ def listdict_investmentsoperationshistorical(year, month, local_currency, local_
                 ioh["operationstypes"]=dict_ot[ioh["operationstypes_id"]]
                 ioh["years"]=0
                 list_ioh.append(ioh)
+    list_ioh= sorted(list_ioh,  key=lambda item: item['dt_end'])
     return list_ioh
     
     
