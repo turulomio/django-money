@@ -15,6 +15,10 @@ def my_context(request):
     grReport.append(Action(_("Total"), None, "report_total", True))
     grAdministration=Group(1, _("Management"), "20",  True)
     grAdministration.append(Action(_("Concepts"), None, "concept_list", True))
+    grProducts=Group(1, _("Products"), "10",  True)
+    grProducts.append(Action(_("Search"), None, "product_list", True))
+    
+    menu.append(grProducts)
     menu.append(grReport)
     menu.append(grAdministration)
 

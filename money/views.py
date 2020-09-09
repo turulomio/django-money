@@ -31,6 +31,7 @@ from money.tables import (
     TabulatorInvestmentsOperationsHomogeneus, 
     TabulatorInvestmentsOperationsCurrentHomogeneus, 
     TabulatorInvestmentsOperationsCurrentHeterogeneus, 
+    TabulatorProducts, 
     TabulatorOrders, 
     TabulatorReportIncomeTotal, 
     TabulatorReportTotal, 
@@ -43,7 +44,7 @@ from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end
 from money.reusing.decorators import timeit
 from money.reusing.percentage import Percentage
-#from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from money.listdict_functions import listdict_sum
 from money.listdict import (
     listdict_accounts, 
@@ -90,6 +91,24 @@ def order_list(request,  active):
 def order_view(request, pk):
     order=get_object_or_404(Orders, id=pk)
     return render(request, 'order_view.html', locals())
+    
+@login_required
+def product_list(request):
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    search = request.GET.get('search')
+    if search!=None:
+        listproducts=[]
+        searchtitle=_("Searching products that contain '{}' in database").format(search)
+        for row in cursor_rows("select id, name from products where name ilike %s;", ( f"%%{search}%%", )):
+            row["code"]=row["id"]
+            listproducts.append(row)
+            
+            
+
+        table_products=TabulatorProducts("table_products", 'product_view', listproducts, local_currency, local_zone ).render()
+    return render(request, 'product_list.html', locals())
+
 @login_required
 def product_view(request, pk):
     product=get_object_or_404(Products, id=pk)

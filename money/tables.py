@@ -116,6 +116,16 @@ class TabulatorInvestmentsOperationsHistoricalHomogeneus(TabulatorFromListDict):
         self.setTypes("int","datetime", "int",  "str", "Decimal", investment.products.currency, investment.products.currency, investment.products.currency, investment.products.currency, investment.products.currency, investment.products.currency)
         self.setBottomCalc(None, None, None,None, None, "sum", "sum", "sum", "sum", "sum", "sum")
 
+class TabulatorProducts(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, local_currency, local_zone):
+        TabulatorFromListDict.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setLocalZone(local_zone)
+        self.setListDict(listdict)
+        self.setFields("id",  "code","name")
+        self.setHeaders(_("Id"), _("Code"),  _("Name"))
+        self.setTypes("int", "int","str")
+
 class TabulatorProductsPairsEvolution(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, investment, local_zone):
         TabulatorFromListDict.__init__(self, name)
