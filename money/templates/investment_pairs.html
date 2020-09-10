@@ -16,6 +16,36 @@
 <p></p>
 {{table_ioc_better|safe}}
 
+
+<h2>{% trans "Next investment calculator" %}</h2>
+
+
+<p><strong>{% trans "Better product has invested" %}: </strong><label id="better_current_nominal">0</label> {{product_better.currency}}</p>
+<p><strong>{% trans "Worse product has invested" %} : </strong><label id="better_worst_nominal">0</label> {{product_worse.currency}}</p>
+<label>New amount in {{local_currency}}: </label>
+<input id="percentage" type="text" name="next" value="15000" onchange="calculate_shares_to_invest();" onkeydown="calculate_shares_to_invest();">
+<p><strong>Better reinvest nominal. </strong><label id="better_reinvest_nominal">0</label> {{product_better.currency}}</p>
+<p><strong>Worse reinvest nominal. </strong><label id="worse_reinvest_nominal">0</label> {{product_worse.currency}}</p>
+<p><strong>Better total new nominal. </strong><label id="better_total_new_nominal">0</label> {{product_better.currency}}</p>
+<p><strong>Worse total new nominal. </strong><label id="worse_total_new_nominal">0</label> {{product_worse.currency}}</p>
+<p><strong>Better shares amount. </strong><label id="better_reinvest_shares">0</label></p>
+<p><strong>Worse shares amount. </strong><label id="worse_reinvest_shares">0</label></p>
+<script>
+    function calculate_shares_to_invest(){
+        var label = document.getElementById('result');
+        var input=document.getElementById('percentage');
+        var percentage=parseFloat(input.value);
+        var shares=parseFloat(label.getAttribute("better_shares"));
+        var gains=parseFloat(label.getAttribute("gains"));
+        var average_price=parseFloat(label.getAttribute("better_average_price"));
+        var leverage=parseFloat(label.getAttribute("better_leverages_real"));
+        var diff=shares*average_price*leverage*(percentage/100) ;
+        label.innerHTML="".concat(gains).concat("-").concat(diff).concat("=").concat(gains-diff).concat(" {{local_currency}}");
+    }
+    calculate_reinvest_loses();
+
+</script>
+
 <h2>{% trans "Products evolution" %}</h2>
 {{table_products_pair_evolution|safe}}
 <p>
