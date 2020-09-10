@@ -1,12 +1,6 @@
 {% extends "base.html" %}
 
-{% load static %}
-{% load random_numbers %}
 {% load i18n %}
-
-{% block head_js_section %}
-<script type="text/javascript" src='{% static "js/component.pairsnextoperation.js" %}?dev={% random_integer 0 10000 %}'></script>
-{% endblock %}
 
 {% block content %}
 <h1>{% trans "Investments pairs" %}</h1>
@@ -24,6 +18,35 @@
 
 
 <h2>{% trans "Next investment calculator" %}</h2>
+
+<form class="normal" method="post" id="form_invest">{% csrf_token %}
+    <label>{% trans "Please set the amount to invest "%}</label>
+    <input id="amount" value="1000"></input>
+    <label> {{local_currency}}</label>
+    <button id="button_invest" type="submit">{% trans "Calculate" %}</button>
+</form>
+<div id="form_invest_result"></div>
+<script>
+$(document).ready(function() {
+  $("#button_invest").click(function(e) {
+    var amount=$("#amount").val();
+    e.preventDefault();
+    $.ajax({
+      type: "POST",
+      url: "{% url 'ajax_investment_pairs_invest' product_worse.id product_better.id account.id 9999999999 %}".replace("9999999999", amount),
+      data: {
+            csrfmiddlewaretoken: "{{csrf_token}}",
+      },
+      success: function(result) {
+        $("#form_invest_result").html(result);
+      },
+      error: function(result) {
+        $("#form_invest_result").html('<p>{% trans "Somethng is wrong" %}</p>');
+      }
+    });
+  });
+});
+</script>
 
 {{pairs_new_operation|safe}}
 

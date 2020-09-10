@@ -20,7 +20,7 @@
 
 
 
-<form method="post" id="form_income">{% csrf_token %}
+<form class="normal" method="post" id="form_income">{% csrf_token %}
 <button id="button_income" type="submit">{% trans "Get income report" %}</button>
 </form>
 
@@ -31,7 +31,7 @@ $(document).ready(function() {
     e.preventDefault();
     $.ajax({
       type: "POST",
-      url: "{% url 'report_total_income__div' year %}",
+      url: "{% url 'ajax_report_total_income' year %}",
       data: {
             csrfmiddlewaretoken: "{{csrf_token}}",
       },

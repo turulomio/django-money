@@ -142,7 +142,7 @@ form{
     display: inline-block;
 }
 
-form.checkbox_selection{
+form.checkbox_selection, form.normal{
     background: none;
     border-radius: none;
     border: none;

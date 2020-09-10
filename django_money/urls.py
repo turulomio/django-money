@@ -60,6 +60,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('investment/update/<int:pk>', money_views.investment_update.as_view(), name='investment_update'),
     
     path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/', money_views.investment_pairs, name='investment_pairs'),
+    path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/<int:amount>/', money_views.ajax_investment_pairs_invest, name='ajax_investment_pairs_invest'),
     
     path('investmentoperation/new/<int:investments_id>/', money_views.investmentoperation_new.as_view(), name='investmentoperation_new'),
     path('investmentoperation/update/<int:pk>', money_views.investmentoperation_update.as_view(), name='investmentoperation_update'),
@@ -80,7 +81,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('report/concepts/<int:year>/<int:month>/',  money_views.report_concepts,  name='report_concepts'), 
     path('report/total/', money_views.report_total,  name='report_total'),
     path('report/total/<int:year>/', money_views.report_total,  name='report_total'),
-    path('report/total/div/income/<int:year>/', money_views.report_total_income__div,  name='report_total_income__div'),
+    path('report/total/div/income/<int:year>/', money_views.ajax_report_total_income,  name='ajax_report_total_income'),
     path('report/total/income/details/', money_views.report_total_income_details,  name='report_total_income_details'),
     path('report/total/income/details/<int:year>/<int:month>/', money_views.report_total_income_details,  name='report_total_income_details'),
     

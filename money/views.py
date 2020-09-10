@@ -1,4 +1,5 @@
 from datetime import  date
+from decimal import Decimal
 
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -13,6 +14,8 @@ from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from django import forms
+
+from math import floor
 
 
 from money.connection_dj import cursor_rows
@@ -38,6 +41,7 @@ from money.tables import (
     TabulatorInvestmentsOperationsHistoricalHomogeneus, 
     TabulatorInvestmentsOperationsHistoricalHeterogeneus, 
     TabulatorProductsPairsEvolution, 
+    TabulatorInvestmentsPairsInvestCalculator, 
 )
 from money.tokens import account_activation_token
 from money.reusing.currency import Currency
@@ -47,7 +51,6 @@ from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict_functions import listdict_sum
 from money.listdict import (
-    component_pairs_next_operation, 
     listdict_accounts, 
     listdict_banks, 
     listdict_investments, 
@@ -371,10 +374,51 @@ def investment_pairs(request, worse, better, accounts_id):
     better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
     better_leverages_real=product_better.real_leveraged_multiplier()
     better_average_price=str(Investmentsoperations.invesmentsoperationscurrent_average_price_investment(list_ioc_better)).replace(",", ".")
-    #Dictionary to next pair operation
-    pairs_new_operation=component_pairs_next_operation(product_better, product_worse, list_ioc_better, list_ioc_worse, local_currency)
     return render(request, 'investment_pairs.html', locals())
 
+
+@login_required
+def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
+    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    product_better=Products.objects.all().filter(id=better)[0]
+    product_worse=Products.objects.all().filter(id=worse)[0]
+    basic_results_better=product_better.basic_results()
+    basic_results_worse=product_worse.basic_results()
+    account=Accounts.objects.all().filter(id=accounts_id)[0]    
+    list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, local_currency, local_zone)
+    list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, local_currency, local_zone)
+
+    listdict=[]
+    better_shares=round(amount/basic_results_better["last"]/product_better.real_leveraged_multiplier(), 2)
+    better_current=listdict_sum(list_ioc_better, "invested_user")
+    better_invest= better_shares*basic_results_better["last"]*product_better.real_leveraged_multiplier()
+    better_total=better_current+better_invest
+    listdict.append({   
+        'name': product_better.name, 
+        'last_datetime': basic_results_better["last_datetime"], 
+        'last': basic_results_better["last"], 
+        'current': better_current, 
+        'invest': better_invest, 
+        'total': better_total, 
+        'shares': better_shares, 
+      })    
+    
+    worse_current=abs(listdict_sum(list_ioc_worse, "invested_user"))
+    worse_shares=Decimal(floor((better_total-worse_current)/basic_results_worse["last"]/product_worse.real_leveraged_multiplier()/Decimal(0.01))*Decimal(0.01))#Sifnificance
+    worse_invest= worse_shares*basic_results_worse["last"]*product_worse.real_leveraged_multiplier()
+    listdict.append({   
+        'name': product_worse.name, 
+        'last_datetime': basic_results_worse["last_datetime"], 
+        'last': basic_results_worse["last"], 
+        'current': worse_current, 
+        'invest': worse_invest, 
+        'total': worse_current+worse_invest,
+        'shares': worse_shares, 
+      })
+    table_calculator=TabulatorInvestmentsPairsInvestCalculator("table_calculator", None, listdict, local_currency, local_zone).render()
+    return HttpResponse(table_calculator)
+    
 @login_required
 def investment_view(request, pk):
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
@@ -546,7 +590,7 @@ def report_total(request, year=date.today().year):
 
 @timeit
 @login_required
-def report_total_income__div(request, year=date.today().year):
+def ajax_report_total_income(request, year=date.today().year):
     start=timezone.now()
     local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
     local_zone=settingsdb("mem/localzone")# perhaps i could acces context??

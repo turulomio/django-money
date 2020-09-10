@@ -82,6 +82,15 @@ class TabulatorInvestments(TabulatorFromListDict):
     {column:"gains", dir:"desc"}, //then sort by this second
     {column:"percentage_sellingpoint", dir:"asc"}, //sort by this first
     ],""")
+class TabulatorInvestmentsPairsInvestCalculator(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, local_currency, local_zone):
+        TabulatorFromListDict.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setListDict(listdict)    
+        self.setFields("name", "last_datetime","last","current", "invest",  "total", "shares")
+        self.setHeaders(_("Investment name"), _("Last quote update"),  _("Last quote"), _("Currently invested"),  _("New inversion"), _("Final inversion"), _("Shares to invest"))
+        self.setTypes("str", "datetime", "Decimal", local_currency,local_currency,local_currency,"Decimal")
+        self.setBottomCalc(None, None, None,  "sum", "sum", "sum", None)
 
 class TabulatorInvestmentsOperationsCurrentHomogeneus(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, investment, local_zone):
