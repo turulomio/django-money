@@ -4,7 +4,7 @@ from money.connection_dj import  cursor_rows
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from xulpymoney.libxulpymoneytypes import eOperationType
-
+from money.listdict_functions import listdict_sum
 from money.models import (
     Accounts, 
     Concepts, 
@@ -18,11 +18,27 @@ from money.models import (
     currencies_in_accounts, 
     qs_investments_netgains_usercurrency_in_year_month, 
 )
+from money.reusing.currency import currency_symbol
 from money.reusing.datetime_functions import dtaware_month_end
-
 from money.reusing.percentage import percentage_between, Percentage
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
+
+
+def component_pairs_next_operation(better, worse, ioc_better, ioc_worse, local_currency):
+    label_string=_(f"Select an amount to reinvest in {local_currency}")
+    better_current=listdict_sum(ioc_better, "invested_user")
+    worse_current=listdict_sum(ioc_worse, "invested_user")
+    return f"""
+    <pairs-next-operation 
+better_currency=" {currency_symbol(better.currency)}"
+worse_currency=" {currency_symbol(worse.currency)}"
+label_string="{label_string}"
+better_current="{better_current}"
+worse_current="{worse_current}"
+>
+</pairs-next-operation>
+"""
 
 
 def listdict_accounts(queryset):    

@@ -47,6 +47,7 @@ from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict_functions import listdict_sum
 from money.listdict import (
+    component_pairs_next_operation, 
     listdict_accounts, 
     listdict_banks, 
     listdict_investments, 
@@ -347,7 +348,6 @@ def investment_pairs(request, worse, better, accounts_id):
     dict_ot=Operationstypes.dict()
     account=Accounts.objects.all().filter(id=accounts_id)[0]
     
-    
     list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, local_currency, local_zone)
     
     table_ioc_better=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_better", None, list_ioc_better, local_currency, local_zone).render()
@@ -366,11 +366,13 @@ def investment_pairs(request, worse, better, accounts_id):
     
     list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, dtaware_month_start(2012, 1, local_zone), basic_results_worse,  basic_results_better, local_currency, local_zone)
     table_products_pair_evolution_from=TabulatorProductsPairsEvolution("table_products_pair_evolution_from", None, list_products_evolution, local_currency, local_zone).render()
-    #Variables to next reinvestment calcs
+    #Variables to calculate reinvest loses
     gains=listdict_sum(list_ioc_better, "gains_gross_user")+listdict_sum(list_ioc_worse, "gains_gross_user")
     better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
     better_leverages_real=product_better.real_leveraged_multiplier()
     better_average_price=str(Investmentsoperations.invesmentsoperationscurrent_average_price_investment(list_ioc_better)).replace(",", ".")
+    #Dictionary to next pair operation
+    pairs_new_operation=component_pairs_next_operation(product_better, product_worse, list_ioc_better, list_ioc_worse, local_currency)
     return render(request, 'investment_pairs.html', locals())
 
 @login_required
