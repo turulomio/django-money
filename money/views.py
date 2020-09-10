@@ -17,10 +17,8 @@ from django import forms
 
 from math import floor
 
-
 from money.connection_dj import cursor_rows
 from money.forms import SignUpForm, AccountsOperationsForm 
-from money.settingsdb import settingsdb
 from money.tables import (
     TabulatorDividends, 
     TabulatorReportConcepts, 
@@ -98,8 +96,6 @@ def order_view(request, pk):
     
 @login_required
 def product_list(request):
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     search = request.GET.get('search')
     if search!=None:
         listproducts=[]
@@ -107,10 +103,8 @@ def product_list(request):
         for row in cursor_rows("select id, name from products where name ilike %s;", ( f"%%{search}%%", )):
             row["code"]=row["id"]
             listproducts.append(row)
-            
-            
 
-        table_products=TabulatorProducts("table_products", 'product_view', listproducts, local_currency, local_zone ).render()
+        table_products=TabulatorProducts("table_products", 'product_view', listproducts, request.globals["mem/localcurrency"], request.globals["mem/localzone"] ).render()
     return render(request, 'product_list.html', locals())
 
 @login_required
@@ -190,24 +184,29 @@ def error_403(request, exception):
 ## @todo Limit search minimum 3 and maximum 50
 ## @todo Add a tab Widget, author, books, valorations with number in ttab
 def home(request):
+    print(request)
+    print(dir(request))
+    print(request.hola)
+    
+    
     return render(request, 'home.html', locals())
 
 @login_required
 def bank_list(request,  active):
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    
     banks= Banks.objects.all().filter(active=active).order_by('name')
-    banks_list=listdict_banks(banks, timezone.now(), active, local_currency)
-    table_banks=TabulatorBanks("table_banks", 'bank_view', banks_list, local_currency).render()
+    banks_list=listdict_banks(banks, timezone.now(), active, request.globals["mem/localcurrency"])
+    table_banks=TabulatorBanks("table_banks", 'bank_view', banks_list, request.globals["mem/localcurrency"]).render()
     return render(request, 'bank_list.html', locals())
 
 @login_required
 def account_list(request,  active=True):
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
+    
     
     accounts= Accounts.objects.all().filter(active=active).order_by('name')
     list_accounts=listdict_accounts(accounts)
     
-    table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, local_currency).render()
+    table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, request.globals["mem/localcurrency"]).render()
     table_accounts=table_accounts.replace(', field:"balance"', ', field:"balance", align:"right"')
     return render(request, 'account_list.html', locals())
         
@@ -217,14 +216,14 @@ def account_list(request,  active=True):
 def account_view(request, pk, year=date.today().year, month=date.today().month): 
     year_start=1970
     year_end=date.today().year + 10
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    
     account=get_object_or_404(Accounts, pk=pk)
     
-    dt_initial=dtaware_month_start(year, month, local_zone)
+    dt_initial=dtaware_month_start(year, month, request.globals["mem/localzone"])
     initial_balance=float(account.balance( dt_initial)[0].amount)
     qsaccountoperations= Accountsoperations.objects.all().filter(accounts_id=pk, datetime__year=year, datetime__month=month).order_by('datetime')
     listdic_accountsoperations=listdict_accountsoperations_from_queryset(qsaccountoperations, initial_balance)
-    table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", listdic_accountsoperations, account.currency, local_zone).render()
+    table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", listdic_accountsoperations, account.currency, request.globals["mem/localzone"]).render()
   
     creditcards= Creditcards.objects.all().filter(accounts_id=pk, active=True).order_by('name')
     table_creditcards=TabulatorCreditCards("table_creditcards", "creditcard_view", creditcards, account).render()
@@ -332,18 +331,15 @@ class accountoperation_delete(DeleteView):
 
 @login_required
 def investment_list(request,  active):
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
     investments= Investments.objects.all().filter(active=active).order_by('name')
-    listdict=listdict_investments(investments, timezone.now(), local_currency, active)
-    table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, local_currency, active, local_zone).render()
-
+    listdict=listdict_investments(investments, timezone.now(), request.globals["mem/localcurrency"], active)
+    table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, request.globals["mem/localcurrency"], active, request.globals["mem/localzone"]).render()
     return render(request, 'investment_list.html', locals())
     
 @login_required
 def investment_pairs(request, worse, better, accounts_id):
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    
+    
     product_better=Products.objects.all().filter(id=better)[0]
     product_worse=Products.objects.all().filter(id=worse)[0]
     basic_results_better=product_better.basic_results()
@@ -351,11 +347,11 @@ def investment_pairs(request, worse, better, accounts_id):
     dict_ot=Operationstypes.dict()
     account=Accounts.objects.all().filter(id=accounts_id)[0]
     
-    list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, local_currency, local_zone)
+    list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, request.globals["mem/localcurrency"], request.globals["mem/localzone"])
     
-    table_ioc_better=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_better", None, list_ioc_better, local_currency, local_zone).render()
-    list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, local_currency, local_zone)
-    table_ioc_worse=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_worse", None, list_ioc_worse, local_currency, local_zone).render()
+    table_ioc_better=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_better", None, list_ioc_better, request.globals["mem/localcurrency"], request.globals["mem/localzone"]).render()
+    list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, request.globals["mem/localcurrency"], request.globals["mem/localzone"])
+    table_ioc_worse=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_worse", None, list_ioc_worse, request.globals["mem/localcurrency"], request.globals["mem/localzone"]).render()
     
     datetimes=[]
     for ioc in list_ioc_better:
@@ -364,11 +360,11 @@ def investment_pairs(request, worse, better, accounts_id):
         datetimes.append(ioc["datetime"])
     datetimes.sort()
 
-    list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, list_ioc_worse, list_ioc_better, basic_results_worse,  basic_results_better, local_currency, local_zone)
-    table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, local_currency, local_zone).render()
+    list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, list_ioc_worse, list_ioc_better, basic_results_worse,  basic_results_better, request.globals["mem/localcurrency"], request.globals["mem/localzone"])
+    table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, request.globals["mem/localcurrency"], request.globals["mem/localzone"]).render()
     
-    list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, dtaware_month_start(2012, 1, local_zone), basic_results_worse,  basic_results_better, local_currency, local_zone)
-    table_products_pair_evolution_from=TabulatorProductsPairsEvolution("table_products_pair_evolution_from", None, list_products_evolution, local_currency, local_zone).render()
+    list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, dtaware_month_start(2012, 1, request.globals["mem/localzone"]), basic_results_worse,  basic_results_better, request.globals["mem/localcurrency"], request.globals["mem/localzone"])
+    table_products_pair_evolution_from=TabulatorProductsPairsEvolution("table_products_pair_evolution_from", None, list_products_evolution, request.globals["mem/localcurrency"], request.globals["mem/localzone"]).render()
     #Variables to calculate reinvest loses
     gains=listdict_sum(list_ioc_better, "gains_gross_user")+listdict_sum(list_ioc_worse, "gains_gross_user")
     better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
@@ -379,15 +375,15 @@ def investment_pairs(request, worse, better, accounts_id):
 
 @login_required
 def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    
+    
     product_better=Products.objects.all().filter(id=better)[0]
     product_worse=Products.objects.all().filter(id=worse)[0]
     basic_results_better=product_better.basic_results()
     basic_results_worse=product_worse.basic_results()
     account=Accounts.objects.all().filter(id=accounts_id)[0]    
-    list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, local_currency, local_zone)
-    list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, local_currency, local_zone)
+    list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, request.globals["mem/localcurrency"], request.globals["mem/localzone"])
+    list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, request.globals["mem/localcurrency"], request.globals["mem/localzone"])
 
     listdict=[]
     better_shares=round(amount/basic_results_better["last"]/product_better.real_leveraged_multiplier(), 2)
@@ -416,17 +412,17 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
         'total': worse_current+worse_invest,
         'shares': worse_shares, 
       })
-    table_calculator=TabulatorInvestmentsPairsInvestCalculator("table_calculator", None, listdict, local_currency, local_zone).render()
+    table_calculator=TabulatorInvestmentsPairsInvestCalculator("table_calculator", None, listdict, request.globals["mem/localcurrency"], request.globals["mem/localzone"]).render()
     return HttpResponse(table_calculator)
     
 @login_required
 def investment_view(request, pk):
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    
+    
     investment=get_object_or_404(Investments, id=pk)
     basic_results=investment.products.basic_results()
     dict_ot=Operationstypes.dict()
-    io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), local_currency)
+    io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), request.globals["mem/localcurrency"])
     
     for ioc in io_current:
         ioc["percentage_annual"]=Investmentsoperations.investmentsoperationscurrent_percentage_annual(ioc, basic_results)
@@ -442,13 +438,13 @@ def investment_view(request, pk):
         
         
    
-    table_io=TabulatorInvestmentsOperationsHomogeneus("IO", "investmentoperation_update", io, investment, local_zone).render()
-    table_ioc=TabulatorInvestmentsOperationsCurrentHomogeneus("IOC", None, io_current, investment, local_zone).render()
-    table_ioh=TabulatorInvestmentsOperationsHistoricalHomogeneus("IOH", None, io_historical, investment, local_zone).render()
+    table_io=TabulatorInvestmentsOperationsHomogeneus("IO", "investmentoperation_update", io, investment, request.globals["mem/localzone"]).render()
+    table_ioc=TabulatorInvestmentsOperationsCurrentHomogeneus("IOC", None, io_current, investment, request.globals["mem/localzone"]).render()
+    table_ioh=TabulatorInvestmentsOperationsHistoricalHomogeneus("IOH", None, io_historical, investment, request.globals["mem/localzone"]).render()
 
     qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
     listdict_dividends=listdict_dividends_from_queryset(qs_dividends)
-    table_dividends=TabulatorDividends("table_dividends", None, listdict_dividends, investment.accounts.currency,  local_zone).render()
+    table_dividends=TabulatorDividends("table_dividends", None, listdict_dividends, investment.accounts.currency,  request.globals["mem/localzone"]).render()
    
     return render(request, 'investment_view.html', locals())
 
@@ -543,17 +539,17 @@ class bank_update(UpdateView):
 @login_required
 def bank_view(request, pk):
     bank=get_object_or_404(Banks, pk=pk)
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    
+    
 
     investments=bank.investments(True)
-    listdic=listdict_investments(investments, timezone.now(), local_currency, True)
-    table_investments=TabulatorInvestments("table_investments", "investment_view", listdic, local_currency, True, local_zone).render()
+    listdic=listdict_investments(investments, timezone.now(), request.globals["mem/localcurrency"], True)
+    table_investments=TabulatorInvestments("table_investments", "investment_view", listdic, request.globals["mem/localcurrency"], True, request.globals["mem/localzone"]).render()
     
 
     accounts= bank.accounts(True)
     list_accounts=listdict_accounts(accounts)
-    table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, local_currency).render()
+    table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, request.globals["mem/localcurrency"]).render()
     return render(request, 'bank_view.html', locals())
     
 
@@ -568,21 +564,20 @@ def report_total(request, year=date.today().year):
     year_start=1970
     year_end=date.today().year + 10
     start=timezone.now()
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    
     qs_investments=Investments.objects.all()
     qs_accounts=Accounts.objects.all()
     print("Loading querysets took {}".format(timezone.now()-start))
-    last_year=dtaware_month_end(year-1, 12, local_zone)
+    last_year=dtaware_month_end(year-1, 12, request.globals["mem/localzone"])
     
     start=timezone.now()
-    last_year_balance=total_balance(last_year, local_currency)['total_user']
-    str_last_year_balance=Currency(last_year_balance, local_currency).string()
+    last_year_balance=total_balance(last_year, request.globals["mem/localcurrency"])['total_user']
+    str_last_year_balance=Currency(last_year_balance, request.globals["mem/localcurrency"]).string()
     print("Loading alltotals last_year took {}".format(timezone.now()-start))
     
     start=timezone.now()
-    list_report=listdict_report_total(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone)
-    table_report_total=TabulatorReportTotal("table_report_total", None, list_report, local_currency).render()
+    list_report=listdict_report_total(qs_investments, qs_accounts, year, last_year_balance, request.globals["mem/localcurrency"], request.globals["mem/localzone"])
+    table_report_total=TabulatorReportTotal("table_report_total", None, list_report, request.globals["mem/localcurrency"]).render()
     print("Loading list report took {}".format(timezone.now()-start))
     
     return render(request, 'report_total.html', locals())
@@ -592,30 +587,28 @@ def report_total(request, year=date.today().year):
 @login_required
 def ajax_report_total_income(request, year=date.today().year):
     start=timezone.now()
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    
     qs_investments=Investments.objects.all()
-    list_report2=listdict_report_total_income(qs_investments, year, local_currency, local_zone)
-    table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", "report_total_income_details", list_report2, local_currency).render()
+    list_report2=listdict_report_total_income(qs_investments, year, request.globals["mem/localcurrency"], request.globals["mem/localzone"])
+    table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", "report_total_income_details", list_report2, request.globals["mem/localcurrency"]).render()
     print("Loading list report income took {}".format(timezone.now()-start))
     return HttpResponse(table_report_total_income)
 
 @timeit
 @login_required
 def report_total_income_details(request, year=date.today().year, month=date.today()):
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+  
     
-    expenses=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 2,  local_currency, local_zone)
-    table_expenses=TabulatorAccountOperations("table_expenses", None, expenses, local_currency,  local_zone).render()
-    incomes=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 1,  local_currency, local_zone)
-    table_incomes=TabulatorAccountOperations("table_incomes", None, incomes, local_currency,  local_zone).render()
+    expenses=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 2,  request.globals["mem/localcurrency"], request.globals["mem/localzone"])
+    table_expenses=TabulatorAccountOperations("table_expenses", None, expenses, request.globals["mem/localcurrency"],  request.globals["mem/localzone"]).render()
+    incomes=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 1,  request.globals["mem/localcurrency"], request.globals["mem/localzone"])
+    table_incomes=TabulatorAccountOperations("table_incomes", None, incomes, request.globals["mem/localcurrency"],  request.globals["mem/localzone"]).render()
     
     dividends=listdict_dividends_by_month(year, month)
-    table_dividends=TabulatorDividends("table_dividends", None, dividends, local_currency,  local_zone).render()
+    table_dividends=TabulatorDividends("table_dividends", None, dividends, request.globals["mem/localcurrency"],  request.globals["mem/localzone"]).render()
     
-    gains=listdict_investmentsoperationshistorical(year, month, local_currency, local_zone)
-    table_gains=TabulatorInvestmentsOperationsHistoricalHeterogeneus("table_gains", None, gains, local_currency, local_zone).render()
+    gains=listdict_investmentsoperationshistorical(year, month, request.globals["mem/localcurrency"], request.globals["mem/localzone"])
+    table_gains=TabulatorInvestmentsOperationsHistoricalHeterogeneus("table_gains", None, gains, request.globals["mem/localcurrency"], request.globals["mem/localzone"]).render()
     return render(request, 'report_total_income_details.html', locals())
 
 
@@ -623,7 +616,6 @@ def report_total_income_details(request, year=date.today().year, month=date.toda
 def report_concepts(request, year=date.today().year, month=date.today().month):
     year_start=1970
     year_end=date.today().year+10
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context?? CRO QUE CON MIDDLEWARE
     list_report_concepts_positive=[]
     month_balance_positive=0
     dict_month_positive={}
@@ -690,18 +682,18 @@ group by
             })
     
 
-    table_report_concepts_positive=TabulatorReportConcepts("table_report_concepts_positive", None, list_report_concepts_positive, local_currency).render()
-    table_report_concepts_negative=TabulatorReportConcepts("table_report_concepts_negative", None, list_report_concepts_negative, local_currency).render()
+    table_report_concepts_positive=TabulatorReportConcepts("table_report_concepts_positive", None, list_report_concepts_positive, request.globals["mem/localcurrency"]).render()
+    table_report_concepts_negative=TabulatorReportConcepts("table_report_concepts_negative", None, list_report_concepts_negative, request.globals["mem/localcurrency"]).render()
 
     return render(request, 'report_concepts.html', locals())
     
 @login_required
 def creditcard_view(request, pk):
-    local_currency=settingsdb("mem/localcurrency")# perhaps i could acces context??
-    local_zone=settingsdb("mem/localzone")# perhaps i could acces context??
+    
+    
     creditcard=get_object_or_404(Creditcards, id=pk)
     creditcardoperations=Creditcardsoperations.objects.all().filter(creditcards_id=pk,  paid=False)
-    table_creditcardoperations=TabulatorCreditCardsOperations("table_creditcardoperations", 'creditcardoperation_update', creditcardoperations, creditcard, local_zone).render()
+    table_creditcardoperations=TabulatorCreditCardsOperations("table_creditcardoperations", 'creditcardoperation_update', creditcardoperations, creditcard, request.globals["mem/localzone"]).render()
 
     return render(request, 'creditcard_view.html', locals())
     
