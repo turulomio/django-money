@@ -2,8 +2,8 @@
 class InputDatetime extends HTMLElement {
   constructor() {
     super();
-    this.format_naive="YYYY-MM-DD hh:mm:ss";
-    this.format_aware="YYYY-MM-DD hh:mm:ssZ";
+    this.format_naive="YYYY-MM-DD HH:mm:ss";
+    this.format_aware="YYYY-MM-DD HH:mm:ssZ";
   }
 
   connectedCallback(){   
@@ -46,8 +46,17 @@ class InputDatetime extends HTMLElement {
   }
 
   calculate(){
+      var old=this.label.innerHTML;
       var dtaware=moment.tz(this.input.value, this.selTimezone.value);
       this.label.innerHTML=dtaware.format(this.format_aware);
+      if (old != this.label.innerHTML){
+        let event = new Event("changed");
+        this.dispatchEvent(event);
+
+      }
+  }
+  getValue(){
+      return this.label.innerHTML;
   }
 
 }

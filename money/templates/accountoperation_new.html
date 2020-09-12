@@ -9,12 +9,18 @@
         {{ form.as_table }}
         </table>
         <script type="text/javascript">
-            jQuery('#datetimepicker').datetimepicker({
-                inline:false,
-                format:'Y-m-d H:i:s',
-                lang:'{{LANGUAGE_CODE}}',
+           var dtp=document.getElementById('datetimepicker');
+           dtp.addEventListener("click", function() { 
+                var inputdt=document.createElement("input-datetime")
+                dtp.insertAdjacentElement("afterend",inputdt) ;
+                inputdt.addEventListener("changed",function(){
+                    alert("CUSTOM");
+                    dtp.value=inputdt.getValue();
+                });
             });
+
         </script>
+        <div id="dddddd" title="Basic dialog"></div>
     <button type="submit">{% trans "Save" %}</button>
     </form>
     {% include "messages.html" %}

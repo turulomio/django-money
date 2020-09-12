@@ -264,6 +264,8 @@ class accountoperation_new(CreateView):
         form.fields['accounts'].widget = forms.HiddenInput()
         form.fields['accounts'].initial=Accounts.objects.get(pk=self.kwargs['accounts_id'])
         form.fields['datetime'].initial=timezone.now()
+        print(dir(form.fields['datetime']))
+        print(dir(form.fields['datetime'].widget))
         form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
         return form
         
