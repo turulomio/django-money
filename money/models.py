@@ -326,13 +326,10 @@ class Investmentsoperations(models.Model):
     ## @param d Dict with basic results of investment product
     @staticmethod
     def investmentsoperationscurrent_percentage_annual(d_ioc, d_basic):
-        print(d_ioc)
-        print(d_basic)
         if d_ioc["datetime"].year==date.today().year:
             lastyear=d_ioc["price_investment"] #Product value, self.money_price(type) not needed.
         else:
             lastyear=d_basic["lastyear"]
-        print(lastyear, d_basic["lastyear"])
         if d_basic["lastyear"] is None or lastyear is None:
             return Percentage()
 

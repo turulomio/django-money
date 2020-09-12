@@ -12,23 +12,6 @@ class TabulatorAccounts(TabulatorFromListDict):
         self.setTypes("int","str", "bool", "str", "str", local_currency)
         self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
 
-#class TabulatorAccountOperations(TabulatorFromQuerySet):
-#    def __init__(self, name, destiny_url, queryset, account, dt_initial, local_zone):
-#        balance=float(account.balance( dt_initial)[0].amount)
-#        print(balance)
-#        TabulatorFromQuerySet.__init__(self, name)
-#        self.setDestinyUrl(destiny_url)
-#        self.setQuerySet(queryset)
-#        self.setLocalZone(local_zone)
-#        self.setCallByNames("id","datetime", "concepts.name","amount", "balance","comment")
-#        self.setHeaders("Id", _("Date and time"), _("Concept"), _("Amount"),_("Balance"),  _("Comment"))
-#        self.setTypes("int","datetime", "str", account.currency, account.currency,  "str")
-#        self.generate_listdict()
-#        for d in self.listdict:
-#            balance=balance+d["amount"]
-#            d["balance"]=balance
-
-
 class TabulatorAccountOperations(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, currency,  local_zone):
         TabulatorFromListDict.__init__(self, name)
@@ -36,7 +19,6 @@ class TabulatorAccountOperations(TabulatorFromListDict):
         self.setListDict(listdict)
         self.setLayout("fitDataStretch")
         self.setHeight("400px")
-        self.setLayout("fitDataTable")
         self.setLocalZone(local_zone)
         self.setFields("id","datetime", "concepts","amount", "balance","comment")
         self.setHeaders("Id", _("Date and time"), _("Concept"), _("Amount"),_("Balance"),  _("Comment"))
@@ -236,7 +218,6 @@ class TabulatorReportTotal(TabulatorFromListDict):
         self.setTypes("str","EUR", "EUR", "EUR", "EUR","percentage")
         self.showLastRecord(False)
         self.setBottomCalc(None, None, None, None, "sum", None)      
-        
 
 class TabulatorReportIncomeTotal(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency):

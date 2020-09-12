@@ -187,11 +187,11 @@ register = template.Library()
 def mymenu(context):
     user=context['user']
     url_name=context['request'].resolver_match.url_name
-    return format_html(context['menu'].render_menu(user,url_name))
+    return format_html(context['request'].menu.render_menu(user,url_name))
 
 @register.simple_tag(takes_context=True)
 def mypagetitle(context):
     # return the version value as a dictionary
     # you may add other values here as well
     url_name=context['request'].resolver_match.url_name
-    return  context['menu'].render_pagetitle(url_name)
+    return  context['request'].menu.render_pagetitle(url_name)

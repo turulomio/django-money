@@ -183,12 +183,8 @@ def error_403(request, exception):
 ## @todo Add search to search field to repeat search
 ## @todo Limit search minimum 3 and maximum 50
 ## @todo Add a tab Widget, author, books, valorations with number in ttab
+@timeit
 def home(request):
-    print(request)
-    print(dir(request))
-    print(request.hola)
-    
-    
     return render(request, 'home.html', locals())
 
 @login_required

@@ -144,7 +144,7 @@ form{
 
 form.checkbox_selection, form.normal{
     background: none;
-    border-radius: none;
+    border-radius: unset;
     border: none;
     padding: 8px;
 }
@@ -202,7 +202,7 @@ td {
         color: white;
         font-weight:bold;
         text-decoration: none;
-        overflow-y:none;
+        overflow-y: unset;
         padding: 20px;
         display: flex;
         flex-direction: column;
@@ -255,7 +255,7 @@ td {
         color: white;
         font-weight:bold;
         text-decoration: none;
-        overflow-y:none;
+        overflow-y: unset;
         padding: 20px;
     }
 
