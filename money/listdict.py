@@ -232,7 +232,7 @@ def listdict_report_total_income(qs_investments, year, local_currency, local_zon
     list_= sorted(list_, key=lambda item: item["month_number"])
     return list_
 
-def listdict_report_total(qs_investments, qs_accounts, year, last_year_balance, local_currency, local_zone):
+def listdict_report_total(year, last_year_balance, local_currency, local_zone):
     def month_results(month_end, month_name, local_currency):
         return month_end, month_name, total_balance(month_end, local_currency)
     #####################
@@ -258,9 +258,6 @@ def listdict_report_total(qs_investments, qs_accounts, year, last_year_balance, 
         
             month_end=dtaware_month_end(year, month, local_zone)
             futures.append(executor.submit(month_results, month_end,  month_name, local_currency))
-#            
-#        for future in as_completed(futures): 
-#            #print(future, future.result())
 
     futures= sorted(futures, key=lambda future: future.result()[0])#month_end
     last_month=last_year_balance 

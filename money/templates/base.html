@@ -6,60 +6,61 @@
 {% load random_numbers %}
 
 {# Make modifiable head elements #}
-    <head>
-        <title>{% block title %}{% mypagetitle %}{% endblock title %}</title>
-        {% block head_favicon %}
-            <link rel="icon" href='{% static "images/favicon.ico" %}'>
-        {% endblock head_favicon %}
+<head>
+    <title>{% block title %}{% mypagetitle %}{% endblock title %}</title>
+    {% block head_favicon %}
+        <link rel="icon" href='{% static "images/favicon.ico" %}'>
+    {% endblock head_favicon %}
 
-        {% block head_meta %}
-            {% block head_meta_charset %}
-                <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-            {% endblock head_meta_charset %}
+    {% block head_meta %}
+        {% block head_meta_charset %}
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        {% endblock head_meta_charset %}
 
-            {% block head_meta_contentlanguage %}
-                <meta http-equiv="Content-Language" value="en-US" />
-            {% endblock head_meta_contentlanguage %}
+        {% block head_meta_contentlanguage %}
+            <meta http-equiv="Content-Language" value="en-US" />
+        {% endblock head_meta_contentlanguage %}
 
-            {% block head_meta_viewport %}
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            {% endblock head_meta_viewport %}
-        {% endblock head_meta %}
+        {% block head_meta_viewport %}
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {% endblock head_meta_viewport %}
+    {% endblock head_meta %}
 
-        {% block head_js %}
-            {% block head_js_site %}
-                <script type="text/javascript" src='{% static "js/jquery.js" %}'></script>
-                <script type="text/javascript" src='{% static "js/jquery-ui.js" %}'></script>
-                <script type="text/javascript" src='{% static "js/bootstrap.js" %}'></script>
-                <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script>
-                <script type="text/javascript" src='{% static "js/jquery.datetimepicker.full.min.js" %}'></script>
-                <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
-                <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script>
-                <script type="text/javascript" src='{% static "js/component.dtaware.js" %}'></script>
+    {% block head_js %}
+        {% block head_js_site %}
+            <script type="text/javascript" src='{% static "js/jquery.js" %}'></script>
+            <script type="text/javascript" src='{% static "js/jquery-ui.js" %}'></script>
+            <script type="text/javascript" src='{% static "js/bootstrap.js" %}'></script>
+            <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script>
+            <script type="text/javascript" src='{% static "js/jquery.datetimepicker.full.min.js" %}'></script>
+            <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
+            <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script>
+            <script type="text/javascript" src='{% static "js/component.dtaware.js" %}'></script>
+            <script type="text/javascript" src='{% static "js/component.yearpicker.js" %}'></script>
 
-            {% endblock head_js_site %}
-            {% block head_js_section %}
-            {% endblock head_js_section %}
-        {% endblock head_js %}
+        {% endblock head_js_site %}
+        {% block head_js_section %}
+        {% endblock head_js_section %}
+    {% endblock head_js %}
 
-            {% block head_css %}
-            {% block head_css_site %}
-            <!--
-            -->
-            <link rel="stylesheet" type="text/css" href='{% static "css/jquery-ui.css" %}'>
-            <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap.css" %}' >
-            <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}' >
-            <link rel="stylesheet" type="text/css" href='{% static "css/jquery.datetimepicker.min.css" %}'>
-            <link rel="stylesheet" type="text/css" href='{% static "css/mystyles.css" %}?dev={% random_integer 0 10000 %}'>
-            {% endblock head_css_site %}
+        {% block head_css %}
+        {% block head_css_site %}
+        <!--
+        -->
+        <link rel="stylesheet" type="text/css" href='{% static "css/jquery-ui.css" %}'>
+        <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap.css" %}' >
+        <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}' >
+        <link rel="stylesheet" type="text/css" href='{% static "css/jquery.datetimepicker.min.css" %}'>
+        <link rel="stylesheet" type="text/css" href='{% static "css/mystyles.css" %}?dev={% random_integer 0 10000 %}'>
+        {% endblock head_css_site %}
 
-            {% block head_css_section %}
-            {% endblock head_css_section %}
+        {% block head_css_section %}
+        {% endblock head_css_section %}
 
-            {% block head_css_page %}
-            {% endblock head_css_page %}
-        {% endblock head_css %}
-    </head>
+        {% block head_css_page %}
+        {% endblock head_css_page %}
+    {% endblock head_css %}
+</head>
 <body>
     <div class="layHorizontal">
         <div class="sidebar">

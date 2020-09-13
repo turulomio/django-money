@@ -10,7 +10,7 @@ class MoneyMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         # One-time configuration and initialization.
-        start=time.time()
+#        start=time.time()
         self.menu=Menu(_("Django Money"))
         self.menu.append(Action(_("Banks"), None,  "bank_list_active",  True))
         self.menu.append(Action(_("Accounts"), None,  "account_list_active",  True))
@@ -31,7 +31,7 @@ class MoneyMiddleware:
         self.menu.append(grProducts)
         self.menu.append(grReport)
         self.menu.append(grAdministration)
-        print(_("Menu loaded in {}".format(time.time()-start)))
+#        print(_("Menu loaded in {}".format(time.time()-start)))
 
     def __call__(self, request):
         # Code to be executed for each request before
@@ -52,6 +52,6 @@ class MoneyMiddleware:
         globals=Globals.objects.all()
         request.globals={}
         for g in globals:
-            request.globals[g.global_field]=g.value
-        request.local_currency_symbol=currency_symbol(request.globals["mem/localcurrency"])
-        print(time.time()-start)
+            request.globals[g.global_field.replace("/", ("__"))]=g.value
+        request.local_currency_symbol=currency_symbol(request.globals["mem__localcurrency"])
+        print(f"Loading middleware request took {time.time()-start}" )

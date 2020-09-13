@@ -1,0 +1,66 @@
+
+{% comment %}
+Adds support to dtaware datepicker
+Can be used with only
+Parameters:
+    - dtaware_id
+    -timezone
+
+
+
+        <script type="text/javascript">
+            jQuery('#datetimepicker').datetimepicker({
+                inline:false,
+                format:'d/m/Y H:i:s',
+                lang:'{{LANGUAGE_CODE}}',
+            });
+        </script>    
+
+{% endcomment %}
+
+<script type="text/javascript">
+    function calculate(dtp){
+        var old=dtp.value;
+        var dtaware=moment.tz(input.value, select.value);
+        alert(dtaware);
+        if (old != dtaware){
+            dtp.value=dtaware.format("YYYY-MM-DD HH:mm:ssZ");
+
+        }
+    }
+
+    
+    var dtp=document.getElementById('{{dtaware_id}}');
+    var button=document.createElement("button");
+    button.setAttribute("type","button");
+    button.innerHtml=">";
+    var input=document.createElement("input");
+    var select=document.createElement("select"); 
+    for (let zone of moment.tz.names()) {
+        select.innerHTML=select.innerHTML.concat(`<option value="${zone}">${zone}</option>`);
+    }
+    select.value="{{timezone}}";
+    input.style.visibility ="hidden";
+    select.style.visibility="hidden";
+    select.addEventListener('change', (event) => {
+        calculate(dtp);
+    });
+    input.addEventListener('change', (event) => {
+        calculate(dtp);
+    });
+    button.addEventListener("click", function() {
+        input.style.visibility="visible";
+        select.style.visibility="visible";
+        return false;
+    });
+
+    dtp.insertAdjacentElement("afterend",select) ;
+    dtp.insertAdjacentElement("afterend",input) ;
+    dtp.insertAdjacentElement("afterend",button) ;
+
+    jQuery(input).datetimepicker({
+        inline:false,
+        format:'d/m/Y H:i:s',
+        lang:'{{LANGUAGE_CODE}}',
+    });
+</script>

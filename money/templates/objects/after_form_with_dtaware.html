@@ -1,0 +1,28 @@
+
+{% comment %}
+Adds support to dtaware datepicker
+Can be used with only
+Parameters:
+    - dtaware_id
+
+
+
+        <script type="text/javascript">
+            jQuery('#datetimepicker').datetimepicker({
+                inline:false,
+                format:'d/m/Y H:i:s',
+                lang:'{{LANGUAGE_CODE}}',
+            });
+        </script>
+{% endcomment %}
+
+<script type="text/javascript">
+    var dtp=document.getElementById('{{dtaware_id}}');
+    dtp.addEventListener("click", function() { 
+        var inputdt=document.createElement("input-datetime");
+        inputdt.setAttribute("parent_id",dtp.getAttribute("id"));
+        inputdt.setAttribute("timezone", "{{ request.globals.mem__localzone }}");
+        dtp.insertAdjacentElement("afterend",inputdt) ;
+    });
+
+</script>

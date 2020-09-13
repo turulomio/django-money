@@ -127,6 +127,7 @@ LANGUAGES=[
     ("ru", "Russian"), 
 ]
 ## Timezone definition
+USE_TZ = True
 TIME_ZONE = 'UTC'
 
 ## Allos internationalization
@@ -135,7 +136,6 @@ USE_I18N = True
 USE_L10N = True
 DATE_FORMAT = "Y-m-d"
 
-USE_TZ = True
 LOGIN_URL = reverse_lazy("login")
 LOGIN_REDIRECT_URL = reverse_lazy("home")
 LOGOUT_REDIRECT_URL = reverse_lazy("login")

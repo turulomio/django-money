@@ -8,21 +8,9 @@
         {% csrf_token %}
         {{ form.as_table }}
         </table>
-        <script type="text/javascript">
-           var dtp=document.getElementById('datetimepicker');
-           dtp.addEventListener("click", function() { 
-                var inputdt=document.createElement("input-datetime")
-                dtp.insertAdjacentElement("afterend",inputdt) ;
-                inputdt.addEventListener("changed",function(){
-                    alert("CUSTOM");
-                    dtp.value=inputdt.getValue();
-                });
-            });
-
-        </script>
-        <div id="dddddd" title="Basic dialog"></div>
     <button type="submit">{% trans "Save" %}</button>
     </form>
+    {% include "objects/after_form_with_dtaware_in_template.html" with dtaware_id="datetimepicker" timezone=request.globals.mem__localzone %}    
     {% include "messages.html" %}
 
 {% endblock %}
