@@ -321,6 +321,9 @@ class Investmentsoperations(models.Model):
     class Meta:
         managed = False
         db_table = 'investmentsoperations'
+        
+    def __str__(self):
+        return "InvestmentOperation"
     
     ## @param d Dict with investmentsoperationscurrent
     ## @param d Dict with basic results of investment product
@@ -357,6 +360,7 @@ class Investmentsoperations(models.Model):
         return Percentage(d_ioc['gains_gross_investment'], d_ioc["invested_investment"])
 
     #Investment price 
+    @staticmethod
     def invesmentsoperationscurrent_average_price_investment(listdict_ioc, price_key="price_user"):
         return listdict_average_ponderated(listdict_ioc, "shares", price_key)
 
@@ -378,19 +382,17 @@ class Operationstypes(models.Model):
         db_table = 'operationstypes'
         
     def __str__(self):
-        self.fullName()
+        return self.fullName()
         
     def fullName(self):
         return _(self.name)
         
     @staticmethod
-    def dict():
+    def dictionary():
         d={}
         for ot in Operationstypes.objects.all():
             d[ot.id]=ot.fullName()
         return d
-        
-
 
 class Opportunities(models.Model):
     date = models.DateField()

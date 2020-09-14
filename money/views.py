@@ -7,7 +7,7 @@ from django.contrib.auth import  login
 from django.shortcuts import render,  redirect, get_object_or_404
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
@@ -453,30 +453,52 @@ class investmentoperation_new(CreateView):
     model = Investmentsoperations
     fields = ( 'datetime', 'operationstypes',  'shares', 'price',  'taxes',  'commission', 'comment', 'investments', 'currency_conversion')
     template_name="investmentoperation_new.html"
-    investments_id=None
 
     def get_form(self, form_class=None): 
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(investmentoperation_new, self).get_form(form_class)
-        form.fields['datetime'].initial=timezone.now()
-        form.fields['currency_conversion'].initial=1
-        form.fields['taxes'].initial=0
-        form.fields['commission'].initial=0
         form.fields['investments'].widget = forms.HiddenInput()
+        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
         return form
-        
+                
+    def get_initial(self):
+        print("JOER")
+        return {
+            'datetime': str(dtaware_changes_tz(timezone.now(), self.request.globals["mem__localzone"])), 
+            'currency_conversion':1, 
+            'taxes':0, 
+            'commission':0, 
+            }
     def get_success_url(self):
         return reverse_lazy('investment_view',args=(self.object.investments.id,))
   
     def form_valid(self, form):
         form.instance.investments= Investments.objects.get(pk=self.kwargs['investments_id'])
-        self.object = form.save()##This method is used in this way to save an Accountsoperations
-        # do something with self.object
-        # remember the import: from django.http import HttpResponseRedirect
-        return HttpResponseRedirect(self.get_success_url())
         return super().form_valid(form)
-
+#class accountoperation_new(CreateView):
+#    model = Accountsoperations
+#    template_name="accountoperation_new.html"
+#    form_class=AccountsOperationsForm
+#
+#    def get_form(self, form_class=None): 
+#        form = super(accountoperation_new, self).get_form(form_class)
+#        form.fields['accounts'].widget = forms.HiddenInput()
+#        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+#        return form
+#        
+#    def get_initial(self):
+#        return {
+#            'datetime': str(dtaware_changes_tz(timezone.now(), self.request.globals["mem__localzone"])), 
+#            'accounts':Accounts.objects.get(pk=self.kwargs['accounts_id'])
+#        }
+#    
+#    def get_success_url(self):
+#        return reverse_lazy('account_view',args=(self.object.accounts.id,))
+#  
+#    def form_valid(self, form):
+#        form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
+#        return super().form_valid(form)
 @method_decorator(login_required, name='dispatch')
 class investment_update(UpdateView):
     model = Investments

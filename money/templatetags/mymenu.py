@@ -194,4 +194,6 @@ def mypagetitle(context):
     # return the version value as a dictionary
     # you may add other values here as well
     url_name=context['request'].resolver_match.url_name
-    return  context['request'].menu.render_pagetitle(url_name)
+    r=context['request'].menu.render_pagetitle(url_name)
+    print(url_name, r)
+    return r
