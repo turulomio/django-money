@@ -121,7 +121,7 @@ class Concepts(models.Model):
         return "{} - {}".format(_(self.name), _(self.operationstypes.name))
         
     @staticmethod
-    def dict():
+    def dictionary():
         d={}
         for o in Concepts.objects.all():
             d[o.id]=o.fullName()
@@ -325,8 +325,8 @@ class Investmentsoperations(models.Model):
     def __str__(self):
         return "InvestmentOperation"
     
-    ## @param d Dict with investmentsoperationscurrent
-    ## @param d Dict with basic results of investment product
+    ## @param d dictionary with investmentsoperationscurrent
+    ## @param d dictionary with basic results of investment product
     @staticmethod
     def investmentsoperationscurrent_percentage_annual(d_ioc, d_basic):
         if d_ioc["datetime"].year==date.today().year:

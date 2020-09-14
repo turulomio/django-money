@@ -347,7 +347,7 @@ def investment_pairs(request, worse, better, accounts_id):
     product_worse=Products.objects.all().filter(id=worse)[0]
     basic_results_better=product_better.basic_results()
     basic_results_worse=product_worse.basic_results()
-    dict_ot=Operationstypes.dict()
+    dict_ot=Operationstypes.dictionary()
     account=Accounts.objects.all().filter(id=accounts_id)[0]
     
     list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
@@ -422,7 +422,7 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
 def investment_view(request, pk):
     investment=get_object_or_404(Investments, id=pk)
     basic_results=investment.products.basic_results()
-    dict_ot=Operationstypes.dict()
+    dict_ot=Operationstypes.dictionary()
     io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), request.globals["mem__localcurrency"])
     
     for ioc in io_current:

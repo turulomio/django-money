@@ -103,71 +103,53 @@ class TabulatorCommons:
             if self.fields[i]==self.field_pk and self.show_field_pk==False:
                 continue
             
-            if self.types[i]=="datetime":
+            if self.types[i] in ("datetime", "date"):
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""
-            elif self.types[i] in ("Decimal", "float", "int", "date") and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , formatter: NUMBER}}, \n"""
+            elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is None:
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , formatter: NUMBER }}, \n"""
             elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is not None:
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right",  formatter: NUMBER, bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100,  formatter: EUR ,hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100,  formatter: NUMBER, formatterParams:{{"suffix": "€"}}, hozAlign:"right" }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: EUR, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter:EUR}}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: NUMBER, formatterParams:{{"suffix": "€"}}, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: NUMBER, bottomCalcFormatterParams:{{"suffix": "€"}} }}, \n"""
             elif self.types[i] =="USD" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: USD, ,hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: NUMBER, formatterParams:{{"suffix": "$"}}, hozAlign:"right" }}, \n"""
             elif self.types[i] =="USD" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: USD, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: USD}}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: NUMBER, formatterParams:{{"suffix": "$"}},  hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: NUMBER, bottomCalcFormatterParams:{{"suffix": "$"}} }}, \n"""
             elif self.types[i]=="str":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""            
             elif self.types[i]=="bool":
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"tickCross", hozAlign:"center" }}, \n"""
             elif self.types[i] =="percentage" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter:PERCENTAGE, hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter:NUMBER, formatterParams:{{"suffix": "%"}}, hozAlign:"right" }}, \n"""
+            elif self.types[i] =="percentage" and self.bottomcalc[i] is not None:
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter:NUMBER, formatterParams:{{"suffix": "%"}}, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: NUMBER, bottomCalcFormatterParams:{{"suffix": "%"}} }}, \n"""
 
 
         return f"""
     <div id="{self.name}"></div>
     <script>
-        var NUMBER = function(cell, formatterParams){{
-    var value = cell.getValue();
-    if (value === null) {{return "";}}
-    if(value  <0){{
-       cell.getElement().style.color="#ff0000";
-       return value;
-    }}else{{
-        return value;
+    var NUMBER = function(cell, formatterParams){{
+    if (formatterParams.hasOwnProperty('suffix')){{
+        suffix=" ".concat(formatterParams.suffix);
+    }} else {{
+        suffix="";
     }}
+    if (formatterParams.hasOwnProperty('digits')){{
+        digits=formatterParams.digits.parseInt();
+    }} else {{
+        digits=2;
+    }}
+    if (cell.getValue() == null) {{return "";}}
+    if (cell.getValue() == '') {{return "";}}
+    if (cell.getValue()<0){{
+       cell.getElement().style.color="#ff0000";
+    }}
+    console.log(cell.getValue());
+    return cell.getValue().toFixed(digits) + suffix;
 }};    
-    var EUR = function(cell, formatterParams){{
-    var value = cell.getValue();
-    if (value === null) {{return "";}}
-    if(value  <0){{
-       cell.getElement().style.color="#ff0000";
-       return value.toFixed(2) + " €";
-    }}else{{
-        return value.toFixed(2) + " €";
-    }}
-}};    
-    var USD = function(cell, formatterParams){{
-    var value = cell.getValue();
-    if (value === null) {{return "";}}
-    if(value  <0){{
-       cell.getElement().style.color="#ff0000";
-       return value.toFixed(2) + " €";
-    }}else{{
-        return value.toFixed(2) + " €";
-    }}
-}};    
-    var PERCENTAGE = function(cell, formatterParams){{
-    var value = cell.getValue();
-    if (value === "") {{return "";}}
-    if(value  <0){{
-       cell.getElement().style.color="#ff0000";
-       return value.toFixed(2) + " %";
-    }}else{{
-        return value.toFixed(2) + " %";
-    }}
-}};
+
     
         var tabledata = {tb_list};  
         var table = new Tabulator("#{self.name}", {{

@@ -100,7 +100,7 @@ def listdict_banks(queryset, dt, active, local_currency):
 def listdict_investmentsoperationshistorical(year, month, local_currency, local_zone):
     #Git investments with investmentsoperations in this year, month
     list_ioh=[]
-    dict_ot=Operationstypes.dict()
+    dict_ot=Operationstypes.dictionary()
     dt_year_month=dtaware_month_end(year, month, local_zone)
     for investment in Investments.objects.raw("select distinct(investments.*) from investmentsoperations, investments where date_part('year', datetime)=%s and date_part('month', datetime)=%s and investments.id=investmentsoperations.investments_id", (year, month)):
         io, io_current, io_historical=investment.get_investmentsoperations(dt_year_month, local_currency)
@@ -119,7 +119,7 @@ def listdict_investmentsoperationshistorical(year, month, local_currency, local_
 def listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product, account, dt, basic_results, local_currency, local_zone):
     #Git investments with investmentsoperations in this year, month
     list_ioc=[]
-    dict_ot=Operationstypes.dict()
+    dict_ot=Operationstypes.dictionary()
     for investment in Investments.objects.raw("select distinct(investments.*) from investmentsoperations, investments where datetime <=%s and investments.products_id=%s and investments.accounts_id=%s and investments.id=investmentsoperations.investments_id", (dt,  product.id, account.id)):
         io, io_current, io_historical=investment.get_investmentsoperations(dt, local_currency)
         
@@ -302,7 +302,7 @@ def listdict_accountsoperations_from_queryset(qs_accountsoperations, initial):
 def listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, operationstypes_id, local_currency, local_zone):
     
     r=[]
-    dict_concepts=Concepts.dict()
+    dict_concepts=Concepts.dictionary()
     balance=0
     for currency in currencies_in_accounts():
         for op in cursor_rows("""
