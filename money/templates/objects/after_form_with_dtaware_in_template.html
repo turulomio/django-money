@@ -20,21 +20,20 @@ Parameters:
 
 <script type="text/javascript">
     function calculate(dtp){
-        var old=dtp.value;
         var dtaware=moment.tz(input.value, select.value);
-        alert(dtaware);
-        if (old != dtaware){
-            dtp.value=dtaware.format("YYYY-MM-DD HH:mm:ssZ");
+        dtp.value=dtaware.format("YYYY-MM-DD HH:mm:ssZ");
 
-        }
     }
 
     
     var dtp=document.getElementById('{{dtaware_id}}');
+    var div=document.createElement("div")
+    div.style.display="flex";
     var button=document.createElement("button");
     button.setAttribute("type","button");
-    button.innerHtml=">";
+    button.innerHTML=">";
     var input=document.createElement("input");
+    input.value=dtp.value.substring(0,26);
     var select=document.createElement("select"); 
     for (let zone of moment.tz.names()) {
         select.innerHTML=select.innerHTML.concat(`<option value="${zone}">${zone}</option>`);
@@ -49,18 +48,26 @@ Parameters:
         calculate(dtp);
     });
     button.addEventListener("click", function() {
-        input.style.visibility="visible";
-        select.style.visibility="visible";
-        return false;
+        if (input.style.visibility=="hidden"){
+            input.style.visibility="visible";
+            select.style.visibility="visible";
+            button.innerHTML="<";
+        } else {
+            input.style.visibility="hidden";
+            select.style.visibility="hidden";
+            button.innerHTML=">";
+            calculate(dtp);
+        }
     });
 
-    dtp.insertAdjacentElement("afterend",select) ;
-    dtp.insertAdjacentElement("afterend",input) ;
-    dtp.insertAdjacentElement("afterend",button) ;
+    div.appendChild(button);
+    div.appendChild(input);
+    div.appendChild(select);
+    dtp.insertAdjacentElement("afterend",div) ;
 
     jQuery(input).datetimepicker({
         inline:false,
-        format:'d/m/Y H:i:s',
+        format:'Y-m-d H:i:s',
         lang:'{{LANGUAGE_CODE}}',
     });
 </script>
