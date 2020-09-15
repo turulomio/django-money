@@ -293,7 +293,9 @@ class accountoperation_update(UpdateView):
     def get_form(self, form_class=None): 
         form = super(accountoperation_update, self).get_form(form_class)
         form.fields['accounts'].widget = forms.HiddenInput()
-        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
         
     def get_initial(self):
@@ -461,7 +463,9 @@ class investmentoperation_new(CreateView):
             form_class = self.get_form_class()
         form = super(investmentoperation_new, self).get_form(form_class)
         form.fields['investments'].widget = forms.HiddenInput()
-        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
                 
     def get_initial(self):
@@ -515,6 +519,9 @@ class investment_update(UpdateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(investment_update, self).get_form(form_class)
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
     
     def form_valid(self, form):
@@ -775,8 +782,9 @@ class creditcardoperation_new(CreateView):
         form = super(creditcardoperation_new, self).get_form(form_class)
         form.fields['creditcards'].widget = forms.HiddenInput()
         form.fields['creditcards'].initial=Creditcards.objects.get(pk=self.kwargs['creditcards_id'])
-        form.fields['datetime'].initial=timezone.now()
-        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         form.fields['paid'].widget = forms.HiddenInput()
         form.fields['paid'].initial=False
         return form
@@ -803,7 +811,9 @@ class creditcardoperation_update(UpdateView):
         form = super(creditcardoperation_update, self).get_form(form_class)
         form.fields['creditcards'].widget = forms.HiddenInput()
         form.fields['paid'].widget = forms.HiddenInput()
-        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
   
     def form_valid(self, form):

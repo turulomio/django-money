@@ -4,23 +4,23 @@ class InputDatetime extends HTMLInputElement {
     super();
     this.format_naive="YYYY-MM-DD HH:mm:ss";
     this.format_aware="YYYY-MM-DD HH:mm:ssZ";
-    if (this.hasAttribute("locale")==true){
-      this.locale=this.getAttribute("locale");
-    }else{
 
-      this.locale="en"; //TODO
-    }
-    if (this.hasAttribute("localzone")==true){
-      this.localzone=this.getAttribute("localzone");
-    }else{
-      this.localzone="UTC";
-
-    }
     this.addEventListener('click', e => this.changeDisplay());
   }
 
   first_creation(){
   
+    if (this.hasAttribute("locale")){// Doesn't work in constructor and I don't know why.
+          this.locale=this.getAttribute("locale");
+    }else{
+
+      this.locale="en"; //TODO
+    }
+    if (this.hasAttribute("localzone")){
+      this.localzone=this.getAttribute("localzone");
+    }else{
+      this.localzone="UTC";
+    }
     this.div=document.createElement("div")
     this.div.hidden=true;
     
@@ -53,7 +53,6 @@ class InputDatetime extends HTMLInputElement {
     this.button.addEventListener("click", (event) => {
       this.div.hidden=true;
       this.calculate();
-
     });
 
     this.div.appendChild(this.button);
@@ -65,18 +64,17 @@ class InputDatetime extends HTMLInputElement {
     jQuery(this.input).datetimepicker({
       inline:false,
       format:'Y-m-d H:i:s',
-      lang: this.locale,
     });
+    $.datetimepicker.setLocale(this.locale);
 
     this.insertAdjacentElement("afterend",this.div) ;
   }
 
   calculate(){
-      var dtaware=moment.tz(this.input.value, this.select.value);
-      var date=dtaware.format("YYYY-MM-DD HH:mm:ss");
-      var tz=dtaware.format("Z");
-      this.value=date.concat(".")+this.inputms.value + tz;
-
+    var dtaware=moment.tz(this.input.value, this.select.value);
+    var date=dtaware.format("YYYY-MM-DD HH:mm:ss");
+    var tz=dtaware.format("Z");
+    this.value=date.concat(".")+this.inputms.value + tz;
   }
 
   changeDisplay(){  
@@ -84,7 +82,7 @@ class InputDatetime extends HTMLInputElement {
       this.first_creation();
     } 
     if (this.div.hidden==true){
-          //Parse string datetime
+      //Parse string datetime
       var spl=this.value.split(".");
       console.log(this.value);
       console.log(spl);
@@ -98,10 +96,10 @@ class InputDatetime extends HTMLInputElement {
       this.input.value=dt;
       this.inputms.value=ms;
       this.div.hidden=false;
-   } else {
-    this.div.hidden=true;
+    } else {
+      this.div.hidden=true;
+    }
   }
-}
 }
 
 window.customElements.define('input-datetime', InputDatetime, {extends: 'input'});
