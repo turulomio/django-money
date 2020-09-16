@@ -16,17 +16,21 @@ class MoneyMiddleware:
         self.menu.append(Action(_("Accounts"), None,  "account_list_active",  True))
         self.menu.append(Action(_("Investments"), None,  "investment_list_active",  True))
         self.menu.append(Action(_("Orders"), None,  "order_list_active",  True))
+        
         grReport=Group(1, _("Reports"), "10",  True)
         grReport.append(Action(_("Concepts"), None, "report_concepts", True))
         grReport.append(Action(_("Total"), None, "report_total", True))
+        
         grAdministration=Group(1, _("Management"), "20",  True)
         grAdministration.append(Action(_("Concepts"), None, "concept_list", True))
         
         grProducts=Group(1, _("Products"), "30",  True)
         grProducts.append(Action(_("Search"), None, "product_list", True))
-#        grProductsPredefined=Group(1, _("Predefined"), "40", True)
-#        grProductsPredefined.append(Action(_("Favorites"), None, "product_list", True))
-#        grProducts.append(grProductsPredefined)
+        
+        grProductsPredefined=Group(2, _("Predefined"), "40", True)
+        grProductsPredefined.append(Action(_("Favorites"), None, "product_list_favorites", True))
+        
+        grProducts.append(grProductsPredefined)
         
         self.menu.append(grProducts)
         self.menu.append(grReport)

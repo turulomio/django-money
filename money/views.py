@@ -107,6 +107,19 @@ def product_list(request):
 
         table_products=TabulatorProducts("table_products", 'product_view', listproducts, request.globals["mem__localcurrency"], request.globals["mem__localzone"] ).render()
     return render(request, 'product_list.html', locals())
+    
+@login_required
+def product_list_favorites(request):
+    search = request.GET.get('search')
+    if search!=None:
+        listproducts=[]
+        searchtitle=_("Searching products that contain '{}' in database").format(search)
+        for row in cursor_rows("select id, name from products where name ilike %s;", ( f"%%{search}%%", )):
+            row["code"]=row["id"]
+            listproducts.append(row)
+
+        table_products=TabulatorProducts("table_products", 'product_view', listproducts, request.globals["mem__localcurrency"], request.globals["mem__localzone"] ).render()
+    return render(request, 'product_list.html', locals())
 
 @login_required
 def product_view(request, pk):
