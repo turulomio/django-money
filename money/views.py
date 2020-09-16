@@ -39,6 +39,7 @@ from money.tables import (
     TabulatorInvestmentsOperationsHistoricalHomogeneus, 
     TabulatorInvestmentsOperationsHistoricalHeterogeneus, 
     TabulatorProductsPairsEvolution, 
+    TabulatorProductsPairsEvolutionWithMonthDiff, 
     TabulatorInvestmentsPairsInvestCalculator, 
 )
 from money.tokens import account_activation_token
@@ -293,7 +294,9 @@ class accountoperation_update(UpdateView):
     def get_form(self, form_class=None): 
         form = super(accountoperation_update, self).get_form(form_class)
         form.fields['accounts'].widget = forms.HiddenInput()
-        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
         
     def get_initial(self):
@@ -353,7 +356,6 @@ def investment_pairs(request, worse, better, accounts_id):
     account=Accounts.objects.all().filter(id=accounts_id)[0]
     
     list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    
     table_ioc_better=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_better", None, list_ioc_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
     list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     table_ioc_worse=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_worse", None, list_ioc_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
@@ -369,7 +371,7 @@ def investment_pairs(request, worse, better, accounts_id):
     table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
     
     list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, dtaware_month_start(2012, 1, request.globals["mem__localzone"]), basic_results_worse,  basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    table_products_pair_evolution_from=TabulatorProductsPairsEvolution("table_products_pair_evolution_from", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
+    table_products_pair_evolution_from=TabulatorProductsPairsEvolutionWithMonthDiff("table_products_pair_evolution_from", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
     #Variables to calculate reinvest loses
     gains=listdict_sum(list_ioc_better, "gains_gross_user")+listdict_sum(list_ioc_worse, "gains_gross_user")
     better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
@@ -461,7 +463,9 @@ class investmentoperation_new(CreateView):
             form_class = self.get_form_class()
         form = super(investmentoperation_new, self).get_form(form_class)
         form.fields['investments'].widget = forms.HiddenInput()
-        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
                 
     def get_initial(self):
@@ -515,6 +519,9 @@ class investment_update(UpdateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(investment_update, self).get_form(form_class)
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
     
     def form_valid(self, form):
@@ -775,8 +782,9 @@ class creditcardoperation_new(CreateView):
         form = super(creditcardoperation_new, self).get_form(form_class)
         form.fields['creditcards'].widget = forms.HiddenInput()
         form.fields['creditcards'].initial=Creditcards.objects.get(pk=self.kwargs['creditcards_id'])
-        form.fields['datetime'].initial=timezone.now()
-        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         form.fields['paid'].widget = forms.HiddenInput()
         form.fields['paid'].initial=False
         return form
@@ -803,7 +811,9 @@ class creditcardoperation_update(UpdateView):
         form = super(creditcardoperation_update, self).get_form(form_class)
         form.fields['creditcards'].widget = forms.HiddenInput()
         form.fields['paid'].widget = forms.HiddenInput()
-        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
   
     def form_valid(self, form):

@@ -164,18 +164,23 @@ def listdict_products_pairs_evolution_from_datetime(product_worse, product_bette
     dt=from_
     worse_first=product_worse.quote(dt)
     better_first=product_better.quote(dt)
+    last_diff=Percentage(0, 1)
     while dt<timezone.now():
         worse_at_dt=product_worse.quote(dt)
         better_at_dt=product_better.quote(dt)
         percentage_year_worse=percentage_between(worse_first["quote"], worse_at_dt["quote"])
         percentage_year_better=percentage_between(better_first["quote"], better_at_dt["quote"])
+        diff=percentage_year_worse- percentage_year_better
+        diff_before=diff-last_diff
         l.append({
             "datetime": dt, 
-            "price_ratio":worse_at_dt["quote"]/better_at_dt["quote"], 
+            "price_ratio": worse_at_dt["quote"]/better_at_dt["quote"], 
             "percentage_year_worse": percentage_year_worse, 
             "percentage_year_better": percentage_year_better, 
-            "percentage_year_diff": percentage_year_worse-percentage_year_better, 
+            "percentage_year_diff": diff, 
+            "percentage_month_diff": diff_before
         })
+        last_diff=diff
         dt=dt+timedelta(days=30)
     return l
 

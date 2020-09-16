@@ -9,17 +9,15 @@ class InputDatetime extends HTMLInputElement {
   }
 
   first_creation(){
-    if (this.hasAttribute("locale")==true){
-      this.locale=this.getAttribute("locale");
+    if (this.hasAttribute("locale")){// Doesn't work in constructor and I don't know why.
+        this.locale=this.getAttribute("locale");
     }else{
-
-      this.locale="en"; //TODO
+        this.locale="en";
     }
-    if (this.hasAttribute("localzone")==true){
+    if (this.hasAttribute("localzone")){
       this.localzone=this.getAttribute("localzone");
     }else{
       this.localzone="UTC";
-
     }
     this.div=document.createElement("div")
     this.div.hidden=true;
@@ -60,6 +58,7 @@ class InputDatetime extends HTMLInputElement {
     this.select.addEventListener('change', (event) => {
       this.value=this.widget2string();
     });
+
     this.select.value=this.localzone;
 
     this.div.appendChild(this.button);
@@ -72,8 +71,8 @@ class InputDatetime extends HTMLInputElement {
     jQuery(this.input).datetimepicker({
       inline:false,
       format:'Y-m-d H:i:s',
-      lang: this.locale,
     });
+    $.datetimepicker.setLocale(this.locale);
 
     this.insertAdjacentElement("afterend",this.div) ;
   }
