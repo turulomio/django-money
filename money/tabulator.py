@@ -141,12 +141,13 @@ class TabulatorCommons:
     }} else {{
         digits=2;
     }}
-    if (cell.getValue() == null) {{return "";}}
-    if (cell.getValue() == '') {{return "";}}
-    if (cell.getValue()<0){{
+    if (cell.getValue() == null) {{return "- - -";}}
+    else if (cell.getValue()==0){{//Needs this to avoid showing "" 
+    }}
+    else if (cell.getValue() == '') {{return "";}}
+    else if (cell.getValue()<0){{
        cell.getElement().style.color="#ff0000";
     }}
-    console.log(cell.getValue());
     return cell.getValue().toFixed(digits) + suffix;
 }};    
 
