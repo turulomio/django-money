@@ -57,7 +57,7 @@ class TabulatorInvestments(TabulatorFromListDict):
         else:
             self.setFields("id","name")
             self.setHeaders(_("Id"), _("Name"))
-        self.setTypes("int", "str", "str", "float",  local_currency, "percentage", local_currency, local_currency, local_currency,"percentage", "percentage")
+        self.setTypes("int", "str", "str", "float6",  local_currency, "percentage", local_currency, local_currency, local_currency,"percentage", "percentage")
         self.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
         self.setInitialOptions("""
     initialSort:[

@@ -109,6 +109,10 @@ class TabulatorCommons:
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , formatter: NUMBER }}, \n"""
             elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is not None:
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right",  formatter: NUMBER, bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
+            elif self.types[i] in ("Decimal6", "float6") and self.bottomcalc[i] is None:
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , formatter: NUMBER,  formatterParams:{{"digits":6}},  }}, \n"""
+            elif self.types[i] in ("Decimal6", "float6") and self.bottomcalc[i] is not None:
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right",  formatter: NUMBER,  formatterParams:{{"digits":6}}, bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is None:
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100,  formatter: NUMBER, formatterParams:{{"suffix": "€"}}, hozAlign:"right" }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is not None:
@@ -137,18 +141,23 @@ class TabulatorCommons:
         suffix="";
     }}
     if (formatterParams.hasOwnProperty('digits')){{
-        digits=formatterParams.digits.parseInt();
+        digits=formatterParams.digits;
     }} else {{
         digits=2;
     }}
     if (cell.getValue() == null) {{return "- - -";}}
-    else if (cell.getValue()==0){{//Needs this to avoid showing "" 
-    }}
     else if (cell.getValue() == '') {{return "";}}
+    else if (cell.getValue()==0){{//Needs this to avoid showing
+    }}
     else if (cell.getValue()<0){{
        cell.getElement().style.color="#ff0000";
     }}
+    try {{
     return cell.getValue().toFixed(digits) + suffix;
+}}
+catch(err) {{
+    alert(cell.getValue());
+}}
 }};    
 
     
