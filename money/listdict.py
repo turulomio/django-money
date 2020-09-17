@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, date
 from decimal import Decimal
 from money.connection_dj import  cursor_rows
 from django.utils import timezone
@@ -95,6 +95,44 @@ def listdict_banks(queryset, dt, active, local_currency):
         )
     return list_
 
+## @param ohclmonthly If none load then in this function
+def listdict_product_quotes_month_comparation(product, ohclmonthly=None):
+        if ohclmonthly is None:
+            ohclmonthly=product.ohclMonthlyBeforeSplits()
+            
+        data=[]
+        data
+        minyear=ohclmonthly[0].year
+        for i, year in enumerate(range(minyear,  date.today().year+1)):
+            row=[]
+            row.append(year)
+            for month_name, month in (
+                (_("January"), 1), 
+                (_("February"), 2), 
+                (_("March"), 3), 
+                (_("April"), 4), 
+                (_("May"), 5), 
+                (_("June"), 6), 
+                (_("July"), 7), 
+                (_("August"), 8), 
+                (_("September"), 9), 
+                (_("October"), 10), 
+                (_("November"), 11), 
+                (_("December"), 12), 
+            ):
+                pass
+#            for month in range(1, 13):
+#                row.append(self.product.result.ohclMonthly.percentage_by_year_month(year, month))
+#            row.append(self.product.result.ohclYearly.percentage_by_year(year))
+#            data.append(row)
+#            
+#        self.mqtwMensuales.setData(
+#            [self.tr("Year"), self.tr("January"),  self.tr("February"), self.tr("March"), self.tr("April"), self.tr("May"), self.tr("June"), self.tr("July"), self.tr("August"), self.tr("September"), self.tr("October"), self.tr("November"), self.tr("December"), self.tr("Total")], 
+#            None, 
+#            data, 
+#            decimals=2, 
+#            zonename=self.mem.localzone_name
+#        )
 
 ## Gets all ioh from all investments 
 def listdict_investmentsoperationshistorical(year, month, local_currency, local_zone):

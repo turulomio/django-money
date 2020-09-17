@@ -17,7 +17,8 @@
 
 
 <p class="orders">
-  <a href="{% url 'investment_update' pk=investment.id %}">Update this investment</a>
+  <a href="{% url 'investment_update' pk=investment.id %}">Update this investment</a> | 
+      <a href="{% url 'product_view' pk=investment.products.id %}">Show product</a>
 </p>
 <script>
   $( function() {
@@ -52,7 +53,6 @@
 </div>
 
   <p class="orders">
-      <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">Add an investment operation</a> | 
-      <a href="{% url 'product_view' pk=investment.products.id %}">Show product</a>
+      <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">Add an investment operation</a>
   </p>
 {% endblock %}

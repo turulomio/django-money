@@ -4,5 +4,14 @@
 
 {% block content %}
   <h1>{% trans "Product details" %}</h1>
-
+<p><strong>{% trans "Id" %}: </strong>{{ product.id }}</p>
+<p><strong>{% trans "Name" %}: </strong>{{ product.name }}</p>
+<p><strong>{% trans "ISIN" %}: </strong>{{ product.isin }}</p>
+<p><strong>{% trans "Currency" %}: </strong>{{ product.currency_symbol }}</p>
+<p><strong>{% trans "Product type" %}: </strong>{{ product.productstypes.name }}</p>
+<p><strong>{% trans "Leverage" %}: </strong>{{ product.leverages.name }}</p>
 {% endblock %}
+
+<h1>{% trans "Quotes month comparation" %}</h1>
+
+  {{ table_quotes_month_comparation |safe}}

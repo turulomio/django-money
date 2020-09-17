@@ -454,6 +454,7 @@ class Products(models.Model):
         
     def currency_symbol(self):
         return currency_symbol(self.currency)
+
     def basic_results(self):
         return cursor_one_row("select * from last_penultimate_lastyear(%s,%s)", (self.id, timezone.now() ))
     ## IBEXA es x2 pero esta en el pricio
@@ -465,6 +466,9 @@ class Products(models.Model):
 
     def quote(self, dt):
         return cursor_one_row("select * from quote(%s,%s)", (self.id, dt ))
+        
+    def ohclMonthlyBeforeSplits(self):
+        return cursor_rows("select * from ohclmonthlybeforesplits(%s)", (self.id, ))
 class Productstypes(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.TextField()

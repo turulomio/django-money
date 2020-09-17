@@ -13,6 +13,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
+
 from django import forms
 
 from math import floor
@@ -495,29 +496,7 @@ class investmentoperation_new(CreateView):
     def form_valid(self, form):
         form.instance.investments= Investments.objects.get(pk=self.kwargs['investments_id'])
         return super().form_valid(form)
-#class accountoperation_new(CreateView):
-#    model = Accountsoperations
-#    template_name="accountoperation_new.html"
-#    form_class=AccountsOperationsForm
-#
-#    def get_form(self, form_class=None): 
-#        form = super(accountoperation_new, self).get_form(form_class)
-#        form.fields['accounts'].widget = forms.HiddenInput()
-#        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
-#        return form
-#        
-#    def get_initial(self):
-#        return {
-#            'datetime': str(dtaware_changes_tz(timezone.now(), self.request.globals["mem__localzone"])), 
-#            'accounts':Accounts.objects.get(pk=self.kwargs['accounts_id'])
-#        }
-#    
-#    def get_success_url(self):
-#        return reverse_lazy('account_view',args=(self.object.accounts.id,))
-#  
-#    def form_valid(self, form):
-#        form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
-#        return super().form_valid(form)
+
 @method_decorator(login_required, name='dispatch')
 class investment_update(UpdateView):
     model = Investments
@@ -532,9 +511,8 @@ class investment_update(UpdateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(investment_update, self).get_form(form_class)
-        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
-        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
-        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['selling_expiration'].widget.attrs['is'] ='input-date'
+        form.fields['selling_expiration'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
     
     def form_valid(self, form):
@@ -555,6 +533,9 @@ class investmentoperation_update(UpdateView):
             form_class = self.get_form_class()
         form = super(investmentoperation_update, self).get_form(form_class)
         form.fields['investments'].widget = forms.HiddenInput()
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
     
     def form_valid(self, form):
