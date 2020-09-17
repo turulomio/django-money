@@ -132,7 +132,7 @@ class TabulatorCommons:
 
 
         return f"""
-    <div id="{self.name}"></div>
+    <div id="{self.name}" class="tabulator"></div>
     <script>
     var NUMBER = function(cell, formatterParams){{
     if (formatterParams.hasOwnProperty('suffix')){{
@@ -146,18 +146,24 @@ class TabulatorCommons:
         digits=2;
     }}
     if (cell.getValue() == null) {{return "- - -";}}
-    else if (cell.getValue() == '') {{return "";}}
-    else if (cell.getValue()==0){{//Needs this to avoid showing
+    else if (cell.getValue()==0){{//Must be before '' ??
+        return 0+ suffix;
     }}
+    else if (cell.getValue() == '') {{return "";}}
     else if (cell.getValue()<0){{
        cell.getElement().style.color="#ff0000";
+        return cell.getValue().toFixed(digits) + suffix;
     }}
-    try {{
-    return cell.getValue().toFixed(digits) + suffix;
-}}
-catch(err) {{
-    alert(cell.getValue());
-}}
+    else if (cell.getValue()>0){{
+        return cell.getValue().toFixed(digits) + suffix;
+    }}
+ /*   try {{
+        return cell.getValue().toFixed(digits) + suffix;
+    }}
+    catch(err) {{
+        console.log(value);
+        return "- - - - -";
+    }}*/
 }};    
 
     

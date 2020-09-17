@@ -13,8 +13,10 @@
 <h2>{% trans "Current investment operations" %}</h2>
 
 {{ table_ioc_worse  |safe }}
-<p></p>
+
 {{table_ioc_better|safe}}
+
+<p>{% blocktrans with pair_gains=pair_gains %}Current pair balance is {{ pair_gains }}.{% endblocktrans %}</p>
 
 
 <h2>{% trans "Next investment calculator" %}</h2>

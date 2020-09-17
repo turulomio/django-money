@@ -11,8 +11,7 @@
 {% trans "Check to show inactive investments" as mylabel %}
 {% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
 
-<p></p>
-
 {{table_investments|safe}}
+
 {% endblock %}
 

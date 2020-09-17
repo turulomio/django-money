@@ -373,6 +373,8 @@ def investment_pairs(request, worse, better, accounts_id):
     table_ioc_better=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_better", None, list_ioc_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
     list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     table_ioc_worse=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_worse", None, list_ioc_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
+
+    pair_gains=Currency(listdict_sum(list_ioc_better, 'gains_net_user')+listdict_sum(list_ioc_worse, 'gains_net_user'), request.globals["mem__localcurrency"])
     
     datetimes=[]
     for ioc in list_ioc_better:
@@ -383,6 +385,7 @@ def investment_pairs(request, worse, better, accounts_id):
 
     list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, list_ioc_worse, list_ioc_better, basic_results_worse,  basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
+    
     
     list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, dtaware_month_start(2012, 1, request.globals["mem__localzone"]), basic_results_worse,  basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     table_products_pair_evolution_from=TabulatorProductsPairsEvolutionWithMonthDiff("table_products_pair_evolution_from", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()

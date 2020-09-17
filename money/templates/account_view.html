@@ -9,7 +9,7 @@
 {% load i18n %}
 
 {% block content %}
-  <h1>{% blocktrans with account_name=account.name %} Account details of {{ account_name }}{% endblocktrans %}</h1>
+  <h1>{% blocktrans with account_name=account.name %} Account details of '{{ account_name }}'{% endblocktrans %}</h1>
 
   <selector-yearmonth title="{% trans 'Select a year and a month' %}" year_start="{{ year_start }}" year_end="{{ year_end }}" year="{{ year }}" month="{{ month }}" url="{% url 'account_view' account.id %}"></selector-yearmonth>
 

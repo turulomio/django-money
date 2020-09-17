@@ -422,3 +422,8 @@ a.Selected{
 div.chart_js{
     padding: 10px;
 }
+
+div.tabulator{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
