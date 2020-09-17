@@ -14,7 +14,8 @@
     "jquery-ui": "^1.12.1",
     "moment-timezone": "^0.5.31",
     "popper.js": "^1.16.1",
-    "tabulator-tables": "^4.8.1"
+    "tabulator-tables": "^4.8.1",
+    "xlsx": "^0.16.7"
   },
   "devDependencies": {},
   "scripts": {
