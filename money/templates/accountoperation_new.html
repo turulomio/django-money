@@ -10,7 +10,6 @@
         </table>
     <button type="submit">{% trans "Save" %}</button>
     </form>
-    {% include "objects/after_form_with_dtaware_in_template.html" with dtaware_id="datetimepicker" timezone=request.globals.mem__localzone %}    
-    {% include "messages.html" %}
+     {% include "messages.html" %}
 
 {% endblock %}

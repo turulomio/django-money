@@ -1,67 +1,107 @@
 
-class InputDatetime extends HTMLElement {
+class InputDatetime extends HTMLInputElement {
   constructor() {
     super();
     this.format_naive="YYYY-MM-DD HH:mm:ss";
     this.format_aware="YYYY-MM-DD HH:mm:ssZ";
-    this.dtaware=null;
+    if (this.hasAttribute("locale")==true){
+      this.locale=this.getAttribute("locale");
+    }else{
+
+      this.locale="en"; //TODO
+    }
+    if (this.hasAttribute("localzone")==true){
+      this.localzone=this.getAttribute("localzone");
+    }else{
+      this.localzone="UTC";
+
+    }
+    this.addEventListener('click', e => this.changeDisplay());
   }
 
-  connectedCallback(){   
-    if (this.hasAttribute("locale")==true){
-        moment.locale(this.getAttribute("locale"));
-    }
+  first_creation(){
+  
+    this.div=document.createElement("div")
+    this.div.hidden=true;
+    
+    this.button=document.createElement("button");
+    this.button.setAttribute("type","button");
+    this.button.innerHTML="<";
+
     this.input=document.createElement("input");
-    this.input.setAttribute("id","datetimepicker1")
+
+    this.inputms=document.createElement("input")
+    
+    this.select=document.createElement("select"); 
+    for (let zone of moment.tz.names()) {
+      this.select.innerHTML=this.select.innerHTML.concat(`<option value="${zone}">${zone}</option>`);
+    }
+    this.select.value=this.localzone;
+    
+    this.select.addEventListener('change', (event) => {
+        this.calculate();
+    });
+    
     this.input.addEventListener('change', (event) => {
         this.calculate();
     });
-    //let shadow = this.input.attachShadow({mode: 'open'});
-
-    if (this.hasAttribute("datetime")==true){
-        this.input.value=this.getAttribute("datetime");
-    } else{
-      this.input.value=moment().format(this.format_naive);
-    }
-
-    if (this.hasAttribute("parent_id")==true){
-        this.parent=document.getElementById(this.getAttribute("parent_id"));
-    } else{
-      this.parent=null;
-    }
-
-    this.selTimezone=document.createElement("select");
-    for (let zone of moment.tz.names()) {
-        this.selTimezone.innerHTML=this.selTimezone.innerHTML.concat(`<option value="${zone}">${zone}</option>`);
-    }
-    if (this.hasAttribute("timezone")==true){
-      this.selTimezone.value=this.getAttribute("timezone");
-    } else{
-      this.selTimezone.value='UTC';
-    }
-
-    this.selTimezone.addEventListener('change', (event) => {
+    
+    this.inputms.addEventListener('change', (event) => {
         this.calculate();
     });
-    this.appendChild(this.input);
-    this.appendChild(this.selTimezone);
-    this.calculate();
+    
+    this.button.addEventListener("click", (event) => {
+      this.div.hidden=true;
+      this.calculate();
+
+    });
+
+    this.div.appendChild(this.button);
+    this.div.appendChild(this.input);
+    this.div.appendChild(this.inputms);
+    this.div.appendChild(this.select);
+    this.div.style.display="flex";
+
+    jQuery(this.input).datetimepicker({
+      inline:false,
+      format:'Y-m-d H:i:s',
+      lang: this.locale,
+    });
+
+    this.insertAdjacentElement("afterend",this.div) ;
   }
 
   calculate(){
-      var old=this.dtaware;
-      this.dtaware=moment.tz(this.input.value, this.selTimezone.value);
-      if (old != this.dtaware){
-        let event = new Event("changed");
-        this.dispatchEvent(event);
-        this.parent.value=this.dtaware.format(this.format_aware);
+      var dtaware=moment.tz(this.input.value, this.select.value);
+      var date=dtaware.format("YYYY-MM-DD HH:mm:ss");
+      var tz=dtaware.format("Z");
+      this.value=date.concat(".")+this.inputms.value + tz;
 
+  }
+
+  changeDisplay(){  
+    if (this.hasOwnProperty( "div")==false){
+      this.first_creation();
+    } 
+    if (this.div.hidden==true){
+          //Parse string datetime
+      var spl=this.value.split(".");
+      console.log(this.value);
+      console.log(spl);
+      if (spl.length==0){//Without ms 
+        var dt=this.value.substring(0,18);
+        var ms=0;
+      } else {
+        var dt=spl[0];
+        var ms=spl[1].split("+")[0];        
       }
+      this.input.value=dt;
+      this.inputms.value=ms;
+      this.div.hidden=false;
+   } else {
+    this.div.hidden=true;
   }
-  getValue(){
-      return this.label.innerHTML;
-  }
-
+}
 }
 
-window.customElements.define('input-datetime', InputDatetime);
+window.customElements.define('input-datetime', InputDatetime, {extends: 'input'});

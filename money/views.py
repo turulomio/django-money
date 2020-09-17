@@ -262,7 +262,9 @@ class accountoperation_new(CreateView):
     def get_form(self, form_class=None): 
         form = super(accountoperation_new, self).get_form(form_class)
         form.fields['accounts'].widget = forms.HiddenInput()
-        form.fields['datetime'].widget.attrs['id'] ='datetimepicker'
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
         
     def get_initial(self):
