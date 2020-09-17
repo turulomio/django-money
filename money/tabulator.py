@@ -163,34 +163,41 @@ catch(err) {{
     
         var tabledata = {tb_list};  
         var table = new Tabulator("#{self.name}", {{
-        selectable:true,
-        persistence: true, 
-        printAsHtml:true, //enable html table printing
-        printStyled:true, //copy Tabulator styling to HTML table
-        {str_height}
-        data:tabledata, //assign data to table
-        layout:"{self.layout}", //fit columns to width of table (optional)
-        columns:[ {columns}
-        ],
-        {str_initialoptions}
-        {str_destiny_url}
-        rowContextMenu: [
-            {{
-                label:"Print",
-                action:function(e, column){{
-                    table.print();
+            clipboard:true, //enable clipboard functionality
+            selectable:true,
+            persistence: true, 
+            printAsHtml:true, //enable html table printing
+            printStyled:true, //copy Tabulator styling to HTML table
+            {str_height}
+            data:tabledata, //assign data to table
+            layout:"{self.layout}", //fit columns to width of table (optional)
+            columns:[ {columns}
+            ],
+            {str_initialoptions}
+            {str_destiny_url}
+            rowContextMenu: [
+                {{
+                    label:"Copy to clipboard",
+                    action:function(e, column){{
+                        table.copyToClipboard("all");
+                    }}
+                }},               
+                {{
+                    label:"Print",
+                    action:function(e, column){{
+                        table.print();
+                    }}
+                }},
+                {{
+                    separator:true,
+                }},
+                {{
+                    label:"Export to xlsx",
+                    action:function(e, column){{
+                        table.download("xlsx", "data.xlsx", {{sheetName:"MyData"}}); 
+                    }}
                 }}
-            }},
-            {{
-                separator:true,
-            }},
-            {{
-                label:"Export to xlsx",
-                action:function(e, column){{
-                    table.download("xlsx", "data.xlsx", {{sheetName:"MyData"}}); 
-                }}
-            }}
-        ]
+            ]
         }});
         
         {str_show_last_record}
