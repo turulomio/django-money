@@ -15,11 +15,12 @@ from django.db import models, connection
 
 from money.reusing.currency import Currency, currency_symbol
 from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows
-from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware
+from money.reusing.casts import string2list_of_integers
+from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware, dtaware2string
 from money.reusing.percentage import Percentage
 from money.listdict_functions import listdict_average_ponderated
 
-from xulpymoney.libxulpymoneytypes import eProductType
+from xulpymoney.libxulpymoneytypes import eProductType, eComment, eMoneyCurrency
 
 class Accounts(models.Model):
     name = models.TextField(blank=True, null=True)
@@ -289,7 +290,15 @@ class Investments(models.Model):
         return io,  current, historical
 
 
-        
+                
+    def hasSameAccountCurrency(self):
+        """
+            Returns a boolean
+            Check if investment currency is the same that account currency
+        """
+        if self.products.currency==self.accounts.currency:
+            return True
+        return False
 
 class Investmentsaccountsoperations(models.Model):
     concepts_id = models.IntegerField()
@@ -634,11 +643,6 @@ def qs_list_of_ids(qs):
         r.append(o.id)
     return tuple(r)
 
-from xulpymoney.casts import string2list_of_integers
-from xulpymoney.datetime_functions import dtaware2string
-from xulpymoney.libxulpymoneytypes import eComment, eMoneyCurrency
-from xulpymoney.objects.dividend import Dividend
-from xulpymoney.objects.money import Money
 ## Class who controls all comments from accountsoperations, investmentsoperations ...
 class Comment:
     def __init__(self):
@@ -706,8 +710,6 @@ class Comment:
         return True
 
     def decode(self, string):
-        """Sets the comment to show in app"""
-        from xulpymoney.objects.accountoperation import AccountOperation
         try:
             (code, args)=self.get(string)
             if code==None:
@@ -715,49 +717,47 @@ class Comment:
 
             if code==eComment.InvestmentOperation:
                 if not self.validateLength(1, code, args): return string
-                io=self.mem.data.investments.findInvestmentOperation(args[0])
+                io=Investmentsoperations.objects.get(pk=args[0])
                 if io==None: return string
-                if io.investment.hasSameAccountCurrency():
+                if io.investments.hasSameAccountCurrency():
                     return self.tr("{}: {} shares. Amount: {}. Comission: {}. Taxes: {}").format(io.investment.name, io.shares, io.gross(eMoneyCurrency.Product), io.money_commission(eMoneyCurrency.Product), io.taxes(eMoneyCurrency.Product))
                 else:
                     return self.tr("{}: {} shares. Amount: {} ({}). Comission: {} ({}). Taxes: {} ({})").format(io.investment.name, io.shares, io.gross(eMoneyCurrency.Product), io.gross(eMoneyCurrency.Account),  io.money_commission(eMoneyCurrency.Product), io.money_commission(eMoneyCurrency.Account),  io.taxes(eMoneyCurrency.Product), io.taxes(eMoneyCurrency.Account))
 
             elif code==eComment.AccountTransferOrigin:#Operaccount transfer origin
                 if not self.validateLength(3, code, args): return string
-                aod=AccountOperation(self.mem, args[1])
-                return _("Transfer to {}").format(aod.account.name)
+                aod=Accountsoperations.objects.get(pk=args[1])
+                return _("Transfer to {}").format(aod.accounts.name)
 
             elif code==eComment.AccountTransferDestiny:#Operaccount transfer destiny
                 if not self.validateLength(3, code, args): return string
-                aoo=AccountOperation(self.mem, args[0])
-                return _("Transfer received from {}").format(aoo.account.name)
+                aoo=Accountsoperations.objects.get(pk=args[0])
+                return _("Transfer received from {}").format(aoo.accounts.name)
 
             elif code==eComment.AccountTransferOriginCommission:#Operaccount transfer origin commission
                 if not self.validateLength(3, code, args): return string
-                aoo=AccountOperation(self.mem, args[0])
-                aod=AccountOperation(self.mem, args[1])
-                return _("Comission transfering {} from {} to {}").format(aoo.account.currency.string(aoo.amount), aoo.account.name, aod.account.name)
+                aoo=Accountsoperations.objects.get(pk=args[0])
+                aod=Accountsoperations.objects.get(pk=args[1])
+                return _("Comission transfering {} from {} to {}").format(Currency(aoo.amount, aoo.accounts.currency), aoo.accounts.name, aod.accounts.name)
 
             elif code==eComment.Dividend:#Comentario de cuenta asociada al dividendo
                 if not self.validateLength(1, code, args): return string
-                dividend=Dividend(self.mem).init__db_query(args[0])
-                investment=self.mem.data.investments.find_by_id(dividend.investment.id)
-                if investment.hasSameAccountCurrency():
-                    return _( "From {}. Gross {}. Net {}.").format(investment.name, dividend.gross(1), dividend.net(1))
+                dividend=Dividends.objects.get(pk=args[[0]])
+                if dividend.investments.hasSameAccountCurrency():
+                    return _( "From {}. Gross {}. Net {}.").format(dividend.investments.name, dividend.gross(1), dividend.net(1))
                 else:
-                    return _( "From {}. Gross {} ({}). Net {} ({}).").format(investment.name, dividend.gross(1), dividend.gross(2), dividend.net(1), dividend.net(2))
+                    return _( "From {}. Gross {} ({}). Net {} ({}).").format(dividend.investments.name, dividend.gross(1), dividend.gross(2), dividend.net(1), dividend.net(2))
 
             elif code==eComment.CreditCardBilling:#Facturaci´on de tarjeta diferida
                 if not self.validateLength(2, code, args): return string
-                creditcard=self.mem.data.accounts.find_creditcard_by_id(args[0])
-                number=self.mem.con.cursor_one_field("select count(*) from creditcardsoperations where accountsoperations_id=%s", (args[1], ))
+                creditcard=Creditcards.objects.get(pk=args[0])
+                number=cursor_one_field("select count(*) from creditcardsoperations where accountsoperations_id=%s", (args[1], ))
                 return _("Billing {} movements of {}").format(number, creditcard.name)
 
             elif code==eComment.CreditCardRefund:#Devolución de tarjeta
-                from xulpymoney.objects.creditcardoperation import CreditCardOperation
                 if not self.validateLength(1, code, args): return string
-                cco=CreditCardOperation(self.mem).init__db_query(args[0])
-                money=Money(self.mem, cco.amount, cco.tarjeta.account.currency)
+                cco=Creditcardsoperations.objects.get(pk=args[0])
+                money=Currency(cco.amount, cco.creditcards.accounts.currency)
                 return _("Refund of {} payment of which had an amount of {}").format(dtaware2string(cco.datetime), money)
         except:
-            return self.tr("Error decoding comment {}").format(string)
+            return _("Error decoding comment {}").format(string)

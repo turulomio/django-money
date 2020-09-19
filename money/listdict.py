@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from xulpymoney.libxulpymoneytypes import eOperationType
 from money.models import (
     Accounts, 
+    Comment, 
     Concepts, 
     Dividends, 
     Investments, 
@@ -337,7 +338,7 @@ def listdict_accountsoperations_from_queryset(qs_accountsoperations, initial):
     balance=Decimal(initial)
     for op in qs_accountsoperations:
         balance=balance+op.amount
-        r.append({"id":op.id, "datetime": op.datetime,"concepts": op.concepts.name,"amount":op.amount,"balance": balance,"comment":op.comment})
+        r.append({"id":op.id, "datetime": op.datetime,"concepts": op.concepts.name,"amount":op.amount,"balance": balance,"comment": Comment().decode(op.comment)})
     r= sorted(r,  key=lambda item: item['datetime'])
     return r
 
@@ -374,7 +375,7 @@ def listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_mon
                 creditcards.id=creditcardsoperations.creditcards_id""", (operationstypes_id, year, month,  currency, operationstypes_id, year, month,  currency)):
             if local_currency==currency:
                 balance=balance+op["amount"]
-                r.append({"id":-1, "datetime": op['datetime'], "concepts":dict_concepts[op['concepts_id']], "amount":op['amount'], "balance": balance,"comment":op["comment"]})
+                r.append({"id":-1, "datetime": op['datetime'], "concepts":dict_concepts[op['concepts_id']], "amount":op['amount'], "balance": balance,"comment":Comment().decode(op["comment"])})
             else:
                 print("TODO")
             
