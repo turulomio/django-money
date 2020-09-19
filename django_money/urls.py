@@ -27,13 +27,7 @@ urlpatterns=[
 urlpatterns=urlpatterns+ i18n_patterns(
     path('i18n/setlang/',  set_language, name="set_language"), 
     path('admin/', admin.site.urls,  name="admin-site"),
-#    path('money/', money.urls, name="money-site"),
     path('', money_views.home, name='home'),
-    
-    path('signup/', money_views.signup, name='signup'),
-    
-    path('account_activation_sent/', money_views.account_activation_sent, name='account_activation_sent'),
-    path('activate/(<uidb64>/<token>/',  money_views.activate, name='activate'),
     
     path('login/', LoginView.as_view(template_name='login.html'), name="login"), 
     path('logout/', logout_then_login, name="logout"), 
