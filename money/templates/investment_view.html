@@ -12,7 +12,7 @@
 <p><strong>Product Id: </strong>{{ investment.products.fullName }}</p>
 <p><strong>Active: </strong>{{ investment.active }}</p>
 <p><strong>Selling point: </strong>{{ investment.sellling_point }}</p>
-<p><strong>Selling expiration: </strong>{{ investment.sellling_expiration }}</p>
+<p><strong>Selling expiration: </strong>{{ investment.selling_expiration }}</p>
 <p><strong>Daily adjustment: </strong>{{ investment.daily_adjustment }}</p>
 
 
@@ -35,21 +35,21 @@
   </ul>
  
 
-<div id="tabs-1">
-    {{ table_io | safe }}
-</div>
+  <div id="tabs-1">
+      {{ table_io | safe }}
+  </div>
 
 
-<div id="tabs-2">
-{{ table_ioc | safe }}
-</div>
+  <div id="tabs-2">
+  {{ table_ioc | safe }}
+  </div>
 
-<div id="tabs-3">
-  {{ table_ioh |safe}}
-</div>
-<div id="tabs-4">
-  {{ table_dividends |safe}}
-</div>
+  <div id="tabs-3">
+    {{ table_ioh |safe}}
+  </div>
+  <div id="tabs-4">
+    {{ table_dividends |safe}}
+  </div>
 </div>
 
   <p class="orders">

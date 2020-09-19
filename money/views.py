@@ -486,13 +486,13 @@ class investmentoperation_new(CreateView):
         return form
                 
     def get_initial(self):
-        print("JOER")
         return {
             'datetime': str(dtaware_changes_tz(timezone.now(), self.request.globals["mem__localzone"])), 
             'currency_conversion':1, 
             'taxes':0, 
             'commission':0, 
             }
+
     def get_success_url(self):
         return reverse_lazy('investment_view',args=(self.object.investments.id,))
   
@@ -505,7 +505,11 @@ class investment_update(UpdateView):
     model = Investments
     fields = ( 'name', 'accounts',  'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
     template_name="investment_update.html"
-        
+
+    def get_initial(self):
+        return {
+            'selling_expiration': str(self.object.selling_expiration), 
+            }
 
     def get_success_url(self):
         return reverse_lazy('investment_view',args=(self.object.id,))
@@ -792,6 +796,7 @@ class creditcardoperation_new(CreateView):
     def form_valid(self, form):
         form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
         return super().form_valid(form)
+
 @method_decorator(login_required, name='dispatch')
 class creditcardoperation_update(UpdateView):
     model = Creditcardsoperations

@@ -1,7 +1,12 @@
 
 class InputDate extends HTMLInputElement {
   constructor() {
-    super();
+    super();   
+    jQuery(this).datetimepicker({
+      inline:false,
+      format:'Y-m-d',
+      timepicker:false,
+    });
     this.addEventListener('click', e => this.changeDisplay());
   }
 
@@ -11,12 +16,6 @@ class InputDate extends HTMLInputElement {
     }else{
         this.locale="en";
     }
-    
-    jQuery(this).datetimepicker({
-      inline:false,
-      format:'Y-m-d',
-      timepicker:false,
-    });
     $.datetimepicker.setLocale(this.locale);
 
   }

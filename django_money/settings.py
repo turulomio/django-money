@@ -135,6 +135,7 @@ USE_I18N = True
 
 USE_L10N = True
 DATE_FORMAT = "Y-m-d"
+DATE_INPUT_FORMATS = ('%Y-%m-%d')
 
 LOGIN_URL = reverse_lazy("login")
 LOGIN_REDIRECT_URL = reverse_lazy("home")
