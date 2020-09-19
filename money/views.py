@@ -1,13 +1,13 @@
 from datetime import  date
 from decimal import Decimal
-
+from django.db import transaction
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib.auth import  login
 from django.shortcuts import render,  redirect, get_object_or_404
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.models import User
@@ -19,7 +19,7 @@ from django import forms
 from math import floor
 
 from money.connection_dj import cursor_rows
-from money.forms import SignUpForm, AccountsOperationsForm 
+from money.forms import SignUpForm, AccountsOperationsForm, AccountsTransferForm
 from money.tables import (
     TabulatorDividends, 
     TabulatorReportConcepts, 
@@ -70,6 +70,7 @@ from money.models import (
     Banks, 
     Accounts, 
     Accountsoperations, 
+    Comment, 
     Creditcards,  
     Investments, 
     Investmentsoperations, 
@@ -81,6 +82,8 @@ from money.models import (
 
     total_balance, 
 )
+from xulpymoney.libxulpymoneytypes import eConcept, eComment
+
 
 @login_required
 def order_list(request,  active):
@@ -239,34 +242,81 @@ def account_view(request, pk, year=date.today().year, month=date.today().month):
     creditcards= Creditcards.objects.all().filter(accounts_id=pk, active=True).order_by('name')
     table_creditcards=TabulatorCreditCards("table_creditcards", "creditcard_view", creditcards, account).render()
   
-    return render(request, 'account_view.html', locals())
+    return render(request, 'account_view.html', locals())        
+        
+@login_required       
+@transaction.atomic
+def account_transfer(request, origin): 
+    
+    origin=get_object_or_404(Accounts, pk=origin)
+    if request.method == 'POST':
+        form = AccountsTransferForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['commission']>0:
+                ao_commission=Accountsoperations()
+                ao_commission.datetime=form.cleaned_data['datetime']
+                concept_commision=Concepts.objects.get(pk=eConcept.BankCommissions)
+                ao_commission.concepts=concept_commision
+                ao_commission.operationstypes=concept_commision.operationstypes
+                ao_commission.amount=-form.cleaned_data['commission']
+                ao_commission.accounts=origin
+                ao_commission.save()
+            else:
+                ao_commission=None
 
+            #Origin
+            ao_origin=Accountsoperations()
+            ao_origin.datetime=form.cleaned_data['datetime']
+            concept_transfer_origin=Concepts.objects.get(pk=eConcept.TransferOrigin)
+            ao_origin.concepts=concept_transfer_origin
+            ao_origin.operationstypes=concept_transfer_origin.operationstypes
+            ao_origin.amount=-form.cleaned_data['amount']
+            ao_origin.accounts=origin
+            ao_origin.save()
 
-#@login_required
-#def accountoperation_update(request, accounts_id):
-#    if request.method == 'POST':
-#        form = AccountsoperationsAddForm(request.POST)
-#        if form.is_valid():
-#            accountoperation=Accountsoperations()
-#            accountoperation.comment= form.cleaned_data['comment']
-#            accountoperation.concepts=form.cleaned_data['concepts']
-#            accountoperation.amount=form.cleaned_data['amount']
-#            accountoperation.datetime=form.cleaned_data['datetime']
-#            accountoperation.operationstypes=accountoperation.concepts.operationstypes.id
-#            accountoperation.accounts=form.cleaned_data['accounts']
-#            accountoperation.save()
-#            return HttpResponseRedirect( reverse_lazy('account_view', args=(accounts_id,)))
-#    else:
-#        form = AccountsoperationsAddForm()
-#        form.fields['datetime'].widget.attrs['class'] ='form-control datetimepicker-input'
-#        form.fields['datetime'].widget.attrs['data-target'] ='#datetimepicker1'
-#        form.fields['accounts'].widget = forms.HiddenInput()
-##        form.fields['operationstypes'].widget = forms.HiddenInput()
-#        form.fields['accounts'].initial=accounts_id
-#        form.fields['datetime'].initial=timezone.now()
-#    return render(request, 'accountoperation_update.html', {'form': form})
+            #Destiny
+            ao_destiny=Accountsoperations()
+            ao_destiny.datetime=form.cleaned_data['datetime']
+            concept_transfer_destiny=Concepts.objects.get(pk=eConcept.TransferDestiny)
+            ao_destiny.concepts=concept_transfer_destiny
+            ao_destiny.operationstypes=concept_transfer_destiny.operationstypes
+            ao_destiny.amount=-form.cleaned_data['amount']
+            ao_destiny.accounts=form.cleaned_data['destiny']
+            ao_destiny.save()
 
+            #Encoding comments
+            ao_origin.comment=Comment().encode(eComment.AccountTransferOrigin, ao_origin, ao_destiny, ao_commission)
+            ao_origin.save()
+            ao_destiny.comment=Comment().encode(eComment.AccountTransferDestiny, ao_origin, ao_destiny, ao_commission)
+            ao_destiny.save()
+            if ao_commission is not None:
+                ao_commission.comment=Comment().encode(eComment.AccountTransferOriginCommission, ao_origin, ao_destiny, ao_commission)
+                ao_commission.save()
 
+            return HttpResponseRedirect( reverse_lazy('account_view', args=(origin.id,)))
+    else:
+        form = AccountsTransferForm()
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =request.LANGUAGE_CODE
+        form.fields['datetime'].initial= str(dtaware_changes_tz(timezone.now(), request.globals["mem__localzone"]))
+        form.fields['commission'].initial=0
+  
+    return render(request, 'account_transfer.html', locals())
+
+@login_required       
+@transaction.atomic
+def account_transfer_delete(request, comment): 
+    decode_objects=Comment().decode_objects(comment)
+    if request.method == 'POST':
+        print(decode_objects['origin'])
+        decode_objects["origin"].delete()
+        decode_objects['destiny'].delete()
+        if decode_objects['commission'] is not None:
+            decode_objects['commission'].delete()
+        return HttpResponseRedirect( reverse_lazy('account_view', args=(decode_objects['origin'].accounts.id,)))
+
+    return render(request, 'account_transfer_delete.html', locals())
 
 @method_decorator(login_required, name='dispatch')
 class accountoperation_new(CreateView):

@@ -49,6 +49,8 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('account/list/inactive/', money_views.account_list,   {'active':False}, name='account_list_inactive'),
     path('account/view/<slug:pk>/<int:year>/<int:month>/', money_views.account_view, name='account_view'),
     path('account/view/<int:pk>/', money_views.account_view, name='account_view'),
+    path('account/transfer/<int:origin>/', money_views.account_transfer, name='account_transfer'),
+    path('account/transfer/delete/<str:comment>/', money_views.account_transfer_delete, name='account_transfer_delete'),
     
     path('accountoperation/new/<int:accounts_id>/', money_views.accountoperation_new.as_view(), name='accountoperation_new'),
     path('accountoperation/update/<int:pk>/', money_views.accountoperation_update.as_view(), name='accountoperation_update'),

@@ -1,15 +1,12 @@
-from django.contrib.auth.models import User
-from money.models import Accountsoperations
-
-    
-from django.utils.translation import gettext_lazy as _
-
+from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+        
+from money.models import Accountsoperations, Accounts
 
 from xulpymoney.libxulpymoneytypes import eOperationType
-from django.core.exceptions import ValidationError
-from django import forms
-        
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(max_length=254, help_text=_('Required. Inform a valid email address.'))
@@ -31,4 +28,9 @@ class AccountsOperationsForm(forms.ModelForm):
         if cleaned_data['concepts'].operationstypes.id==eOperationType.Income and cleaned_data.get("amount")<0:
             raise ValidationError(_('Invalid value: %(value)s, must be positive'),code='invalid',  params={'value': cleaned_data['amount']},)
         return cleaned_data
-        
+
+class AccountsTransferForm(forms.Form):
+    datetime = forms.DateTimeField(required=True)
+    destiny = forms.ModelChoiceField(queryset=Accounts.objects.all().filter(active=True), required=True)
+    amount=forms.DecimalField(min_value=0, decimal_places=2, required=True)
+    commission=forms.DecimalField(min_value=0, decimal_places=2, required=True)

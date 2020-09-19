@@ -3,6 +3,7 @@
 
 {% block content %}
     <h1>{% trans "Update an account operation" %}</h1>
+  {% if object.can_be_updated %}
     <form method="post">
         <table>
         {% csrf_token %}
@@ -11,9 +12,19 @@
     <button type="submit">{% trans "Save" %}</button>
     </form>
     {% include "messages.html" %}
-
     <p class="orders">
         <a href="{% url 'accountoperation_delete' pk=object.id %}">{% trans "Delete this account operation" %}</a>
+    </p>
+  {% else %}
+    <p>Can't be updated</p>
+    <p class="orders">
+        {% if object.is_transfer %}
+        <a href="{% url 'account_transfer_delete' comment=object.comment %}">{% trans "Delete this transfer" %}</a>
+
+        {% endif %}
+  {% endif %}
+
+    <p class="orders">
         <a href="{% url 'report_concepts' %}">{% trans "Monthly concepts report" %}</a>
     </p>
 

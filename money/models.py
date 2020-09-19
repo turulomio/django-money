@@ -20,7 +20,7 @@ from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, 
 from money.reusing.percentage import Percentage
 from money.listdict_functions import listdict_average_ponderated
 
-from xulpymoney.libxulpymoneytypes import eProductType, eComment, eMoneyCurrency
+from xulpymoney.libxulpymoneytypes import eProductType, eComment, eMoneyCurrency, eConcept
 
 class Accounts(models.Model):
     name = models.TextField(blank=True, null=True)
@@ -32,6 +32,7 @@ class Accounts(models.Model):
     class Meta:
         managed = False
         db_table = 'accounts'
+        ordering = ['name']
         
     def __str__(self):
         return self.fullName()
@@ -69,6 +70,22 @@ class Accountsoperations(models.Model):
     def __str__(self):
         return "{} {} {}".format(self.datetime, self.concepts.name, self.amount)
 
+    def can_be_updated(self):
+        if self.concepts is None:
+            return False
+        if self.concepts.id in (eConcept.BuyShares, eConcept.SellShares, 
+            eConcept.Dividends, eConcept.CreditCardBilling, eConcept.AssistancePremium,
+            eConcept.DividendsSaleRights, eConcept.BondsCouponRunPayment, eConcept.BondsCouponRunIncome, 
+            eConcept.BondsCoupon, eConcept.RolloverPaid, eConcept.RolloverReceived):
+            return False
+        if Comment().getCode(self.comment) in (eComment.AccountTransferOrigin, eComment.AccountTransferDestiny, eComment.AccountTransferOriginCommission):
+            return False        
+        return True
+        
+    def is_transfer(self):
+        if Comment().getCode(self.comment) in (eComment.AccountTransferOrigin, eComment.AccountTransferDestiny, eComment.AccountTransferOriginCommission):
+            return True
+        return False
 
 class Annualtargets(models.Model):
     year = models.IntegerField(primary_key=True)
@@ -761,3 +778,46 @@ class Comment:
                 return _("Refund of {} payment of which had an amount of {}").format(dtaware2string(cco.datetime), money)
         except:
             return _("Error decoding comment {}").format(string)
+
+
+
+    def decode_objects(self, string):
+            (code, args)=self.get(string)
+            if code==None:
+                return None
+
+            if code==eComment.InvestmentOperation:
+                if not self.validateLength(1, code, args): return None
+                io=Investmentsoperations.objects.get(pk=args[0])
+                return {"io": io}
+
+            elif code in (eComment.AccountTransferOrigin,  eComment.AccountTransferDestiny, eComment.AccountTransferOriginCommission):
+                if not self.validateLength(3, code, args): return None
+                aoo=Accountsoperations.objects.get(pk=args[0])
+                aod=Accountsoperations.objects.get(pk=args[1])
+                if args[2]==-1:
+                    aoc=None
+                else:
+                    aoc=Accountsoperations.objects.get(pk=args[2])
+                return {"origin":aoo, "destiny":aod, "commission":aoc }
+
+            elif code==eComment.Dividend:#Comentario de cuenta asociada al dividendo
+                if not self.validateLength(1, code, args): return string
+                dividend=Dividends.objects.get(pk=args[[0]])
+                if dividend.investments.hasSameAccountCurrency():
+                    return _( "From {}. Gross {}. Net {}.").format(dividend.investments.name, dividend.gross(1), dividend.net(1))
+                else:
+                    return _( "From {}. Gross {} ({}). Net {} ({}).").format(dividend.investments.name, dividend.gross(1), dividend.gross(2), dividend.net(1), dividend.net(2))
+
+            elif code==eComment.CreditCardBilling:#Facturaci´on de tarjeta diferida
+                if not self.validateLength(2, code, args): return string
+                creditcard=Creditcards.objects.get(pk=args[0])
+                number=cursor_one_field("select count(*) from creditcardsoperations where accountsoperations_id=%s", (args[1], ))
+                return _("Billing {} movements of {}").format(number, creditcard.name)
+
+            elif code==eComment.CreditCardRefund:#Devolución de tarjeta
+                if not self.validateLength(1, code, args): return string
+                cco=Creditcardsoperations.objects.get(pk=args[0])
+                money=Currency(cco.amount, cco.creditcards.accounts.currency)
+                return _("Refund of {} payment of which had an amount of {}").format(dtaware2string(cco.datetime), money)
+
