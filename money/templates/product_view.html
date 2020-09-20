@@ -10,8 +10,12 @@
 <p><strong>{% trans "Currency" %}: </strong>{{ product.currency_symbol }}</p>
 <p><strong>{% trans "Product type" %}: </strong>{{ product.productstypes.name }}</p>
 <p><strong>{% trans "Leverage" %}: </strong>{{ product.leverages.name }}</p>
-{% endblock %}
 
 <h1>{% trans "Quotes month comparation" %}</h1>
 
   {{ table_quotes_month_comparation |safe}}
+
+
+
+
+{% endblock %}

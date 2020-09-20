@@ -1,15 +1,15 @@
 from datetime import  date
 from decimal import Decimal
+from django import forms
+from django.contrib import messages
 from django.db import transaction
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.shortcuts import render,  get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
-
-from django import forms
 
 from math import floor
 
@@ -123,6 +123,32 @@ def product_list_favorites(request):
 def product_view(request, pk):
     product=get_object_or_404(Products, id=pk)
     return render(request, 'product_view.html', locals())
+    
+@login_required
+def product_update(request):
+    data = {}
+    if "GET" == request.method:
+        return render(request, "product_update.html", data)
+    # if not GET, then proceed
+    if "csv_file1" not in request.FILES:
+        messages.error(request, _('You must upload a file'))
+        return HttpResponseRedirect(reverse("product_update"))
+    else:
+        csv_file = request.FILES["csv_file1"]
+        
+    if not csv_file.name.endswith('.csv'):
+        messages.error(request, _('File is not CSV type'))
+        return HttpResponseRedirect(reverse("product_update"))
+
+    #if file is too large, return
+    if csv_file.multiple_chunks():
+        messages.error(request, _("Uploaded file is too big ({} MB)." ).format(csv_file.size/(1000*1000),))
+        return HttpResponseRedirect(reverse("product_update"))
+
+    print(csv_file.__class__)
+    from money.investing_com import InvestingCom
+    InvestingCom(request, csv_file, product=None)
+    return HttpResponseRedirect(reverse("product_update"))
 
 @login_required
 def concept_list(request):

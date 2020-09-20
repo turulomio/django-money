@@ -71,6 +71,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('product/view/<slug:pk>/', money_views.product_view, name='product_view'),
     path('product/list/', money_views.product_list,  name='product_list'),
     path('product/list/favorites/', money_views.product_list_favorites,  name='product_list_favorites'),
+    path('product/product_update/', money_views.product_update,  name='product_update'),
     
     path('concept/list/', money_views.concept_list,  name='concept_list'),
     

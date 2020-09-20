@@ -10,7 +10,8 @@ class MoneyMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         # One-time configuration and initialization.
-#        start=time.time()
+
+        start=time.time()
         self.menu=Menu(_("Django Money"))
         self.menu.append(Action(_("Banks"), None,  "bank_list_active",  True))
         self.menu.append(Action(_("Accounts"), None,  "account_list_active",  True))
@@ -25,6 +26,7 @@ class MoneyMiddleware:
         grAdministration.append(Action(_("Concepts"), None, "concept_list", True))
         
         grProducts=Group(1, _("Products"), "30",  True)
+        grProducts.append(Action(_("Update"), None, "product_update", True))
         grProducts.append(Action(_("Search"), None, "product_list", True))
         
         grProductsPredefined=Group(2, _("Predefined"), "40", True)
@@ -35,7 +37,7 @@ class MoneyMiddleware:
         self.menu.append(grProducts)
         self.menu.append(grReport)
         self.menu.append(grAdministration)
-#        print(_("Menu loaded in {}".format(time.time()-start)))
+        print(_("Middleware start time took {} seconds".format(time.time()-start)))
 
     def __call__(self, request):
         # Code to be executed for each request before
