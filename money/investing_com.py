@@ -1,5 +1,6 @@
-
 from django.contrib import messages
+
+from money.models import Products,  Quotes
 
 from csv import reader
 from logging import debug
@@ -17,7 +18,7 @@ class InvestingCom:
         self.request=request
         self.product=product
         self.columns=self.get_number_of_csv_columns()
-        print("Columns", self.columns     )
+        print("Columns", self.columns)
         if self.product==None: #Several products
             if self.columns==8:
                 messages.info(self.request,"append_from_default")
@@ -100,38 +101,46 @@ class InvestingCom:
     ## It has 39 columns
     def append_from_portfolio(self):
         line_count = 0
+        quotes_count = 0
         for row in self.get_csv_object_seeking():
             if line_count >0:#Ignores headers line
-                for product in self.mem.data.products.find_all_by_ticker(row[1], eTickerPosition.InvestingCom):
-                    ## Casos especiales por ticker repetido se compara con más información.
-                    if row[1]=="DE30" and row[2]=="DE":
-                        product=self.mem.data.products.find_by_id(78094)#DAX 30
-                        print("DAX30")
-                    elif row [1]=="DE30" and row[2]=="Eurex":
-                        product=self.mem.data.products.find_by_id(81752)#CFD DAX 30
-                        print("CDFDAX")
-                    
+                ## Casos especiales por ticker repetido se compara con más información.
+                if row[1]=="DE30" and row[2]=="DE":
+                    products=[Products.objects.get(id=78094),]#DAX 30
+                    print("DAX30")
+                elif row [1]=="DE30" and row[2]=="Eurex":
+                    products=(Products.objects.get(id=81752),)#CFD DAX 30
+                    print("CDFDAX")
+                else:
+                    products=Products.objects.raw('SELECT products.* FROM products where tickers[5]=%s', (row[1], ))
+
+                for product in products:
+                    print(product)
                     if row[16].find(":")==-1:#It's a date
-                        try:
-                            quote=Quote(self.mem)
-                            quote.product=product
-                            date_=string2date(row[16], "DD/MM")
-                            quote.datetime=dtaware(date_,quote.product.stockmarket.closes, quote.product.stockmarket.zone.name)#Without 4 microseconds becaouse is not a ohcl
-                            quote.quote=string2decimal(row[3])
-                            self.append(quote)
-                        except:
-                            debug("Error parsing "+ str(row))
+#                        try:
+                        quote=Quotes()
+                        quote.products=product
+                        date_=string2date(row[16], "DD/MM")
+                        quote.datetime=dtaware(date_, product.stockmarket.closes, product.stockmarket.zone.name)#Without 4 microseconds becaouse is not a ohcl
+                        quote.quote=string2decimal(row[3])
+                        print(quote)
+                        quotes_count=quotes_count+1
+    #                        quote.save()
+#                        except:
+#                            messages.error(self.request,"Error parsing "+ str(row))
                     else: #It's an hour
                         try:
-                            quote=Quote(self.mem)
-                            quote.product=product
+                            quote=Quotes()
+                            quote.products=product
                             quote.datetime=string2dtaware(row[16],"%H:%M:%S", self.mem.localzone_name)
                             quote.quote=string2decimal(row[3])
-                            self.append(quote)
+                            print(quote)
+                            quotes_count=quotes_count+1
+    #                        quote.save()
                         except:
-                            debug("Error parsing " + str(row))
+                            messages.error(self.request, "Error parsing " + str(row))
             line_count += 1
-        print("Added {} quotes from {} CSV lines".format(self.length(), line_count))      
+        messages.info(self.request,"Added {} quotes from {} CSV lines".format(quotes_count, line_count))      
 
     ## Imports data from a CSV file with this struct. It has 6 columns
     ## "Fecha","Último","Apertura","Máximo","Mínimo","Vol.","% var."
