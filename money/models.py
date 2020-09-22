@@ -580,6 +580,7 @@ class Productstypes(models.Model):
         db_table = 'productstypes'
 
 class Quotes(models.Model):
+    id = models.AutoField(primary_key=True)
     datetime = models.DateTimeField(blank=True, null=True)
     quote = models.DecimalField(max_digits=18, decimal_places=6, blank=True, null=True)
     products = models.ForeignKey(Products, models.DO_NOTHING, blank=True, null=True)

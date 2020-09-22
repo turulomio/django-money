@@ -18,7 +18,8 @@
 
 <p class="orders">
   <a href="{% url 'investment_update' pk=investment.id %}">Update this investment</a> | 
-      <a href="{% url 'product_view' pk=investment.products.id %}">Show product</a>
+  <a href="{% url 'product_view' pk=investment.products.id %}">Show product</a> | 
+  <a href="{% url 'quote_new' products_id=investment.products.id %}">Add a quote to product</a>
 </p>
 <script>
   $( function() {

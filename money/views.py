@@ -66,18 +66,17 @@ from money.models import (
     Accountsoperations, 
     Comment, 
     Creditcards,  
+    Creditcardsoperations, 
     Investments, 
     Investmentsoperations, 
     Dividends, 
     Concepts, 
     Products,  
+    Quotes, 
     Orders, 
-    Creditcardsoperations, 
-
     total_balance, 
 )
 from xulpymoney.libxulpymoneytypes import eConcept, eComment
-
 
 @login_required
 def order_list(request,  active):
@@ -620,6 +619,42 @@ def report_total_income_details(request, year=date.today().year, month=date.toda
     table_gains=TabulatorInvestmentsOperationsHistoricalHeterogeneus("table_gains", None, gains, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
     return render(request, 'report_total_income_details.html', locals())
 
+        
+        
+@method_decorator(login_required, name='dispatch')
+class quote_new(CreateView):
+    model = Quotes
+    template_name="quote_new.html"
+    fields=("id","datetime",  "quote", "products")
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(quote_new, self).get_form(form_class)
+        form.fields['products'].widget = forms.HiddenInput()
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        return form
+        
+    def get_context_data(self, **kwargs):
+        context = super(quote_new, self).get_context_data(**kwargs)
+        context['product'] = self.product
+        return context
+        
+        
+    def get_initial(self):
+        self.product=Products.objects.get(pk=self.kwargs['products_id'])
+        return {
+            'datetime': str(dtaware_changes_tz(timezone.now(), self.request.globals["mem__localzone"])), 
+            'products': self.product
+        }
+        
+    def get_success_url(self):
+        return reverse_lazy('investment_list_active')
+          
+    def form_valid(self, form):
+        return super().form_valid(form)
 
 @login_required
 def report_concepts(request, year=date.today().year, month=date.today().month):
