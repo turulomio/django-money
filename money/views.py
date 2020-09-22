@@ -145,7 +145,6 @@ def product_update(request):
         messages.error(request, _("Uploaded file is too big ({} MB)." ).format(csv_file.size/(1000*1000),))
         return HttpResponseRedirect(reverse("product_update"))
 
-    print(csv_file.__class__)
     from money.investing_com import InvestingCom
     InvestingCom(request, csv_file, product=None)
     return HttpResponseRedirect(reverse("product_update"))

@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.utils.translation import ugettext_lazy as _
 
 from money.models import Products,  Quotes
 
@@ -18,7 +19,6 @@ class InvestingCom:
         self.request=request
         self.product=product
         self.columns=self.get_number_of_csv_columns()
-        print("Columns", self.columns)
         if self.product==None: #Several products
             if self.columns==8:
                 messages.info(self.request,"append_from_default")
@@ -57,7 +57,11 @@ class InvestingCom:
             line_count = 0
             for row in csv_reader:
                 if line_count >0:#Ignores headers line
-                    for product in self.mem.data.products.find_all_by_ticker(row[1], eTickerPosition.InvestingCom):
+                    products=self.mem.data.products.find_all_by_ticker(row[1], eTickerPosition.InvestingCom)
+                    print(row[1], len(products))
+                    if len(products)==0:
+                        print(_(f"Product with InvestingCom ticker {row[1]} wasn't found"))
+                    for product in products:
                         if row[7].find(":")==-1:#It's a date
                             try:
                                 quote=Quote(self.mem)
@@ -107,40 +111,42 @@ class InvestingCom:
                 ## Casos especiales por ticker repetido se compara con más información.
                 if row[1]=="DE30" and row[2]=="DE":
                     products=[Products.objects.get(id=78094),]#DAX 30
-                    print("DAX30")
                 elif row [1]=="DE30" and row[2]=="Eurex":
                     products=(Products.objects.get(id=81752),)#CFD DAX 30
-                    print("CDFDAX")
+                elif "EUR/USD" in row [1]:
+                    products=(Products.objects.get(id=81757),)#EUR/USD
+                elif "Oro al " in row [1]:
+                    products=(Products.objects.get(id=81758),)#CFD ORO
                 else:
                     products=Products.objects.raw('SELECT products.* FROM products where tickers[5]=%s', (row[1], ))
 
+                if len(products)==0:
+                    print(_(f"Product with InvestingCom ticker {row[1]} wasn't found"))
+
                 for product in products:
-                    print(product)
                     if row[16].find(":")==-1:#It's a date
-#                        try:
-                        quote=Quotes()
-                        quote.products=product
-                        date_=string2date(row[16], "DD/MM")
-                        quote.datetime=dtaware(date_, product.stockmarket.closes, product.stockmarket.zone.name)#Without 4 microseconds becaouse is not a ohcl
-                        quote.quote=string2decimal(row[3])
-                        print(quote)
-                        quotes_count=quotes_count+1
-    #                        quote.save()
-#                        except:
-#                            messages.error(self.request,"Error parsing "+ str(row))
+                        try:
+                            quote=Quotes()
+                            quote.products=product
+                            date_=string2date(row[16], "DD/MM")
+                            quote.datetime=dtaware(date_, product.stockmarkets.closes, product.stockmarkets.zone)#Without 4 microseconds becaouse is not a ohcl
+                            quote.quote=string2decimal(row[3])
+                            quotes_count=quotes_count+1
+                            quote.save()
+                        except:
+                            messages.error(self.request,"Error parsing date"+ str(row))
                     else: #It's an hour
                         try:
                             quote=Quotes()
                             quote.products=product
-                            quote.datetime=string2dtaware(row[16],"%H:%M:%S", self.mem.localzone_name)
+                            quote.datetime=string2dtaware(row[16],"%H:%M:%S", self.request.globals["mem__localzone"])
                             quote.quote=string2decimal(row[3])
-                            print(quote)
                             quotes_count=quotes_count+1
-    #                        quote.save()
+                            quote.save()
                         except:
-                            messages.error(self.request, "Error parsing " + str(row))
+                            messages.error(self.request, "Error parsing hour" + str(row))
             line_count += 1
-        messages.info(self.request,"Added {} quotes from {} CSV lines".format(quotes_count, line_count))      
+        messages.info(self.request,"Managed {} quotes from {} CSV lines".format(quotes_count, line_count))      
 
     ## Imports data from a CSV file with this struct. It has 6 columns
     ## "Fecha","Último","Apertura","Máximo","Mínimo","Vol.","% var."

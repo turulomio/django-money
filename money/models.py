@@ -5,7 +5,7 @@
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 Decimal()#Internal eval
 
@@ -54,6 +54,82 @@ class Accounts(models.Model):
     def accounts_balance_user_currency(qs, dt):
         return cursor_one_field("select sum((account_balance(accounts.id,%s,'EUR')).balance_user_currency) from  accounts where id in %s", (dt, qs_list_of_ids(qs)))
     
+## This model is not in Xulpymoney to avoid changing a lot of code
+class Stockmarkets(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.TextField(blank=False, null=False)
+    country=models.CharField(max_length=5, blank=False, null=False)
+    starts=models.TimeField(blank=False, null=False)
+    closes=models.TimeField(blank=False, null=False)
+    starts_futures=models.TimeField(blank=False, null=False)
+    closes_futures=models.TimeField(blank=False, null=False)
+    zone=models.TextField(blank=False, null=False)
+
+    class Meta:
+        managed = True
+        db_table = 'stockmarkets'
+
+    ## Returns the close time of a given date
+    def dtaware_closes(self, date):
+        return dtaware(date, self.closes, self.zone)
+    
+    def dtaware_closes_futures(self, date):
+        return dtaware(date, self.closes_futures, self.zone)
+
+    def dtaware_today_closes_futures(self):
+        return self.dtaware_closes_futures(date.today())
+    
+    ## Returns a datetime with timezone with the todays stockmarket closes
+    def dtaware_today_closes(self):
+        return self.dtaware_closes(date.today())
+
+    ## Returns a datetime with timezone with the todays stockmarket closes
+    def dtaware_today_starts(self):
+        return dtaware(date.today(), self.starts, self.zone)
+
+    ## When we don't know the datetime of a quote because the webpage we are scrapping doesn't gives us, we can use this functions
+    ## - If it's saturday or sunday it returns last friday at close time
+    ## - If it's not weekend and it's after close time it returns todays close time
+    ## - If it's not weekend and it's before open time it returns yesterday close time. If it's monday it returns last friday at close time
+    ## - If it's not weekend and it's after opent time and before close time it returns aware current datetime
+    ## @param delay Boolean that if it's True (default) now  datetime is minus 15 minutes. If False uses now datetime
+    ## @return Datetime aware, always. It can't be None
+    def estimated_datetime_for_intraday_quote(self, delay=True):
+        if delay==True:
+            now=self.zone.now()-timedelta(minutes=15)
+        else:
+            now=self.zone.now()
+        if now.weekday()<5:#Weekday
+            if now>self.dtaware_today_closes():
+                return self.dtaware_today_closes()
+            elif now<self.dtaware_today_starts():
+                if now.weekday()>0:#Tuesday to Friday
+                    return dtaware(date.today()-timedelta(days=1), self.closes, self.zone)
+                else: #Monday
+                    return dtaware(date.today()-timedelta(days=3), self.closes, self.zone)
+            else:
+                return now
+        elif now.weekday()==5:#Saturday
+            return dtaware(date.today()-timedelta(days=1), self.closes, self.zone)
+        elif now.weekday()==6:#Sunday
+            return dtaware(date.today()-timedelta(days=2), self.closes, self.zone)
+
+    ## When we don't know the date pf a quote of a one quote by day product. For example funds... we'll use this function
+    ## - If it's saturday or sunday it returns last thursday at close time
+    ## - If it's not weekend and returns yesterday close time except if it's monday that returns last friday at close time
+    ## @return Datetime aware, always. It can't be None
+    def estimated_datetime_for_daily_quote(self):
+        now=self.zone.now()
+        if now.weekday()<5:#Weekday
+            if now.weekday()>0:#Tuesday to Friday
+                return dtaware(date.today()-timedelta(days=1), self.closes, self.zone)
+            else: #Monday
+                return dtaware(date.today()-timedelta(days=3), self.closes, self.zone)
+        elif now.weekday()==5:#Saturday
+            return dtaware(date.today()-timedelta(days=2), self.closes, self.zone)
+        elif now.weekday()==6:#Sunday
+            return dtaware(date.today()-timedelta(days=3), self.closes, self.zone)
+
 
 class Accountsoperations(models.Model):
     concepts = models.ForeignKey('Concepts', models.DO_NOTHING)
@@ -461,7 +537,7 @@ class Products(models.Model):
     percentage = models.IntegerField()
     pci = models.CharField(max_length=1)
     leverages = models.ForeignKey(Leverages, models.DO_NOTHING)
-    stockmarkets_id = models.IntegerField()
+    stockmarkets = models.ForeignKey(Stockmarkets, models.DO_NOTHING)
     comment = models.TextField(blank=True, null=True)
     obsolete = models.BooleanField()
     tickers = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -511,6 +587,20 @@ class Quotes(models.Model):
     class Meta:
         managed = False
         db_table = 'quotes'
+        
+    def __str__(self):
+        return f"Quote ({self.id}) of '{self.products.name}' at {self.datetime} is {self.quote}"
+        
+    def save(self):
+        quotes=Quotes.objects.all().filter(datetime=self.datetime, products=self.products)
+        if quotes.count()>0:
+            for quote in quotes:
+                quote.quote=self.quote
+                models.Model.save(quote)
+                print(f"Updating {quote}")
+        else:
+            models.Model.save(self)
+            print(f"Inserting {self}")
 
 
 class Simulations(models.Model):
@@ -535,6 +625,7 @@ class Splits(models.Model):
     class Meta:
         managed = False
         db_table = 'splits'
+
 
 
 class Strategies(models.Model):
