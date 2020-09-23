@@ -819,7 +819,7 @@ class Comment:
         return True
 
     def decode(self, string):
-        try:
+#        try:
             (code, args)=self.get(string)
             if code==None:
                 return string
@@ -839,6 +839,7 @@ class Comment:
                 return _("Transfer to {}").format(aod.accounts.name)
 
             elif code==eComment.AccountTransferDestiny:#Operaccount transfer destiny
+            
                 if not self.validateLength(3, code, args): return string
                 aoo=Accountsoperations.objects.get(pk=args[0])
                 return _("Transfer received from {}").format(aoo.accounts.name)
@@ -850,12 +851,13 @@ class Comment:
                 return _("Comission transfering {} from {} to {}").format(Currency(aoo.amount, aoo.accounts.currency), aoo.accounts.name, aod.accounts.name)
 
             elif code==eComment.Dividend:#Comentario de cuenta asociada al dividendo
-                if not self.validateLength(1, code, args): return string
-                dividend=Dividends.objects.get(pk=args[[0]])
-                if dividend.investments.hasSameAccountCurrency():
-                    return _( "From {}. Gross {}. Net {}.").format(dividend.investments.name, dividend.gross(1), dividend.net(1))
-                else:
-                    return _( "From {}. Gross {} ({}). Net {} ({}).").format(dividend.investments.name, dividend.gross(1), dividend.gross(2), dividend.net(1), dividend.net(2))
+                dividend=self.decode_objects(string)
+                if dividend is not None:
+                    if dividend.investments.hasSameAccountCurrency():
+                        string= _( "From {}. Gross {}. Net {}.").format(dividend.investments.name, dividend.gross(eMoneyCurrency.Account), dividend.net(eMoneyCurrency.Account))
+                    else:
+                        string= _( "From {}. Gross {} ({}). Net {} ({}).").format(dividend.investments.name, dividend.gross(1), dividend.gross(2), dividend.net(1), dividend.net(2))
+                return string
 
             elif code==eComment.CreditCardBilling:#Facturaci´on de tarjeta diferida
                 if not self.validateLength(2, code, args): return string
@@ -868,8 +870,8 @@ class Comment:
                 cco=Creditcardsoperations.objects.get(pk=args[0])
                 money=Currency(cco.amount, cco.creditcards.accounts.currency)
                 return _("Refund of {} payment of which had an amount of {}").format(dtaware2string(cco.datetime), money)
-        except:
-            return _("Error decoding comment {}").format(string)
+#        except:
+#            return _("Error decoding comment {}").format(string)
 
 
 
@@ -894,12 +896,9 @@ class Comment:
                 return {"origin":aoo, "destiny":aod, "commission":aoc }
 
             elif code==eComment.Dividend:#Comentario de cuenta asociada al dividendo
-                if not self.validateLength(1, code, args): return string
-                dividend=Dividends.objects.get(pk=args[[0]])
-                if dividend.investments.hasSameAccountCurrency():
-                    return _( "From {}. Gross {}. Net {}.").format(dividend.investments.name, dividend.gross(1), dividend.net(1))
-                else:
-                    return _( "From {}. Gross {} ({}). Net {} ({}).").format(dividend.investments.name, dividend.gross(1), dividend.gross(2), dividend.net(1), dividend.net(2))
+                if not self.validateLength(1, code, args): return None
+                dividend=Dividends.objects.get(pk=args[0])
+                return dividend
 
             elif code==eComment.CreditCardBilling:#Facturaci´on de tarjeta diferida
                 if not self.validateLength(2, code, args): return string
