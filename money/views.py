@@ -240,7 +240,7 @@ def account_transfer(request, origin):
             concept_transfer_destiny=Concepts.objects.get(pk=eConcept.TransferDestiny)
             ao_destiny.concepts=concept_transfer_destiny
             ao_destiny.operationstypes=concept_transfer_destiny.operationstypes
-            ao_destiny.amount=-form.cleaned_data['amount']
+            ao_destiny.amount=form.cleaned_data['amount']
             ao_destiny.accounts=form.cleaned_data['destiny']
             ao_destiny.save()
 
