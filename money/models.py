@@ -47,6 +47,9 @@ class Accounts(models.Model):
         r=cursor_one_row("select * from account_balance(%s,%s,%s)", (self.id, dt, local_currency))
         return Currency(r['balance_account_currency'], self.currency), Currency(r['balance_user_currency'], r['user_currency'])
 
+    def mycurrency(self, value):
+        return Currency(value, self.currency)
+
     def currency_symbol(self):
         return currency_symbol(self.currency)
     
@@ -266,7 +269,6 @@ class Dividends(models.Model):
     class Meta:
         managed = False
         db_table = 'dividends'
-
 
     ## TODO This method should take care of diffrent currencies in accounts. Dividens are in account currency
     @staticmethod
@@ -853,10 +855,7 @@ class Comment:
             elif code==eComment.Dividend:#Comentario de cuenta asociada al dividendo
                 dividend=self.decode_objects(string)
                 if dividend is not None:
-                    if dividend.investments.hasSameAccountCurrency():
-                        string= _( "From {}. Gross {}. Net {}.").format(dividend.investments.name, dividend.gross(eMoneyCurrency.Account), dividend.net(eMoneyCurrency.Account))
-                    else:
-                        string= _( "From {}. Gross {} ({}). Net {} ({}).").format(dividend.investments.name, dividend.gross(1), dividend.gross(2), dividend.net(1), dividend.net(2))
+                    string= _( "From {}. Gross {}. Net {}.".format(dividend.investments.name, dividend.investments.accounts.mycurrency(dividend.gross), dividend.investments.accounts.mycurrency(dividend.net)))
                 return string
 
             elif code==eComment.CreditCardBilling:#Facturaci´on de tarjeta diferida
