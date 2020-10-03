@@ -50,6 +50,17 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('accountoperation/update/<int:pk>/', money_views.accountoperation_update.as_view(), name='accountoperation_update'),
     path('accountoperation/delete/<int:pk>', money_views.accountoperation_delete.as_view(), name='accountoperation_delete'),
     
+    
+    path('creditcard/view/<slug:pk>/', money_views.creditcard_view, name='creditcard_view'),
+    path('creditcard/new/<int:accounts_id>/', money_views.creditcard_new.as_view(), name='creditcard_new'),
+    path('creditcard/update/<slug:pk>/', money_views.creditcard_update.as_view(), name='creditcard_update'),
+    path('creditcard/delete/<slug:pk>/', money_views.creditcard_delete.as_view(), name='creditcard_delete'),
+    
+    
+    path('creditcardoperation/new/<int:creditcards_id>', money_views.creditcardoperation_new.as_view(), name='creditcardoperation_new'),
+    path('creditcardoperation/update/<int:pk>', money_views.creditcardoperation_update.as_view(), name='creditcardoperation_update'),
+    path('creditcardoperation/delete/<int:pk>', money_views.creditcardoperation_delete.as_view(), name='creditcardoperation_delete'),
+
     path('investment/list/', money_views.investment_list, {'active':True}, name='investment_list_active'),
     path('investment/list/inactive/', money_views.investment_list, {'active': False}, name='investment_list_inactive'),
     path('investment/view/<slug:pk>/', money_views.investment_view, name='investment_view'),
@@ -85,16 +96,9 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('report/total/income/details/', money_views.report_total_income_details,  name='report_total_income_details'),
     path('report/total/income/details/<int:year>/<int:month>/', money_views.report_total_income_details,  name='report_total_income_details'),
     
+    path('strategy/list/', money_views.strategy_list, {'active':True}, name='strategy_list_active'),
+    path('strategy/list/inactive/', money_views.strategy_list, {'active': False}, name='strategy_list_inactive'),
     
-    path('creditcard/view/<slug:pk>/', money_views.creditcard_view, name='creditcard_view'),
-    path('creditcard/new/<int:accounts_id>/', money_views.creditcard_new.as_view(), name='creditcard_new'),
-    path('creditcard/update/<slug:pk>/', money_views.creditcard_update.as_view(), name='creditcard_update'),
-    path('creditcard/delete/<slug:pk>/', money_views.creditcard_delete.as_view(), name='creditcard_delete'),
-    
-    
-    path('creditcardoperation/new/<int:creditcards_id>', money_views.creditcardoperation_new.as_view(), name='creditcardoperation_new'),
-    path('creditcardoperation/update/<int:pk>', money_views.creditcardoperation_update.as_view(), name='creditcardoperation_update'),
-    path('creditcardoperation/delete/<int:pk>', money_views.creditcardoperation_delete.as_view(), name='creditcardoperation_delete'),
     
 )
 

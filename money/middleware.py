@@ -34,8 +34,10 @@ class MoneyMiddleware:
         
         grProducts.append(grProductsPredefined)
         
+        
         self.menu.append(grProducts)
         self.menu.append(grReport)
+        self.menu.append(Action(_("Strategies"), None,  "strategy_list_active",  True))
         self.menu.append(grAdministration)
         print(_("Middleware start time took {} seconds".format(time.time()-start)))
 

@@ -12,6 +12,7 @@ from money.models import (
     Investments, 
     Investmentsoperations, 
     Operationstypes, 
+    Strategies, 
     balance_user_by_operationstypes, 
     get_investmentsoperations_totals_of_all_investments, 
     percentage_to_selling_point, total_balance, 
@@ -384,3 +385,23 @@ def listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_mon
     return r
 
     
+def listdict_strategies(active, local_currency, local_zone):
+    l=[]
+    strategies=Strategies.objects.all().filter(dt_to__isnull=active)
+    for strategy in strategies:
+        gains_net_current=0
+        gains_net_historical=0
+        dividends_net=0
+        
+        l.append({
+                "id": strategy.id, 
+                "name": strategy.name, 
+                "dt_from":strategy.dt_from, 
+                "dt_to":strategy.dt_to, 
+                "gains_net_current": gains_net_current, 
+                "gains_net_historical": gains_net_historical, 
+                "dividends_net": dividends_net, 
+                "total_net": gains_net_current+gains_net_historical+dividends_net
+            }
+        )
+    return l

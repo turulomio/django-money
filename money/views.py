@@ -37,6 +37,7 @@ from money.tables import (
     TabulatorProductsPairsEvolution, 
     TabulatorProductsPairsEvolutionWithMonthDiff, 
     TabulatorInvestmentsPairsInvestCalculator, 
+    TabulatorStrategies
 )
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz
@@ -58,6 +59,7 @@ from money.listdict import (
     listdict_investmentsoperationscurrent_homogeneus_merging_same_product, 
     listdict_products_pairs_evolution, 
     listdict_products_pairs_evolution_from_datetime, 
+    listdict_strategies, 
 )
 from money.models import (
     Operationstypes, 
@@ -824,7 +826,6 @@ class creditcardoperation_update(UpdateView):
     template_name="creditcardoperation_update.html"
     fields=("id","datetime",  "concepts", "amount", "comment", "creditcards", "paid")
 
-
     def get_success_url(self):
         return reverse_lazy('creditcard_view',kwargs={"pk":self.object.creditcards.id})
 
@@ -842,3 +843,10 @@ class creditcardoperation_update(UpdateView):
     def form_valid(self, form):
         form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
         return super().form_valid(form)
+    
+@login_required
+def strategy_list(request, active=True):
+    strategies=listdict_strategies(active, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    table_strategies=TabulatorStrategies("table_strategies", None, strategies, request.globals["mem__localcurrency"]).render()
+    return render(request, 'strategy_list.html', locals())
+    
