@@ -31,6 +31,7 @@
             <script type="text/javascript" src='{% static "js/jquery.js" %}'></script>
             <script type="text/javascript" src='{% static "js/jquery-ui.js" %}'></script>
             <script type="text/javascript" src='{% static "js/bootstrap.js" %}'></script>
+            <script type="text/javascript" src='{% static "js/Chart.js" %}'></script>
             <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script>
             <script type="text/javascript" src='{% static "js/xlsx.full.min.js" %}'></script>
             <script type="text/javascript" src='{% static "js/jquery.datetimepicker.full.min.js" %}'></script>
@@ -48,11 +49,10 @@
 
         {% block head_css %}
         {% block head_css_site %}
-        <!--
-        -->
         <link rel="stylesheet" type="text/css" href='{% static "css/jquery-ui.css" %}'>
-        <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap.css" %}' >
-        <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}' >
+        <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap.css" %}'>
+        <link rel="stylesheet" type="text/css" href='{% static "css/Chart.css" %}'>
+        <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/jquery.datetimepicker.min.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/mystyles.css" %}?dev={% random_integer 0 10000 %}'>
         {% endblock head_css_site %}

@@ -135,9 +135,9 @@ class TabulatorProductsPairsEvolutionWithMonthDiff(TabulatorFromListDict):
         self.setDestinyUrl(destiny_url)
         self.setLocalZone(local_zone)
         self.setListDict(listdict)
-        self.setFields("datetime", "price_ratio", "percentage_year_worse", "percentage_year_better", "percentage_year_diff", "percentage_month_diff")
-        self.setHeaders(_("Date and time"), _("Price ratio"), _("% worse from start"), _("% better from start"), _("% from start"), _("% from last step"))
-        self.setTypes("datetime", "Decimal6", "percentage", "percentage", "percentage", "percentage")
+        self.setFields("datetime", "price_worse","price_better","price_ratio", "percentage_year_worse", "percentage_year_better", "percentage_year_diff", "percentage_month_diff")
+        self.setHeaders(_("Date and time"), _("Price worse"), _("Price better"),  _("Price ratio"), _("% worse from start"), _("% better from start"), _("% from start"), _("% from last step"))
+        self.setTypes("datetime", "Decimal", "Decimal",  "Decimal6", "percentage", "percentage", "percentage", "percentage")
         self.showLastRecord(False)
 
 class TabulatorInvestmentsOperationsHistoricalHeterogeneus(TabulatorFromListDict):
@@ -243,8 +243,7 @@ class TabulatorReportIncomeTotal(TabulatorFromListDict):
         self.setTypes("int","str","EUR", "EUR", "EUR", "EUR","EUR")
         self.setBottomCalc(None, None, "sum", "sum", "sum", "sum", "sum")
         self.showLastRecord(False)
-        
-        
+
 class TabulatorStrategies(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency):
         TabulatorFromListDict.__init__(self, name)
@@ -254,5 +253,4 @@ class TabulatorStrategies(TabulatorFromListDict):
         self.setHeaders("Id", _("Name"), _("From"), _("To"), _("Current net gains"), _("Historical net gains"), _("Net dividends"), _("Net total"))
         self.setTypes("int","str", "str", "str","EUR", "EUR", "EUR","EUR")
         self.setBottomCalc(None, None, None,None, "sum", "sum", "sum", "sum")
-        
-        
+

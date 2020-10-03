@@ -214,6 +214,8 @@ def listdict_products_pairs_evolution_from_datetime(product_worse, product_bette
         diff_before=diff-last_diff
         l.append({
             "datetime": dt, 
+            "price_worse": worse_at_dt["quote"], 
+            "price_better": better_at_dt["quote"], 
             "price_ratio": worse_at_dt["quote"]/better_at_dt["quote"], 
             "percentage_year_worse": percentage_year_worse, 
             "percentage_year_better": percentage_year_better, 
