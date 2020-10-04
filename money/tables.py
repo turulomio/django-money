@@ -129,6 +129,7 @@ class TabulatorProductsPairsEvolution(TabulatorFromListDict):
         self.setHeaders(_("Date and time"), _("Price ratio"), _("% year worse"), _("% year better"), _("% year diff"))
         self.setTypes("datetime", "Decimal6", "percentage", "percentage", "percentage")
         self.showLastRecord(False)
+
 class TabulatorProductsPairsEvolutionWithMonthDiff(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, investment, local_zone):
         TabulatorFromListDict.__init__(self, name)
@@ -136,8 +137,8 @@ class TabulatorProductsPairsEvolutionWithMonthDiff(TabulatorFromListDict):
         self.setLocalZone(local_zone)
         self.setListDict(listdict)
         self.setFields("datetime", "price_worse","price_better","price_ratio", "percentage_year_worse", "percentage_year_better", "percentage_year_diff", "percentage_month_diff")
-        self.setHeaders(_("Date and time"), _("Price worse"), _("Price better"),  _("Price ratio"), _("% worse from start"), _("% better from start"), _("% from start"), _("% from last step"))
-        self.setTypes("datetime", "Decimal", "Decimal",  "Decimal6", "percentage", "percentage", "percentage", "percentage")
+        self.setHeaders(_("Date"), _("Price worse"), _("Price better"),  _("Price ratio"), _("% worse from start"), _("% better from start"), _("% from start"), _("% from last step"))
+        self.setTypes("date", "Decimal", "Decimal",  "Decimal6", "percentage", "percentage", "percentage", "percentage")
         self.showLastRecord(False)
 
 class TabulatorInvestmentsOperationsHistoricalHeterogeneus(TabulatorFromListDict):

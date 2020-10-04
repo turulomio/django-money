@@ -1,4 +1,4 @@
-from datetime import timedelta, date
+from datetime import date
 from decimal import Decimal
 from money.connection_dj import  cursor_rows
 from django.utils import timezone
@@ -199,31 +199,43 @@ def listdict_products_pairs_evolution(product_worse, product_better, datetimes, 
     l= sorted(l,  key=lambda item: item['datetime'])
     return l
 
-def listdict_products_pairs_evolution_from_datetime(product_worse, product_better, from_, basic_results_worse,   basic_results_better, local_currency, local_zone):
+def listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_quotes, basic_results_worse,   basic_results_better, local_currency, local_zone):
     l=[]
-    dt=from_
-    worse_first=product_worse.quote(dt)
-    better_first=product_better.quote(dt)
     last_diff=Percentage(0, 1)
-    while dt<timezone.now():
-        worse_at_dt=product_worse.quote(dt)
-        better_at_dt=product_better.quote(dt)
-        percentage_year_worse=percentage_between(worse_first["quote"], worse_at_dt["quote"])
-        percentage_year_better=percentage_between(better_first["quote"], better_at_dt["quote"])
+    first_a=common_quotes[0]["a_open"]
+    first_b=common_quotes[0]["b_open"]
+    for row in common_quotes:#a worse, b better
+        percentage_year_worse=percentage_between(first_a,  row["a_open"])
+        percentage_year_better=percentage_between(first_b, row["b_open"])
         diff=percentage_year_worse- percentage_year_better
         diff_before=diff-last_diff
         l.append({
-            "datetime": dt, 
-            "price_worse": worse_at_dt["quote"], 
-            "price_better": better_at_dt["quote"], 
-            "price_ratio": worse_at_dt["quote"]/better_at_dt["quote"], 
+            "datetime": date(row["year"], row["month"], 1), 
+            "price_worse": row["a_open"], 
+            "price_better": row["b_open"], 
+            "price_ratio": row["a_open"]/row["b_open"], 
             "percentage_year_worse": percentage_year_worse, 
             "percentage_year_better": percentage_year_better, 
             "percentage_year_diff": diff, 
             "percentage_month_diff": diff_before
         })
         last_diff=diff
-        dt=dt+timedelta(days=30)
+        
+    #Last quote
+    percentage_year_worse=percentage_between(first_a,  basic_results_worse["last"])
+    percentage_year_better=percentage_between(first_b, basic_results_better["last"])
+    diff=percentage_year_worse- percentage_year_better
+    diff_before=diff-last_diff
+    l.append({
+        "datetime": date.today(), 
+        "price_worse":  basic_results_worse["last"], 
+        "price_better":  basic_results_better["last"], 
+        "price_ratio": basic_results_worse["last"]/ basic_results_better["last"], 
+        "percentage_year_worse": percentage_year_worse, 
+        "percentage_year_better": percentage_year_better, 
+        "percentage_year_diff": diff, 
+        "percentage_month_diff": diff_before
+    })
     return l
 
 

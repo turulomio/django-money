@@ -42,6 +42,7 @@ from money.tables import (
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz
 from money.reusing.decorators import timeit
+from money.reusing.lineal_regression import LinealRegression
 from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict_functions import listdict_sum
@@ -347,6 +348,7 @@ def investment_list(request,  active):
     table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, request.globals["mem__localcurrency"], active, request.globals["mem__localzone"]).render()
     return render(request, 'investment_list.html', locals())
     
+@timeit
 @login_required
 def investment_pairs(request, worse, better, accounts_id):
     product_better=Products.objects.all().filter(id=better)[0]
@@ -356,6 +358,7 @@ def investment_pairs(request, worse, better, accounts_id):
     dict_ot=Operationstypes.dictionary()
     account=Accounts.objects.all().filter(id=accounts_id)[0]
     
+
     list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     table_ioc_better=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_better", None, list_ioc_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
     list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
@@ -372,10 +375,6 @@ def investment_pairs(request, worse, better, accounts_id):
 
     list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, list_ioc_worse, list_ioc_better, basic_results_worse,  basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
-    
-    
-    list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, dtaware_month_start(2012, 1, request.globals["mem__localzone"]), basic_results_worse,  basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    table_products_pair_evolution_from=TabulatorProductsPairsEvolutionWithMonthDiff("table_products_pair_evolution_from", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
     #Variables to calculate reinvest loses
     gains=listdict_sum(list_ioc_better, "gains_gross_user")+listdict_sum(list_ioc_worse, "gains_gross_user")
     better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
@@ -426,6 +425,27 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
     table_calculator=TabulatorInvestmentsPairsInvestCalculator("table_calculator", None, listdict, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
     return HttpResponse(table_calculator)
     
+@timeit
+@login_required
+def ajax_investment_pairs_evolution(request, worse, better ):
+    product_better=Products.objects.all().filter(id=better)[0]
+    product_worse=Products.objects.all().filter(id=worse)[0]
+    basic_results_better=product_better.basic_results()
+    basic_results_worse=product_worse.basic_results()
+    common_monthly_quotes=cursor_rows("select a.year, a.month, a.products_id as a, a.open as a_open, b.products_id as b, b.open as b_open from ohclmonthlybeforesplits(%s) as a ,ohclmonthlybeforesplits(%s) as b where a.year=b.year and a.month=b.month", (product_worse.id, product_better.id))
+    
+    list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_monthly_quotes, basic_results_worse,  basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    table_products_pair_evolution_from=TabulatorProductsPairsEvolutionWithMonthDiff("table_products_pair_evolution_from", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
+    
+    lr=LinealRegression(product_better.name, product_worse.name)
+    for row in common_monthly_quotes:
+        lr.append(row["b_open"], row["a_open"])
+        lr.calculate()
+    print(lr.string(True))
+    print(lr.r_squared_string())
+    
+    return HttpResponse(table_products_pair_evolution_from)
+
 @login_required
 def investment_view(request, pk):
     investment=get_object_or_404(Investments, id=pk)
