@@ -18,6 +18,7 @@ from money.models import (
     percentage_to_selling_point, total_balance, 
     currencies_in_accounts, 
     qs_investments_netgains_usercurrency_in_year_month, 
+    money_convert, 
 )
 from money.reusing.datetime_functions import dtaware_month_end
 from money.reusing.percentage import percentage_between, Percentage
@@ -174,32 +175,38 @@ def listdict_investmentsoperationscurrent_homogeneus_merging_same_product(produc
     return list_ioc
 
 
-def listdict_products_pairs_evolution(product_worse, product_better, datetimes, ioc_worse, ioc_better, basic_results_worse,   basic_results_better, local_currency, local_zone):
+def listdict_products_pairs_evolution(product_worse, product_better, datetimes, ioc_worse, ioc_better, basic_results_worse,   basic_results_better):
     l=[]
+    first_price_better=money_convert(ioc_better[0]["datetime"], ioc_better[0]["price_investment"], product_better.currency, product_worse.currency)
     for i in range(len(ioc_better)):
+        price_better=money_convert(ioc_better[i]["datetime"], ioc_better[i]["price_investment"], product_better.currency, product_worse.currency)
         percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], ioc_worse[i]["price_investment"])
-        percentage_year_better=percentage_between(ioc_better[0]["price_investment"], ioc_better[i]["price_investment"])
+        percentage_year_better=percentage_between(first_price_better, price_better)
         l.append({
             "datetime":ioc_better[i ]["datetime"], 
-            "price_ratio":ioc_worse[i]["price_investment"]/ioc_better[i]["price_investment"], 
+            "price_worse": ioc_worse[i]["price_investment"], 
+            "price_better": price_better, 
+            "price_ratio":ioc_worse[i]["price_investment"]/price_better, 
             "percentage_year_worse": percentage_year_worse, 
             "percentage_year_better": percentage_year_better, 
             "percentage_year_diff": percentage_year_worse-percentage_year_better, 
         })
+    price_better=money_convert(timezone.now(), basic_results_better["last"], product_better.currency, product_worse.currency)
     percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], basic_results_worse["last"]) 
-    percentage_year_better=percentage_between(ioc_better[0]["price_investment"], basic_results_better["last"])
+    percentage_year_better=percentage_between(first_price_better, price_better)
     l.append({
         "datetime":timezone.now(), 
-        "price_ratio": basic_results_worse["last"]/basic_results_better["last"], 
+        "price_worse": basic_results_worse["last"], 
+        "price_better": price_better, 
+        "price_ratio": basic_results_worse["last"]/price_better, 
         "percentage_year_worse": percentage_year_worse, 
         "percentage_year_better": percentage_year_better, 
         "percentage_year_diff": percentage_year_worse-percentage_year_better, 
-        
     })
     l= sorted(l,  key=lambda item: item['datetime'])
     return l
 
-def listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_quotes, basic_results_worse,   basic_results_better, local_currency, local_zone):
+def listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_quotes, basic_results_worse,   basic_results_better):
     l=[]
     last_diff=Percentage(0, 1)
     first_a=common_quotes[0]["a_open"]
@@ -210,7 +217,7 @@ def listdict_products_pairs_evolution_from_datetime(product_worse, product_bette
         diff=percentage_year_worse- percentage_year_better
         diff_before=diff-last_diff
         l.append({
-            "datetime": date(row["year"], row["month"], 1), 
+            "datetime": row["date"], 
             "price_worse": row["a_open"], 
             "price_better": row["b_open"], 
             "price_ratio": row["a_open"]/row["b_open"], 
@@ -220,22 +227,6 @@ def listdict_products_pairs_evolution_from_datetime(product_worse, product_bette
             "percentage_month_diff": diff_before
         })
         last_diff=diff
-        
-    #Last quote
-    percentage_year_worse=percentage_between(first_a,  basic_results_worse["last"])
-    percentage_year_better=percentage_between(first_b, basic_results_better["last"])
-    diff=percentage_year_worse- percentage_year_better
-    diff_before=diff-last_diff
-    l.append({
-        "datetime": date.today(), 
-        "price_worse":  basic_results_worse["last"], 
-        "price_better":  basic_results_better["last"], 
-        "price_ratio": basic_results_worse["last"]/ basic_results_better["last"], 
-        "percentage_year_worse": percentage_year_worse, 
-        "percentage_year_better": percentage_year_better, 
-        "percentage_year_diff": diff, 
-        "percentage_month_diff": diff_before
-    })
     return l
 
 

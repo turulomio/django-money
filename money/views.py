@@ -359,9 +359,9 @@ def investment_pairs(request, worse, better, accounts_id):
     
 
     list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    table_ioc_better=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_better", None, list_ioc_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
+    table_ioc_better=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_better", None, list_ioc_better, product_better.currency, request.globals["mem__localzone"]).render()
     list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    table_ioc_worse=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_worse", None, list_ioc_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
+    table_ioc_worse=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_worse", None, list_ioc_worse, product_worse.currency, request.globals["mem__localzone"]).render()
 
     pair_gains=Currency(listdict_sum(list_ioc_better, 'gains_net_user')+listdict_sum(list_ioc_worse, 'gains_net_user'), request.globals["mem__localcurrency"])
     
@@ -372,8 +372,8 @@ def investment_pairs(request, worse, better, accounts_id):
         datetimes.append(ioc["datetime"])
     datetimes.sort()
 
-    list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, list_ioc_worse, list_ioc_better, basic_results_worse,  basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
+    list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, list_ioc_worse, list_ioc_better, basic_results_worse,  basic_results_better)
+    table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, product_worse.currency, request.globals["mem__localzone"]).render()
     #Variables to calculate reinvest loses
     gains=listdict_sum(list_ioc_better, "gains_gross_user")+listdict_sum(list_ioc_worse, "gains_gross_user")
     better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
@@ -431,18 +431,73 @@ def ajax_investment_pairs_evolution(request, worse, better ):
     product_worse=Products.objects.all().filter(id=worse)[0]
     basic_results_better=product_better.basic_results()
     basic_results_worse=product_worse.basic_results()
-    common_monthly_quotes=cursor_rows("select a.year, a.month, a.products_id as a, a.open as a_open, b.products_id as b, b.open as b_open from ohclmonthlybeforesplits(%s) as a ,ohclmonthlybeforesplits(%s) as b where a.year=b.year and a.month=b.month", (product_worse.id, product_better.id))
     
-    list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_monthly_quotes, basic_results_worse,  basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    table_products_pair_evolution_from=TabulatorProductsPairsEvolutionWithMonthDiff("table_products_pair_evolution_from", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
-    from money.reusing.lineal_regression import LinealRegression
-
-    lr=LinealRegression(product_better.name, product_worse.name)
-    for row in common_monthly_quotes:
-        lr.append(row["b_open"], row["a_open"])
-        lr.calculate()
-    print(lr.string(True))
-    print(lr.r_squared_string())
+    if product_better.currency==product_worse.currency:
+        common_monthly_quotes=cursor_rows("""
+            select 
+                make_date(a.year, a.month,1) as date, 
+                a.products_id as a, 
+                a.open as a_open, 
+                b.products_id as b, 
+                b.open as b_open 
+            from 
+                ohclmonthlybeforesplits(%s) as a ,
+                ohclmonthlybeforesplits(%s) as b 
+            where 
+                a.year=b.year and 
+                a.month=b.month
+        UNION ALL
+            select
+                now()::date as date,
+                %s as a, 
+                (select last from last_penultimate_lastyear(%s,now())) as a_open, 
+                %s as b, 
+                (select last from last_penultimate_lastyear(%s,now())) as b_open
+                """, (product_worse.id, product_better.id, 
+                product_worse.id, product_worse.id, product_better.id, product_better.id))
+    else: #Uses worse currency
+        #Fist condition in where it's to remove quotes without money_convert due to no data
+        common_monthly_quotes=cursor_rows("""
+            select 
+                make_date(a.year,a.month,1) as date, 
+                a.products_id as a, 
+                a.open as a_open, 
+                b.products_id as b, 
+                money_convert(make_date(a.year,a.month,1)::timestamp with time zone, b.open, %s, %s) as b_open
+            from 
+                ohclmonthlybeforesplits(%s) as a 
+                ,ohclmonthlybeforesplits(%s) as b 
+            where 
+                b.open != money_convert(make_date(a.year,a.month,1)::timestamp with time zone, b.open, %s, %s)  and
+                a.year=b.year and 
+                a.month=b.month
+        UNION ALL
+            select
+                now()::date as date,
+                %s as a, 
+                (select last from last_penultimate_lastyear(%s,now())) as a_open, 
+                %s as b, 
+                money_convert(now(), (select last from last_penultimate_lastyear(%s,now())), %s,%s) as b_open
+                """, ( product_better.currency,  product_worse.currency, 
+                        product_worse.id, 
+                        product_better.id, 
+                        product_better.currency,  product_worse.currency, 
+                        
+                        product_worse.id,
+                        product_worse.id,
+                        product_better.id, 
+                        product_better.id, product_better.currency,  product_worse.currency))
+    
+    list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_monthly_quotes, basic_results_worse,  basic_results_better)
+    table_products_pair_evolution_from=TabulatorProductsPairsEvolutionWithMonthDiff("table_products_pair_evolution_from", None, list_products_evolution, product_worse.currency, request.globals["mem__localzone"]).render()
+    
+#    from money.reusing.lineal_regression import LinealRegression
+#    lr=LinealRegression(product_better.name, product_worse.name)
+#    for row in common_monthly_quotes:
+#        lr.append(row["b_open"], row["a_open"])
+#        lr.calculate()
+#    print(lr.string(True))
+#    print(lr.r_squared_string())
     
     return HttpResponse(table_products_pair_evolution_from)
 
