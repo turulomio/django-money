@@ -687,12 +687,9 @@ def currencies_in_accounts():
 def total_balance(dt, local_currency):
     return cursor_one_row("select * from total_balance(%s,%s)", (dt, local_currency, ))
 
-
-
-
-
-
 def money_convert(dt, amount, from_,  to_):   
+    if from_==to_:
+        return amount
     return cursor_one_field("select * from money_convert(%s, %s, %s, %s)", (dt, amount, from_,  to_))
 
 
