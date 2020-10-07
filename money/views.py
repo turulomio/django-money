@@ -42,7 +42,6 @@ from money.tables import (
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz
 from money.reusing.decorators import timeit
-from money.reusing.lineal_regression import LinealRegression
 from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict_functions import listdict_sum
@@ -436,7 +435,8 @@ def ajax_investment_pairs_evolution(request, worse, better ):
     
     list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_monthly_quotes, basic_results_worse,  basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     table_products_pair_evolution_from=TabulatorProductsPairsEvolutionWithMonthDiff("table_products_pair_evolution_from", None, list_products_evolution, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
-    
+    from money.reusing.lineal_regression import LinealRegression
+
     lr=LinealRegression(product_better.name, product_worse.name)
     for row in common_monthly_quotes:
         lr.append(row["b_open"], row["a_open"])
