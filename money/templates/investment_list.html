@@ -13,5 +13,16 @@
 <p></p>
 {{table_investments|safe}}
 
+<script>
+var column = table.getColumn("percentage_sellingpoint");
+for (var cell of column.getCells()) {
+    if (cell.getValue()<5 && cell.getValue()>0){
+        cell.getElement().style.backgroundColor='#92ffab';
+        cell.getElement().style.backgroundRepeat= 'no-repeat';
+        cell.getElement().style.backgroundImage="url('/static/images/xulpymoney.png')";
+        cell.getElement().style.backgroundSize = "16px 16px";
+    }
+}
+</script>
 {% endblock %}
 

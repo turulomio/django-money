@@ -8,14 +8,15 @@
   },
   "dependencies": {
     "bootstrap": "^4.5.2",
+    "datatables": "^1.10.18",
     "gettext-js": "0.0.3",
     "jquery": "^3.5.1",
     "jquery-datetimepicker": "^2.5.21",
     "jquery-ui": "^1.12.1",
     "moment-timezone": "^0.5.31",
     "popper.js": "^1.16.1",
-    "tabulator-tables": "^4.8.1",
-    "xlsx": "^0.16.7"
+    "tabulator-tables": "^4.8.2",
+    "xlsx": "^0.16.8"
   },
   "devDependencies": {},
   "scripts": {
