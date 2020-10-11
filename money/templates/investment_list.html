@@ -14,12 +14,25 @@
 {{table_investments|safe}}
 
 <script>
+// Adding background color 
 var column = table.getColumn("percentage_sellingpoint");
 for (var cell of column.getCells()) {
     if (cell.getValue()<5 && cell.getValue()>0){
         cell.getElement().style.backgroundColor='#92ffab';
+    } else if (cell.getValue()>100){
+        cell.getElement().style.backgroundColor='#ff92ab';
+    }
+}
+
+// Adding icon 
+for (var row of table.getRows()) {
+    var dat=row.getData();
+    var date = moment(dat.selling_expiration, "YYYY-MM-DD");
+    if (date.isValid() && date< moment()){
+        cell=row.getCell("percentage_sellingpoint");
         cell.getElement().style.backgroundRepeat= 'no-repeat';
-        cell.getElement().style.backgroundImage="url('/static/images/xulpymoney.png')";
+        cell.getElement().style.verticalAlign= 'middle';
+        cell.getElement().style.backgroundImage="url('/static/images/alarm_clock.png')";
         cell.getElement().style.backgroundSize = "16px 16px";
     }
 }

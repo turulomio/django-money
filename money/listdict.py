@@ -67,6 +67,7 @@ def listdict_investments(queryset, dt,  local_currency, active):
                     "gains": t_io_current["gains_gross_user"],  
                     "percentage_invested": Percentage(t_io_current["gains_gross_user"], t_io_current["invested_user"]), 
                     "percentage_sellingpoint": percentage_to_selling_point(t_io_current["shares"], investment.selling_price, basic_quotes['last']), 
+                    "selling_expiration": investment.selling_expiration, 
                 }
             )
     else:        

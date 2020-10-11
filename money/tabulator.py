@@ -63,8 +63,8 @@ class TabulatorCommons:
         tb_list=[]
         for d in self.listdict:
             new_d={}
-            for field in self.fields:
-                new_d[field]=object_to_tb(d[field], self.translate, self.localzone)
+            for key, value in d.items():
+                new_d[key]=object_to_tb(d[key], self.translate, self.localzone)
             tb_list.append(new_d)
                         
         if self.show_last_record is True and len(tb_list)>0:
