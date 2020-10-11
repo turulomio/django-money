@@ -1,4 +1,5 @@
 from django.utils.translation import ugettext_lazy as _
+_('Added shares')
 _('Attendance bonus')
 _('Bank commissions')
 _('Bonds. Coupon collection')

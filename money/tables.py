@@ -53,7 +53,15 @@ class TabulatorInvestments(TabulatorFromListDict):
         self.setLocalZone(local_zone)
         if active is True:
             self.setFields("id","name", "last_datetime","last_quote","daily_difference", "daily_percentage", "invested_local",  "balance", "gains", "percentage_invested", "percentage_sellingpoint")
-            self.setHeaders(_("Id"), _("Name"), _("Last dt.") ,  _("Last quote"), _("Daily diff"), _("% daily"), _("Invested"),_("Balance"),  _("Gains"), _("% Invested"), _("% selling point"))
+
+            self.setHeaders(_("Id"), _("Name"), _("Last dt.") ,  _("Last quote"), _("Daily diff"), 
+            # Translator: xgettext:no-python-format
+            _("% daily"), 
+            _("Invested"),_("Balance"),  _("Gains"), 
+            # Translator: xgettext:no-python-format
+            _("% Invested"), 
+            # Translator: xgettext:no-python-format
+            _("% selling point"))
         else:
             self.setFields("id","name")
             self.setHeaders(_("Id"), _("Name"))
