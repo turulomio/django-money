@@ -44,5 +44,36 @@ $(document).ready(function() {
 });
 </script>
 {{table_report_total_income|safe}}
+
+<h1>{% trans 'Show gains by product type' %}</h1>
+
+<form class="normal" method="post" id="form_gains_by_product_type">{% csrf_token %}
+  <button id="button_gains_by_product_type" type="submit">{% trans "Gains by product type report" %}</button>
+  </form>
+  
+  <div id="gains_by_product_type"></div>
+  <script>
+  $(document).ready(function() {
+    $("#button_gains_by_product_type").click(function(e) {
+      e.preventDefault();
+      $.ajax({
+        type: "POST",
+        url: "{% url 'ajax_report_gains_by_product_type' year %}",
+        data: {
+              csrfmiddlewaretoken: "{{csrf_token}}",
+        },
+        success: function(result) {
+          $("#gains_by_product_type").html(result);    
+          $("#form_gains_by_product_type").css("display", "none");
+  
+        },
+        error: function(result) {
+          $("#gains_by_product_type").html('<p>{% trans "Somethng is wrong" %}</p>');          
+        }
+      });
+    });
+  });
+  </script>
+
 {% endblock %}
 

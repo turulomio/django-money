@@ -32,6 +32,7 @@ from money.tables import (
     TabulatorOrders, 
     TabulatorReportIncomeTotal, 
     TabulatorReportTotal, 
+    TabulatorInvestmentsGainsByProductType, 
     TabulatorInvestmentsOperationsHistoricalHomogeneus, 
     TabulatorInvestmentsOperationsHistoricalHeterogeneus, 
     TabulatorProductsPairsEvolution, 
@@ -55,6 +56,7 @@ from money.listdict import (
     listdict_accountsoperations_from_queryset, 
     listdict_dividends_by_month, 
     listdict_dividends_from_queryset, 
+    listdict_investments_gains_by_product_type, 
     listdict_investmentsoperationshistorical, 
     listdict_investmentsoperationscurrent_homogeneus_merging_same_product, 
     listdict_products_pairs_evolution, 
@@ -678,6 +680,13 @@ def ajax_report_total_income(request, year=date.today().year):
     table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", "report_total_income_details", list_report2, request.globals["mem__localcurrency"]).render()
     print("Loading list report income took {}".format(timezone.now()-start))
     return HttpResponse(table_report_total_income)
+
+@timeit
+@login_required
+def ajax_report_gains_by_product_type(request, year=date.today().year):
+    list_report=listdict_investments_gains_by_product_type(year, request.globals["mem__localcurrency"])
+    table_investments_gains_by_product_type=TabulatorInvestmentsGainsByProductType("table_investments_gains_by_product_type", "report_total_income_details", list_report, request.globals["mem__localcurrency"]).render()
+    return HttpResponse(table_investments_gains_by_product_type)
 
 @timeit
 @login_required
