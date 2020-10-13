@@ -12,6 +12,7 @@ from money.models import (
     Investments, 
     Investmentsoperations, 
     Operationstypes, 
+    Productstypes, 
     Strategies, 
     balance_user_by_operationstypes, 
     get_investmentsoperations_totals_of_all_investments, 
@@ -408,6 +409,40 @@ def listdict_strategies(active, local_currency, local_zone):
                 "gains_net_historical": gains_net_historical, 
                 "dividends_net": dividends_net, 
                 "total_net": gains_net_current+gains_net_historical+dividends_net
+            }
+        )
+    return l
+
+
+
+    
+def listdict_investments_gains_by_product_type(year, local_currency):
+    rows=[]
+    for row in cursor_rows("""
+select 
+    investments.id, 
+    productstypes_id, 
+    (investment_operations_totals(investments.id, make_timestamp(%s,12,31,23,59,59)::timestamp with time zone, %s)).io_historical 
+from  
+    investments, 
+    products 
+where investments.products_id=products.id""", (year, local_currency, )):
+        rows.append(row)
+        print(row)
+    l=[]
+    for pt in Productstypes.objects.all():
+#    for strategy in strategies:
+#        gains_net_current=0
+#        gains_net_historical=0
+#        dividends_net=0
+#        
+        l.append({
+                "id": pt.id, 
+                "name":pt.name, 
+                "gains_gross": 0, 
+                "dividends_gross":0, 
+                "gains_net":0, 
+                "dividends_net": 0, 
             }
         )
     return l
