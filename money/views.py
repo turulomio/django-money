@@ -687,7 +687,7 @@ def ajax_report_total_income(request, year=date.today().year):
 @login_required
 def ajax_report_gains_by_product_type(request, year=date.today().year):
     list_report=listdict_investments_gains_by_product_type(year, request.globals["mem__localcurrency"])
-    table_investments_gains_by_product_type=TabulatorInvestmentsGainsByProductType("table_investments_gains_by_product_type", "report_total_income_details", list_report, request.globals["mem__localcurrency"]).render()
+    table_investments_gains_by_product_type=TabulatorInvestmentsGainsByProductType("table_investments_gains_by_product_type", None, list_report, request.globals["mem__localcurrency"]).render()
     return HttpResponse(table_investments_gains_by_product_type)
 
 @timeit
