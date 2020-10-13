@@ -12,6 +12,18 @@
 
 <p></p>
 {{ table_orders|safe}}
-
+<script>
+// Adding background color 
+var column = table.getColumn("percentage_from_price");
+for (var cell of column.getCells()) {
+    if (cell.getValue()>-5 ){
+        cell.getElement().style.backgroundColor='#92ffab';
+    }
+}
+//Sorting
+table.setSort([
+    {column:"percentage_from_price", dir:"desc"}, //sort by this first
+]);
+</script>
 {% endblock %}
 

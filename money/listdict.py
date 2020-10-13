@@ -390,7 +390,6 @@ def listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_mon
         r= sorted(r,  key=lambda item: item['datetime'])
 #            r=r+money_convert(dtaware_month_end(year, month, local_zone), balance, currency, local_currency)
     return r
-
     
 def listdict_strategies(active, local_currency, local_zone):
     l=[]
@@ -412,6 +411,34 @@ def listdict_strategies(active, local_currency, local_zone):
             }
         )
     return l
+
+
+    
+def listdict_orders_active( ):
+    rows=cursor_rows("""
+        select  
+            orders.id, 
+            investments.name || ' (' || accounts.name || ')' as name, 
+            date, 
+            expiration, 
+            shares, 
+            price, 
+            shares+price as amount, 
+            (price-(select last from last_penultimate_lastyear(products_id,now())))/price *100 as percentage_from_price ,
+            products.currency
+        from 
+            orders,
+            investments,
+            products,
+            accounts 
+        where 
+            executed is null and 
+            expiration>=now() and 
+            orders.investments_id=investments.id and 
+            products.id=investments.products_id and 
+            investments.accounts_id=accounts.id
+    """)
+    return rows
 
 
 

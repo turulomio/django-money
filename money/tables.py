@@ -218,15 +218,14 @@ class TabulatorReportConcepts(TabulatorFromListDict):
     {column:"total", dir:"desc"}, //sort by this first
     ],""")        
 
-class TabulatorOrders(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset):
-        TabulatorFromQuerySet.__init__(self, name)
+class TabulatorOrders(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, local_currency):
+        TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
-        self.setQuerySet(queryset)
-        self.setCallByNames("id", "date", "expiration", ("investments.fullName",()), "shares", "price", "executed")
-        self.setHeaders(_("Id"), _("Date"),_("Expiration"), _("Investment"),  _("Shares"), _("Price"), _("Executed"))
-        self.setTypes("int", "str", "str", "str",   "Decimal", "Decimal", "str")
-        self.generate_listdict()
+        self.setListDict(listdict)
+        self.setFields("id", "date", "expiration", "name", "currency","shares", "price", "amount", "percentage_from_price","executed")
+        self.setHeaders(_("Id"), _("Date"),_("Expiration"), _("Investment"), _("Currency"),   _("Shares"), _("Price"), _("Amount"), _("% from price"), _("Executed"))
+        self.setTypes("int", "str", "str", "str",  "str",   "Decimal", "Decimal", "Decimal", "percentage","str")
         
 
 class TabulatorReportTotal(TabulatorFromListDict):

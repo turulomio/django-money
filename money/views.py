@@ -60,6 +60,7 @@ from money.listdict import (
     listdict_investments_gains_by_product_type, 
     listdict_investmentsoperationshistorical, 
     listdict_investmentsoperationscurrent_homogeneus_merging_same_product, 
+    listdict_orders_active, 
     listdict_products_pairs_evolution, 
     listdict_products_pairs_evolution_from_datetime, 
     listdict_strategies, 
@@ -85,11 +86,8 @@ from xulpymoney.libxulpymoneytypes import eConcept, eComment
 
 @login_required
 def order_list(request,  active):
-    if active is True:
-        orders= Orders.objects.all().filter(executed__isnull=True ,  expiration__gte=date.today()).order_by('date')
-    else:
-        orders= Orders.objects.all().filter(executed__isnull=False ,  expiration__lt=date.today()).order_by('-date')[:20]
-    table_orders=TabulatorOrders("table_orders", 'order_view', orders).render()
+    listdict_orders=listdict_orders_active()
+    table_orders=TabulatorOrders("table_orders", 'order_view', listdict_orders, request.globals["mem__localcurrency"]).render()
     return render(request, 'order_list.html', locals())
     
 @login_required
