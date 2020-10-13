@@ -524,7 +524,9 @@ def investment_view(request, pk):
     for ioh in io_historical:
         ioh["operationstypes"]=dict_ot[ioh["operationstypes_id"]]
         ioh["years"]=0
-   
+        
+    gains_at_selling_price=investment.currency_gains_at_selling_price(io_current)
+
     table_io=TabulatorInvestmentsOperationsHomogeneus("IO", "investmentoperation_update", io, investment, request.globals["mem__localzone"]).render()
     table_ioc=TabulatorInvestmentsOperationsCurrentHomogeneus("IOC", None, io_current, investment, request.globals["mem__localzone"]).render()
     table_ioh=TabulatorInvestmentsOperationsHistoricalHomogeneus("IOH", None, io_historical, investment, request.globals["mem__localzone"]).render()

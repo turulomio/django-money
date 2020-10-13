@@ -394,6 +394,29 @@ class Investments(models.Model):
         if self.products.currency==self.accounts.currency:
             return True
         return False
+        
+        
+    def selling_expiration_alert(self):
+        if self.selling_price is None:
+            return False
+        if self.selling_price==Decimal(0):
+            return False
+        if self.selling_expiration is None:
+            return False
+        if self.selling_expiration<date.today():
+            return True
+        return False
+        
+    ## @param listdict_ioc
+    def currency_gains_at_selling_price(self, listdict_ioc):
+        #Get selling price gains
+        if self.selling_price is None:
+            return None
+        gains=0
+        for ioc in listdict_ioc:
+            gains=gains+abs(ioc["shares"]*(self.selling_price-ioc['price_investment'])*ioc['real_leverages'])
+        return Currency(gains, self.products.currency)
+        
 
 class Investmentsaccountsoperations(models.Model):
     concepts_id = models.IntegerField()

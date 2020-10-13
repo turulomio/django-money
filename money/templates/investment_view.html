@@ -7,13 +7,20 @@
 <h1>{% blocktrans with investment=investment.name %}Investment details of '{{ investment }}'{% endblocktrans %}</h1>
 <h2>{% trans "Investment operations" %}</h2>
 
-<p><strong>Id: </strong>{{ investment.id }}</p>
-<p><strong>Name: </strong>{{ investment.fullName }}</p>
-<p><strong>Product Id: </strong>{{ investment.products.fullName }}</p>
-<p><strong>Active: </strong>{{ investment.active }}</p>
-<p><strong>Selling point: </strong>{{ investment.sellling_point }}</p>
-<p><strong>Selling expiration: </strong>{{ investment.selling_expiration }}</p>
-<p><strong>Daily adjustment: </strong>{{ investment.daily_adjustment }}</p>
+<p><strong>{% trans 'Id' %}: </strong>{{ investment.id }}</p>
+<p><strong>{% trans 'Name' %}: </strong>{{ investment.fullName }}</p>
+<p><strong>{% trans 'Product Id' %}: </strong>{{ investment.products.fullName }}</p>
+<p><strong>{% trans 'Active' %}: </strong>{{ investment.active }}</p>
+<p><strong>{% trans 'Selling point' %}: </strong>{{ investment.selling_price }}
+  {% if gains_at_selling_price %}
+      . {% blocktrans with gains_at_selling_price=gains_at_selling_price.string %} to gain {{ gains_at_selling_price }}.{% endblocktrans %}
+  {% endif %}</p>
+<p><strong>{% trans 'Selling expiration' %}: </strong>{{ investment.selling_expiration }}
+  {% if investment.selling_expiration_alert %}
+      . <span class="red">{% trans 'You must set a new selling order.' %}</span>
+  {% endif %}</p>
+<p><strong>{% trans 'Daily adjustment' %}: </strong>{{ investment.daily_adjustment }}</p>
+<p><strong>{% trans 'Currency' %}: </strong>{{ investment.products.currency }} ({{ investment.products.currency_symbol }})</p>
 
 
 <p class="orders">
