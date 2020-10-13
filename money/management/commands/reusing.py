@@ -18,6 +18,7 @@ class Command(BaseCommand):
         download_from_github("turulomio", "reusingcode", "python_plain/myconfigparser.py", "money/reusing")
         download_from_github("turulomio", "reusingcode", "python/text_inputs.py", "money/reusing")
         download_from_github("turulomio", "reusingcode", "django/templatetags/mymenu.py", "money/templatetags")
+        download_from_github("turulomio", "reusingcode", "js/component.ajaxbutton.js", "money/static/js")
         download_from_github("turulomio", "reusingcode", "js/component.yearmonthpicker.js", "money/static/js")
         download_from_github("turulomio", "reusingcode", "js/component.yearpicker.js", "money/static/js")
  

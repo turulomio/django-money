@@ -58,33 +58,7 @@ $(document).ready(function() {
 
 
 <h2>{% trans "Pair historical evolution" %}</h2>
-
-<form class="normal" method="post" id="form_evolution">{% csrf_token %}
-    <button id="button_evolution" type="submit">{% trans "Press to see pair historical evolution" %}</button>
-</form>
-<div id="form_evolution_result"></div>
-<script>
-$(document).ready(function() {
-  $("#button_evolution").click(function(e) {
-    var amount=$("#amount").val();
-    e.preventDefault();
-    $.ajax({
-      type: "POST",
-      url: "{% url 'ajax_investment_pairs_evolution' product_worse.id product_better.id %}",
-      data: {
-            csrfmiddlewaretoken: "{{csrf_token}}",
-      },
-      success: function(result) {
-        $("#form_evolution_result").html(result);
-        $("#form_evolution").hide();
-      },
-      error: function(result) {
-        $("#form_evolution_result").html('<p>{% trans "Something is wrong" %}</p>');
-      }
-    });
-  });
-});
-</script>
+<ajax-button id="ajax_button_evolution" url="{% url 'ajax_investment_pairs_evolution' product_worse.id product_better.id %}" buttontext="{% trans 'Press to see pair historical evolution' %}" csrf_token="{{csrf_token}}"></ajax-button>
 <h2>{% trans "Loses of next reinvestment" %}</h2>
 
 

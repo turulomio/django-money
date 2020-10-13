@@ -9,6 +9,7 @@ from django.shortcuts import render,  get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
 
 from math import floor
@@ -425,6 +426,7 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
     return HttpResponse(table_calculator)
     
 @timeit
+@ensure_csrf_cookie ##For ajax-button
 @login_required
 def ajax_investment_pairs_evolution(request, worse, better ):
     product_better=Products.objects.all().filter(id=better)[0]

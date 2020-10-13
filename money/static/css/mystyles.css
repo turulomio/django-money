@@ -142,7 +142,7 @@ form{
     display: inline-block;
 }
 
-form.checkbox_selection, form.normal{
+form.checkbox_selection, form.normal, ajax-button > form{
     background: none;
     border-radius: unset;
     border: none;

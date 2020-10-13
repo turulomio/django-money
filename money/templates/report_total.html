@@ -15,34 +15,7 @@
 </p>
 
 
+<ajax-button id="ajax_button_income" url="{% url 'ajax_report_total_income' year %}" buttontext="{% trans 'Get income report' %}" csrf_token="{{csrf_token}}"></ajax-button>
 
-<form class="normal" method="post" id="form_income">{% csrf_token %}
-<button id="button_income" type="submit">{% trans "Get income report" %}</button>
-</form>
-
-<div id="income"></div>
-<script>
-$(document).ready(function() {
-  $("#button_income").click(function(e) {
-    e.preventDefault();
-    $.ajax({
-      type: "POST",
-      url: "{% url 'ajax_report_total_income' year %}",
-      data: {
-            csrfmiddlewaretoken: "{{csrf_token}}",
-      },
-      success: function(result) {
-        $("#income").html(result);    
-        $("#form_income").css("display", "none");
-
-      },
-      error: function(result) {
-        $("#income").html('<p>{% trans "Somethng is wrong" %}</p>');          
-      }
-    });
-  });
-});
-</script>
-{{table_report_total_income|safe}}
 {% endblock %}
 

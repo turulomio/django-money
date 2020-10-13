@@ -26,7 +26,7 @@ class MoneyMiddleware:
         grAdministration.append(Action(_("Concepts"), None, "concept_list", True))
         
         grProducts=Group(1, _("Products"), "30",  True)
-        grProducts.append(Action(_("Update"), None, "product_update", True))
+        grProducts.append(Action(_("Update quotes"), None, "product_update", True))
         grProducts.append(Action(_("Search"), None, "product_list", True))
         
         grProductsPredefined=Group(2, _("Predefined"), "40", True)
