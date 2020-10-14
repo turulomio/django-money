@@ -123,9 +123,9 @@ class TabulatorProducts(TabulatorFromListDict):
         self.setDestinyUrl(destiny_url)
         self.setLocalZone(local_zone)
         self.setListDict(listdict)
-        self.setFields("id",  "code","name")
-        self.setHeaders(_("Id"), _("Code"),  _("Name"))
-        self.setTypes("int", "int","str")
+        self.setFields("id",  "code","name", "isin", "last_datetime", "last", "percentage_day", "percentage_year",  "percentage_dps")
+        self.setHeaders(_("Id"), _("Code"),  _("Name"), _("ISIN"), _("Last quote datetime"), _("Last quote"), _("% day"), _("% year"), _("% DPS"))
+        self.setTypes("int", "int","str", "str", "str", "Decimal6", "percentage", "percentage", "percentage")
 
 class TabulatorProductsPairsEvolution(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, currency, local_zone):

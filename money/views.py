@@ -101,9 +101,25 @@ def product_list(request):
     if search!=None:
         listproducts=[]
         searchtitle=_("Searching products that contain '{}' in database").format(search)
-        for row in cursor_rows("select id, name from products where name ilike %s;", ( f"%%{search}%%", )):
-            row["code"]=row["id"]
-            listproducts.append(row)
+        listproducts=cursor_rows("""
+select 
+    products.id, 
+    products.id as code,
+    name, isin, 
+    last_datetime, 
+    last, 
+    percentage(penultimate, last) as percentage_day, 
+    percentage(t.lastyear, last) as percentage_year, 
+    (select estimation from estimations_dps where year=extract(year from now()) and id=products.id)/last*100 as percentage_dps
+from 
+    products, 
+    last_penultimate_lastyear(products.id,now()) as t
+where 
+    t.id=products.id and
+    (name ilike %s or 
+     isin ilike %s or
+    tickers::text ilike %s)""", [f"%%{search}%%"]*3)      
+        
 
         table_products=TabulatorProducts("table_products", 'product_view', listproducts, request.globals["mem__localcurrency"], request.globals["mem__localzone"] ).render()
     return render(request, 'product_list.html', locals())
