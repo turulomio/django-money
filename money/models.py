@@ -706,7 +706,7 @@ def get_investmentsoperations_totals_of_all_investments(dt, local_currency):
 def currencies_in_accounts():
     return cursor_one_column("select distinct(currency) from accounts")
     
-## @return accounts, investments, totals
+## @return accounts, investments, totals, invested
 def total_balance(dt, local_currency):
     return cursor_one_row("select * from total_balance(%s,%s)", (dt, local_currency, ))
 

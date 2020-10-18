@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from datetime import date
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls.i18n import i18n_patterns, set_language 
@@ -88,6 +89,9 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('quote/new/<int:products_id>/', money_views.quote_new.as_view(), name='quote_new'),
     
     path('concept/list/', money_views.concept_list,  name='concept_list'),
+    
+    path('chart/total/', money_views.ajax_chart_total, {'year_from': date.today().year},  name='ajax_chart_total_default'),
+    path('chart/total/<int:year_from>/', money_views.ajax_chart_total,  name='ajax_chart_total'),
     
     path('report/concepts/',  money_views.report_concepts,  name='report_concepts'), 
     path('report/concepts/<int:year>/<int:month>/',  money_views.report_concepts,  name='report_concepts'), 

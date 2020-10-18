@@ -15,8 +15,9 @@
     <h2>{% trans 'Documentation' %}</h2>
     <p><a href="http://github.com/turulomio/xulpymoney/wiki/">Xulpymoney wiki</a></p>
 
+<h1>{% trans 'Total chart' %}</h1>
+    <ajax-button id="chart_total" url="{% url 'ajax_chart_total' 2020 %}" buttontext="{% trans 'Total chart' %}" csrf_token="{{csrf_token}}"></ajax-button>
 
 
-<input-datetime locale="{{LANGUAGE_CODE}}" timezone="Europe/Madrid"></input-datetime>
 {% endblock %}
 

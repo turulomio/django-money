@@ -18,9 +18,15 @@ class MoneyMiddleware:
         self.menu.append(Action(_("Investments"), None,  "investment_list_active",  True))
         self.menu.append(Action(_("Orders"), None,  "order_list_active",  True))
         
+        grCharts=Group(2,  _("Charts"), "11", True)
+        grCharts.append(Action(_("Total"), None, "ajax_chart_total_default", True))
+        
         grReport=Group(1, _("Reports"), "10",  True)
         grReport.append(Action(_("Concepts"), None, "report_concepts", True))
         grReport.append(Action(_("Total"), None, "report_total", True))
+        grReport.append(grCharts)
+        
+        
         
         grAdministration=Group(1, _("Management"), "20",  True)
         grAdministration.append(Action(_("Concepts"), None, "concept_list", True))

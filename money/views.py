@@ -1,4 +1,4 @@
-from datetime import  date
+from datetime import  date, timedelta
 from decimal import Decimal
 from django import forms
 from django.contrib import messages
@@ -16,6 +16,9 @@ from math import floor
 
 from money.connection_dj import cursor_rows
 from money.forms import AccountsOperationsForm, AccountsTransferForm
+from money.charts import (
+    chart_lines_total, 
+)
 from money.tables import (
     TabulatorDividends, 
     TabulatorReportConcepts, 
@@ -50,6 +53,7 @@ from money.listdict_functions import listdict_sum
 from money.listdict import (
     listdict_accounts, 
     listdict_banks, 
+    #listdict_chart_total, 
     listdict_investments, 
     listdict_report_total_income, 
     listdict_report_total,     
@@ -687,6 +691,17 @@ def report_total(request, year=date.today().year):
     
     return render(request, 'report_total.html', locals())
 
+
+
+@timeit
+@login_required
+def ajax_chart_total(request, year_from):
+#    ld_chart_total=listdict_chart_total(year_from, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+#    table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", "report_total_income_details", list_report2, request.globals["mem__localcurrency"]).render()
+    now=timezone.now()
+    
+    chart_total=chart_lines_total([now-timedelta(days=4),now-timedelta(days=3), now-timedelta(days=2), now-timedelta(days=1) ], [1, 2, 3, 4])
+    return render(request, 'chart_total.html', locals())
 
 @timeit
 @login_required

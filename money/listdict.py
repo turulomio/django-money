@@ -16,7 +16,8 @@ from money.models import (
     Strategies, 
     balance_user_by_operationstypes, 
     get_investmentsoperations_totals_of_all_investments, 
-    percentage_to_selling_point, total_balance, 
+    percentage_to_selling_point, 
+    total_balance, 
     currencies_in_accounts, 
     qs_investments_netgains_usercurrency_in_year_month, 
     money_convert, 
@@ -472,4 +473,18 @@ where investments.products_id=products.id""", (year, local_currency, )):
                 "dividends_net": 0, 
             }
         )
+    return l
+
+def listdict_chart_total(year_from, local_currency, local_zone):
+    l=[]
+    for year in range(year_from, date.today().year+1):
+        for month in range(1, 13):
+            dt=dtaware_month_end(year, month, local_zone)
+            total=total_balance(dt, local_currency)
+            l.append({
+                "datetime":dt, 
+                "total_user": total["total_user"], 
+                "invested_user":total["investments_invested_user"], 
+                "investments_user":total["investments_user"], 
+            })
     return l
