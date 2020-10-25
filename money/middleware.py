@@ -33,9 +33,10 @@ class MoneyMiddleware:
         
         grProducts=Group(1, _("Products"), "30",  True)
         grProducts.append(Action(_("Update quotes"), None, "product_update", True))
-        grProducts.append(Action(_("Search"), None, "product_list", True))
+        grProducts.append(Action(_("Search"), None, "product_list_search", True))
         
         grProductsPredefined=Group(2, _("Predefined"), "40", True)
+        grProductsPredefined.append(Action(_("Benchmark index"), None, "product_benchmark", True))
         grProductsPredefined.append(Action(_("Favorites"), None, "product_list_favorites", True))
         
         grProducts.append(grProductsPredefined)

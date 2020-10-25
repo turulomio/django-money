@@ -14,7 +14,7 @@ from django.views.generic.edit import UpdateView, CreateView, DeleteView
 
 from math import floor
 
-from money.connection_dj import cursor_rows
+from money.connection_dj import cursor_rows, cursor_one_column
 from money.forms import AccountsOperationsForm, AccountsTransferForm
 from money.charts import (
     chart_lines_total, 
@@ -102,16 +102,14 @@ def order_view(request, pk):
     return render(request, 'order_view.html', locals())
     
 @login_required
-def product_list(request):
-    search = request.GET.get('search')
-    if search!=None:
-        listproducts=[]
-        searchtitle=_("Searching products that contain '{}' in database").format(search)
+def  table_product_list_from_ids(request, ids):
+        ids=tuple(ids)
         listproducts=cursor_rows("""
 select 
     products.id, 
     products.id as code,
-    name, isin, 
+    name, 
+    isin, 
     last_datetime, 
     last, 
     percentage(penultimate, last) as percentage_day, 
@@ -122,26 +120,41 @@ from
     last_penultimate_lastyear(products.id,now()) as t
 where 
     t.id=products.id and
+    products.id in %s""", (ids, ))
+        return TabulatorProducts("table_products", 'product_view', listproducts, request.globals["mem__localcurrency"], request.globals["mem__localzone"] )
+
+@login_required
+def product_list_search(request):
+    search = request.GET.get('search')
+    if search!=None:
+        searchtitle=_("Searching products that contain '{}' in database").format(search)
+        ids=cursor_one_column("""
+select 
+    products.id
+from 
+    products
+where 
     (name ilike %s or 
      isin ilike %s or
-    tickers::text ilike %s)""", [f"%%{search}%%"]*3)      
-        
-
-        table_products=TabulatorProducts("table_products", 'product_view', listproducts, request.globals["mem__localcurrency"], request.globals["mem__localzone"] ).render()
-    return render(request, 'product_list.html', locals())
+    tickers::text ilike %s)""", [f"%%{search}%%"]*3) 
+        table_products=table_product_list_from_ids(request, ids).render()
+    return render(request, 'product_list_search.html', locals())
     
 @login_required
 def product_list_favorites(request):
-    search = request.GET.get('search')
-    if search!=None:
-        listproducts=[]
-        searchtitle=_("Searching products that contain '{}' in database").format(search)
-        for row in cursor_rows("select id, name from products where name ilike %s;", ( f"%%{search}%%", )):
-            row["code"]=row["id"]
-            listproducts.append(row)
-
-        table_products=TabulatorProducts("table_products", 'product_view', listproducts, request.globals["mem__localcurrency"], request.globals["mem__localzone"] ).render()
+    favorites=request.globals["mem__favorites"]
+    title=_("Favorites product list")
+    ids=[]
+    for id in favorites.split(","):
+        ids.append(int(id))
+    print(ids)
+    table_products=table_product_list_from_ids(request, ids).render()
     return render(request, 'product_list.html', locals())
+
+@login_required
+def product_benchmark(request):
+    print(request.globals)
+    return product_view(request, request.globals["mem__benchmarkid"])
 
 @timeit
 @login_required

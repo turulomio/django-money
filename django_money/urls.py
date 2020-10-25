@@ -81,8 +81,9 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('order/list/inactive/', money_views.order_list, {'active': False}, name='order_list_inactive'),
     path('order/view/<slug:pk>/', money_views.bank_view, name='order_view'),
     
+    path('product/benchmark/', money_views.product_benchmark, name='product_benchmark'),
     path('product/view/<slug:pk>/', money_views.product_view, name='product_view'),
-    path('product/list/', money_views.product_list,  name='product_list'),
+    path('product/list/search/', money_views.product_list_search,  name='product_list_search'),
     path('product/list/favorites/', money_views.product_list_favorites,  name='product_list_favorites'),
     path('product/product_update/', money_views.product_update,  name='product_update'),
     
