@@ -8,7 +8,7 @@
 
 <selector-year title="{% trans 'Select a year' %}" year_start="{{ year_start }}" year_end="{{ year_end }}" year="{{ year }}" url="{% url 'report_total' %}"></selector-year>
 <p></p>
-<p>Last year balance ({{last_year|date:"Y-m-d"}}) is {{ str_last_year_balance }}</p>
+<p>Last year balance ({{last_year|date:"Y-m-d"}}) is {{ last_year_balance.string }}</p>
 
 {{table_report_total|safe}}
 <p>

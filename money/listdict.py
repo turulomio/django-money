@@ -314,7 +314,7 @@ def listdict_report_total(year, last_year_balance, local_currency, local_zone):
             futures.append(executor.submit(month_results, month_end,  month_name, local_currency))
 
     futures= sorted(futures, key=lambda future: future.result()[0])#month_end
-    last_month=last_year_balance 
+    last_month=last_year_balance.amount
     for future in futures:
         month_end, month_name,  total = future.result()
         list_.append({

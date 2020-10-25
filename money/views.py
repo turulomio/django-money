@@ -687,8 +687,7 @@ def report_total(request, year=date.today().year):
     last_year=dtaware_month_end(year-1, 12, request.globals["mem__localzone"])
     
     start=timezone.now()
-    last_year_balance=total_balance(last_year, request.globals["mem__localcurrency"])['total_user']
-    str_last_year_balance=Currency(last_year_balance, request.globals["mem__localcurrency"]).string()
+    last_year_balance=Currency(total_balance(last_year, request.globals["mem__localcurrency"])['total_user'], request.globals["mem__localcurrency"])
     print("Loading alltotals last_year took {}".format(timezone.now()-start))
     
     start=timezone.now()
@@ -703,6 +702,8 @@ def report_total(request, year=date.today().year):
 @timeit
 @login_required
 def ajax_chart_total(request, year_from):
+    year_start=1970
+    year_end=date.today().year + 10
     ld_chart_total=listdict_chart_total(year_from, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     chart_total=chart_lines_total(ld_chart_total, request.globals["mem__localcurrency"])
     return render(request, 'chart_total.html', locals())
