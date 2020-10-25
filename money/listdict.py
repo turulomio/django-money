@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 from money.connection_dj import  cursor_rows
 from money.reusing.listdict_functions import listdict2dict
@@ -491,16 +491,27 @@ group by productstypes_id""", (year, ))
     return l
 
 def listdict_chart_total(year_from, local_currency, local_zone):
+    def month_results(year, month,  local_currency, local_zone):
+        dt=dtaware_month_end(year, month, local_zone)
+        return dt, total_balance(dt, local_currency)
+    #####################
     if year_from==date.today().year:
         months_12=date.today()-timedelta(days=365)
         list_months=months(months_12.year, months_12.month)
     else:
         list_months=months(year_from, 1)
+        
     l=[]
-    for year,  month in list_months:
-        start=datetime.now()
-        dt=dtaware_month_end(year, month, local_zone)
-        total=total_balance(dt, local_currency)
+    futures=[]
+    
+    # HA MEJORADO UNOS 5 segundos de 10 segundos a 3 para 12 meses
+    with ThreadPoolExecutor(max_workers=cpu_count()+1) as executor:
+        for year,  month in list_months:    
+            futures.append(executor.submit(month_results, year, month, local_currency,  local_zone))
+
+#    futures= sorted(futures, key=lambda future: future.result()[0])#month_end
+    for future in futures:
+        dt, total=future.result()
         l.append({
             "datetime":dt, 
             "total_user": total["total_user"], 
@@ -508,7 +519,6 @@ def listdict_chart_total(year_from, local_currency, local_zone):
             "investments_user":total["investments_user"], 
             "accounts_user":total["accounts_user"], 
         })
-        print(f"Total balance for {year}-{month} took {datetime.now()-start}")
     return l
 #from asgiref.sync import sync_to_async
 #def listdict_chart_total(year_from, local_currency, local_zone):
