@@ -1,4 +1,4 @@
-from money.tabulator import TabulatorFromListDict, TabulatorFromQuerySet
+from money.reusing.tabulator import TabulatorFromListDict, TabulatorFromQuerySet
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -67,11 +67,8 @@ class TabulatorInvestments(TabulatorFromListDict):
             self.setHeaders(_("Id"), _("Name"))
         self.setTypes("int", "str", "str", "float6",  local_currency, "percentage", local_currency, local_currency, local_currency,"percentage", "percentage")
         self.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
-        self.setInitialOptions("""
-    initialSort:[
-    {column:"gains", dir:"desc"}, //then sort by this second
-    {column:"percentage_sellingpoint", dir:"asc"}, //sort by this first
-    ],""")
+        self.setFilterHeaders(None, "input", None, None, None, None, None, None, None, None, None)
+
 class TabulatorInvestmentsPairsInvestCalculator(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency, local_zone):
         TabulatorFromListDict.__init__(self, name)

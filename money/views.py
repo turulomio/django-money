@@ -47,9 +47,9 @@ from money.tables import (
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz
 from money.reusing.decorators import timeit
+from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key
 from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
-from money.reusing.listdict_functions import listdict_sum
 from money.listdict import (
     listdict_accounts, 
     listdict_banks, 
@@ -366,6 +366,12 @@ def investment_list(request,  active):
     investments= Investments.objects.all().filter(active=active).order_by('name')
     listdict=listdict_investments(investments, timezone.now(), request.globals["mem__localcurrency"], active)
     table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, request.globals["mem__localcurrency"], active, request.globals["mem__localzone"]).render()
+    
+    # Foot only for active investments
+    if listdict_has_key(listdict, "gains"):
+        positives=Currency(listdict_sum_positives(listdict, "gains"), request.globals["mem__localcurrency"])
+        negatives=Currency(listdict_sum_negatives(listdict, "gains"), request.globals["mem__localcurrency"])
+        foot=_(f"Positive gains - Negative gains = {positives} {negatives} = {positives+negatives}")    
     return render(request, 'investment_list.html', locals())
     
 @timeit
@@ -400,6 +406,7 @@ def investment_pairs(request, worse, better, accounts_id):
     better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
     better_leverages_real=product_better.real_leveraged_multiplier()
     better_average_price=str(Investmentsoperations.invesmentsoperationscurrent_average_price_investment(list_ioc_better)).replace(",", ".")
+    
     return render(request, 'investment_pairs.html', locals())
 
 
@@ -724,8 +731,6 @@ def ajax_report_gains_by_product_type(request, year=date.today().year):
 @timeit
 @login_required
 def report_total_income_details(request, year=date.today().year, month=date.today()):
-  
-    
     expenses=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 2,  request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     table_expenses=TabulatorAccountOperations("table_expenses", None, expenses, request.globals["mem__localcurrency"],  request.globals["mem__localzone"]).render()
     incomes=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 1,  request.globals["mem__localcurrency"], request.globals["mem__localzone"])

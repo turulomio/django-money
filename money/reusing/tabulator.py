@@ -1,3 +1,6 @@
+## THIS IS FILE IS FROM https://github.com/turulomio/reusingcode IF YOU NEED TO UPDATE IT PLEASE MAKE A PULL REQUEST IN THAT PROJECT
+## DO NOT UPDATE IT IN YOUR CODE IT WILL BE REPLACED USING FUNCTION IN README
+
 from money.reusing.call_by_name import call_by_name
 from money.reusing.datetime_functions import dtaware_changes_tz
 from django.utils.translation import gettext
@@ -14,6 +17,7 @@ class TabulatorCommons:
         self.height=None
         self.translate=True
         self.bottomcalc=None #Is filled in render
+        self.filterheaders=None #Is filled in render if None
         self.field_pk="id"
         self.show_field_pk=False
         self.initial_options=None
@@ -32,7 +36,10 @@ class TabulatorCommons:
         
     def setHeaders(self, *args):
         self.headers=args
-        
+
+    def setFilterHeaders(self, *args):
+        self.filterheaders=args
+
     def setInitialOptions(self, s):
         self.initial_options=s
         
@@ -58,6 +65,9 @@ class TabulatorCommons:
         ## Fills bottomCalc if None
         if self.bottomcalc is None:
             self.bottomcalc=[None]*len(self.fields)
+        ## Fills filterheaders if None
+        if self.filterheaders is None:
+            self.filterheaders=[None]*len(self.fields)
 
         
         tb_list=[]
@@ -102,33 +112,33 @@ class TabulatorCommons:
         for i in range(len(self.headers)):
             if self.fields[i]==self.field_pk and self.show_field_pk==False:
                 continue
-            
+            filterheader="" if self.filterheaders[i] is None else f""" headerFilter:"{self.filterheaders[i]}", """
             if self.types[i] in ("datetime", "date"):
                 columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""
             elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , formatter: NUMBER }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , formatter: NUMBER {filterheader} }}, \n"""
             elif self.types[i] in ("Decimal", "float", "int") and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right",  formatter: NUMBER, bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right",  formatter: NUMBER, bottomCalc:"{self.bottomcalc[i]}" {filterheader} }}, \n"""
             elif self.types[i] in ("Decimal6", "float6") and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , formatter: NUMBER,  formatterParams:{{"digits":6}},  }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right" , formatter: NUMBER,  formatterParams:{{"digits":6}},  {filterheader} }}, \n"""
             elif self.types[i] in ("Decimal6", "float6") and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right",  formatter: NUMBER,  formatterParams:{{"digits":6}}, bottomCalc:"{self.bottomcalc[i]}" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", hozAlign:"right",  formatter: NUMBER,  formatterParams:{{"digits":6}}, bottomCalc:"{self.bottomcalc[i]}", {filterheader} }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100,  formatter: NUMBER, formatterParams:{{"suffix": "€"}}, hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100,  formatter: NUMBER, formatterParams:{{"suffix": "€"}}, hozAlign:"right", {filterheader}, {filterheader} }}, \n"""
             elif self.types[i] =="EUR" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: NUMBER, formatterParams:{{"suffix": "€"}}, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: NUMBER, bottomCalcFormatterParams:{{"suffix": "€"}} }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: NUMBER, formatterParams:{{"suffix": "€"}}, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: NUMBER, bottomCalcFormatterParams:{{"suffix": "€"}}, {filterheader} }}, \n"""
             elif self.types[i] =="USD" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: NUMBER, formatterParams:{{"suffix": "$"}}, hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: NUMBER, formatterParams:{{"suffix": "$"}}, hozAlign:"right", {filterheader} }}, \n"""
             elif self.types[i] =="USD" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: NUMBER, formatterParams:{{"suffix": "$"}},  hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: NUMBER, bottomCalcFormatterParams:{{"suffix": "$"}} }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter: NUMBER, formatterParams:{{"suffix": "$"}},  hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: NUMBER, bottomCalcFormatterParams:{{"suffix": "$"}}, {filterheader} }}, \n"""
             elif self.types[i]=="str":
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}"}}, \n"""            
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", {filterheader} }}, \n"""            
             elif self.types[i]=="bool":
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"tickCross", hozAlign:"center" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", formatter:"tickCross", hozAlign:"center", {filterheader} }}, \n"""
             elif self.types[i] =="percentage" and self.bottomcalc[i] is None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter:NUMBER, formatterParams:{{"suffix": "%"}}, hozAlign:"right" }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter:NUMBER, formatterParams:{{"suffix": "%"}}, hozAlign:"right", {filterheader} }}, \n"""
             elif self.types[i] =="percentage" and self.bottomcalc[i] is not None:
-                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter:NUMBER, formatterParams:{{"suffix": "%"}}, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: NUMBER, bottomCalcFormatterParams:{{"suffix": "%"}} }}, \n"""
+                columns=columns+f"""{{title: "{self.headers[i]}", field:"{self.fields[i]}", minWidth:100, formatter:NUMBER, formatterParams:{{"suffix": "%"}}, hozAlign:"right", bottomCalc:"{self.bottomcalc[i]}",bottomCalcFormatter: NUMBER, bottomCalcFormatterParams:{{"suffix": "%"}}, {filterheader} }}, \n"""
 
 
         return f"""
