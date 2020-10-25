@@ -6,7 +6,7 @@
     <h1>{% trans "Products search" %}</h1>
     <form class="search" id="searchform" action="{# url 'blog_search_list_view' #}" method="get" accept-charset="utf-8">
       <label>{% trans "Search a product:" %}</label>
-      <input class="searchfield" id="searchbox"  class="form-control" name="search" type="text" placeholder="{% trans "Search" %}">
+      <input class="searchfield" id="searchbox"  class="form-control" name="search" type="text" value="{{search}}"  placeholder="{% trans "Search" %}">
       <button class="searchbutton" type="submit">{% trans "Search" %}</button>
     </form>
 {% if search %}

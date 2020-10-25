@@ -133,23 +133,38 @@ select date, lag, quote, percentage(lag,quote)  from quotes;
     rows_year.pop(0)
 #    ld_print(rows_month)
 #    ld_print(rows_year)
-
-    ld=[]
+    #PERCENTAGES
+    ld_percentage=[]
     d={ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
     for i in range(0, len(rows_month)):
         month=(i % 12 )+1
         d[month]=rows_month[i]["percentage"]
         if month==12:
-            ld.append(d)
+            ld_percentage.append(d)
             d={ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
     if month!=12:
-        ld.append(d)
+        ld_percentage.append(d)
 
     for i in range(0, len(rows_year)):
-        ld[i]["year"]=first_year+i 
-        ld[i][13]=rows_year[i]["percentage"]
+        ld_percentage[i]["year"]=first_year+i 
+        ld_percentage[i][13]=rows_year[i]["percentage"]
+        
+    #QUOTES
+    ld_quotes=[]
+    d={ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
+    for i in range(0, len(rows_month)):
+        month=(i % 12 )+1
+        d[month]=rows_month[i]["quote"]
+        if month==12:
+            ld_quotes.append(d)
+            d={ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
+    if month!=12:
+        ld_quotes.append(d)
 
-    return ld
+    for i in range(0, len(rows_year)):
+        ld_quotes[i]["year"]=first_year+i 
+
+    return ld_quotes, ld_percentage
 
 ## Gets all ioh from all investments 
 def listdict_investmentsoperationshistorical(year, month, local_currency, local_zone):

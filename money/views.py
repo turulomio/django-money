@@ -41,7 +41,8 @@ from money.tables import (
     TabulatorInvestmentsOperationsHistoricalHeterogeneus, 
     TabulatorProductsPairsEvolution, 
     TabulatorProductsPairsEvolutionWithMonthDiff, 
-    TabulatorProductQuotesMonthComparation, 
+    TabulatorProductQuotesMonthPercentages, 
+    TabulatorProductQuotesMonthQuotes,  
     TabulatorInvestmentsPairsInvestCalculator, 
     TabulatorStrategies
 )
@@ -158,8 +159,10 @@ def product_benchmark(request):
 @login_required
 def product_view(request, pk):
     product=get_object_or_404(Products, id=pk)
-    comparation=listdict_product_quotes_month_comparation(2000, product)
-    table_quotes_month_comparation=TabulatorProductQuotesMonthComparation("table_quotes_month_comparation", None, comparation).render()
+    quotes, percentages=listdict_product_quotes_month_comparation(2000, product)
+    table_quotes_month_percentages=TabulatorProductQuotesMonthPercentages("table_quotes_month_percentages", None, percentages).render()
+
+    table_quotes_month_quotes=TabulatorProductQuotesMonthQuotes("table_quotes_month_quotes", None, quotes, product.currency).render()
 
     return render(request, 'product_view.html', locals())
     

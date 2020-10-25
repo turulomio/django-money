@@ -12,9 +12,11 @@
 <p><strong>{% trans "Leverage" %}: </strong>{{ product.leverages.name }}</p>
 <p><strong>{% trans "Tickers" %}: </strong>{{ product.tickers }}</p>
 
-<h1>{% trans "Quotes month comparation" %}</h1>
-
-  {{ table_quotes_month_comparation |safe}}
+<h1>{% trans "Quotes month percentage evolution" %}</h1>
+  {{ table_quotes_month_percentages |safe}}
+  
+<h1>{% trans "Quotes month evolution" %}</h1>
+  {{ table_quotes_month_quotes |safe}}
 
 
 
