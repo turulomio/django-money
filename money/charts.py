@@ -30,6 +30,19 @@ def listdict_to_chartdata(listdict, key_x,  key_y):
         r=r+"},"
     r=r[:-1]+"]"
     return r
+    
+def listdict_with_ohcl_to_chartdata(listdict, key_date="date", key_open="open",  key_close="close", key_low="low",  key_high="high"):
+    r="["
+    for row in listdict:
+        r=r+"{"
+        r=r+f" t: new Date({row[key_date].year}, {row[key_date].month}, {row[key_date].day}, 0, 0, 0), "
+        r=r+f" o: {row[key_open]},"
+        r=r+f" h: {row[key_high]},"
+        r=r+f" c: {row[key_close]},"
+        r=r+f" l: {row[key_low]},"
+        r=r+"},"
+    r=r[:-1]+"]"
+    return r
 
 
 
@@ -105,6 +118,27 @@ def chart_lines_total(listdict, local_currency):
             }}
         }};
 
-			var ctx = document.getElementById('canvas').getContext('2d');
-			window.myLine = new Chart(ctx, config);
-	</script>"""
+                        var ctx = document.getElementById('canvas').getContext('2d');
+                        window.myLine = new Chart(ctx, config);
+        </script>"""
+
+def chart_product_quotes_historical(listdict, product):
+    ## OJO CHART.JS DEBE ESTAR EN MISMA VERSION QUE FINANCIAL
+    return f"""
+<div style="width:75%;">
+    <canvas id="canvas"></canvas>
+</div>
+<script>
+
+var ctx = document.getElementById('canvas').getContext('2d');
+var chart = new Chart(ctx, {{
+        type: 'ohlc',
+        data: {{
+            datasets: [{{
+                label: 'CHRT - Chart.js Corporation',
+                data: {listdict_with_ohcl_to_chartdata(listdict)},
+
+            }}]
+        }}
+}});
+</script>"""

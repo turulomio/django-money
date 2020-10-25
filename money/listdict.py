@@ -545,24 +545,8 @@ def listdict_chart_total(year_from, local_currency, local_zone):
             "accounts_user":total["accounts_user"], 
         })
     return l
-#from asgiref.sync import sync_to_async
-#def listdict_chart_total(year_from, local_currency, local_zone):
-#    async def iteration(year, month, local_currency, local_zone):          
-#        dt=dtaware_month_end(year, month, local_zone)
-#        total=await total_balance(dt, local_currency)
-#        return {
-#            "datetime":dt, 
-#            "total_user": total["total_user"], 
-#            "invested_user":total["investments_invested_user"], 
-#            "investments_user":total["investments_user"], 
-#        }
-#        
-#    async def iteration_all(year_from, local_currency, local_zone):
-#        l=[]
-#        for year in range(year_from, date.today().year+1):
-#            for month in range(1, 13):
-#                l.append(iteration(year, month, local_currency, local_zone))
-#        return await asyncio.gather(*l)
-#    loop = asyncio.new_event_loop()
-#    result = loop.run_until_complete(iteration_all(year_from, local_currency, local_zone))
-#    print(result)
+
+def listdict_chart_product_quotes_historical(dt_from, product,  local_currency, local_zone):
+    rows=product.ohclDailyBeforeSplits()
+    ld_print(rows)
+    return rows[-50:]

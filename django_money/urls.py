@@ -86,6 +86,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('product/list/search/', money_views.product_list_search,  name='product_list_search'),
     path('product/list/favorites/', money_views.product_list_favorites,  name='product_list_favorites'),
     path('product/product_update/', money_views.product_update,  name='product_update'),
+    path('product/chart/historical/<int:pk>/', money_views.ajax_chart_product_quotes_historical,  name='ajax_chart_product_quotes_historical'),
     
     path('quote/new/<int:products_id>/', money_views.quote_new.as_view(), name='quote_new'),
     

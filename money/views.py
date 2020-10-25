@@ -18,6 +18,7 @@ from money.connection_dj import cursor_rows, cursor_one_column
 from money.forms import AccountsOperationsForm, AccountsTransferForm
 from money.charts import (
     chart_lines_total, 
+    chart_product_quotes_historical, 
 )
 from money.tables import (
     TabulatorDividends, 
@@ -56,6 +57,7 @@ from money.listdict import (
     listdict_accounts, 
     listdict_banks, 
     listdict_chart_total, 
+    listdict_chart_product_quotes_historical, 
     listdict_investments, 
     listdict_report_total_income, 
     listdict_report_total,     
@@ -727,6 +729,14 @@ def ajax_chart_total(request, year_from):
     ld_chart_total=listdict_chart_total(year_from, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     chart_total=chart_lines_total(ld_chart_total, request.globals["mem__localcurrency"])
     return render(request, 'chart_total.html', locals())
+
+@timeit
+@login_required
+def ajax_chart_product_quotes_historical(request, pk):
+    product=get_object_or_404(Products, id=pk)
+    ld_chart_total=listdict_chart_product_quotes_historical(None, product, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    chart_total=chart_product_quotes_historical(ld_chart_total, request.globals["mem__localcurrency"])
+    return HttpResponse(chart_total)
 
 @timeit
 @login_required
