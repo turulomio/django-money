@@ -705,20 +705,16 @@ def ajax_chart_total(request, year_from):
 
 @timeit
 @login_required
-def ajax_report_total_income(request, year=date.today().year):
-    start=timezone.now()
-    
+def ajax_report_total_income(request, year=date.today().year):  
     qs_investments=Investments.objects.all()
     list_report2=listdict_report_total_income(qs_investments, year, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", "report_total_income_details", list_report2, request.globals["mem__localcurrency"]).render()
-    print("Loading list report income took {}".format(timezone.now()-start))
     return HttpResponse(table_report_total_income)
 
 @timeit
 @login_required
 def ajax_report_gains_by_product_type(request, year=date.today().year):
     list_report=listdict_investments_gains_by_product_type(year, request.globals["mem__localcurrency"])
-    print(list_report)
     table_investments_gains_by_product_type=TabulatorInvestmentsGainsByProductType("table_investments_gains_by_product_type", None, list_report, request.globals["mem__localcurrency"]).render()
     gross=Currency(listdict_sum(list_report, "dividends_gross")+ listdict_sum(list_report, "gains_gross"), request.globals["mem__localcurrency"])
     net=Currency(listdict_sum(list_report, "dividends_net")+ listdict_sum(list_report, "gains_net"), request.globals["mem__localcurrency"])
