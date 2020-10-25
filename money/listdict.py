@@ -1,7 +1,10 @@
+import asyncio
+from asgiref.sync import sync_to_async
 from datetime import date, timedelta
 from decimal import Decimal
 from money.connection_dj import  cursor_rows
 from money.reusing.listdict_functions import listdict2dict, listdict_print
+from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from xulpymoney.libxulpymoneytypes import eOperationType
@@ -24,9 +27,9 @@ from money.models import (
     money_convert, 
 )
 from money.reusing.datetime_functions import dtaware_month_end, months
+from money.reusing.decorators import timeit
 from money.reusing.percentage import percentage_between, Percentage
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from multiprocessing import cpu_count
 
 ld_print=listdict_print
 
@@ -277,7 +280,7 @@ def listdict_report_total_income(qs_investments, year, local_currency, local_zon
     
     
     # HA MEJORADO UNOS 3 segundos de 16 a 13
-    with ThreadPoolExecutor(max_workers=cpu_count()+1) as executor:
+    with ThreadPoolExecutor(max_workers=settings.CONCURRENCY_DB_CONNECTIONS_BY_USER) as executor:
         for month_name, month in (
             (_("January"), 1), 
             (_("February"), 2), 
@@ -319,7 +322,7 @@ def listdict_report_total(year, last_year_balance, local_currency, local_zone):
     futures=[]
     
     # HA MEJORADO UNOS 5 segundos de 7 a 2
-    with ThreadPoolExecutor(max_workers=cpu_count()+1) as executor:
+    with ThreadPoolExecutor(max_workers=settings.CONCURRENCY_DB_CONNECTIONS_BY_USER) as executor:
         for month_name, month in (
             (_("January"), 1), 
             (_("February"), 2), 
@@ -352,11 +355,8 @@ def listdict_report_total(year, last_year_balance, local_currency, local_zone):
             "diff_lastmonth": total['total_user']-last_month, 
         })
         last_month=total['total_user']
-    
     return list_
     
-    
-
 def listdict_dividends_from_queryset(qs_dividends):
     r=[]
     for o in qs_dividends:
@@ -515,7 +515,8 @@ group by productstypes_id""", (year, ))
         })
     return l
 
-def listdict_chart_total(year_from, local_currency, local_zone):
+@timeit
+def listdict_chart_total_threadpool(year_from, local_currency, local_zone):
     def month_results(year, month,  local_currency, local_zone):
         dt=dtaware_month_end(year, month, local_zone)
         return dt, total_balance(dt, local_currency)
@@ -530,11 +531,43 @@ def listdict_chart_total(year_from, local_currency, local_zone):
     futures=[]
     
     # HA MEJORADO UNOS 5 segundos de 10 segundos a 3 para 12 meses
-    with ThreadPoolExecutor(max_workers=cpu_count()+1) as executor:
+    with ThreadPoolExecutor(max_workers=settings.CONCURRENCY_DB_CONNECTIONS_BY_USER) as executor:
         for year,  month in list_months:    
             futures.append(executor.submit(month_results, year, month, local_currency,  local_zone))
 
 #    futures= sorted(futures, key=lambda future: future.result()[0])#month_end
+    for future in futures:
+        dt, total=future.result()
+        l.append({
+            "datetime":dt, 
+            "total_user": total["total_user"], 
+            "invested_user":total["investments_invested_user"], 
+            "investments_user":total["investments_user"], 
+            "accounts_user":total["accounts_user"], 
+        })
+    return l
+    
+    
+@sync_to_async
+def month_results(year, month,  local_currency, local_zone):
+    dt=dtaware_month_end(year, month, local_zone)
+    return dt, total_balance(dt, local_currency)
+
+@timeit
+async def listdict_chart_total_async(year_from, local_currency, local_zone):
+    if year_from==date.today().year:
+        months_12=date.today()-timedelta(days=365)
+        list_months=months(months_12.year, months_12.month)
+    else:
+        list_months=months(year_from, 1)
+        
+    l=[]
+    futures=[]   
+    for year,  month in list_months:
+        futures.append(asyncio.ensure_future(month_results(year, month, local_currency,  local_zone)))       
+    await asyncio.wait(futures)
+
+
     for future in futures:
         dt, total=future.result()
         l.append({

@@ -1,4 +1,5 @@
-from datetime import  date
+import asyncio
+from datetime import  date, datetime
 from decimal import Decimal
 from django import forms
 from django.contrib import messages
@@ -56,7 +57,8 @@ from django.utils.translation import ugettext_lazy as _
 from money.listdict import (
     listdict_accounts, 
     listdict_banks, 
-    listdict_chart_total, 
+    listdict_chart_total_async, 
+    listdict_chart_total_threadpool, 
     listdict_chart_product_quotes_historical, 
     listdict_investments, 
     listdict_report_total_income, 
@@ -726,7 +728,17 @@ def report_total(request, year=date.today().year):
 def ajax_chart_total(request, year_from):
     year_start=1970
     year_end=date.today().year + 10
-    ld_chart_total=listdict_chart_total(year_from, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    ld_chart_total=listdict_chart_total_threadpool(year_from, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    chart_total=chart_lines_total(ld_chart_total, request.globals["mem__localcurrency"])
+    return render(request, 'chart_total.html', locals())
+
+@login_required
+def ajax_chart_total_async(request, year_from):
+    year_start=1970
+    year_end=date.today().year + 10
+    start=datetime.now()
+    ld_chart_total=asyncio.run(listdict_chart_total_async(year_from, request.globals["mem__localcurrency"], request.globals["mem__localzone"]))
+    print(f"listdict_chart_total_async took {datetime.now()-start}")
     chart_total=chart_lines_total(ld_chart_total, request.globals["mem__localcurrency"])
     return render(request, 'chart_total.html', locals())
 

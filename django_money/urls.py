@@ -93,6 +93,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('concept/list/', money_views.concept_list,  name='concept_list'),
     
     path('chart/total/', money_views.ajax_chart_total, {'year_from': date.today().year},  name='ajax_chart_total'),
+    path('chart/total/async/', money_views.ajax_chart_total_async, {'year_from': date.today().year},  name='ajax_chart_total_async'),
     path('chart/total/<int:year_from>/', money_views.ajax_chart_total,  name='ajax_chart_total'),
     
     path('report/concepts/',  money_views.report_concepts,  name='report_concepts'), 

@@ -21,6 +21,7 @@ class TabulatorProductQuotesMonthPercentages(TabulatorFromListDict):
         self.setFields("year", "1","2","3", "4","5","6", "7","8","9", "10","11","12","13" )
         self.setHeaders(_("Year"), _("January"),  _("February"), _("March"), _("April"), _("May"), _("June"), _("July"), _("August"), _("September"), _("October"), _("November"), _("December"), _("Total"))
         self.setTypes("str", *["percentage"]*13)
+
 class TabulatorProductQuotesMonthQuotes(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, currency):
         TabulatorFromListDict.__init__(self, name)
@@ -36,7 +37,6 @@ class TabulatorAccountOperations(TabulatorFromListDict):
         self.setDestinyUrl(destiny_url)
         self.setListDict(listdict)
         self.setLayout("fitDataStretch")
-        self.setHeight("400px")
         self.setLocalZone(local_zone)
         self.setFields("id","datetime", "concepts","amount", "balance","comment")
         self.setHeaders("Id", _("Date and time"), _("Concept"), _("Amount"),_("Balance"),  _("Comment"))

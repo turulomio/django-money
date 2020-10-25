@@ -114,9 +114,9 @@ class InvestingCom:
                 elif row [1]=="DE30" and row[2]=="Eurex":
                     products=(Products.objects.get(id=81752),)#CFD DAX 30
                 elif "EUR/USD" in row [1]:
-                    products=(Products.objects.get(id=81757),)#EUR/USD
+                    products=(Products.objects.get(id=74747),)#EUR/USD
                 elif "Oro al " in row [1]:
-                    products=(Products.objects.get(id=81758),)#CFD ORO
+                    products=(Products.objects.get(id=81758), Products.objects.get(id=81757))#CFD ORO
                 else:
                     products=Products.objects.raw('SELECT products.* FROM products where tickers[5]=%s', (row[1], ))
 

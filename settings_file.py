@@ -1,18 +1,9 @@
-from colorama import Fore, Style
-from gettext import gettext
-
 from sys import path as sys_path
 sys_path.append("money/reusing")
-from casts import list2string, string2list_of_strings, string2list_of_integers, str2bool
-from datetime_functions import string2dtnaive
 from text_inputs import input_string, input_YN
 from myconfigparser import MyConfigParser
 
-_=gettext
-
-
 if __name__ == "__main__":
-
     print("Hidden settings are going to be generated in /etc/django_money/settings.conf")
     config=MyConfigParser("/etc/django_money/settings.conf")
 
@@ -42,5 +33,8 @@ if __name__ == "__main__":
         ans = input_string("Add you smtp mail password", "your_pass")
         config.cset("smtp", "password", ans)
 
-
+    ans=input_YN("Do you want to change other server settings?")
+    if ans is True:
+        ans = input_string("How many concurrent database conections can be made by user for complex and long queries?","4")
+        config.set("concurrency", "dbconnectionsbyuser", ans)
     config.save()

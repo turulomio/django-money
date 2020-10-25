@@ -96,6 +96,8 @@ SERVER_EMAIL = EMAIL_HOST_USER
 #print(f"Smtp server: smtp://{EMAIL_HOST_USER}@{EMAIL_HOST}:{EMAIL_PORT} (Tls: {EMAIL_USE_TLS})")
 
 
+CONCURRENCY_DB_CONNECTIONS_BY_USER=myconfigparser.getInteger("concurrency", "dbconnectionsbyuser", 4)
+
 ## Locale paths in source distribution
 LOCALE_PATHS = (
     BASE_DIR+ '/money/locale/',
