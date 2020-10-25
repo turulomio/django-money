@@ -12,6 +12,20 @@ class TabulatorAccounts(TabulatorFromListDict):
         self.setTypes("int","str", "bool", "str", "str", local_currency)
         self.setBottomCalc(None, "sum", None, "sum", "sum", "sum", None, None, None)
 
+
+class TabulatorProductQuotesMonthComparation(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict):
+        TabulatorFromListDict.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setListDict(listdict)
+        self.setFields("year", "1","2","3", "4","5","6", "7","8","9", "10","11","12","13" )
+        self.setHeaders(_("Year"), _("January"),  _("February"), _("March"), _("April"), _("May"), _("June"), _("July"), _("August"), _("September"), _("October"), _("November"), _("December"), _("Total"))
+        self.setTypes("str", *["percentage"]*13)
+
+
+#            [self.tr("Year"), self.tr("January"),  self.tr("February"), self.tr("March"), self.tr("April"), self.tr("May"), self.tr("June"), self.tr("July"), self.tr("August"), self.tr("September"), self.tr("October"), self.tr("November"), self.tr("December"), self.tr("Total")], 
+
+
 class TabulatorAccountOperations(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, currency,  local_zone):
         TabulatorFromListDict.__init__(self, name)

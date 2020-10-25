@@ -596,6 +596,9 @@ class Products(models.Model):
         
     def ohclMonthlyBeforeSplits(self):
         return cursor_rows("select * from ohclmonthlybeforesplits(%s)", (self.id, ))
+    def ohclDailyBeforeSplits(self):
+        return cursor_rows("select * from ohcldailybeforesplits(%s)", (self.id, ))
+
 class Productstypes(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.TextField()

@@ -41,6 +41,7 @@ from money.tables import (
     TabulatorInvestmentsOperationsHistoricalHeterogeneus, 
     TabulatorProductsPairsEvolution, 
     TabulatorProductsPairsEvolutionWithMonthDiff, 
+    TabulatorProductQuotesMonthComparation, 
     TabulatorInvestmentsPairsInvestCalculator, 
     TabulatorStrategies
 )
@@ -65,6 +66,7 @@ from money.listdict import (
     listdict_investmentsoperationshistorical, 
     listdict_investmentsoperationscurrent_homogeneus_merging_same_product, 
     listdict_orders_active, 
+    listdict_product_quotes_month_comparation, 
     listdict_products_pairs_evolution, 
     listdict_products_pairs_evolution_from_datetime, 
     listdict_strategies, 
@@ -141,9 +143,13 @@ def product_list_favorites(request):
         table_products=TabulatorProducts("table_products", 'product_view', listproducts, request.globals["mem__localcurrency"], request.globals["mem__localzone"] ).render()
     return render(request, 'product_list.html', locals())
 
+@timeit
 @login_required
 def product_view(request, pk):
     product=get_object_or_404(Products, id=pk)
+    comparation=listdict_product_quotes_month_comparation(2000, product)
+    table_quotes_month_comparation=TabulatorProductQuotesMonthComparation("table_quotes_month_comparation", None, comparation).render()
+
     return render(request, 'product_view.html', locals())
     
 @login_required

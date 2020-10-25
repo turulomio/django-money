@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from decimal import Decimal
 from money.connection_dj import  cursor_rows
-from money.reusing.listdict_functions import listdict2dict
+from money.reusing.listdict_functions import listdict2dict, listdict_print
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from xulpymoney.libxulpymoneytypes import eOperationType
@@ -28,7 +28,7 @@ from money.reusing.percentage import percentage_between, Percentage
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
 
-
+ld_print=listdict_print
 
 def listdict_accounts(queryset):    
     
@@ -103,31 +103,56 @@ def listdict_banks(queryset, dt, active, local_currency):
     return list_
 
 ## @param ohclmonthly If none load then in this function
-def listdict_product_quotes_month_comparation(product, ohclmonthly=None):
-        if ohclmonthly is None:
-            ohclmonthly=product.ohclMonthlyBeforeSplits()
+def listdict_product_quotes_month_comparation(first_year, product, ohclmonthly=None):
+    #Calculo 1 mes antes
+    rows_month=cursor_rows("""
+WITH quotes as (
+	SELECT 
+		dates::date - interval '1 day' date, 
+		(select quote from quote(%s, dates - interval '1 day')), 
+		lag((select quote from quote(%s, dates - interval '1 day')),1) over(order by dates::date) 
+	from 
+		generate_series('%s-01-01'::date - interval '1 day','%s-01-01'::date, '1 month') dates
+)
+select date,lag, quote, percentage(lag,quote)  from quotes;
+""", (product.id, product.id, first_year, date.today().year+1))
+    rows_month.pop(0)
+    
+    #Calculo 1 año antes
+    rows_year=cursor_rows("""
+WITH quotes as (
+	SELECT 
+		dates::date - interval '1 day' date, 
+		(select quote from quote(%s, dates - interval '1 day')), 
+		lag((select quote from quote(%s, dates - interval '1 day')),1) over(order by dates::date) 
+	from 
+		generate_series('%s-01-01'::date - interval '1 day','%s-01-02'::date, '1 year') dates
+)
+select date, lag, quote, percentage(lag,quote)  from quotes;
+""", (product.id, product.id, first_year, date.today().year+1))
+    rows_year.pop(0)
+    ld_print(rows_month)
+    ld_print(rows_year)
+
+    ld=[]
+    d={ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
+    for i in range(0, len(rows_month)):
+        month=(i % 12 )+1
+        d[month]=rows_month[i]["percentage"]
+        if month==12:
+            ld.append(d)
+            d={ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
+    if month!=12:
+        ld.append(d)
+
+    for i in range(0, len(rows_year)):
+        ld[i]["year"]=first_year+i 
+        ld[i][13]=rows_year[i]["percentage"]
+
+    return ld
             
-        data=[]
-        data
-        minyear=ohclmonthly[0].year
-        for i, year in enumerate(range(minyear,  date.today().year+1)):
-            row=[]
-            row.append(year)
-            for month_name, month in (
-                (_("January"), 1), 
-                (_("February"), 2), 
-                (_("March"), 3), 
-                (_("April"), 4), 
-                (_("May"), 5), 
-                (_("June"), 6), 
-                (_("July"), 7), 
-                (_("August"), 8), 
-                (_("September"), 9), 
-                (_("October"), 10), 
-                (_("November"), 11), 
-                (_("December"), 12), 
-            ):
-                pass
+                
+#                pass
 #            for month in range(1, 13):
 #                row.append(self.product.result.ohclMonthly.percentage_by_year_month(year, month))
 #            row.append(self.product.result.ohclYearly.percentage_by_year(year))
