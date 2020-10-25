@@ -22,10 +22,6 @@ class TabulatorProductQuotesMonthComparation(TabulatorFromListDict):
         self.setHeaders(_("Year"), _("January"),  _("February"), _("March"), _("April"), _("May"), _("June"), _("July"), _("August"), _("September"), _("October"), _("November"), _("December"), _("Total"))
         self.setTypes("str", *["percentage"]*13)
 
-
-#            [self.tr("Year"), self.tr("January"),  self.tr("February"), self.tr("March"), self.tr("April"), self.tr("May"), self.tr("June"), self.tr("July"), self.tr("August"), self.tr("September"), self.tr("October"), self.tr("November"), self.tr("December"), self.tr("Total")], 
-
-
 class TabulatorAccountOperations(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, currency,  local_zone):
         TabulatorFromListDict.__init__(self, name)
@@ -137,6 +133,7 @@ class TabulatorProducts(TabulatorFromListDict):
         self.setFields("id",  "code","name", "isin", "last_datetime", "last", "percentage_day", "percentage_year",  "percentage_dps")
         self.setHeaders(_("Id"), _("Code"),  _("Name"), _("ISIN"), _("Last quote datetime"), _("Last quote"), _("% day"), _("% year"), _("% DPS"))
         self.setTypes("int", "int","str", "str", "str", "Decimal6", "percentage", "percentage", "percentage")
+        self.setFilterHeaders(None,  *["input"]*8)
 
 class TabulatorProductsPairsEvolution(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, currency, local_zone):
