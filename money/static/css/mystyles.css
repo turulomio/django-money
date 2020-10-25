@@ -201,6 +201,7 @@ td {
     div.sidebar{
         color: white;
         font-weight:bold;
+        white-space: nowrap;
         text-decoration: none;
         overflow-y: unset;
         padding: 20px;
