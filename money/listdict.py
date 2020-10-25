@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from money.connection_dj import  cursor_rows
 from money.reusing.listdict_functions import listdict2dict
@@ -23,7 +23,7 @@ from money.models import (
     qs_investments_netgains_usercurrency_in_year_month, 
     money_convert, 
 )
-from money.reusing.datetime_functions import dtaware_month_end
+from money.reusing.datetime_functions import dtaware_month_end, months
 from money.reusing.percentage import percentage_between, Percentage
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
@@ -491,15 +491,43 @@ group by productstypes_id""", (year, ))
     return l
 
 def listdict_chart_total(year_from, local_currency, local_zone):
+    if year_from==date.today().year:
+        months_12=date.today()-timedelta(days=365)
+        list_months=months(months_12.year, months_12.month)
+    else:
+        list_months=months(year_from, 1)
     l=[]
-    for year in range(year_from, date.today().year+1):
-        for month in range(1, 13):
-            dt=dtaware_month_end(year, month, local_zone)
-            total=total_balance(dt, local_currency)
-            l.append({
-                "datetime":dt, 
-                "total_user": total["total_user"], 
-                "invested_user":total["investments_invested_user"], 
-                "investments_user":total["investments_user"], 
-            })
+    for year,  month in list_months:
+        start=datetime.now()
+        dt=dtaware_month_end(year, month, local_zone)
+        total=total_balance(dt, local_currency)
+        l.append({
+            "datetime":dt, 
+            "total_user": total["total_user"], 
+            "invested_user":total["investments_invested_user"], 
+            "investments_user":total["investments_user"], 
+            "accounts_user":total["accounts_user"], 
+        })
+        print(f"Total balance for {year}-{month} took {datetime.now()-start}")
     return l
+#from asgiref.sync import sync_to_async
+#def listdict_chart_total(year_from, local_currency, local_zone):
+#    async def iteration(year, month, local_currency, local_zone):          
+#        dt=dtaware_month_end(year, month, local_zone)
+#        total=await total_balance(dt, local_currency)
+#        return {
+#            "datetime":dt, 
+#            "total_user": total["total_user"], 
+#            "invested_user":total["investments_invested_user"], 
+#            "investments_user":total["investments_user"], 
+#        }
+#        
+#    async def iteration_all(year_from, local_currency, local_zone):
+#        l=[]
+#        for year in range(year_from, date.today().year+1):
+#            for month in range(1, 13):
+#                l.append(iteration(year, month, local_currency, local_zone))
+#        return await asyncio.gather(*l)
+#    loop = asyncio.new_event_loop()
+#    result = loop.run_until_complete(iteration_all(year_from, local_currency, local_zone))
+#    print(result)

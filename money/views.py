@@ -1,4 +1,4 @@
-from datetime import  date, timedelta
+from datetime import  date
 from decimal import Decimal
 from django import forms
 from django.contrib import messages
@@ -53,7 +53,7 @@ from django.utils.translation import ugettext_lazy as _
 from money.listdict import (
     listdict_accounts, 
     listdict_banks, 
-    #listdict_chart_total, 
+    listdict_chart_total, 
     listdict_investments, 
     listdict_report_total_income, 
     listdict_report_total,     
@@ -703,11 +703,8 @@ def report_total(request, year=date.today().year):
 @timeit
 @login_required
 def ajax_chart_total(request, year_from):
-#    ld_chart_total=listdict_chart_total(year_from, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-#    table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", "report_total_income_details", list_report2, request.globals["mem__localcurrency"]).render()
-    now=timezone.now()
-    
-    chart_total=chart_lines_total([now-timedelta(days=4),now-timedelta(days=3), now-timedelta(days=2), now-timedelta(days=1) ], [1, 2, 3, 4])
+    ld_chart_total=listdict_chart_total(year_from, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    chart_total=chart_lines_total(ld_chart_total, request.globals["mem__localcurrency"])
     return render(request, 'chart_total.html', locals())
 
 @timeit
