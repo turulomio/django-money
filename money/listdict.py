@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal
 from money.connection_dj import  cursor_rows
+from money.reusing.listdict_functions import listdict2dict
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from xulpymoney.libxulpymoneytypes import eOperationType
@@ -445,34 +446,48 @@ def listdict_orders_active( ):
 
     
 def listdict_investments_gains_by_product_type(year, local_currency):
-    rows=[]
-    for row in cursor_rows("""
+    gains=cursor_rows("""
 select 
     investments.id, 
     productstypes_id, 
-    (investment_operations_totals(investments.id, make_timestamp(%s,12,31,23,59,59)::timestamp with time zone, %s)).io_historical 
+    (investment_operations(investments.id, make_timestamp(%s,12,31,23,59,59)::timestamp with time zone, %s)).io_historical 
 from  
     investments, 
     products 
-where investments.products_id=products.id""", (year, local_currency, )):
-        rows.append(row)
-        print(row)
+where investments.products_id=products.id""", (year, local_currency, ))
+    
+    #This inner joins its made to see all productstypes_id even if they are Null.
+    # Subquery for dividends is used due to if I make a where from dividends table I didn't get null productstypes_id
+    dividends=cursor_rows("""
+select  
+    productstypes_id, 
+    sum(dividends.gross) as gross,
+    sum(dividends.net) as net
+from 
+    products
+    left join investments on products.id=investments.products_id
+    left join (select * from dividends where extract('year' from datetime)=2020) dividends on investments.id=dividends.investments_id
+group by productstypes_id""", (year, ))
+    dividends_dict=listdict2dict(dividends, "productstypes_id")
     l=[]
     for pt in Productstypes.objects.all():
-#    for strategy in strategies:
-#        gains_net_current=0
-#        gains_net_historical=0
-#        dividends_net=0
-#        
+        gains_net, gains_gross= 0, 0
+        for row in gains:
+            if row["productstypes_id"]==pt.id:
+                io_historical=eval(row["io_historical"])
+                for ioh in io_historical:
+                    if int(ioh["dt_end"][0:4])==year:
+                        gains_net=gains_net+ioh["gains_net_user"]
+                        gains_gross=gains_gross+ioh["gains_gross_user"]
+
         l.append({
                 "id": pt.id, 
                 "name":pt.name, 
-                "gains_gross": 0, 
-                "dividends_gross":0, 
-                "gains_net":0, 
-                "dividends_net": 0, 
-            }
-        )
+                "gains_gross": gains_gross, 
+                "dividends_gross":dividends_dict[pt.id]["gross"], 
+                "gains_net":gains_net, 
+                "dividends_net": dividends_dict[pt.id]["net"], 
+        })
     return l
 
 def listdict_chart_total(year_from, local_currency, local_zone):

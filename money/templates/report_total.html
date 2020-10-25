@@ -18,7 +18,7 @@
 
 <h1>{% trans 'Show gains by product type' %}</h1>
 
-<ajax-button id="ajax_button_gains_by_product_type" url="{% url 'ajax_report_gains_by_product_type' year %}" buttontext="{% trans 'Gains by product type report' %}" csrf_token="{{csrf_token}}"></ajax-button>
+<ajax-button id="ajax_button_gains_by_product_type" url="{% url 'ajax_report_gains_by_product_type' year %}" buttontext="{% trans 'Gains by product type report' %}" csrf_token="{{csrf_token}}" showbuttonafter></ajax-button>
 
 {% endblock %}
 

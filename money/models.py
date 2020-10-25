@@ -18,7 +18,7 @@ from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_
 from money.reusing.casts import string2list_of_integers
 from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware, dtaware2string
 from money.reusing.percentage import Percentage
-from money.listdict_functions import listdict_average_ponderated
+from money.reusing.listdict_functions import listdict_average_ponderated
 
 from xulpymoney.libxulpymoneytypes import eProductType, eComment, eMoneyCurrency, eConcept
 
@@ -764,7 +764,7 @@ def qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, mon
         io, io_current, io_historical=investment.get_investmentsoperations(dt_year_month, 'EUR')
         for ioh in io_historical:
             if ioh['dt_end'].year==year and ioh['dt_end'].month==month:
-                    r=r+ioh['net_gains_user']
+                    r=r+ioh['gains_net_user']
     return r
 
 

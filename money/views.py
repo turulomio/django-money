@@ -49,7 +49,7 @@ from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_
 from money.reusing.decorators import timeit
 from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
-from money.listdict_functions import listdict_sum
+from money.reusing.listdict_functions import listdict_sum
 from money.listdict import (
     listdict_accounts, 
     listdict_banks, 
@@ -718,8 +718,12 @@ def ajax_report_total_income(request, year=date.today().year):
 @login_required
 def ajax_report_gains_by_product_type(request, year=date.today().year):
     list_report=listdict_investments_gains_by_product_type(year, request.globals["mem__localcurrency"])
+    print(list_report)
     table_investments_gains_by_product_type=TabulatorInvestmentsGainsByProductType("table_investments_gains_by_product_type", None, list_report, request.globals["mem__localcurrency"]).render()
-    return HttpResponse(table_investments_gains_by_product_type)
+    gross=Currency(listdict_sum(list_report, "dividends_gross")+ listdict_sum(list_report, "gains_gross"), request.globals["mem__localcurrency"])
+    net=Currency(listdict_sum(list_report, "dividends_net")+ listdict_sum(list_report, "gains_net"), request.globals["mem__localcurrency"])
+    s=f"<p>Gross gains + Gross dividends = {gross.string()}.</p><p>Net gains + Net dividends = {net.string()}.</p>"
+    return HttpResponse(table_investments_gains_by_product_type+s)
 
 @timeit
 @login_required
