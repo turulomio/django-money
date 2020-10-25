@@ -7,21 +7,27 @@ def list_dt_to_jsarray(l):
     print(r)
     return r
 
+
+
+
+
+
 def chart_lines_total(list_dt, list_values):
-    js_dt=list_dt_to_jsarray(list_dt)
+#    js_dt=list_dt_to_jsarray(list_dt)
     return f"""
     <div style="width:75%;">
         <canvas id="canvas"></canvas>
 </div>
 	<script>
-		var timeFormat = 'MM/DD/YYYY HH:mm';
+    var datab=[{{x:new Date(2020, 2, 15, 18, 37, 39), y:12}}, {{x:new Date(2020, 2, 16, 18, 37, 39), y:14}}, ];
+		var timeFormat = 'YYYY-MM-DD HH:mm:SS';
 		var config = {{
 			type: 'line',
 			data: {{
-				labels: {js_dt},
+				labels: [],
 				datasets: [{{
                     label: "HOLA", 
-					data: {list_values},
+					data: datab,
 					backgroundColor:'rgb(255,0,0)',
 					borderColor: 'rgb(255,0,0)',
 					fill: false,
@@ -51,6 +57,9 @@ def chart_lines_total(list_dt, list_values):
 				}}
 			}}
 		}};
+
+
+
 
 		window.onload = function() {{
 			var ctx = document.getElementById('canvas').getContext('2d');

@@ -43,11 +43,6 @@ if (column !== false){//Only for active investments
         {column:"gains", dir:"desc"}, //sort by this first
         {column:"percentage_sellingpoint", dir:"asc"}, //sort by this first
     ]);
-} else {
-    var col = table.getColumn("name");
-    console.dir(col);
-
-    col.headerFilter( "input"); //set header filter for name column to  "steve"
 }
 </script>
 
