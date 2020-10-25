@@ -147,13 +147,11 @@ def product_list_favorites(request):
     ids=[]
     for id in favorites.split(","):
         ids.append(int(id))
-    print(ids)
     table_products=table_product_list_from_ids(request, ids).render()
     return render(request, 'product_list.html', locals())
 
 @login_required
 def product_benchmark(request):
-    print(request.globals)
     return product_view(request, request.globals["mem__benchmarkid"])
 
 @timeit

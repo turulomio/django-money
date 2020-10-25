@@ -131,8 +131,8 @@ WITH quotes as (
 select date, lag, quote, percentage(lag,quote)  from quotes;
 """, (product.id, product.id, first_year, date.today().year+1))
     rows_year.pop(0)
-    ld_print(rows_month)
-    ld_print(rows_year)
+#    ld_print(rows_month)
+#    ld_print(rows_year)
 
     ld=[]
     d={ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
@@ -150,21 +150,6 @@ select date, lag, quote, percentage(lag,quote)  from quotes;
         ld[i][13]=rows_year[i]["percentage"]
 
     return ld
-            
-                
-#                pass
-#            for month in range(1, 13):
-#                row.append(self.product.result.ohclMonthly.percentage_by_year_month(year, month))
-#            row.append(self.product.result.ohclYearly.percentage_by_year(year))
-#            data.append(row)
-#            
-#        self.mqtwMensuales.setData(
-#            [self.tr("Year"), self.tr("January"),  self.tr("February"), self.tr("March"), self.tr("April"), self.tr("May"), self.tr("June"), self.tr("July"), self.tr("August"), self.tr("September"), self.tr("October"), self.tr("November"), self.tr("December"), self.tr("Total")], 
-#            None, 
-#            data, 
-#            decimals=2, 
-#            zonename=self.mem.localzone_name
-#        )
 
 ## Gets all ioh from all investments 
 def listdict_investmentsoperationshistorical(year, month, local_currency, local_zone):
