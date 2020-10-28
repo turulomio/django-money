@@ -347,23 +347,23 @@ div.headeritem > a:hover {
 .nav_level_3{
     list-style-type: square;
     display: block;
-    font-size:90%;
-    line-height:100%;
+    font-size:98%;
+    line-height:110%;
 }
 
 .nav_level_3 li {
     padding-left: 30px;
     display: block;
-    font-size:90%;
-    line-height:100%;
+    font-size:98%;
+    line-height:110%;
 }
 
 .nav_level_3 a {
     color: #BFBFBF;
     font-weight: bold;
     display: block;
-    font-size:90%;
-    line-height:100%;
+    font-size:98%;
+    line-height:110%;
 }
 
 a.Selected{

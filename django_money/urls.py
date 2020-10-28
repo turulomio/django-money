@@ -85,6 +85,8 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('product/view/<slug:pk>/', money_views.product_view, name='product_view'),
     path('product/list/search/', money_views.product_list_search,  name='product_list_search'),
     path('product/list/favorites/', money_views.product_list_favorites,  name='product_list_favorites'),
+    path('product/list/indexes/', money_views.product_list_indexes,  name='product_list_indexes'),
+    path('product/list/cfds/', money_views.product_list_cfds,  name='product_list_cfds'),
     path('product/product_update/', money_views.product_update,  name='product_update'),
     path('product/chart/historical/<int:pk>/', money_views.ajax_chart_product_quotes_historical,  name='ajax_chart_product_quotes_historical'),
     

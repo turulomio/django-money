@@ -93,7 +93,7 @@ from money.models import (
     Orders, 
     total_balance, 
 )
-from xulpymoney.libxulpymoneytypes import eConcept, eComment
+from xulpymoney.libxulpymoneytypes import eConcept, eComment, eProductType
 
 @login_required
 def order_list(request,  active):
@@ -152,6 +152,32 @@ def product_list_favorites(request):
     ids=[]
     for id in favorites.split(","):
         ids.append(int(id))
+    table_products=table_product_list_from_ids(request, ids).render()
+    return render(request, 'product_list.html', locals())
+
+@login_required
+def product_list_indexes(request):
+    title=_("Indexes product list")        
+    ids=cursor_one_column("""
+select 
+    products.id
+from 
+    products
+where   
+    productstypes_id=%s""", (eProductType.Index, )) 
+    table_products=table_product_list_from_ids(request, ids).render()
+    return render(request, 'product_list.html', locals())
+    
+@login_required
+def product_list_cfds(request):
+    title=_("CFD product list")        
+    ids=cursor_one_column("""
+select 
+    products.id
+from 
+    products
+where   
+    productstypes_id in (%s,%s)""", (eProductType.CFD, eProductType.Future)) 
     table_products=table_product_list_from_ids(request, ids).render()
     return render(request, 'product_list.html', locals())
 

@@ -38,7 +38,9 @@ class MoneyMiddleware:
         
         grProductsPredefined=Group(2, _("Predefined"), "40", True)
         grProductsPredefined.append(Action(_("Benchmark index"), None, "product_benchmark", True))
+        grProductsPredefined.append(Action(_("CFDs"), None, "product_list_cfds", True))
         grProductsPredefined.append(Action(_("Favorites"), None, "product_list_favorites", True))
+        grProductsPredefined.append(Action(_("Indexes"), None, "product_list_indexes", True))
         
         grProducts.append(grProductsPredefined)
         
