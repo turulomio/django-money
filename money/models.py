@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.db import models, connection
 
 from money.reusing.currency import Currency, currency_symbol
-from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows
+from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows, execute
 from money.reusing.casts import string2list_of_integers
 from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware, dtaware2string
 from money.reusing.percentage import Percentage
@@ -426,13 +426,14 @@ class Investmentsaccountsoperations(models.Model):
     accounts_id = models.IntegerField()
     datetime = models.DateTimeField(blank=True, null=True)
     investmentsoperations_id = models.IntegerField()
-    investments_id = models.IntegerField()
+    investments = models.ForeignKey(Investments, models.DO_NOTHING)
 
     class Meta:
         managed = False
         db_table = 'investmentsaccountsoperations'
 
 
+    
 class Investmentsoperations(models.Model):
     operationstypes = models.ForeignKey('Operationstypes', models.DO_NOTHING, blank=True, null=True)
     investments = models.ForeignKey(Investments, models.DO_NOTHING, blank=True, null=True)
@@ -451,7 +452,35 @@ class Investmentsoperations(models.Model):
         
     def __str__(self):
         return "InvestmentOperation"
-    
+
+    ## Esta función actualiza la tabla investmentsaccountsoperations que es una tabla donde 
+    ## se almacenan las accountsoperations automaticas por las operaciones con investments. Es una tabla 
+    ## que se puede actualizar en cualquier momento con esta función
+    def actualizar_cuentaoperacion_asociada(self):
+        #/Borra de la tabla investmentsaccountsoperations los de la operinversión pasada como parámetro
+        execute("delete from investmentsaccountsoperations where investmentsoperations_id=%s",(self.invesments.id, )) 
+
+        
+        if self.investments.daily_adjustment is True: #Because it uses adjustment information
+            return
+        
+        self.comment=Comment().encode(eComment.InvestmentOperation, self)
+        if self.operationstypes.id==4:#Compra Acciones
+            #Se pone un registro de compra de shares que resta el balance de la opercuenta
+            amount=-self.gross(type=2)-self.money_commission(type=2)
+            c=AccountOperationOfInvestmentOperation(self.mem, self.datetime, self.mem.concepts.find_by_id(29), self.tipooperacion, amount.amount, self.comment, self.investment.account, self,self.investment, None)
+            c.save()
+        elif self.operationstypes.id==5:#// Venta Acciones
+            #//Se pone un registro de compra de shares que resta el balance de la opercuenta
+            amount=self.gross(type=2)-self.money_commission(type=2)-self.taxes(type=2)
+            c=AccountOperationOfInvestmentOperation(self.mem, self.datetime, self.mem.concepts.find_by_id(35), self.tipooperacion, amount.amount, self.comment, self.investment.account, self,self.investment, None)
+            c.save()
+        elif self.operationstypes.id==6:
+            #//Si hubiera comisión se añade la comisión.
+            if(self.commission!=0):
+                amount=-self.money_commission(type=2)-self.taxes(type=2)
+                c=AccountOperationOfInvestmentOperation(self.mem, self.datetime, self.mem.concepts.find_by_id(38), self.mem.tiposoperaciones.find_by_id(1), amount.amount, self.comment, self.investment.account, self,self.investment, None)
+                c.save()
     ## @param d dictionary with investmentsoperationscurrent
     ## @param d dictionary with basic results of investment product
     @staticmethod

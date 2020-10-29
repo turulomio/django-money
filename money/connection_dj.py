@@ -32,3 +32,7 @@ def cursor_one_field(sql, params=[]):
         cursor.execute(sql, params)
         row = cursor.fetchone()
     return row[0]
+
+def execute(sql, params=[]):
+    with connection.cursor() as cursor:
+        cursor.execute(sql, params)

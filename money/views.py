@@ -2,6 +2,7 @@ import asyncio
 from datetime import  date, datetime
 from decimal import Decimal
 from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.db import transaction
 from django.urls import reverse_lazy, reverse
@@ -626,6 +627,7 @@ class investmentoperation_new(CreateView):
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
         form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['operationstypes'].queryset=Operationstypes.objects.filter(pk__in=[4, 5, 6])
         return form
                 
     def get_initial(self):
@@ -638,10 +640,25 @@ class investmentoperation_new(CreateView):
 
     def get_success_url(self):
         return reverse_lazy('investment_view',args=(self.object.investments.id,))
-  
+
+    @transaction.atomic
     def form_valid(self, form):
         form.instance.investments= Investments.objects.get(pk=self.kwargs['investments_id'])
-        return super().form_valid(form)
+        if (    form.instance.commission>0 and 
+                form.instance.taxes>0 and 
+                ((form.instance.shares>=0 and form.instance.operationstypes.id in (4, 6)) or (form.instance.shares<0 and form.instance.operationstypes.id==5) )) :
+            #return super().form_valid(form)
+            form.instance.save()
+        else:
+            if form.instance.commission<0:
+                form.add_error(None, ValidationError({"commission": "Commission must be positive ..."}))    
+            if form.instance.commission<0:
+                form.add_error(None, ValidationError({"taxes": "Taxes must be positive ..."}))    
+            if form.instance.shares<0 and form.instance.operationstypes.id in (4, 6):
+                form.add_error(None, ValidationError({"shares": "Shares can't be negative for this operation type..."}))    
+            if form.instance.shares>0 and form.instance.operationstypes.id in (5, ):
+                form.add_error(None, ValidationError({"shares": "Shares can't be positive for this operation type..."}))    
+            return super().form_invalid(form)
 
 @method_decorator(login_required, name='dispatch')
 class investment_update(UpdateView):
