@@ -12,6 +12,10 @@
 <p><strong>{% trans "Leverage" %}: </strong>{{ product.leverages.name }}</p>
 <p><strong>{% trans "Tickers" %}: </strong>{{ product.tickers }}</p>
 
+<p class="orders">
+  <a href="{% url 'quote_new' products_id=product.id %}">Add a quote to product</a>
+</p>
+
 <h1>{% trans "Quotes month percentage evolution" %}</h1>
   {{ table_quotes_month_percentages |safe}}
   

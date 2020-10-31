@@ -25,6 +25,7 @@ from money import views as money_views
 urlpatterns=[
     path('favicon.ico', RedirectView.as_view(url='/static/images/favicon.ico')),
 ]
+
 urlpatterns=urlpatterns+ i18n_patterns(
     path('i18n/setlang/',  set_language, name="set_language"), 
     path('admin/', admin.site.urls,  name="admin-site"),
@@ -51,7 +52,6 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('accountoperation/update/<int:pk>/', money_views.accountoperation_update.as_view(), name='accountoperation_update'),
     path('accountoperation/delete/<int:pk>', money_views.accountoperation_delete.as_view(), name='accountoperation_delete'),
     
-    
     path('creditcard/view/<slug:pk>/', money_views.creditcard_view, name='creditcard_view'),
     path('creditcard/new/<int:accounts_id>/', money_views.creditcard_new.as_view(), name='creditcard_new'),
     path('creditcard/update/<slug:pk>/', money_views.creditcard_update.as_view(), name='creditcard_update'),
@@ -74,8 +74,6 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('investmentoperation/new/<int:investments_id>/', money_views.investmentoperation_new.as_view(), name='investmentoperation_new'),
     path('investmentoperation/update/<int:pk>', money_views.investmentoperation_update.as_view(), name='investmentoperation_update'),
     path('investmentoperation/delete/<int:pk>', money_views.investmentoperation_delete.as_view(), name='investmentoperation_delete'),
-        
-        
         
     path('order/list/', money_views.order_list, {'active':True}, name='order_list_active'),
     path('order/list/inactive/', money_views.order_list, {'active': False}, name='order_list_inactive'),
@@ -109,8 +107,6 @@ urlpatterns=urlpatterns+ i18n_patterns(
     
     path('strategy/list/', money_views.strategy_list, {'active':True}, name='strategy_list_active'),
     path('strategy/list/inactive/', money_views.strategy_list, {'active': False}, name='strategy_list_inactive'),
-    
-    
 )
 
 handler403 = 'money.views.error_403'
