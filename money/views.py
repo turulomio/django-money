@@ -16,7 +16,7 @@ from django.views.generic.edit import UpdateView, CreateView, DeleteView
 
 from math import floor
 
-from money.connection_dj import cursor_rows, cursor_one_column
+from money.connection_dj import cursor_rows, cursor_one_column, execute
 from money.forms import AccountsOperationsForm, AccountsTransferForm
 from money.charts import (
     chart_lines_total, 
@@ -363,6 +363,7 @@ class accountoperation_new(CreateView):
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
         form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['concepts'].queryset=Concepts.queryset_order_by_fullname()
         return form
         
     def get_initial(self):
@@ -580,7 +581,30 @@ def ajax_investment_pairs_evolution(request, worse, better ):
 #    print(lr.r_squared_string())
     
     return HttpResponse(table_products_pair_evolution_from)
+@method_decorator(login_required, name='dispatch')
+class investment_update(UpdateView):
+    model = Investments
+    fields = ( 'name', 'accounts',  'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
+    template_name="investment_update.html"
 
+    def get_initial(self):
+        return {
+            'selling_expiration': str(self.object.selling_expiration), 
+            }
+
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.id,))
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(investment_update, self).get_form(form_class)
+        form.fields['selling_expiration'].widget.attrs['is'] ='input-date'
+        form.fields['selling_expiration'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        return form
+    
+    def form_valid(self, form):
+        return super().form_valid(form)
 @login_required
 def investment_view(request, pk):
     investment=get_object_or_404(Investments, id=pk)
@@ -616,14 +640,13 @@ def investment_view(request, pk):
 @method_decorator(login_required, name='dispatch')
 class investmentoperation_new(CreateView):
     model = Investmentsoperations
-    fields = ( 'datetime', 'operationstypes',  'shares', 'price',  'taxes',  'commission', 'comment', 'investments', 'currency_conversion')
+    fields = ( 'datetime', 'operationstypes',  'shares', 'price',  'taxes',  'commission', 'comment', 'currency_conversion')
     template_name="investmentoperation_new.html"
 
     def get_form(self, form_class=None): 
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(investmentoperation_new, self).get_form(form_class)
-        form.fields['investments'].widget = forms.HiddenInput()
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
         form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
@@ -644,11 +667,12 @@ class investmentoperation_new(CreateView):
     @transaction.atomic
     def form_valid(self, form):
         form.instance.investments= Investments.objects.get(pk=self.kwargs['investments_id'])
-        if (    form.instance.commission>0 and 
-                form.instance.taxes>0 and 
+        if (    form.instance.commission>=0 and 
+                form.instance.taxes>=0 and 
                 ((form.instance.shares>=0 and form.instance.operationstypes.id in (4, 6)) or (form.instance.shares<0 and form.instance.operationstypes.id==5) )) :
-            #return super().form_valid(form)
             form.instance.save()
+            form.instance.update_associated_account_operation(self.request.globals["mem__localcurrency"])
+            return super().form_valid(form)
         else:
             if form.instance.commission<0:
                 form.add_error(None, ValidationError({"commission": "Commission must be positive ..."}))    
@@ -660,35 +684,12 @@ class investmentoperation_new(CreateView):
                 form.add_error(None, ValidationError({"shares": "Shares can't be positive for this operation type..."}))    
             return super().form_invalid(form)
 
-@method_decorator(login_required, name='dispatch')
-class investment_update(UpdateView):
-    model = Investments
-    fields = ( 'name', 'accounts',  'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
-    template_name="investment_update.html"
 
-    def get_initial(self):
-        return {
-            'selling_expiration': str(self.object.selling_expiration), 
-            }
-
-    def get_success_url(self):
-        return reverse_lazy('investment_view',args=(self.object.id,))
-
-    def get_form(self, form_class=None): 
-        if form_class is None: 
-            form_class = self.get_form_class()
-        form = super(investment_update, self).get_form(form_class)
-        form.fields['selling_expiration'].widget.attrs['is'] ='input-date'
-        form.fields['selling_expiration'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
-        return form
-    
-    def form_valid(self, form):
-        return super().form_valid(form)
 
 @method_decorator(login_required, name='dispatch')
 class investmentoperation_update(UpdateView):
     model = Investmentsoperations
-    fields = ( 'datetime', 'operationstypes',  'shares', 'price',  'taxes',  'commission', 'comment', 'investments', 'currency_conversion')
+    fields = ( 'datetime', 'operationstypes',  'shares', 'price',  'taxes',  'commission', 'comment', 'currency_conversion')
     template_name="investmentoperation_update.html"
         
 
@@ -698,21 +699,45 @@ class investmentoperation_update(UpdateView):
     def get_form(self, form_class=None): 
         if form_class is None: 
             form_class = self.get_form_class()
-        form = super(investmentoperation_update, self).get_form(form_class)
-        form.fields['investments'].widget = forms.HiddenInput()
+        form = super(investmentoperation_update, self).get_form(form_class) 
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
         form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['operationstypes'].queryset=Operationstypes.objects.filter(pk__in=[4, 5, 6])
         return form
-    
+
+    @transaction.atomic
     def form_valid(self, form):
-        return super().form_valid(form)
+        form.instance.investments= Investmentsoperations.objects.get(pk=self.kwargs['pk']).investments
+        if (    form.instance.commission>=0 and 
+                form.instance.taxes>=0 and 
+                ((form.instance.shares>=0 and form.instance.operationstypes.id in (4, 6)) or (form.instance.shares<0 and form.instance.operationstypes.id==5) )) :
+            form.instance.save()
+            form.instance.update_associated_account_operation(self.request.globals["mem__localcurrency"])
+            return super().form_valid(form)
+        else:
+            if form.instance.commission<0:
+                form.add_error(None, ValidationError({"commission": "Commission must be positive ..."}))    
+            if form.instance.commission<0:
+                form.add_error(None, ValidationError({"taxes": "Taxes must be positive ..."}))    
+            if form.instance.shares<0 and form.instance.operationstypes.id in (4, 6):
+                form.add_error(None, ValidationError({"shares": "Shares can't be negative for this operation type..."}))    
+            if form.instance.shares>0 and form.instance.operationstypes.id in (5, ):
+                form.add_error(None, ValidationError({"shares": "Shares can't be positive for this operation type..."}))    
+            return super().form_invalid(form)
 
 class investmentoperation_delete(DeleteView):
     model = Investmentsoperations
     template_name = 'investmentoperation_delete.html'
     def get_success_url(self):
-        return reverse_lazy('investment_view',args=(self.object.investments.id,))
+        return reverse_lazy('investment_view',args=(self.object.investments.id,))   
+       
+    @transaction.atomic
+    def delete(self, *args, **kwargs):
+        self.object = self.get_object()
+        execute("delete from investmentsaccountsoperations where investmentsoperations_id=%s",(self.object.id, )) 
+        return super(investmentoperation_delete, self).delete(*args, **kwargs)
+
 
 @login_required
 def bank_new(request, pk):

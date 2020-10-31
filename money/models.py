@@ -12,6 +12,7 @@ Decimal()#Internal eval
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.db import models, connection
+from django.db.models import Case, When
 
 from money.reusing.currency import Currency, currency_symbol
 from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows, execute
@@ -20,7 +21,7 @@ from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, 
 from money.reusing.percentage import Percentage
 from money.reusing.listdict_functions import listdict_average_ponderated
 
-from xulpymoney.libxulpymoneytypes import eProductType, eComment, eMoneyCurrency, eConcept
+from xulpymoney.libxulpymoneytypes import eProductType, eComment, eConcept
 
 class Accounts(models.Model):
     name = models.TextField(blank=True, null=True)
@@ -223,6 +224,15 @@ class Concepts(models.Model):
         for o in Concepts.objects.all():
             d[o.id]=o.fullName()
         return d
+        
+    def queryset_order_by_fullname():
+        ids=[]
+        for concept in sorted(Concepts.objects.all(), key=lambda o: o.fullName()):
+            ids.append(concept.id)
+        preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
+        queryset = Concepts.objects.filter(pk__in=ids).order_by(preserved)
+        #print(queryset.query)
+        return queryset
 
 
 class Creditcards(models.Model):
@@ -418,33 +428,17 @@ class Investments(models.Model):
         return Currency(gains, self.products.currency)
         
 
-class Investmentsaccountsoperations(models.Model):
-    concepts_id = models.IntegerField()
-    operationstypes_id = models.IntegerField()
-    amount = models.DecimalField(max_digits=100, decimal_places=2)
-    comment = models.TextField(blank=True, null=True)
-    accounts_id = models.IntegerField()
-    datetime = models.DateTimeField(blank=True, null=True)
-    investmentsoperations_id = models.IntegerField()
-    investments = models.ForeignKey(Investments, models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'investmentsaccountsoperations'
-
-
-    
 class Investmentsoperations(models.Model):
-    operationstypes = models.ForeignKey('Operationstypes', models.DO_NOTHING, blank=True, null=True)
-    investments = models.ForeignKey(Investments, models.DO_NOTHING, blank=True, null=True)
-    shares = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
-    taxes = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
-    commission = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
-    price = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
-    datetime = models.DateTimeField(blank=True, null=True)
+    operationstypes = models.ForeignKey('Operationstypes', models.DO_NOTHING, blank=False, null=False)
+    investments = models.ForeignKey(Investments, models.DO_NOTHING, blank=False, null=False)
+    shares = models.DecimalField(max_digits=100, decimal_places=6, blank=False, null=False)
+    taxes = models.DecimalField(max_digits=100, decimal_places=2, blank=False, null=False)
+    commission = models.DecimalField(max_digits=100, decimal_places=2, blank=False, null=False)
+    price = models.DecimalField(max_digits=100, decimal_places=6, blank=False, null=False)
+    datetime = models.DateTimeField(blank=False, null=False)
     comment = models.TextField(blank=True, null=True)
-    show_in_ranges = models.BooleanField(blank=True, null=True)
-    currency_conversion = models.DecimalField(max_digits=30, decimal_places=10)
+    show_in_ranges = models.BooleanField(blank=False, null=False)
+    currency_conversion = models.DecimalField(max_digits=30, decimal_places=10, blank=False, null=False)
 
     class Meta:
         managed = False
@@ -456,31 +450,64 @@ class Investmentsoperations(models.Model):
     ## Esta función actualiza la tabla investmentsaccountsoperations que es una tabla donde 
     ## se almacenan las accountsoperations automaticas por las operaciones con investments. Es una tabla 
     ## que se puede actualizar en cualquier momento con esta función
-    def actualizar_cuentaoperacion_asociada(self):
+    def update_associated_account_operation(self,  local_currency):
         #/Borra de la tabla investmentsaccountsoperations los de la operinversión pasada como parámetro
-        execute("delete from investmentsaccountsoperations where investmentsoperations_id=%s",(self.invesments.id, )) 
+        execute("delete from investmentsaccountsoperations where investmentsoperations_id=%s",(self.id, )) 
 
+        
+        listdict_io, listdict_ioc, listdict_ioh  =self.investments.get_investmentsoperations(timezone.now(), local_currency)
+        
+        io=Investmentsoperations.investmentsoperations_find_by_id(listdict_io, self.id)
+        print(io)
         
         if self.investments.daily_adjustment is True: #Because it uses adjustment information
             return
         
-        self.comment=Comment().encode(eComment.InvestmentOperation, self)
+        comment=Comment().encode(eComment.InvestmentOperation, self)
         if self.operationstypes.id==4:#Compra Acciones
-            #Se pone un registro de compra de shares que resta el balance de la opercuenta
-            amount=-self.gross(type=2)-self.money_commission(type=2)
-            c=AccountOperationOfInvestmentOperation(self.mem, self.datetime, self.mem.concepts.find_by_id(29), self.tipooperacion, amount.amount, self.comment, self.investment.account, self,self.investment, None)
+            c=Investmentsaccountsoperations()
+            c.datetime=self.datetime
+            c.concepts=Concepts.objects.get(pk=29)
+            c.operationstypes=c.concepts.operationstypes
+            c.amount=-io['net_account']
+            c.comment=comment
+            c.accounts=self.investments.accounts
+            c.investments=self.investments
+            c.investmentsoperations=self
             c.save()
         elif self.operationstypes.id==5:#// Venta Acciones
-            #//Se pone un registro de compra de shares que resta el balance de la opercuenta
-            amount=self.gross(type=2)-self.money_commission(type=2)-self.taxes(type=2)
-            c=AccountOperationOfInvestmentOperation(self.mem, self.datetime, self.mem.concepts.find_by_id(35), self.tipooperacion, amount.amount, self.comment, self.investment.account, self,self.investment, None)
+            c=Investmentsaccountsoperations()
+            c.datetime=self.datetime
+            c.concepts=Concepts.objects.get(pk=35)
+            c.operationstypes=c.concepts.operationstypes
+            c.amount=-io['net_account']
+            c.comment=comment
+            c.accounts=self.investments.accounts
+            c.investments=self.investments
+            c.investmentsoperations=self
             c.save()
-        elif self.operationstypes.id==6:
-            #//Si hubiera comisión se añade la comisión.
+        elif self.operationstypes.id==6:#Added
             if(self.commission!=0):
-                amount=-self.money_commission(type=2)-self.taxes(type=2)
-                c=AccountOperationOfInvestmentOperation(self.mem, self.datetime, self.mem.concepts.find_by_id(38), self.mem.tiposoperaciones.find_by_id(1), amount.amount, self.comment, self.investment.account, self,self.investment, None)
+                c=Investmentsaccountsoperations()
+                c.datetime=self.datetime
+                c.concepts=Concepts.objects.get(pk=38)
+                c.operationstypes=c.concepts.operationstypes
+                c.amount=-io['taxes_account']-io['commission_account']
+                c.comment=comment
+                c.accounts=self.investments.accounts
+                c.investments=self.investments
+                c.investmentsoperations=self
                 c.save()
+
+    ## Gets and investment operation from its listdict_io using an id
+    ## @param listdict_io Listdict with investmentsoperations
+    ## @param id integer with the id of the investment operation
+    @staticmethod
+    def investmentsoperations_find_by_id(listdict_io,  id):
+        for o in listdict_io:
+            if o["id"]==id:
+                return o
+        
     ## @param d dictionary with investmentsoperationscurrent
     ## @param d dictionary with basic results of investment product
     @staticmethod
@@ -520,6 +547,22 @@ class Investmentsoperations(models.Model):
     def invesmentsoperationscurrent_average_price_investment(listdict_ioc, price_key="price_user"):
         return listdict_average_ponderated(listdict_ioc, "shares", price_key)
 
+class Investmentsaccountsoperations(models.Model):
+    concepts = models.ForeignKey('Concepts', models.DO_NOTHING)
+    operationstypes =models.ForeignKey('Operationstypes', models.DO_NOTHING, blank=False, null=False)
+    amount = models.DecimalField(max_digits=100, decimal_places=2)
+    comment = models.TextField(blank=True, null=True)
+    accounts = models.ForeignKey(Accounts, models.DO_NOTHING)
+    datetime = models.DateTimeField(blank=True, null=True)
+    investmentsoperations = models.ForeignKey(Investmentsoperations, models.DO_NOTHING)
+    investments = models.ForeignKey(Investments, models.DO_NOTHING, blank=False, null=False)
+
+    class Meta:
+        managed = False
+        db_table = 'investmentsaccountsoperations'
+
+
+    
 class Leverages(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.TextField()
@@ -879,13 +922,11 @@ class Comment:
                 return string
 
             if code==eComment.InvestmentOperation:
-                if not self.validateLength(1, code, args): return string
-                io=Investmentsoperations.objects.get(pk=args[0])
-                if io==None: return string
-                if io.investments.hasSameAccountCurrency():
-                    return self.tr("{}: {} shares. Amount: {}. Comission: {}. Taxes: {}").format(io.investment.name, io.shares, io.gross(eMoneyCurrency.Product), io.money_commission(eMoneyCurrency.Product), io.taxes(eMoneyCurrency.Product))
-                else:
-                    return self.tr("{}: {} shares. Amount: {} ({}). Comission: {} ({}). Taxes: {} ({})").format(io.investment.name, io.shares, io.gross(eMoneyCurrency.Product), io.gross(eMoneyCurrency.Account),  io.money_commission(eMoneyCurrency.Product), io.money_commission(eMoneyCurrency.Account),  io.taxes(eMoneyCurrency.Product), io.taxes(eMoneyCurrency.Account))
+                io=self.decode_objects(string)
+#                if io.investments.hasSameAccountCurrency():
+                return _("{}: {} shares. Amount: {}. Comission: {}. Taxes: {}").format(io.investments.name, io.shares, io.shares*io.price,  io.commission, io.taxes)
+#                else:
+#                    return _("{}: {} shares. Amount: {} ({}). Comission: {} ({}). Taxes: {} ({})").format(io.investment.name, io.shares, io.gross(eMoneyCurrency.Product), io.gross(eMoneyCurrency.Account),  io.money_commission(eMoneyCurrency.Product), io.money_commission(eMoneyCurrency.Account),  io.taxes(eMoneyCurrency.Product), io.taxes(eMoneyCurrency.Account))
 
             elif code==eComment.AccountTransferOrigin:#Operaccount transfer origin
                 if not self.validateLength(3, code, args): return string
@@ -933,8 +974,9 @@ class Comment:
 
             if code==eComment.InvestmentOperation:
                 if not self.validateLength(1, code, args): return None
+                print(args[0].__class__,  args[0])
                 io=Investmentsoperations.objects.get(pk=args[0])
-                return {"io": io}
+                return io
 
             elif code in (eComment.AccountTransferOrigin,  eComment.AccountTransferDestiny, eComment.AccountTransferOriginCommission):
                 if not self.validateLength(3, code, args): return None
