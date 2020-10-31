@@ -644,6 +644,7 @@ class Products(models.Model):
     class Meta:
         managed = False
         db_table = 'products'
+        ordering = ['name']
         
     def __str__(self):
         return self.fullName()

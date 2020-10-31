@@ -65,7 +65,9 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('investment/list/', money_views.investment_list, {'active':True}, name='investment_list_active'),
     path('investment/list/inactive/', money_views.investment_list, {'active': False}, name='investment_list_inactive'),
     path('investment/view/<slug:pk>/', money_views.investment_view, name='investment_view'),
+    path('investment/new/<int:accounts_id>', money_views.investment_new.as_view(), name='investment_new'),
     path('investment/update/<int:pk>', money_views.investment_update.as_view(), name='investment_update'),
+    path('investment/delete/<int:pk>', money_views.investment_delete.as_view(), name='investment_delete'),
     
     path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/', money_views.investment_pairs, name='investment_pairs'),
     path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/<int:amount>/', money_views.ajax_investment_pairs_invest, name='ajax_investment_pairs_invest'),

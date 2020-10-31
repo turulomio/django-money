@@ -581,30 +581,7 @@ def ajax_investment_pairs_evolution(request, worse, better ):
 #    print(lr.r_squared_string())
     
     return HttpResponse(table_products_pair_evolution_from)
-@method_decorator(login_required, name='dispatch')
-class investment_update(UpdateView):
-    model = Investments
-    fields = ( 'name', 'accounts',  'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
-    template_name="investment_update.html"
 
-    def get_initial(self):
-        return {
-            'selling_expiration': str(self.object.selling_expiration), 
-            }
-
-    def get_success_url(self):
-        return reverse_lazy('investment_view',args=(self.object.id,))
-
-    def get_form(self, form_class=None): 
-        if form_class is None: 
-            form_class = self.get_form_class()
-        form = super(investment_update, self).get_form(form_class)
-        form.fields['selling_expiration'].widget.attrs['is'] ='input-date'
-        form.fields['selling_expiration'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
-        return form
-    
-    def form_valid(self, form):
-        return super().form_valid(form)
 @login_required
 def investment_view(request, pk):
     investment=get_object_or_404(Investments, id=pk)
@@ -1079,4 +1056,62 @@ def strategy_list(request, active=True):
     strategies=listdict_strategies(active, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
     table_strategies=TabulatorStrategies("table_strategies", None, strategies, request.globals["mem__localcurrency"]).render()
     return render(request, 'strategy_list.html', locals())
+        
+class investment_delete(DeleteView):
+    model = Investments
+    template_name = 'investment_delete.html'
     
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.accounts.id,))
+        
+        
+@method_decorator(login_required, name='dispatch')
+class investment_new(CreateView):
+    model = Investments
+    template_name="investment_new.html"
+    fields = ( 'name', 'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(investment_new, self).get_form(form_class)
+        return form
+        
+    def get_initial(self):
+        return {
+            'daily_adjustment': False, 
+            'balance_percentage': 100, 
+            'active': True
+        }
+    def form_valid(self, form):
+        form.instance.accounts =Accounts.objects.get(pk=self.kwargs['accounts_id'])
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.accounts.id,))
+        
+@method_decorator(login_required, name='dispatch')
+class investment_update(UpdateView):
+    model = Investments
+    fields = ( 'name', 'accounts',  'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
+    template_name="investment_update.html"
+
+    def get_initial(self):
+        return {
+            'selling_expiration': str(self.object.selling_expiration), 
+            }
+
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.id,))
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(investment_update, self).get_form(form_class)
+        form.fields['selling_expiration'].widget.attrs['is'] ='input-date'
+        form.fields['selling_expiration'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        return form
+    
+    def form_valid(self, form):
+        return super().form_valid(form)
+
