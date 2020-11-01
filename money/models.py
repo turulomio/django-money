@@ -357,14 +357,15 @@ class Investments(models.Model):
     class Meta:
         managed = False
         db_table = 'investments'
+        ordering = ['name']
+        
 
+    def __str__(self):
+        return self.fullName()
 
     def fullName(self):
         return "{} ({})".format(self.name, self.accounts.name)
-            
 
-        
-        
     ## Lista los id, io, io_current_totals, io_historical_current  de esta inversion
     def get_investmentsoperations_totals(self, dt, local_currency):
         row_io= cursor_one_row("select * from investment_operations_totals(%s,%s,%s)", (self.id, dt, local_currency))

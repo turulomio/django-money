@@ -99,13 +99,9 @@ from xulpymoney.libxulpymoneytypes import eConcept, eComment, eProductType
 @login_required
 def order_list(request,  active):
     listdict_orders=listdict_orders_active()
-    table_orders=TabulatorOrders("table_orders", 'order_view', listdict_orders, request.globals["mem__localcurrency"]).render()
+    table_orders=TabulatorOrders("table_orders", 'order_update', listdict_orders, request.globals["mem__localcurrency"]).render()
     return render(request, 'order_list.html', locals())
-    
-@login_required
-def order_view(request, pk):
-    order=get_object_or_404(Orders, id=pk)
-    return render(request, 'order_view.html', locals())
+
     
 @login_required
 def  table_product_list_from_ids(request, ids):
@@ -1123,3 +1119,67 @@ class investment_delete(DeleteView):
     
     def get_success_url(self):
         return reverse_lazy('investment_list_active')
+        
+        
+@method_decorator(login_required, name='dispatch')
+class order_new(CreateView):
+    model = Orders
+    template_name="order_new.html"
+    fields = ( 'date', 'expiration', 'investments',  'shares',  'price')
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(order_new, self).get_form(form_class)
+        form.fields['date'].widget.attrs['is'] ='input-date'
+        form.fields['date'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['expiration'].widget.attrs['is'] ='input-date'
+        form.fields['expiration'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        return form
+    
+    def get_initial(self):
+        return {
+            'date': str(date.today()), 
+        }
+#    def form_valid(self, form):
+#        form.instance.accounts =Accounts.objects.get(pk=self.kwargs['accounts_id'])
+#        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('order_list_active')
+        
+@method_decorator(login_required, name='dispatch')
+class order_update(UpdateView):
+    model = Orders
+    fields = ( 'date', 'expiration', 'investments',  'shares',  'price')
+    template_name="order_update.html"
+
+    def get_initial(self):
+        return {
+            'date': str(self.object.date), 
+            'expiration': str(self.object.expiration), 
+            }
+
+    def get_success_url(self):
+        return reverse_lazy('order_list_active')
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(order_update, self).get_form(form_class)
+        form.fields['date'].widget.attrs['is'] ='input-date'
+        form.fields['date'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['expiration'].widget.attrs['is'] ='input-date'
+        form.fields['expiration'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        return form
+    
+#    def form_valid(self, form):
+#        return super().form_valid(form)
+
+@method_decorator(login_required, name='dispatch')
+class order_delete(DeleteView):
+    model = Orders
+    template_name = 'order_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('order_list_active')

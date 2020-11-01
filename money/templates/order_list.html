@@ -25,5 +25,11 @@ table.setSort([
     {column:"percentage_from_price", dir:"desc"}, //sort by this first
 ]);
 </script>
+
+  
+
+<p class="orders">
+  <a href="{% url 'order_new' %}">{% trans 'Add a new order' %}</a>
+</p>
 {% endblock %}
 
