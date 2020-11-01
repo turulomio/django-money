@@ -2,7 +2,8 @@
 {% load i18n %}
 
 {% block content %}
-    <h1>{% trans "Add a new investment" %}</h1>
+    <h1>{% blocktrans with account=account %}Add a new investment to '{{ account }}'{% endblocktrans %}</h1>
+
     <form method="post">
         <table>
         {% csrf_token %}

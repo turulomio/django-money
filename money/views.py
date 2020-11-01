@@ -1057,12 +1057,6 @@ def strategy_list(request, active=True):
     table_strategies=TabulatorStrategies("table_strategies", None, strategies, request.globals["mem__localcurrency"]).render()
     return render(request, 'strategy_list.html', locals())
         
-class investment_delete(DeleteView):
-    model = Investments
-    template_name = 'investment_delete.html'
-    
-    def get_success_url(self):
-        return reverse_lazy('investment_view',args=(self.object.accounts.id,))
         
         
 @method_decorator(login_required, name='dispatch')
@@ -1075,12 +1069,19 @@ class investment_new(CreateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(investment_new, self).get_form(form_class)
+        form.fields['name'].widget = forms.TextInput()
         return form
-        
+    
+    def get_context_data(self, **kwargs):
+        context = super(investment_new, self).get_context_data(**kwargs)
+        context['account'] = Accounts.objects.get(pk=self.kwargs['accounts_id'])
+        return context
+
     def get_initial(self):
         return {
             'daily_adjustment': False, 
             'balance_percentage': 100, 
+            'selling_price': 0, 
             'active': True
         }
     def form_valid(self, form):
@@ -1088,12 +1089,12 @@ class investment_new(CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('investment_view',args=(self.object.accounts.id,))
+        return reverse_lazy('investment_view',args=(self.object.id,))
         
 @method_decorator(login_required, name='dispatch')
 class investment_update(UpdateView):
     model = Investments
-    fields = ( 'name', 'accounts',  'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
+    fields = ( 'name', 'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
     template_name="investment_update.html"
 
     def get_initial(self):
@@ -1115,3 +1116,10 @@ class investment_update(UpdateView):
     def form_valid(self, form):
         return super().form_valid(form)
 
+@method_decorator(login_required, name='dispatch')
+class investment_delete(DeleteView):
+    model = Investments
+    template_name = 'investment_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('investment_list_active')

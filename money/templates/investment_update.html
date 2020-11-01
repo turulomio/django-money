@@ -18,6 +18,8 @@
     <button type="submit">{% trans "Save" %}</button>
     </form>
     {% include "messages.html" %}
-
+    <p class="orders">
+        <a href="{% url 'investment_delete' pk=object.id %}">{% trans "Delete this investment" %}</a>
+    </p>
 
 {% endblock %}

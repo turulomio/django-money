@@ -349,7 +349,7 @@ class Investments(models.Model):
     active = models.BooleanField()
     accounts = models.ForeignKey(Accounts, models.DO_NOTHING)
     selling_price = models.DecimalField(max_digits=100, decimal_places=6)
-    products = models.ForeignKey('Products', models.DO_NOTHING, blank=True, null=True)
+    products = models.ForeignKey('Products', models.DO_NOTHING, blank=False, null=False)
     selling_expiration = models.DateField(blank=True, null=True)
     daily_adjustment = models.BooleanField()
     balance_percentage = models.DecimalField(max_digits=18, decimal_places=6)
