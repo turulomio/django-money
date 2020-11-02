@@ -17,7 +17,7 @@ from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from math import floor
 
 from money.connection_dj import cursor_rows, cursor_one_column, execute
-from money.forms import AccountsOperationsForm, AccountsTransferForm
+from money.forms import AccountsOperationsForm, AccountsTransferForm, ProductsRangeForm
 from money.charts import (
     chart_lines_total, 
     chart_product_quotes_historical, 
@@ -192,6 +192,36 @@ def product_view(request, pk):
     table_quotes_month_quotes=TabulatorProductQuotesMonthQuotes("table_quotes_month_quotes", None, quotes, product.currency).render()
 
     return render(request, 'product_view.html', locals())
+    
+@timeit
+@login_required
+def product_ranges(request):
+    if request.method == 'POST':
+        form = ProductsRangeForm(request.POST)
+        if form.is_valid():
+#            if form.cleaned_data['commission']>0:
+#                ao_commission=Accountsoperations()
+#                ao_commission.datetime=form.cleaned_data['datetime']
+#                concept_commision=Concepts.objects.get(pk=eConcept.BankCommissions)
+#                ao_commission.concepts=concept_commision
+#                ao_commission.operationstypes=concept_commision.operationstypes
+#                ao_commission.amount=-form.cleaned_data['commission']
+#                ao_commission.accounts=origin
+#                ao_commission.save()
+#            else:
+#                ao_commission=None
+
+           return HttpResponseRedirect( reverse_lazy('product_ranges'))
+    else:
+        form = ProductsRangeForm()
+#        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+#        form.fields['datetime'].widget.attrs['localzone'] =request.globals["mem__localzone"]
+#        form.fields['datetime'].widget.attrs['locale'] =request.LANGUAGE_CODE
+#        form.fields['datetime'].initial= str(dtaware_changes_tz(timezone.now(), request.globals["mem__localzone"]))
+#        form.fields['commission'].initial=0
+  
+    return render(request, 'product_ranges.html', locals())
+
     
 @login_required
 def product_update(request):
@@ -1105,6 +1135,7 @@ class investment_update(UpdateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(investment_update, self).get_form(form_class)
+        form.fields['name'].widget = forms.TextInput()
         form.fields['selling_expiration'].widget.attrs['is'] ='input-date'
         form.fields['selling_expiration'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form

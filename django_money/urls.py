@@ -90,6 +90,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('product/list/indexes/', money_views.product_list_indexes,  name='product_list_indexes'),
     path('product/list/cfds/', money_views.product_list_cfds,  name='product_list_cfds'),
     path('product/product_update/', money_views.product_update,  name='product_update'),
+    path('product/ranges/', money_views.product_ranges,  name='product_ranges'),
     path('product/chart/historical/<int:pk>/', money_views.ajax_chart_product_quotes_historical,  name='ajax_chart_product_quotes_historical'),
     
     path('quote/new/<int:products_id>/', money_views.quote_new.as_view(), name='quote_new'),

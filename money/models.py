@@ -13,6 +13,7 @@ from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.db import models, connection
 from django.db.models import Case, When
+from django.db.models.expressions import RawSQL
 
 from money.reusing.currency import Currency, currency_symbol
 from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows, execute
@@ -22,6 +23,14 @@ from money.reusing.percentage import Percentage
 from money.reusing.listdict_functions import listdict_average_ponderated
 
 from xulpymoney.libxulpymoneytypes import eProductType, eComment, eConcept
+RANGE_RECOMENDATION_CHOICES =( 
+    ("1", "One"), 
+    ("2", "Two"), 
+    ("3", "Three"), 
+    ("4", "Four"), 
+    ("5", "Five"), 
+) 
+   
 
 class Accounts(models.Model):
     name = models.TextField(blank=True, null=True)
@@ -672,6 +681,10 @@ class Products(models.Model):
         return cursor_rows("select * from ohclmonthlybeforesplits(%s)", (self.id, ))
     def ohclDailyBeforeSplits(self):
         return cursor_rows("select * from ohcldailybeforesplits(%s)", (self.id, ))
+        
+    @staticmethod
+    def qs_products_of_investments():
+        return Products.objects.filter(id__in=RawSQL('select products.id from products, investments where products.id=investments.products_id', ()))
 
 class Productstypes(models.Model):
     id = models.IntegerField(primary_key=True)
