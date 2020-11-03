@@ -55,6 +55,7 @@ from money.reusing.listdict_functions import listdict_sum, listdict_sum_negative
 from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict import (
+    LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount, 
     listdict_accounts, 
     listdict_banks, 
     listdict_chart_total_async, 
@@ -69,7 +70,6 @@ from money.listdict import (
     listdict_dividends_from_queryset, 
     listdict_investments_gains_by_product_type, 
     listdict_investmentsoperationshistorical, 
-    ldo_investmentsoperationscurrent_homogeneus_merging_same_product, 
     listdict_orders_active, 
     listdict_product_quotes_month_comparation, 
     listdict_products_pairs_evolution, 
@@ -456,16 +456,19 @@ def investment_list(request,  active):
 @timeit
 @login_required
 def investment_pairs(request, worse, better, accounts_id):
+    #Dastabase
     product_better=Products.objects.all().filter(id=better)[0]
     product_worse=Products.objects.all().filter(id=worse)[0]
+    d_product_better=Products.get_d_product_with_basics(better)
+    d_product_worse=Products.get_d_product_with_basics(worse)
     basic_results_better=product_better.basic_results()
     basic_results_worse=product_worse.basic_results()
     dict_ot=Operationstypes.dictionary()
     account=Accounts.objects.all().filter(id=accounts_id)[0]
     
-
-    ldo_ioc_better=ldo_investmentsoperationscurrent_homogeneus_merging_same_product("ldo_ioc_better", product_better, account,  timezone.now(), basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    ldo_ioc_worse=ldo_investmentsoperationscurrent_homogeneus_merging_same_product("ldo_ioc_worse",product_worse, account, timezone.now(), basic_results_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    #Variables
+    ldo_ioc_better=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(d_product_better, account, request, name="ldo_better")
+    ldo_ioc_worse=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(d_product_worse, account, request, name="ldo_worse")
 
     pair_gains=Currency(ldo_ioc_better.sum('gains_net_user')+ldo_ioc_worse.sum('gains_net_user'), request.globals["mem__localcurrency"])
     
@@ -475,9 +478,6 @@ def investment_pairs(request, worse, better, accounts_id):
     table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, product_worse.currency, request.globals["mem__localzone"]).render()
     #Variables to calculate reinvest loses
     gains=ldo_ioc_better.sum("gains_gross_user")+ldo_ioc_worse.sum("gains_gross_user")
-#    better_leverages_real=product_better.real_leveraged_multiplier()
-#    better_average_price=str(Investmentsoperations.invesmentsoperationscurrent_average_price_investment(ldo_ioc_better)).replace(",", ".")
-#    
     return render(request, 'investment_pairs.html', locals())
 
 
@@ -487,37 +487,40 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
     
     product_better=Products.objects.all().filter(id=better)[0]
     product_worse=Products.objects.all().filter(id=worse)[0]
-    basic_results_better=product_better.basic_results()
-    basic_results_worse=product_worse.basic_results()
+    d_product_better=Products.get_d_product_with_basics(better)
+    d_product_worse=Products.get_d_product_with_basics(worse)
     account=Accounts.objects.all().filter(id=accounts_id)[0]    
-    list_ioc_better=ldo_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    list_ioc_worse=ldo_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    list_ioc_better=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(d_product_better, account,  request,  name="ldo2_better")
+    list_ioc_worse=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(d_product_worse, account, request,  name="ldo2_worse")
 
     listdict=[]
-    better_shares=round(amount/basic_results_better["last"]/product_better.real_leveraged_multiplier(), 2)
-    better_current=listdict_sum(list_ioc_better, "invested_user")
-    better_invest= better_shares*basic_results_better["last"]*product_better.real_leveraged_multiplier()
+    better_current=list_ioc_better.shares()*product_better.real_leveraged_multiplier()*d_product_better['last']
+    better_shares=round(amount/d_product_better["last"]/product_better.real_leveraged_multiplier(), 2)
+    better_invested=listdict_sum(list_ioc_better.ld, "invested_user")
+    better_invest= better_shares*d_product_better["last"]*product_better.real_leveraged_multiplier()
     better_total=better_current+better_invest
     listdict.append({   
         'name': product_better.name, 
-        'last_datetime': basic_results_better["last_datetime"], 
-        'last': basic_results_better["last"], 
+        'last_datetime': d_product_better["last_datetime"], 
+        'last': d_product_better["last"], 
+        'invested': better_invested, 
         'current': better_current, 
-        'invest': better_invest, 
-        'total': better_total, 
+        'new': better_current, 
+        'new_plus_current': better_total, 
         'shares': better_shares, 
       })    
     
-    worse_current=abs(listdict_sum(list_ioc_worse, "invested_user"))
-    worse_shares=Decimal(floor((better_total-worse_current)/basic_results_worse["last"]/product_worse.real_leveraged_multiplier()/Decimal(0.01))*Decimal(0.01))#Sifnificance
-    worse_invest= worse_shares*basic_results_worse["last"]*product_worse.real_leveraged_multiplier()
+    worse_invested=abs(listdict_sum(list_ioc_worse.ld, "invested_user"))
+    worse_current= worse_shares*d_product_worse["last"]*product_worse.real_leveraged_multiplier()
+    worse_shares=Decimal(floor((better_total-worse_current)/d_product_worse["last"]/product_worse.real_leveraged_multiplier()/Decimal(0.01))*Decimal(0.01))#Sifnificance
     listdict.append({   
         'name': product_worse.name, 
-        'last_datetime': basic_results_worse["last_datetime"], 
-        'last': basic_results_worse["last"], 
-        'current': worse_current, 
-        'invest': worse_invest, 
-        'total': worse_current+worse_invest,
+        'last_datetime': d_product_worse["last_datetime"], 
+        'last': d_product_worse["last"], 
+        'invested': worse_invested, 
+        'current': better_current, 
+        'new': better_current, 
+        'new_plus_current': better_total, 
         'shares': worse_shares, 
       })
     table_calculator=TabulatorInvestmentsPairsInvestCalculator("table_calculator", None, listdict, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()

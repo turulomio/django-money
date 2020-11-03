@@ -92,10 +92,10 @@ class TabulatorInvestmentsPairsInvestCalculator(TabulatorFromListDict):
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setListDict(listdict)    
-        self.setFields("name", "last_datetime","last","current", "invest",  "total", "shares")
-        self.setHeaders(_("Investment name"), _("Last quote update"),  _("Last quote"), _("Currently invested"),  _("New inversion"), _("Final inversion"), _("Shares to invest"))
-        self.setTypes("str", "datetime", "Decimal", local_currency,local_currency,local_currency,"Decimal")
-        self.setBottomCalc(None, None, None,  "sum", "sum", "sum", None)
+        self.setFields("name", "last_datetime","last","invested", "current", "new",   "new_plus_current", "shares")
+        self.setHeaders(_("Investment name"), _("Last quote update"),  _("Last quote"), _("Invested"), _("Current balance"),   _("New inversion"), _("Current + new"), _("Shares to invest"))
+        self.setTypes("str", "datetime", "Decimal", local_currency, local_currency,local_currency,local_currency,"Decimal")
+        self.setBottomCalc(None, None, None,  "sum", "sum",  "sum", "sum", None)
 
 class TabulatorInvestmentsOperationsCurrentHomogeneus(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, investment, local_zone):

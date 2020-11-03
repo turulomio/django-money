@@ -1,3 +1,22 @@
+## Module that uses dictionaries and list of dictionaries to prepare data for django
+## Object types:
+## - Dictionary (d)
+## - List of dicionaries (ld)
+## - List of dictionaries object (ldo)
+##
+## Methods
+## - d_ClassName_KeyName. To add a KeyName to dictionary d of the type Classname. No database querys
+## - LdoName. Encapsulates everything, like tables, database querys although  we must try to avoid it
+## - ld_ClassName. No database querys
+## Predefined dictionaries in models
+## - d_product_with_basic. Product with
+## - d_investment_with_operations. Investment with operations
+## Predefined list of dictionaries
+## - ld_investments List of Investments with fields of database
+## - ld_investments_with_operations. List of d_investment_with_operations
+## Predefined querysets
+## 
+
 import asyncio
 from asgiref.sync import sync_to_async
 from datetime import date, timedelta
@@ -190,15 +209,36 @@ def listdict_investmentsoperationshistorical(year, month, local_currency, local_
         
 
 ## Different o Heterogeneus, due to sum shares...
-class LdoInvestmentsOperationsCurrentHeterogeneusSameProduct(ListDictObject):
-    def __init__(self, ld, product,  name="ldo_investmentsoperationscurrent_homogeneus"):
-        ListDictObject.__init__(self,  ld)
-        self.name=name
-        self.product=product
+class LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(ListDictObject):
+    def __init__(self, d_product_with_basics, account, request, name=None):
+        self.local_currency=request.globals["mem__localcurrency"]
+        self.local_zone=request.globals["mem__localzone"]
+        self.d_product_with_basics=d_product_with_basics
         
-    def setSettings(self, local_zone, local_currency):
-        self.local_zone= local_zone
-        self.local_currency= local_currency
+        list_ioc=[]
+        dict_ot=Operationstypes.dictionary()
+        for investment in Investments.objects.raw("""
+select 
+    distinct(investments.*) 
+from 
+    investmentsoperations, 
+    investments 
+where 
+    investments.products_id=%s and 
+    investments.accounts_id=%s and 
+    investments.id=investmentsoperations.investments_id""", ( d_product_with_basics["id"], account.id)):
+            print(investment, investment.id)
+            io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), self.local_currency)
+            
+            for ioc in io_current:
+                ioc["name"]=investment.fullName()
+                ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
+                ioc["percentage_annual"]=Investmentsoperations.investmentsoperationscurrent_percentage_annual(ioc, d_product_with_basics)
+                ioc["percentage_apr"]=Investmentsoperations.investmentsoperationscurrent_percentage_apr(ioc)
+                ioc["percentage_total"]=Investmentsoperations.investmentsoperationscurrent_percentage_total(ioc)
+                ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
+                list_ioc.append(ioc)
+        ListDictObject.__init__(self,  list_ioc, name=name)
 
     def shares(self):
         return self.sum("shares")
@@ -216,33 +256,12 @@ class LdoInvestmentsOperationsCurrentHeterogeneusSameProduct(ListDictObject):
         r.setListDict(self.ld)
         r.setFields("id","datetime", "name","operationstypes",  "shares", "price_investment", "invested_investment", "balance_investment", "gains_gross_investment", "percentage_annual", "percentage_apr", "percentage_total")
         r.setHeaders("Id", _("Date and time"), _("Name"),  _("Operation type"),  _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Gross gains"), _("% year"), _("% APR"), _("% Total"))
-        r.setTypes("int","datetime", "str", "str",  "Decimal", self.product.currency, self.product.currency, self.product.currency,  self.product.currency, "percentage", "percentage", "percentage")
+        r.setTypes("int","datetime", "str", "str",  "Decimal", self.d_product_with_basics['currency'], self.d_product_with_basics['currency'], self.d_product_with_basics['currency'],  self.d_product_with_basics['currency'], "percentage", "percentage", "percentage")
         r.setBottomCalc(None, None, None, None, "sum", None,  "sum", "sum", "sum", None, None, None)
         r.showLastRecord(False)
         return r.render()
         
-    
-## Gets all ioh from all investments 
-def ldo_investmentsoperationscurrent_homogeneus_merging_same_product(name, product, account, dt, basic_results, local_currency, local_zone):
-    #Git investments with investmentsoperations in this year, month
-    print("AQUIN")
-    list_ioc=[]
-    dict_ot=Operationstypes.dictionary()
-    for investment in Investments.objects.raw("select distinct(investments.*) from investmentsoperations, investments where datetime <=%s and investments.products_id=%s and investments.accounts_id=%s and investments.id=investmentsoperations.investments_id", (dt,  product.id, account.id)):
-        print(dt, local_currency)
-        io, io_current, io_historical=investment.get_investmentsoperations(dt, local_currency)
-        
-        for ioc in io_current:
-            ioc["name"]=investment.fullName()
-            ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
-            ioc["percentage_annual"]=Investmentsoperations.investmentsoperationscurrent_percentage_annual(ioc, basic_results)
-            ioc["percentage_apr"]=Investmentsoperations.investmentsoperationscurrent_percentage_apr(ioc)
-            ioc["percentage_total"]=Investmentsoperations.investmentsoperationscurrent_percentage_total(ioc)
-            ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
-            list_ioc.append(ioc)
-    ldo= LdoInvestmentsOperationsCurrentHeterogeneusSameProduct(list_ioc, product,  name)
-    ldo.setSettings(local_zone, local_currency)
-    return ldo
+
 
 def listdict_products_pairs_evolution(product_worse, product_better, datetimes, ioc_worse, ioc_better, basic_results_worse,   basic_results_better):
     l=[]

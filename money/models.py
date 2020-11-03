@@ -662,6 +662,11 @@ class Products(models.Model):
 
     def basic_results(self):
         return cursor_one_row("select * from last_penultimate_lastyear(%s,%s)", (self.id, timezone.now() ))
+        
+    @staticmethod
+    def get_d_product_with_basics(id):
+        return cursor_one_row("select * from products,last_penultimate_lastyear(products.id, now()) where products.id=%s", (id, ))
+        
     ## IBEXA es x2 pero esta en el pricio
     ## CFD DAX no está en el precio
     def real_leveraged_multiplier(self):
