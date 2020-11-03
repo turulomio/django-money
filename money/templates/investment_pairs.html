@@ -10,13 +10,20 @@
 <p>Worse: {{product_worse.fullName}}</p>
 <p>Better: {{product_better.fullName}}</p>
 
-<h2>{% trans "Current investment operations" %}</h2>
+<h2>{% trans "Current investment operations in investment currency" %}</h2>
 
 {{ ldo_ioc_worse.tabulator |safe }}
 
 {{ ldo_ioc_better.tabulator|safe}}
 
 <p>{% blocktrans with pair_gains=pair_gains %}Current pair balance is {{ pair_gains }}.{% endblocktrans %}</p>
+
+<h2>{% trans "Current investment operations in user currency" %}</h2>
+
+{{ table_ioc_worse_usercurrency|safe}}
+
+{{ table_ioc_better_usercurrency|safe}}
+
 
 
 <h2>{% trans "Next investment calculator" %}</h2>

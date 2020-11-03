@@ -456,6 +456,7 @@ def investment_list(request,  active):
 @timeit
 @login_required
 def investment_pairs(request, worse, better, accounts_id):
+    localzone=request.globals["mem__localzone"]
     #Dastabase
     product_better=Products.objects.all().filter(id=better)[0]
     product_worse=Products.objects.all().filter(id=worse)[0]
@@ -469,6 +470,9 @@ def investment_pairs(request, worse, better, accounts_id):
     #Variables
     ldo_ioc_better=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(d_product_better, account, request, name="ldo_better")
     ldo_ioc_worse=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(d_product_worse, account, request, name="ldo_worse")
+    from money.widgets import table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency
+    table_ioc_better_usercurrency=table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency(ldo_ioc_better.ld,  localzone, "table_ioc_better_usercurrency")
+    table_ioc_worse_usercurrency=table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency(ldo_ioc_worse.ld,  localzone, "table_ioc_worse_usercurrency")
 
     pair_gains=Currency(ldo_ioc_better.sum('gains_net_user')+ldo_ioc_worse.sum('gains_net_user'), request.globals["mem__localcurrency"])
     
@@ -483,8 +487,6 @@ def investment_pairs(request, worse, better, accounts_id):
 
 @login_required
 def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
-    
-    
     product_better=Products.objects.all().filter(id=better)[0]
     product_worse=Products.objects.all().filter(id=worse)[0]
     d_product_better=Products.get_d_product_with_basics(better)
@@ -495,36 +497,39 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
 
     listdict=[]
     better_current=list_ioc_better.shares()*product_better.real_leveraged_multiplier()*d_product_better['last']
-    better_shares=round(amount/d_product_better["last"]/product_better.real_leveraged_multiplier(), 2)
+    better_new_shares=round(amount/d_product_better["last"]/product_better.real_leveraged_multiplier(), 2)
     better_invested=listdict_sum(list_ioc_better.ld, "invested_user")
-    better_invest= better_shares*d_product_better["last"]*product_better.real_leveraged_multiplier()
-    better_total=better_current+better_invest
+    better_new= better_new_shares*d_product_better["last"]*product_better.real_leveraged_multiplier()
+    better_total=better_current+better_new
     listdict.append({   
         'name': product_better.name, 
         'last_datetime': d_product_better["last_datetime"], 
         'last': d_product_better["last"], 
         'invested': better_invested, 
         'current': better_current, 
-        'new': better_current, 
+        'new': better_new, 
         'new_plus_current': better_total, 
-        'shares': better_shares, 
+        'shares': better_new_shares, 
       })    
     
     worse_invested=abs(listdict_sum(list_ioc_worse.ld, "invested_user"))
-    worse_current= worse_shares*d_product_worse["last"]*product_worse.real_leveraged_multiplier()
-    worse_shares=Decimal(floor((better_total-worse_current)/d_product_worse["last"]/product_worse.real_leveraged_multiplier()/Decimal(0.01))*Decimal(0.01))#Sifnificance
+    worse_current=worse_invested+listdict_sum(list_ioc_worse.ld, "gains_gross_user")
+    worse_new_shares=Decimal(floor((better_total-worse_current)/d_product_worse["last"]/product_worse.real_leveraged_multiplier()/Decimal(0.01))*Decimal(0.01))#Sifnificance
+    worse_new= worse_new_shares*d_product_worse["last"]*product_worse.real_leveraged_multiplier()
+    worse_total=worse_current+worse_new
     listdict.append({   
         'name': product_worse.name, 
         'last_datetime': d_product_worse["last_datetime"], 
         'last': d_product_worse["last"], 
         'invested': worse_invested, 
-        'current': better_current, 
-        'new': better_current, 
-        'new_plus_current': better_total, 
-        'shares': worse_shares, 
+        'current': worse_current, 
+        'new': worse_new, 
+        'new_plus_current': worse_total, 
+        'shares': worse_new_shares, 
       })
     table_calculator=TabulatorInvestmentsPairsInvestCalculator("table_calculator", None, listdict, request.globals["mem__localcurrency"], request.globals["mem__localzone"]).render()
-    return HttpResponse(table_calculator)
+    s=f"<p>Difference between pair current balance is {better_current-worse_current}</p>"
+    return HttpResponse(table_calculator+ s)
     
 @timeit
 @ensure_csrf_cookie ##For ajax-button
