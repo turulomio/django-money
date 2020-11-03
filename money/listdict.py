@@ -3,7 +3,7 @@ from asgiref.sync import sync_to_async
 from datetime import date, timedelta
 from decimal import Decimal
 from money.connection_dj import  cursor_rows
-from money.reusing.listdict_functions import listdict2dict, listdict_print
+from money.reusing.listdict_functions import listdict2dict, listdict_print,  ListDictObject
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -29,6 +29,7 @@ from money.models import (
 from money.reusing.datetime_functions import dtaware_month_end, months
 from money.reusing.decorators import timeit
 from money.reusing.percentage import percentage_between, Percentage
+from money.reusing.tabulator import TabulatorFromListDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 ld_print=listdict_print
@@ -186,14 +187,49 @@ def listdict_investmentsoperationshistorical(year, month, local_currency, local_
                 list_ioh.append(ioh)
     list_ioh= sorted(list_ioh,  key=lambda item: item['dt_end'])
     return list_ioh
-    
+        
+
+## Different o Heterogeneus, due to sum shares...
+class LdoInvestmentsOperationsCurrentHeterogeneusSameProduct(ListDictObject):
+    def __init__(self, ld, product,  name="ldo_investmentsoperationscurrent_homogeneus"):
+        ListDictObject.__init__(self,  ld)
+        self.name=name
+        self.product=product
+        
+    def setSettings(self, local_zone, local_currency):
+        self.local_zone= local_zone
+        self.local_currency= local_currency
+
+    def shares(self):
+        return self.sum("shares")
+
+    def shares_js(self):
+        return str(self.shares()).replace(",", ".")
+        
+    def average_price_user(self):
+        return self.average_ponderated("shares", "price_user")
+        
+    def tabulator(self):
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.local_zone)
+        r.setListDict(self.ld)
+        r.setFields("id","datetime", "name","operationstypes",  "shares", "price_investment", "invested_investment", "balance_investment", "gains_gross_investment", "percentage_annual", "percentage_apr", "percentage_total")
+        r.setHeaders("Id", _("Date and time"), _("Name"),  _("Operation type"),  _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Gross gains"), _("% year"), _("% APR"), _("% Total"))
+        r.setTypes("int","datetime", "str", "str",  "Decimal", self.product.currency, self.product.currency, self.product.currency,  self.product.currency, "percentage", "percentage", "percentage")
+        r.setBottomCalc(None, None, None, None, "sum", None,  "sum", "sum", "sum", None, None, None)
+        r.showLastRecord(False)
+        return r.render()
+        
     
 ## Gets all ioh from all investments 
-def listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product, account, dt, basic_results, local_currency, local_zone):
+def ldo_investmentsoperationscurrent_homogeneus_merging_same_product(name, product, account, dt, basic_results, local_currency, local_zone):
     #Git investments with investmentsoperations in this year, month
+    print("AQUIN")
     list_ioc=[]
     dict_ot=Operationstypes.dictionary()
     for investment in Investments.objects.raw("select distinct(investments.*) from investmentsoperations, investments where datetime <=%s and investments.products_id=%s and investments.accounts_id=%s and investments.id=investmentsoperations.investments_id", (dt,  product.id, account.id)):
+        print(dt, local_currency)
         io, io_current, io_historical=investment.get_investmentsoperations(dt, local_currency)
         
         for ioc in io_current:
@@ -204,8 +240,9 @@ def listdict_investmentsoperationscurrent_homogeneus_merging_same_product(produc
             ioc["percentage_total"]=Investmentsoperations.investmentsoperationscurrent_percentage_total(ioc)
             ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
             list_ioc.append(ioc)
-    return list_ioc
-
+    ldo= LdoInvestmentsOperationsCurrentHeterogeneusSameProduct(list_ioc, product,  name)
+    ldo.setSettings(local_zone, local_currency)
+    return ldo
 
 def listdict_products_pairs_evolution(product_worse, product_better, datetimes, ioc_worse, ioc_better, basic_results_worse,   basic_results_better):
     l=[]

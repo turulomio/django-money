@@ -33,8 +33,7 @@ from money.tables import (
     TabulatorCreditCards, 
     TabulatorInvestments, 
     TabulatorInvestmentsOperationsHomogeneus, 
-    TabulatorInvestmentsOperationsCurrentHomogeneus, 
-    TabulatorInvestmentsOperationsCurrentHeterogeneus, 
+    TabulatorInvestmentsOperationsCurrentHomogeneus,
     TabulatorProducts, 
     TabulatorOrders, 
     TabulatorReportIncomeTotal, 
@@ -70,7 +69,7 @@ from money.listdict import (
     listdict_dividends_from_queryset, 
     listdict_investments_gains_by_product_type, 
     listdict_investmentsoperationshistorical, 
-    listdict_investmentsoperationscurrent_homogeneus_merging_same_product, 
+    ldo_investmentsoperationscurrent_homogeneus_merging_same_product, 
     listdict_orders_active, 
     listdict_product_quotes_month_comparation, 
     listdict_products_pairs_evolution, 
@@ -218,7 +217,9 @@ def product_ranges(request):
 #        form.fields['datetime'].widget.attrs['localzone'] =request.globals["mem__localzone"]
 #        form.fields['datetime'].widget.attrs['locale'] =request.LANGUAGE_CODE
 #        form.fields['datetime'].initial= str(dtaware_changes_tz(timezone.now(), request.globals["mem__localzone"]))
-#        form.fields['commission'].initial=0
+        form.fields['percentage_between_ranges'].initial=5
+        form.fields['percentage_gains'].initial=15
+        form.fields['amount_to_invest'].initial=5000
   
     return render(request, 'product_ranges.html', locals())
 
@@ -463,28 +464,20 @@ def investment_pairs(request, worse, better, accounts_id):
     account=Accounts.objects.all().filter(id=accounts_id)[0]
     
 
-    list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    table_ioc_better=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_better", None, list_ioc_better, product_better.currency, request.globals["mem__localzone"]).render()
-    list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    table_ioc_worse=TabulatorInvestmentsOperationsCurrentHeterogeneus("table_ioc_worse", None, list_ioc_worse, product_worse.currency, request.globals["mem__localzone"]).render()
+    ldo_ioc_better=ldo_investmentsoperationscurrent_homogeneus_merging_same_product("ldo_ioc_better", product_better, account,  timezone.now(), basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    ldo_ioc_worse=ldo_investmentsoperationscurrent_homogeneus_merging_same_product("ldo_ioc_worse",product_worse, account, timezone.now(), basic_results_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
 
-    pair_gains=Currency(listdict_sum(list_ioc_better, 'gains_net_user')+listdict_sum(list_ioc_worse, 'gains_net_user'), request.globals["mem__localcurrency"])
+    pair_gains=Currency(ldo_ioc_better.sum('gains_net_user')+ldo_ioc_worse.sum('gains_net_user'), request.globals["mem__localcurrency"])
     
-    datetimes=[]
-    for ioc in list_ioc_better:
-        datetimes.append(ioc["datetime"])
-    for ioc in list_ioc_worse:
-        datetimes.append(ioc["datetime"])
-    datetimes.sort()
+    datetimes=(ldo_ioc_better.list("datetime")+ldo_ioc_worse.list("datetime")).sort()#List of datetimes
 
-    list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, list_ioc_worse, list_ioc_better, basic_results_worse,  basic_results_better)
+    list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, ldo_ioc_worse.ld, ldo_ioc_better.ld, basic_results_worse,  basic_results_better)
     table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, product_worse.currency, request.globals["mem__localzone"]).render()
     #Variables to calculate reinvest loses
-    gains=listdict_sum(list_ioc_better, "gains_gross_user")+listdict_sum(list_ioc_worse, "gains_gross_user")
-    better_shares=str(listdict_sum(list_ioc_better, "shares")).replace(",", ".")
-    better_leverages_real=product_better.real_leveraged_multiplier()
-    better_average_price=str(Investmentsoperations.invesmentsoperationscurrent_average_price_investment(list_ioc_better)).replace(",", ".")
-    
+    gains=ldo_ioc_better.sum("gains_gross_user")+ldo_ioc_worse.sum("gains_gross_user")
+#    better_leverages_real=product_better.real_leveraged_multiplier()
+#    better_average_price=str(Investmentsoperations.invesmentsoperationscurrent_average_price_investment(ldo_ioc_better)).replace(",", ".")
+#    
     return render(request, 'investment_pairs.html', locals())
 
 
@@ -497,8 +490,8 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
     basic_results_better=product_better.basic_results()
     basic_results_worse=product_worse.basic_results()
     account=Accounts.objects.all().filter(id=accounts_id)[0]    
-    list_ioc_better=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
-    list_ioc_worse=listdict_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    list_ioc_better=ldo_investmentsoperationscurrent_homogeneus_merging_same_product(product_better, account,  timezone.now(), basic_results_better, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
+    list_ioc_worse=ldo_investmentsoperationscurrent_homogeneus_merging_same_product(product_worse, account, timezone.now(), basic_results_worse, request.globals["mem__localcurrency"], request.globals["mem__localzone"])
 
     listdict=[]
     better_shares=round(amount/basic_results_better["last"]/product_better.real_leveraged_multiplier(), 2)

@@ -20,7 +20,6 @@ from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_
 from money.reusing.casts import string2list_of_integers
 from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware, dtaware2string
 from money.reusing.percentage import Percentage
-from money.reusing.listdict_functions import listdict_average_ponderated
 
 from xulpymoney.libxulpymoneytypes import eProductType, eComment, eConcept
 RANGE_RECOMENDATION_CHOICES =( 
@@ -552,10 +551,6 @@ class Investmentsoperations(models.Model):
             return Percentage()
         return Percentage(d_ioc['gains_gross_investment'], d_ioc["invested_investment"])
 
-    #Investment price 
-    @staticmethod
-    def invesmentsoperationscurrent_average_price_investment(listdict_ioc, price_key="price_user"):
-        return listdict_average_ponderated(listdict_ioc, "shares", price_key)
 
 class Investmentsaccountsoperations(models.Model):
     concepts = models.ForeignKey('Concepts', models.DO_NOTHING)
