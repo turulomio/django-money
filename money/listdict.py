@@ -29,7 +29,7 @@ from asgiref.sync import sync_to_async
 from datetime import date, timedelta
 from decimal import Decimal
 from money.connection_dj import  cursor_rows
-from money.reusing.listdict_functions import listdict2dict, listdict_print,  ListDictObject
+from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -59,6 +59,19 @@ from money.reusing.tabulator import TabulatorFromListDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 ld_print=listdict_print
+
+## Class that return a object to manage listdict
+## El objetivo es crear un objeto list_dict que se almacenera en self.ld con funciones set
+## set_from_db #Todo se carga desde base de datos con el minimo parametro posible
+## set_from_db_and_variables #Preguntara a base datos aquellas variables que falten. Aunque no estén en los parámetros p.e. money_convert
+## set_from_variables #Solo con variables
+## set #El listdict ya está hecho pero se necesita el objeto para operar con el
+class LdoDjangoMoney(Ldo):
+    def __init__(self, request, name=None):
+        Ldo.__init__(self, name)
+        self.request=request
+        self.local_currency=self.request.globals["mem__localcurrency"]
+        self.local_zone=self.request.globals["mem__localzone"]
 
 def listdict_accounts(queryset):    
     
@@ -216,10 +229,11 @@ def listdict_investmentsoperationshistorical(year, month, local_currency, local_
         
 
 ## Different o Heterogeneus, due to sum shares...
-class LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(ListDictObject):
-    def __init__(self, d_product_with_basics, account, request, name=None):
-        self.local_currency=request.globals["mem__localcurrency"]
-        self.local_zone=request.globals["mem__localzone"]
+class LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(LdoDjangoMoney):
+    def __init__(self, request, name):
+        LdoDjangoMoney.__init__(self, request, name)
+
+    def set_from_db_and_variables(self, d_product_with_basics, account):
         self.d_product_with_basics=d_product_with_basics
         
         list_ioc=[]
@@ -245,7 +259,7 @@ where
                 ioc["percentage_total"]=Investmentsoperations.investmentsoperationscurrent_percentage_total(ioc)
                 ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
                 list_ioc.append(ioc)
-        ListDictObject.__init__(self,  list_ioc, name=name)
+        self.ld=list_ioc
 
     def shares(self):
         return self.sum("shares")
@@ -267,39 +281,64 @@ where
         r.setBottomCalc(None, None, None, None, "sum", None,  "sum", "sum", "sum", None, None, None)
         r.showLastRecord(False)
         return r.render()
+
+class LdoProductsPairsEvolution(LdoDjangoMoney):
+    def __init__(self, request, name):
+        LdoDjangoMoney.__init__(self, request, name)        
         
+    def set_from_db_and_variables(self, product_worse, product_better, datetimes, ioc_worse, ioc_better, basic_results_worse,   basic_results_better, name=None):
+        self.product_worse=product_worse
+        self.product_better=product_better
+        self.datetimes=datetimes
+        self.ioc_worse=ioc_worse
+        self.ioc_better=ioc_better
+        self.basic_results_worse=basic_results_worse
+        self.basic_results_better=basic_results_better
 
-
-def listdict_products_pairs_evolution(product_worse, product_better, datetimes, ioc_worse, ioc_better, basic_results_worse,   basic_results_better):
-    l=[]
-    first_price_better=money_convert(ioc_better[0]["datetime"], ioc_better[0]["price_investment"], product_better.currency, product_worse.currency)
-    for i in range(len(ioc_better)):
-        price_better=money_convert(ioc_better[i]["datetime"], ioc_better[i]["price_investment"], product_better.currency, product_worse.currency)
-        percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], ioc_worse[i]["price_investment"])
+        ## Get listdict
+        l=[]
+        first_price_better=money_convert(ioc_better[0]["datetime"], ioc_better[0]["price_investment"], product_better.currency, product_worse.currency)
+        for i in range(len(ioc_better)):
+            price_better=money_convert(ioc_better[i]["datetime"], ioc_better[i]["price_investment"], product_better.currency, product_worse.currency)
+            percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], ioc_worse[i]["price_investment"])
+            percentage_year_better=percentage_between(first_price_better, price_better)
+            l.append({
+                "datetime":ioc_better[i ]["datetime"], 
+                "price_worse": ioc_worse[i]["price_investment"], 
+                "price_better": price_better, 
+                "price_ratio":ioc_worse[i]["price_investment"]/price_better, 
+                "percentage_year_worse": percentage_year_worse, 
+                "percentage_year_better": percentage_year_better, 
+                "percentage_year_diff": percentage_year_worse-percentage_year_better, 
+            })
+        price_better=money_convert(timezone.now(), basic_results_better["last"], product_better.currency, product_worse.currency)
+        percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], basic_results_worse["last"]) 
         percentage_year_better=percentage_between(first_price_better, price_better)
         l.append({
-            "datetime":ioc_better[i ]["datetime"], 
-            "price_worse": ioc_worse[i]["price_investment"], 
+            "datetime":timezone.now(), 
+            "price_worse": basic_results_worse["last"], 
             "price_better": price_better, 
-            "price_ratio":ioc_worse[i]["price_investment"]/price_better, 
+            "price_ratio": basic_results_worse["last"]/price_better, 
             "percentage_year_worse": percentage_year_worse, 
             "percentage_year_better": percentage_year_better, 
             "percentage_year_diff": percentage_year_worse-percentage_year_better, 
         })
-    price_better=money_convert(timezone.now(), basic_results_better["last"], product_better.currency, product_worse.currency)
-    percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], basic_results_worse["last"]) 
-    percentage_year_better=percentage_between(first_price_better, price_better)
-    l.append({
-        "datetime":timezone.now(), 
-        "price_worse": basic_results_worse["last"], 
-        "price_better": price_better, 
-        "price_ratio": basic_results_worse["last"]/price_better, 
-        "percentage_year_worse": percentage_year_worse, 
-        "percentage_year_better": percentage_year_better, 
-        "percentage_year_diff": percentage_year_worse-percentage_year_better, 
-    })
-    l= sorted(l,  key=lambda item: item['datetime'])
-    return l
+        l= sorted(l,  key=lambda item: item['datetime'])
+        self.ld=l
+        
+    def price_ratio_ponderated_average(self):
+        return 0
+
+    def tabulator(self):
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.local_zone)
+        r.setListDict(self.ld)
+        r.setFields("datetime", "price_worse","price_better","price_ratio", "percentage_year_worse", "percentage_year_better", "percentage_year_diff")
+        r.setHeaders(_("Date and time"), _("Price worse"), _("Price better"), _("Price ratio"), _("% year worse"), _("% year better"), _("% year diff"))
+        r.setTypes("datetime", self.local_currency, self.local_currency, "Decimal6", "percentage", "percentage", "percentage")
+        r.showLastRecord(False)
+        return r.render()
 
 def listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_quotes, basic_results_worse,   basic_results_better):
     l=[]

@@ -41,7 +41,6 @@ from money.tables import (
     TabulatorInvestmentsGainsByProductType, 
     TabulatorInvestmentsOperationsHistoricalHomogeneus, 
     TabulatorInvestmentsOperationsHistoricalHeterogeneus, 
-    TabulatorProductsPairsEvolution, 
     TabulatorProductsPairsEvolutionWithMonthDiff, 
     TabulatorProductQuotesMonthPercentages, 
     TabulatorProductQuotesMonthQuotes,  
@@ -72,7 +71,7 @@ from money.listdict import (
     listdict_investmentsoperationshistorical, 
     listdict_orders_active, 
     listdict_product_quotes_month_comparation, 
-    listdict_products_pairs_evolution, 
+    LdoProductsPairsEvolution, 
     listdict_products_pairs_evolution_from_datetime, 
     listdict_strategies, 
 )
@@ -468,8 +467,11 @@ def investment_pairs(request, worse, better, accounts_id):
     account=Accounts.objects.all().filter(id=accounts_id)[0]
     
     #Variables
-    ldo_ioc_better=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(d_product_better, account, request, name="ldo_better")
-    ldo_ioc_worse=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(d_product_worse, account, request, name="ldo_worse")
+    ldo_ioc_better=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(request, "ldo_better")
+    ldo_ioc_better.set_from_db_and_variables(d_product_better, account)
+    ldo_ioc_worse=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(request, "ldo_worse")
+    ldo_ioc_worse.set_from_db_and_variables(d_product_worse, account)
+    
     from money.widgets import table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency
     table_ioc_better_usercurrency=table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency(ldo_ioc_better.ld,  localzone, "table_ioc_better_usercurrency")
     table_ioc_worse_usercurrency=table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency(ldo_ioc_worse.ld,  localzone, "table_ioc_worse_usercurrency")
@@ -478,8 +480,8 @@ def investment_pairs(request, worse, better, accounts_id):
     
     datetimes=(ldo_ioc_better.list("datetime")+ldo_ioc_worse.list("datetime")).sort()#List of datetimes
 
-    list_products_evolution=listdict_products_pairs_evolution(product_worse, product_better, datetimes, ldo_ioc_worse.ld, ldo_ioc_better.ld, basic_results_worse,  basic_results_better)
-    table_products_pair_evolution=TabulatorProductsPairsEvolution("table_products_pair_evolution", None, list_products_evolution, product_worse.currency, request.globals["mem__localzone"]).render()
+    ldo_products_evolution=LdoProductsPairsEvolution(request,"LdoProductsPairsEvolution")
+    ldo_products_evolution.set_from_db_and_variables(product_worse, product_better, datetimes, ldo_ioc_worse.ld, ldo_ioc_better.ld, basic_results_worse,  basic_results_better)
     #Variables to calculate reinvest loses
     gains=ldo_ioc_better.sum("gains_gross_user")+ldo_ioc_worse.sum("gains_gross_user")
     return render(request, 'investment_pairs.html', locals())

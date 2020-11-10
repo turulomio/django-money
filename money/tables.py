@@ -106,7 +106,7 @@ class TabulatorInvestmentsOperationsCurrentHomogeneus(TabulatorFromListDict):
         self.setFields("id","datetime", "operationstypes",  "shares", "price_investment", "invested_investment", "balance_investment", "gains_gross_investment", "percentage_annual", "percentage_apr", "percentage_total")
         self.setHeaders("Id", _("Date and time"), _("Operation type"),  _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Gross gains"), _("% year"), _("% APR"), _("% Total"))
         self.setTypes("int","datetime", "str",  "Decimal", investment.products.currency, investment.products.currency, investment.products.currency,  investment.products.currency, "percentage", "percentage", "percentage")
-        self.setBottomCalc(None, None, None, None, None, "sum", "sum", "sum", None, None, None)
+        self.setBottomCalc(None, None, None, "sum", None, "sum", "sum", "sum", None, None, None)
         self.showLastRecord(False)
 
 class TabulatorInvestmentsOperationsCurrentHeterogeneus(TabulatorFromListDict):
@@ -143,16 +143,6 @@ class TabulatorProducts(TabulatorFromListDict):
         self.setTypes("int", "int","str", "str", "str", "Decimal6", "percentage", "percentage", "percentage")
         self.setFilterHeaders(None,  *["input"]*8)
 
-class TabulatorProductsPairsEvolution(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, currency, local_zone):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setLocalZone(local_zone)
-        self.setListDict(listdict)
-        self.setFields("datetime", "price_worse","price_better","price_ratio", "percentage_year_worse", "percentage_year_better", "percentage_year_diff")
-        self.setHeaders(_("Date and time"), _("Price worse"), _("Price better"), _("Price ratio"), _("% year worse"), _("% year better"), _("% year diff"))
-        self.setTypes("datetime", currency, currency, "Decimal6", "percentage", "percentage", "percentage")
-        self.showLastRecord(False)
 
 class TabulatorProductsPairsEvolutionWithMonthDiff(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, currency, local_zone):
