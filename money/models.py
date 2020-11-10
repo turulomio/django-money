@@ -489,7 +489,7 @@ class Investmentsoperations(models.Model):
             c.datetime=self.datetime
             c.concepts=Concepts.objects.get(pk=35)
             c.operationstypes=c.concepts.operationstypes
-            c.amount=-io['net_account']
+            c.amount=io['net_account']
             c.comment=comment
             c.accounts=self.investments.accounts
             c.investments=self.investments
