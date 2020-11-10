@@ -17,6 +17,13 @@
 ## Predefined querysets
 ## 
 
+
+## List dict is the main 
+
+## LD_ADD. Adds a new key to all dicts in the lists
+## LD_TOTAL. Calculates a total using a listdict returning a value
+## LD_DEL. Delets a key
+
 import asyncio
 from asgiref.sync import sync_to_async
 from datetime import date, timedelta
@@ -407,10 +414,12 @@ def listdict_report_total(year, last_year_balance, local_currency, local_zone):
             "account_balance":total['accounts_user'], 
             "investment_balance":total['investments_user'], 
             "total":total['total_user'] , 
-            "percentage_year": percentage_between(last_year_balance, total['total_user'] ), 
+            "percentage_year": percentage_between(last_year_balance.amount, total['total_user'] ), 
             "diff_lastmonth": total['total_user']-last_month, 
         })
         last_month=total['total_user']
+    for d in list_:
+        print(d["total"],  last_year_balance)
     return list_
     
 def listdict_dividends_from_queryset(qs_dividends):
