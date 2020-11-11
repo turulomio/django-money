@@ -263,6 +263,12 @@ def error_403(request, exception):
 ## @todo Add a tab Widget, author, books, valorations with number in ttab
 @timeit
 def home(request):
+    qsInvestments=Investments.objects.all().select_related('accounts') .filter(pk=7)[0]
+    print (qsInvestments.name)
+    print(qsInvestments.fullName())
+    print(qsInvestments.accounts.name)
+    print(qsInvestments.accounts.fullName())
+    
     return render(request, 'home.html', locals())
 
 @login_required

@@ -299,14 +299,18 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
         l=[]
         first_price_better=money_convert(ioc_better[0]["datetime"], ioc_better[0]["price_investment"], product_better.currency, product_worse.currency)
         for i in range(len(ioc_better)):
+            ld_print(ioc_better)
             price_better=money_convert(ioc_better[i]["datetime"], ioc_better[i]["price_investment"], product_better.currency, product_worse.currency)
             percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], ioc_worse[i]["price_investment"])
             percentage_year_better=percentage_between(first_price_better, price_better)
+            price_ratio=ioc_worse[i]["price_investment"]/price_better
+            invested=abs(ioc_better[i]["invested_user"])+abs(ioc_worse[i]["invested_user"])
             l.append({
                 "datetime":ioc_better[i ]["datetime"], 
+                "invested": invested, 
                 "price_worse": ioc_worse[i]["price_investment"], 
                 "price_better": price_better, 
-                "price_ratio":ioc_worse[i]["price_investment"]/price_better, 
+                "price_ratio": price_ratio, 
                 "percentage_year_worse": percentage_year_worse, 
                 "percentage_year_better": percentage_year_better, 
                 "percentage_year_diff": percentage_year_worse-percentage_year_better, 
@@ -316,6 +320,7 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
         percentage_year_better=percentage_between(first_price_better, price_better)
         l.append({
             "datetime":timezone.now(), 
+            "invested": 0, 
             "price_worse": basic_results_worse["last"], 
             "price_better": price_better, 
             "price_ratio": basic_results_worse["last"]/price_better, 
@@ -327,16 +332,24 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
         self.ld=l
         
     def price_ratio_ponderated_average(self):
-        return 0
+        sum_inv=0
+        sum_inv_pr=0
+        for i in range(len(self.ioc_better)):            
+            price_better=money_convert(self.ioc_better[i]["datetime"], self.ioc_better[i]["price_investment"], self.product_better.currency, self.product_worse.currency)
+            price_ratio=self.ioc_worse[i]["price_investment"]/price_better
+            invested=abs(self.ioc_better[i]["invested_user"])+abs(self.ioc_worse[i]["invested_user"])
+            sum_inv=sum_inv+invested
+            sum_inv_pr=sum_inv_pr+invested*price_ratio
+        return sum_inv_pr/sum_inv
 
     def tabulator(self):
         r=TabulatorFromListDict(f"{self.name}_table")
         r.setDestinyUrl(None)
         r.setLocalZone(self.local_zone)
         r.setListDict(self.ld)
-        r.setFields("datetime", "price_worse","price_better","price_ratio", "percentage_year_worse", "percentage_year_better", "percentage_year_diff")
-        r.setHeaders(_("Date and time"), _("Price worse"), _("Price better"), _("Price ratio"), _("% year worse"), _("% year better"), _("% year diff"))
-        r.setTypes("datetime", self.local_currency, self.local_currency, "Decimal6", "percentage", "percentage", "percentage")
+        r.setFields("datetime", "invested",  "price_worse","price_better","price_ratio", "percentage_year_worse", "percentage_year_better", "percentage_year_diff")
+        r.setHeaders(_("Date and time"), _("Invested"), _("Price worse"), _("Price better"), _("Price ratio"), _("% year worse"), _("% year better"), _("% year diff"))
+        r.setTypes("datetime", self.local_currency, self.local_currency, self.local_currency, "Decimal6", "percentage", "percentage", "percentage")
         r.showLastRecord(False)
         return r.render()
 

@@ -2,6 +2,48 @@
 ## DO NOT UPDATE IT IN YOUR CODE IT WILL BE REPLACED USING FUNCTION IN README
 
 
+
+
+
+
+## Class that return a object to manage a dict
+## El objetivo es crear un objeto list_dict que se almacenera en self.ld con funciones set
+## set_from_db #Todo se carga desde base de datos con el minimo parametro posible
+## set_from_db_and_variables #Preguntara a base datos aquellas variables que falten. Aunque no estén en los parámetros p.e. money_convert
+## set_from_variables #Solo con variables
+## set #El listdict ya está hecho pero se necesita el objeto para operar con el
+class Do:
+    def __init__(self):
+        pass
+
+    def number_keys(self):
+        return len(self.do)
+
+    def has_key(self,key):
+        return key in listdict
+
+    def print(self):
+        listdict_print(self.ld)
+
+    def set(self, do):
+        self.do=do
+        self.create_attributes(self.do)
+        return self
+
+    def is_set(self):
+        if hasattr(self, "do"):
+            return True
+        print("You must set your dictionary")
+        return False
+    
+    ## Creates an attibute from a key
+    def create_attributes(self, do):
+        for key, value in do.items():
+            setattr(self, key, value)
+
+
+
+
 ## Class that return a object to manage listdict
 ## El objetivo es crear un objeto list_dict que se almacenera en self.ld con funciones set
 ## set_from_db #Todo se carga desde base de datos con el minimo parametro posible
@@ -11,6 +53,7 @@
 class Ldo:
     def __init__(self, name=None):
         self.name=self.__class__.__name__ if name is None else name
+        self.ld=[]
 
     def length(self):
         return len(self.ld)
@@ -20,6 +63,9 @@ class Ldo:
 
     def print(self):
         listdict_print(self.ld)
+
+    def print_first(self):
+        listdict_print_first(self.ld)
 
     def sum(self, key, ignore_nones=True):
         return listdict_sum(self.ld, key, ignore_nones)
@@ -31,11 +77,14 @@ class Ldo:
         return listdict_average_ponderated(self.ld, key_numbers, key_values)
 
     def set(self, ld):
+        del self.ld
         self.ld=ld
+        return self
 
     def is_set(self):
         if hasattr(self, "ld"):
             return True
+        print(f"You must set your listdict in {name}")
         return False
 
 def listdict_has_key(listdict, key):
