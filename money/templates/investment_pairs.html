@@ -16,14 +16,18 @@
 
 {{ ldo_ioc_better.tabulator|safe}}
 
-<p>{% blocktrans with pair_gains=pair_gains %}Current pair balance is {{ pair_gains }}.{% endblocktrans %}</p>
-
 <h2>{% trans "Current investment operations in user currency" %}</h2>
 
 {{ table_ioc_worse_usercurrency|safe}}
 
 {{ table_ioc_better_usercurrency|safe}}
 
+<p>{% blocktrans with worse_balance=ldo_ioc_worse.balance_cfd %}Current worse balance is {{ worse_balance }}.{% endblocktrans %}</p>
+<p>{% blocktrans with better_balance=ldo_ioc_better.balance_cfd %}Current better balance is {{ better_balance }}.{% endblocktrans %}</p>
+<p>{% blocktrans with balance_deviation=balance_deviation max_deviation=max_deviation%}Current balance deviation is {{ balance_deviation }}. Max balance deviation (10 % invested) is {{ max_deviation }}.{% endblocktrans %}</p>
+
+
+<p>{% blocktrans with pair_gains=pair_gains %}Current pair balance is {{ pair_gains }}.{% endblocktrans %}</p>
 
 
 <h2>{% trans "Next investment calculator" %}</h2>

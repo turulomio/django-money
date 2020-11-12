@@ -91,6 +91,7 @@ from money.models import (
     Quotes, 
     Orders, 
     total_balance, 
+    money_convert, 
 )
 from xulpymoney.libxulpymoneytypes import eConcept, eComment, eProductType
 
@@ -479,12 +480,13 @@ def investment_pairs(request, worse, better, accounts_id):
     table_ioc_better_usercurrency=table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency(ldo_ioc_better.ld,  request.local_zone, "table_ioc_better_usercurrency")
     table_ioc_worse_usercurrency=table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency(ldo_ioc_worse.ld,  request.local_zone, "table_ioc_worse_usercurrency")
 
+    pair_invested=ldo_ioc_better.invested()+ldo_ioc_worse.invested()
     pair_gains=Currency(ldo_ioc_better.sum('gains_net_user')+ldo_ioc_worse.sum('gains_net_user'), request.local_currency)
-    
-    datetimes=(ldo_ioc_better.list("datetime")+ldo_ioc_worse.list("datetime")).sort()#List of datetimes
+    balance_deviation =ldo_ioc_better.balance_cfd()-ldo_ioc_worse.balance_cfd()
+    max_deviation=Currency(pair_invested*Decimal(0.10),  request.local_currency)
 
     ldo_products_evolution=LdoProductsPairsEvolution(request,"LdoProductsPairsEvolution")
-    ldo_products_evolution.set_from_db_and_variables(product_worse, product_better, datetimes, ldo_ioc_worse.ld, ldo_ioc_better.ld, basic_results_worse,  basic_results_better)
+    ldo_products_evolution.set_from_db_and_variables(product_worse, product_better, ldo_ioc_worse.ld, ldo_ioc_better.ld, basic_results_worse,  basic_results_better)
     #Variables to calculate reinvest loses
     gains=ldo_ioc_better.sum("gains_gross_user")+ldo_ioc_worse.sum("gains_gross_user")
     return render(request, 'investment_pairs.html', locals())
@@ -503,17 +505,19 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
     list_ioc_worse.set_from_db_and_variables(d_product_worse, account)
 
     listdict=[]
-    better_current=list_ioc_better.shares()*product_better.real_leveraged_multiplier()*d_product_better['last']
+    better_current_investment=list_ioc_better.shares()*product_better.real_leveraged_multiplier()*d_product_better['last']
+    better_current_user=money_convert(timezone.now(), better_current_investment, product_better.currency, request.local_currency)
+    print(list_ioc_better.shares(), product_better.real_leveraged_multiplier(), d_product_better)
     better_new_shares=round(amount/d_product_better["last"]/product_better.real_leveraged_multiplier(), 2)
     better_invested=listdict_sum(list_ioc_better.ld, "invested_user")
     better_new= better_new_shares*d_product_better["last"]*product_better.real_leveraged_multiplier()
-    better_total=better_current+better_new
+    better_total=better_current_user+better_new
     listdict.append({   
         'name': product_better.name, 
         'last_datetime': d_product_better["last_datetime"], 
         'last': d_product_better["last"], 
         'invested': better_invested, 
-        'current': better_current, 
+        'current': better_current_user, 
         'new': better_new, 
         'new_plus_current': better_total, 
         'shares': better_new_shares, 
@@ -535,8 +539,7 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
         'shares': worse_new_shares, 
       })
     table_calculator=TabulatorInvestmentsPairsInvestCalculator("table_calculator", None, listdict, request.local_currency, request.local_zone).render()
-    s=f"<p>Difference between pair current balance is {better_current-worse_current}</p>"
-    return HttpResponse(table_calculator+ s)
+    return HttpResponse(table_calculator)
     
 @timeit
 @ensure_csrf_cookie ##For ajax-button

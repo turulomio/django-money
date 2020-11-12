@@ -52,6 +52,7 @@ from money.models import (
     qs_investments_netgains_usercurrency_in_year_month, 
     money_convert, 
 )
+from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_end, months
 from money.reusing.decorators import timeit
 from money.reusing.percentage import percentage_between, Percentage
@@ -247,6 +248,7 @@ where
     investments.id=investmentsoperations.investments_id""", ( d_product_with_basics["id"], account.id)):
             io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), self.request.local_currency)
             
+            
             for ioc in io_current:
                 ioc["name"]=investment.fullName()
                 ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
@@ -256,6 +258,7 @@ where
                 ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
                 list_ioc.append(ioc)
         self.ld=list_ioc
+        return self
 
     def shares(self):
         return self.sum("shares")
@@ -277,15 +280,24 @@ where
         r.setBottomCalc(None, None, None, None, "sum", None,  "sum", "sum", "sum", None, None, None)
         r.showLastRecord(False)
         return r.render()
+        
+    def invested(self):
+        return self.sum("invested_user")
+        
+    def gains_gross_user(self):
+        return self.sum("gains_gross_user")
+        
+    ## Devuelve el saldo de la inversión para cfd, ya que el saldo es 0 para cfd xq son contratos.
+    def balance_cfd(self):
+        return Currency(self.invested()+self.gains_gross_user(), self.request.local_currency)
 
 class LdoProductsPairsEvolution(LdoDjangoMoney):
     def __init__(self, request, name):
         LdoDjangoMoney.__init__(self, request, name)        
         
-    def set_from_db_and_variables(self, product_worse, product_better, datetimes, ioc_worse, ioc_better, basic_results_worse,   basic_results_better, name=None):
+    def set_from_db_and_variables(self, product_worse, product_better, ioc_worse, ioc_better, basic_results_worse,   basic_results_better, name=None):
         self.product_worse=product_worse
         self.product_better=product_better
-        self.datetimes=datetimes
         self.ioc_worse=ioc_worse
         self.ioc_better=ioc_better
         self.basic_results_worse=basic_results_worse
@@ -295,7 +307,6 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
         l=[]
         first_price_better=money_convert(ioc_better[0]["datetime"], ioc_better[0]["price_investment"], product_better.currency, product_worse.currency)
         for i in range(len(ioc_better)):
-            ld_print(ioc_better)
             price_better=money_convert(ioc_better[i]["datetime"], ioc_better[i]["price_investment"], product_better.currency, product_worse.currency)
             percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], ioc_worse[i]["price_investment"])
             percentage_year_better=percentage_between(first_price_better, price_better)
@@ -326,6 +337,7 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
         })
         l= sorted(l,  key=lambda item: item['datetime'])
         self.ld=l
+        return self
         
     def price_ratio_ponderated_average(self):
         sum_inv=0
