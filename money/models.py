@@ -50,9 +50,7 @@ class Accounts(models.Model):
         return "{} ({})".format(self.name, self.banks.name)
         
     ## @return Tuple (balance_account_currency | balance_user_currency)
-    def balance(self, dt):
-        ## @todo search other solution for local_currency
-        local_currency=cursor_one_field("select value from globals where global='mem/localcurrency'")
+    def balance(self, dt,  local_currency):
         r=cursor_one_row("select * from account_balance(%s,%s,%s)", (self.id, dt, local_currency))
         return Currency(r['balance_account_currency'], self.currency), Currency(r['balance_user_currency'], r['user_currency'])
 
@@ -1025,7 +1023,7 @@ class Comment:
 
             if code==eComment.InvestmentOperation:
                 if not self.validateLength(1, code, args): return None
-                io=Investmentsoperations.objects.get(pk=args[0])
+                io=Investmentsoperations.objects.select_related("investments").get(pk=args[0])
                 return io
 
             elif code in (eComment.AccountTransferOrigin,  eComment.AccountTransferDestiny, eComment.AccountTransferOriginCommission):

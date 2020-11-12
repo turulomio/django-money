@@ -1199,7 +1199,7 @@ msgstr "Por favor establece la cantidad a invertir "
 
 #: money/templates/investment_pairs.html:35
 msgid "Calculate"
-msgstr "Callcular"
+msgstr "Calcular"
 
 #: money/templates/investment_pairs.html:53
 msgid "Something is wrong"

@@ -70,14 +70,11 @@ class LdoDjangoMoney(Ldo):
     def __init__(self, request, name=None):
         Ldo.__init__(self, name)
         self.request=request
-        self.local_currency=self.request.globals["mem__localcurrency"]
-        self.local_zone=self.request.globals["mem__localzone"]
 
-def listdict_accounts(queryset):    
-    
+def listdict_accounts(queryset, local_currency):
     list_=[]
     for account in queryset:
-        balance=account.balance(timezone.now())
+        balance=account.balance(timezone.now(), local_currency)
         list_.append({
                 "id": account.id, 
                 "active":account.active, 
@@ -248,8 +245,7 @@ where
     investments.products_id=%s and 
     investments.accounts_id=%s and 
     investments.id=investmentsoperations.investments_id""", ( d_product_with_basics["id"], account.id)):
-            print(investment, investment.id)
-            io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), self.local_currency)
+            io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), self.request.local_currency)
             
             for ioc in io_current:
                 ioc["name"]=investment.fullName()
@@ -273,7 +269,7 @@ where
     def tabulator(self):
         r=TabulatorFromListDict(f"{self.name}_table")
         r.setDestinyUrl(None)
-        r.setLocalZone(self.local_zone)
+        r.setLocalZone(self.request.local_zone)
         r.setListDict(self.ld)
         r.setFields("id","datetime", "name","operationstypes",  "shares", "price_investment", "invested_investment", "balance_investment", "gains_gross_investment", "percentage_annual", "percentage_apr", "percentage_total")
         r.setHeaders("Id", _("Date and time"), _("Name"),  _("Operation type"),  _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Gross gains"), _("% year"), _("% APR"), _("% Total"))
@@ -345,11 +341,11 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
     def tabulator(self):
         r=TabulatorFromListDict(f"{self.name}_table")
         r.setDestinyUrl(None)
-        r.setLocalZone(self.local_zone)
+        r.setLocalZone(self.request.local_zone)
         r.setListDict(self.ld)
         r.setFields("datetime", "invested",  "price_worse","price_better","price_ratio", "percentage_year_worse", "percentage_year_better", "percentage_year_diff")
         r.setHeaders(_("Date and time"), _("Invested"), _("Price worse"), _("Price better"), _("Price ratio"), _("% year worse"), _("% year better"), _("% year diff"))
-        r.setTypes("datetime", self.local_currency, self.local_currency, self.local_currency, "Decimal6", "percentage", "percentage", "percentage")
+        r.setTypes("datetime", self.request.local_currency, self.request.local_currency, self.request.local_currency, "Decimal6", "percentage", "percentage", "percentage")
         r.showLastRecord(False)
         return r.render()
 

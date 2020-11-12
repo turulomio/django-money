@@ -72,5 +72,7 @@ class MoneyMiddleware:
         request.globals={}
         for g in globals:
             request.globals[g.global_field.replace("/", ("__"))]=g.value
+        request.local_currency=request.globals["mem__localcurrency"]
+        request.local_zone=request.globals["mem__localzone"]
         request.local_currency_symbol=currency_symbol(request.globals["mem__localcurrency"])
         print(f"Loading middleware request took {time.time()-start}" )
