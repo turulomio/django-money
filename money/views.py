@@ -505,12 +505,11 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
     list_ioc_worse.set_from_db_and_variables(d_product_worse, account)
 
     listdict=[]
-    better_current_investment=list_ioc_better.shares()*product_better.real_leveraged_multiplier()*d_product_better['last']
-    better_current_user=money_convert(timezone.now(), better_current_investment, product_better.currency, request.local_currency)
-    print(list_ioc_better.shares(), product_better.real_leveraged_multiplier(), d_product_better)
-    better_new_shares=round(amount/d_product_better["last"]/product_better.real_leveraged_multiplier(), 2)
+    last_user=money_convert(timezone.now(), d_product_better['last'], product_better.currency, request.local_currency)# last in user currency
+    better_current_user=list_ioc_better.shares()*product_better.real_leveraged_multiplier()*last_user
+    better_new_shares=round(amount/last_user/product_better.real_leveraged_multiplier(), 2)
     better_invested=listdict_sum(list_ioc_better.ld, "invested_user")
-    better_new= better_new_shares*d_product_better["last"]*product_better.real_leveraged_multiplier()
+    better_new= better_new_shares*last_user*product_better.real_leveraged_multiplier()
     better_total=better_current_user+better_new
     listdict.append({   
         'name': product_better.name, 
