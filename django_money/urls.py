@@ -64,6 +64,10 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('creditcardoperation/new/<int:creditcards_id>', money_views.creditcardoperation_new.as_view(), name='creditcardoperation_new'),
     path('creditcardoperation/update/<int:pk>', money_views.creditcardoperation_update.as_view(), name='creditcardoperation_update'),
     path('creditcardoperation/delete/<int:pk>', money_views.creditcardoperation_delete.as_view(), name='creditcardoperation_delete'),
+    
+    path('dividend/new/<int:investments_id>', money_views.dividend_new.as_view(), name='dividend_new'),
+    path('dividend/update/<int:pk>', money_views.dividend_update.as_view(), name='dividend_update'),
+    path('dividend/delete/<int:pk>', money_views.dividend_delete.as_view(), name='dividend_delete'),
 
     path('investment/list/', money_views.investment_list, {'active':True}, name='investment_list_active'),
     path('investment/list/inactive/', money_views.investment_list, {'active': False}, name='investment_list_inactive'),

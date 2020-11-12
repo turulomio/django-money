@@ -645,7 +645,7 @@ def investment_view(request, pk):
 
     qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
     listdict_dividends=listdict_dividends_from_queryset(qs_dividends)
-    table_dividends=TabulatorDividends("table_dividends", None, listdict_dividends, investment.accounts.currency,  request.globals["mem__localzone"]).render()
+    table_dividends=TabulatorDividends("table_dividends", "dividend_update", listdict_dividends, investment.accounts.currency,  request.globals["mem__localzone"]).render()
    
     return render(request, 'investment_view.html', locals())
 
@@ -688,7 +688,7 @@ class investmentoperation_new(CreateView):
         else:
             if form.instance.commission<0:
                 form.add_error(None, ValidationError({"commission": "Commission must be positive ..."}))    
-            if form.instance.commission<0:
+            if form.instance.taxes<0:
                 form.add_error(None, ValidationError({"taxes": "Taxes must be positive ..."}))    
             if form.instance.shares<0 and form.instance.operationstypes.id in (4, 6):
                 form.add_error(None, ValidationError({"shares": "Shares can't be negative for this operation type..."}))    
@@ -730,7 +730,7 @@ class investmentoperation_update(UpdateView):
         else:
             if form.instance.commission<0:
                 form.add_error(None, ValidationError({"commission": "Commission must be positive ..."}))    
-            if form.instance.commission<0:
+            if form.instance.taxes<0:
                 form.add_error(None, ValidationError({"taxes": "Taxes must be positive ..."}))    
             if form.instance.shares<0 and form.instance.operationstypes.id in (4, 6):
                 form.add_error(None, ValidationError({"shares": "Shares can't be negative for this operation type..."}))    
@@ -1223,3 +1223,101 @@ class order_delete(DeleteView):
     
     def get_success_url(self):
         return reverse_lazy('order_list_active')
+        
+        
+@method_decorator(login_required, name='dispatch')
+class dividend_new(CreateView):
+    model = Dividends
+    template_name="dividend_new.html"
+    fields = ( 'datetime', 'concepts', 'gross',  'net',  'taxes', 'commission',  'dps',  'currency_conversion')
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(dividend_new, self).get_form(form_class)
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['concepts'].queryset=Concepts.queryset_for_dividends_order_by_fullname()
+        return form
+    
+    def get_initial(self):
+        return {
+            'datetime': str(dtaware_changes_tz(timezone.now(), self.request.globals["mem__localzone"])), 
+            'currency_conversion':1, 
+            'gross':0, 
+            'net':0, 
+            'taxes':0, 
+            'commission':0, 
+            'dps':0, 
+            }
+
+    @transaction.atomic
+    def form_valid(self, form):
+        form.instance.investments= Investments.objects.get(pk=self.kwargs['investments_id'])
+        if ( form.instance.commission>=0 and form.instance.taxes>=0) :
+            form.instance.save()
+            accountoperation=form.instance.update_associated_account_operation()
+            form.instance.accountsoperations=accountoperation
+            form.instance.save()#To save accountsoperations
+            return super().form_valid(form)
+        else:
+            if form.instance.commission<0:
+                form.add_error(None, ValidationError({"commission": "Commission must be positive ..."}))    
+            if form.instance.taxes<0:
+                form.add_error(None, ValidationError({"taxes": "Taxes must be positive ..."}))    
+            return super().form_invalid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.investments.id,))
+        
+@method_decorator(login_required, name='dispatch')
+class dividend_update(UpdateView):
+    model = Dividends
+    template_name="dividend_update.html"
+    fields = ( 'datetime', 'concepts', 'gross',  'net',  'taxes', 'commission',  'dps',  'currency_conversion')
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(dividend_update, self).get_form(form_class)
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.globals["mem__localzone"]
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['concepts'].queryset=Concepts.queryset_for_dividends_order_by_fullname()
+        return form
+
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.investments.id,))
+        
+        
+    @transaction.atomic
+    def form_valid(self, form):
+        form.instance.investments= Dividends.objects.get(pk=self.kwargs['pk']).investments
+        if ( form.instance.commission>=0 and form.instance.taxes>=0) :
+            form.instance.save()
+            accountoperation=form.instance.update_associated_account_operation()
+            form.instance.accountsoperations=accountoperation
+            form.instance.save()#To save accountsoperations
+            return super().form_valid(form)
+        else:
+            if form.instance.commission<0:
+                form.add_error(None, ValidationError({"commission": "Commission must be positive ..."}))    
+            if form.instance.taxes<0:
+                form.add_error(None, ValidationError({"taxes": "Taxes must be positive ..."}))    
+            return super().form_invalid(form)
+
+@method_decorator(login_required, name='dispatch')
+class dividend_delete(DeleteView):
+    model = Dividends
+    template_name = 'dividend_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('investment_view',args=(self.object.investments.id,))
+        
+    @transaction.atomic
+    def delete(self, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete_associated_account_operation()
+        return super(dividend_delete, self).delete(*args, **kwargs)
+

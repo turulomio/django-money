@@ -239,7 +239,15 @@ class Concepts(models.Model):
             ids.append(concept.id)
         preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
         queryset = Concepts.objects.filter(pk__in=ids).order_by(preserved)
-        #print(queryset.query)
+        return queryset
+        
+    ## Esta función fue optimizada de 23 queries y 8.43 ms a 7 queries en 4.79ms
+    def queryset_for_dividends_order_by_fullname():
+        ids=[]
+        for concept in sorted(Concepts.objects.select_related('operationstypes').filter(pk__in=(eConcept.Dividends, eConcept.AssistancePremium,  eConcept.DividendsSaleRights, eConcept.RolloverPaid, eConcept.RolloverReceived, eConcept.BondsCouponRunPayment, eConcept.BondsCouponRunIncome, eConcept.BondsCoupon)), key=lambda o: o.fullName()):
+            ids.append(concept.id)
+        preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
+        queryset = Concepts.objects.select_related('operationstypes').filter(pk__in=ids).order_by(preserved)
         return queryset
 
 
@@ -279,7 +287,7 @@ class Dividends(models.Model):
     net = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
     dps = models.DecimalField(max_digits=100, decimal_places=6, blank=True, null=True)
     datetime = models.DateTimeField(blank=True, null=True)
-    accountsoperations_id = models.IntegerField(blank=True, null=True)
+    accountsoperations = models.ForeignKey('Accountsoperations', models.DO_NOTHING)
     commission = models.DecimalField(max_digits=100, decimal_places=2, blank=True, null=True)
     concepts = models.ForeignKey(Concepts, models.DO_NOTHING)
     currency_conversion = models.DecimalField(max_digits=10, decimal_places=6)
@@ -303,6 +311,34 @@ class Dividends(models.Model):
         if dividends is None:
             dividends=0
         return dividends
+
+    def delete_associated_account_operation(self):
+        if hasattr(self,  "accountsoperations") is True:
+            execute("delete from accountsoperations where id=%s",(self.accountsoperations.id, ))        
+
+    ## Esta función actualiza la tabla investmentsaccountsoperations que es una tabla donde 
+    ## se almacenan las accountsoperations automaticas por las operaciones con investments. Es una tabla 
+    ## que se puede actualizar en cualquier momento con esta función
+    def update_associated_account_operation(self):
+        if hasattr(self,  "accountsoperations") is False:#Insert
+            c=Accountsoperations()
+            c.datetime=self.datetime
+            c.concepts=self.concepts
+            c.operationstypes=self.concepts.operationstypes
+            c.amount=self.net
+            c.comment="Transaction not finished"
+            c.accounts=self.investments.accounts
+            c.save()
+            return c
+        else:#update
+            self.accountsoperations.datetime=self.datetime
+            self.accountsoperations.concepts=self.concepts
+            self.accountsoperations.operationstypes=self.concepts.operationstypes
+            self.accountsoperations.amount=self.net
+            self.accountsoperations.comment=Comment().encode(eComment.Dividend, self)
+            self.accountsoperations.accounts=self.investments.accounts
+            self.accountsoperations.save()
+            return self.accountsoperations
 
 class Dps(models.Model):
     date = models.DateField(blank=True, null=True)
@@ -963,8 +999,8 @@ class Comment:
             elif code==eComment.Dividend:#Comentario de cuenta asociada al dividendo
                 dividend=self.decode_objects(string)
                 if dividend is not None:
-                    string= _( "From {}. Gross {}. Net {}.".format(dividend.investments.name, dividend.investments.accounts.mycurrency(dividend.gross), dividend.investments.accounts.mycurrency(dividend.net)))
-                return string
+                    return _( "From {}. Gross {}. Net {}.".format(dividend.investments.name, dividend.investments.accounts.mycurrency(dividend.gross), dividend.investments.accounts.mycurrency(dividend.net)))
+                return _("Error decoding dividend comment")
 
             elif code==eComment.CreditCardBilling:#Facturaci´on de tarjeta diferida
                 if not self.validateLength(2, code, args): return string
@@ -989,7 +1025,6 @@ class Comment:
 
             if code==eComment.InvestmentOperation:
                 if not self.validateLength(1, code, args): return None
-                print(args[0].__class__,  args[0])
                 io=Investmentsoperations.objects.get(pk=args[0])
                 return io
 
@@ -1005,8 +1040,10 @@ class Comment:
 
             elif code==eComment.Dividend:#Comentario de cuenta asociada al dividendo
                 if not self.validateLength(1, code, args): return None
-                dividend=Dividends.objects.get(pk=args[0])
-                return dividend
+                try:
+                    return Dividends.objects.get(pk=args[0])
+                except:
+                    return None
 
             elif code==eComment.CreditCardBilling:#Facturaci´on de tarjeta diferida
                 if not self.validateLength(2, code, args): return string

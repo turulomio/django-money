@@ -61,6 +61,7 @@
 </div>
 
   <p class="orders">
-      <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">Add an investment operation</a>
+      <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">{% trans "Add an investment operation" %}</a> | 
+      <a href="{% url 'dividend_new' investments_id=investment.id %}">{% trans "Add a dividend" %}</a>
   </p>
 {% endblock %}
