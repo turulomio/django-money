@@ -63,16 +63,20 @@ $(document).ready(function() {
 
 {{pairs_new_operation|safe}}
 
+
+
 <h2>{% trans "Products evolution" %}</h2>
 {{ldo_products_evolution.tabulator|safe}}
+<p>{% trans "Ponderated average price ratio: " %}{{ ldo_products_evolution.price_ratio_ponderated_average}}</p>
+<p>{% trans "Price ratio to gain 100 €: " %}{{ price_ratio_to_gain_100 }}</p>
 
-<p>{% trans "Ponderated average price ratio: " %}{{ ldo_products_evolution.price_ratio_ponderated_average}}
+
 
 <h2>{% trans "Pair historical evolution" %}</h2>
 <ajax-button id="ajax_button_evolution" url="{% url 'ajax_investment_pairs_evolution' product_worse.id product_better.id %}" buttontext="{% trans 'Press to see pair historical evolution' %}" csrf_token="{{csrf_token}}"></ajax-button>
+
+
 <h2>{% trans "Loses of next reinvestment" %}</h2>
-
-
 <p><strong>{% trans "Gains" %}: </strong>{{ gains }}</p>
 <p><strong>{% trans "Shares" %}: </strong>{{ ldo_ioc_better.shares_js }}</p>
 <p><strong>{% trans "Average price" %}: </strong>{{ ldo_ioc_better.average_price_user }}</p>

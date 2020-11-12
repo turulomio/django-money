@@ -487,6 +487,10 @@ def investment_pairs(request, worse, better, accounts_id):
 
     ldo_products_evolution=LdoProductsPairsEvolution(request,"LdoProductsPairsEvolution")
     ldo_products_evolution.set_from_db_and_variables(product_worse, product_better, ldo_ioc_worse.ld, ldo_ioc_better.ld, basic_results_worse,  basic_results_better)
+    
+    price_ratio_of_100=100##TODO
+    price_ratio_to_gain_100=ldo_products_evolution.price_ratio_ponderated_average()*(pair_invested+100)/pair_invested
+    
     #Variables to calculate reinvest loses
     gains=ldo_ioc_better.sum("gains_gross_user")+ldo_ioc_worse.sum("gains_gross_user")
     return render(request, 'investment_pairs.html', locals())
@@ -607,14 +611,6 @@ def ajax_investment_pairs_evolution(request, worse, better ):
     
     list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_monthly_quotes, basic_results_worse,  basic_results_better)
     table_products_pair_evolution_from=TabulatorProductsPairsEvolutionWithMonthDiff("table_products_pair_evolution_from", None, list_products_evolution, product_worse.currency, request.local_zone).render()
-    
-#    from money.reusing.lineal_regression import LinealRegression
-#    lr=LinealRegression(product_better.name, product_worse.name)
-#    for row in common_monthly_quotes:
-#        lr.append(row["b_open"], row["a_open"])
-#        lr.calculate()
-#    print(lr.string(True))
-#    print(lr.r_squared_string())
     
     return HttpResponse(table_products_pair_evolution_from)
 
