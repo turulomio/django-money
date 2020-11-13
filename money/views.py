@@ -17,7 +17,7 @@ from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from math import floor
 
 from money.connection_dj import cursor_rows, cursor_one_column, execute
-from money.forms import AccountsOperationsForm, AccountsTransferForm, ProductsRangeForm
+from money.forms import AccountsTransferForm, ProductsRangeForm
 from money.charts import (
     chart_lines_total, 
     chart_product_quotes_historical, 
@@ -48,7 +48,7 @@ from money.tables import (
     TabulatorStrategies
 )
 from money.reusing.currency import Currency
-from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz
+from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz, epochmicros2dtaware, dtaware2epochmicros
 from money.reusing.decorators import timeit
 from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key
 from money.reusing.percentage import Percentage
@@ -93,7 +93,7 @@ from money.models import (
     total_balance, 
     money_convert, 
 )
-from xulpymoney.libxulpymoneytypes import eConcept, eComment, eProductType
+from xulpymoney.libxulpymoneytypes import eConcept, eComment, eProductType, eOperationType
 
 @login_required
 def order_list(request,  active):
@@ -386,11 +386,58 @@ def account_transfer_delete(request, comment):
 class accountoperation_new(CreateView):
     model = Accountsoperations
     template_name="accountoperation_new.html"
-    form_class=AccountsOperationsForm
+    
+    fields = ( 'datetime', 'concepts', 'amount',  'comment')
 
     def get_form(self, form_class=None): 
+#        self.accounts=Accounts.objects.get(pk=self.kwargs['accounts_id'])
         form = super(accountoperation_new, self).get_form(form_class)
-        form.fields['accounts'].widget = forms.HiddenInput()
+        
+        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
+        form.fields['datetime'].widget.attrs['localzone'] =self.request.local_zone
+        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['concepts'].queryset=Concepts.queryset_order_by_fullname()
+        return form
+        
+    def get_initial(self):
+        d={}
+        if self.kwargs['dt']==0:
+            d["datetime"]= str(dtaware_changes_tz(timezone.now(), self.request.local_zone))
+        else:
+            d["datetime"]= str(dtaware_changes_tz(epochmicros2dtaware(self.kwargs['dt']), self.request.local_zone))
+        if self.kwargs['concepts_id']!=0:
+            d["concepts"]=Concepts.objects.get(pk=self.kwargs['concepts_id'])
+        return d
+    
+    def get_success_url(self):
+        return reverse_lazy('accountoperation_new',args=(self.object.accounts.id, dtaware2epochmicros(self.object.datetime)+1000000,  self.object.concepts.id))
+  
+    def form_valid(self, form):
+        if  (
+                (form.instance.concepts.operationstypes.id==eOperationType.Income and form.instance.amount>=0) or
+                (form.instance.concepts.operationstypes.id==eOperationType.Expense and form.instance.amount <0)
+            ):
+            form.instance.accounts=Accounts.objects.get(pk=self.kwargs['accounts_id'])
+            form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
+            return super().form_valid(form)
+        else:
+            if form.instance.concepts.operationstypes.id==eOperationType.Expense and form.instance.amount>=0:
+                    form.add_error(None, ValidationError(_('Amount must be negative')))
+            if form.instance.concepts.operationstypes.id==eOperationType.Income and form.instance.amount<=0:
+                    form.add_error(None, ValidationError(_('Amount must be positive')))
+            return super().form_invalid(form)
+
+@method_decorator(login_required, name='dispatch')
+class accountoperation_update(UpdateView):
+    model = Accountsoperations
+    template_name="accountoperation_update.html"
+    fields = ( 'datetime', 'concepts', 'amount',  'comment')
+
+    def get_success_url(self):
+        return reverse_lazy('account_view',args=(self.object.accounts.id,))
+
+    def get_form(self, form_class=None): 
+        form = super(accountoperation_update, self).get_form(form_class)
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.local_zone
         form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
@@ -399,43 +446,23 @@ class accountoperation_new(CreateView):
         
     def get_initial(self):
         return {
-            'datetime': str(dtaware_changes_tz(timezone.now(), self.request.local_zone)), 
-            'accounts':Accounts.objects.get(pk=self.kwargs['accounts_id'])
-        }
-    
-    def get_success_url(self):
-        return reverse_lazy('account_view',args=(self.object.accounts.id,))
-  
-    def form_valid(self, form):
-        form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
-        return super().form_valid(form)
-
-
-@method_decorator(login_required, name='dispatch')
-class accountoperation_update(UpdateView):
-    model = Accountsoperations
-    template_name="accountoperation_update.html"
-    form_class=AccountsOperationsForm
-
-    def get_success_url(self):
-        return reverse_lazy('account_view',args=(self.object.accounts.id,))
-
-    def get_form(self, form_class=None): 
-        form = super(accountoperation_update, self).get_form(form_class)
-        form.fields['accounts'].widget = forms.HiddenInput()
-        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
-        form.fields['datetime'].widget.attrs['localzone'] =self.request.local_zone
-        form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
-        return form
-        
-    def get_initial(self):
-        return {
             'datetime': str(dtaware_changes_tz(self.object.datetime, self.request.local_zone)), 
         }
-    
+        
     def form_valid(self, form):
-        form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
-        return super().form_valid(form)
+        if  (
+                (form.instance.concepts.operationstypes.id==eOperationType.Income and form.instance.amount>=0) or
+                (form.instance.concepts.operationstypes.id==eOperationType.Expense and form.instance.amount <0)
+            ):
+            form.instance.accounts=Accountsoperations.objects.get(pk=self.kwargs['pk']).accounts
+            form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
+            return super().form_valid(form)
+        else:
+            if form.instance.concepts.operationstypes.id==eOperationType.Expense and form.instance.amount>=0:
+                    form.add_error(None, ValidationError(_('Amount must be negative')))
+            if form.instance.concepts.operationstypes.id==eOperationType.Income and form.instance.amount<=0:
+                    form.add_error(None, ValidationError(_('Amount must be positive')))
+            return super().form_invalid(form)
 
 class accountoperation_delete(DeleteView):
     model = Accountsoperations
@@ -655,6 +682,8 @@ class investmentoperation_new(CreateView):
     def get_form(self, form_class=None): 
         if form_class is None: 
             form_class = self.get_form_class()
+
+        self.investments=Investments.objects.select_related("products").select_related("products__productstypes").select_related("products__leverages").get(pk=self.kwargs['investments_id']) #We can use in template with view.investments
         form = super(investmentoperation_new, self).get_form(form_class)
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.local_zone
@@ -675,7 +704,7 @@ class investmentoperation_new(CreateView):
 
     @transaction.atomic
     def form_valid(self, form):
-        form.instance.investments= Investments.objects.get(pk=self.kwargs['investments_id'])
+        form.instance.investments=Investments.objects.select_related("products").select_related("products__productstypes").select_related("products__leverages").get(pk=self.kwargs['investments_id']) #We can use in template with view.investments
         if (    form.instance.commission>=0 and 
                 form.instance.taxes>=0 and 
                 ((form.instance.shares>=0 and form.instance.operationstypes.id in (4, 6)) or (form.instance.shares<0 and form.instance.operationstypes.id==5) )) :

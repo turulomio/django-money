@@ -12,4 +12,7 @@
     </form>
      {% include "messages.html" %}
 
+  <p class="orders">
+    <a href="{% url 'account_view' pk=view.kwargs.accounts_id %}">{% trans "Show account" %}</a>
+  </p>
 {% endblock %}

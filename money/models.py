@@ -233,10 +233,10 @@ class Concepts(models.Model):
         
     def queryset_order_by_fullname():
         ids=[]
-        for concept in sorted(Concepts.objects.all(), key=lambda o: o.fullName()):
+        for concept in sorted(Concepts.objects.select_related("operationstypes").all(), key=lambda o: o.fullName()):
             ids.append(concept.id)
         preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
-        queryset = Concepts.objects.filter(pk__in=ids).order_by(preserved)
+        queryset = Concepts.objects.select_related("operationstypes").filter(pk__in=ids).order_by(preserved)
         return queryset
         
     ## Esta función fue optimizada de 23 queries y 8.43 ms a 7 queries en 4.79ms

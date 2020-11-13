@@ -13,35 +13,35 @@
 <p>
 <p>
 <label id="balance">Balance is ...</label>
-{# FROM HERE: Edit this code is investmentoperation_new and copy it to investmentoperation_update #}
-<script>
-    var real_leverage={{ object.investments.products.real_leveraged_multiplier }}
-    var label=document.getElementById("balance");
-    var shares=document.getElementsByName("shares")[0];
-    var price=document.getElementsByName("price")[0];
-    var taxes=document.getElementsByName("taxes")[0];
-    var commission=document.getElementsByName("commission")[0];
-    function update_label(){
-        let gross=price.value*shares.value*real_leverage;
-        let net = gross - taxes.value - commission.value;
-        label.innerHTML=`Gross balance is ${gross}. Net balance is ${net}. Leverage multiplier is ${real_leverage}`;
-    }
-    update_label();
 
-    shares.addEventListener('change', (event) => {
+    <script>
+        var real_leverage={{ object.investments.products.real_leveraged_multiplier }}
+        var label=document.getElementById("balance");
+        var shares=document.getElementsByName("shares")[0];
+        var price=document.getElementsByName("price")[0];
+        var taxes=document.getElementsByName("taxes")[0];
+        var commission=document.getElementsByName("commission")[0];
+        function update_label(){
+            let gross=currency_string(price.value*shares.value*real_leverage, '{{object.investments.products.currency}}');
+            let net = currency_string(gross - taxes.value - commission.value, '{{object.investments.products.currency}}');
+            label.innerHTML=`Gross balance is ${gross}. Net balance is ${net}. Leverage multiplier is ${real_leverage}`;
+        }
         update_label();
-    });    
-    price.addEventListener('change', (event) => {
-        update_label();
-    });
-    taxes.addEventListener('change', (event) => {
-        update_label();
-    });
-    commission.addEventListener('change', (event) => {
-        update_label();
-    });
-</script>
-{# TO HERE: Edit this code is investmentoperation_new and copy it to investmentoperation_update #}
+
+        shares.addEventListener('change', (event) => {
+            update_label();
+        });    
+        price.addEventListener('change', (event) => {
+            update_label();
+        });
+        taxes.addEventListener('change', (event) => {
+            update_label();
+        });
+        commission.addEventListener('change', (event) => {
+            update_label();
+        });
+    </script>
+
 
     <p class="orders">
             <a href="{% url 'investmentoperation_delete' pk=object.id %}">Delete this investment operation</a>

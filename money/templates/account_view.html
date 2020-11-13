@@ -26,7 +26,7 @@
     {{ table_accountoperations|safe }}
 
   <p class="orders">
-    <a href="{% url 'accountoperation_new' accounts_id=account.id %}">Add an account operation</a> | 
+    <a href="{% url 'accountoperation_new' accounts_id=account.id dt=0 concepts_id=0 %}">Add an account operation</a> | 
     <a href="{% url 'account_transfer' origin=account.id %}">Add a transfer</a>
   </p>
   </div>
