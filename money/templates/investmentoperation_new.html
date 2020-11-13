@@ -10,20 +10,37 @@
         </table>
     <button type="submit">{% trans "Save" %}</button>
     </form>
-    {% include "messages.html" %}
 <p>
 <p>
 <label id="balance">Balance is ...</label>
+{# FROM HERE: Edit this code is investmentoperation_new and copy it to investmentoperation_update #}
 <script>
-/*    label=document.createElement("label");
-    label.innerHTML="Hola";
-    document.appendChild(label);
-    const selectElement = document.querySelector('.nieve');
+    var real_leverage={{ object.investments.products.real_leveraged_multiplier }}
+    var label=document.getElementById("balance");
+    var shares=document.getElementsByName("shares")[0];
+    var price=document.getElementsByName("price")[0];
+    var taxes=document.getElementsByName("taxes")[0];
+    var commission=document.getElementsByName("commission")[0];
+    function update_label(){
+        let gross=price.value*shares.value*real_leverage;
+        let net = gross - taxes.value - commission.value;
+        label.innerHTML=`Gross balance is ${gross}. Net balance is ${net}. Leverage multiplier is ${real_leverage}`;
+    }
+    update_label();
 
-selectElement.addEventListener('change', (event) => {
-    const resultado = document.querySelector('.resultado');
-    resultado.textContent = `Te gusta el sabor ${event.target.value}`;
-});*/
+    shares.addEventListener('change', (event) => {
+        update_label();
+    });    
+    price.addEventListener('change', (event) => {
+        update_label();
+    });
+    taxes.addEventListener('change', (event) => {
+        update_label();
+    });
+    commission.addEventListener('change', (event) => {
+        update_label();
+    });
 </script>
+{# TO HERE: Edit this code is investmentoperation_new and copy it to investmentoperation_update #}
 
 {% endblock %}
