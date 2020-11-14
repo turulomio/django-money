@@ -390,7 +390,6 @@ class accountoperation_new(CreateView):
     fields = ( 'datetime', 'concepts', 'amount',  'comment')
 
     def get_form(self, form_class=None): 
-#        self.accounts=Accounts.objects.get(pk=self.kwargs['accounts_id'])
         form = super(accountoperation_new, self).get_form(form_class)
         
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
@@ -1113,7 +1112,7 @@ class creditcardoperation_update(UpdateView):
     
 @login_required
 def strategy_list(request, active=True):
-    strategies=listdict_strategies(active, request.local_currency, request.local_zone)
+    strategies=listdict_strategies(request, active)
     table_strategies=TabulatorStrategies("table_strategies", None, strategies, request.local_currency).render()
     return render(request, 'strategy_list.html', locals())
         

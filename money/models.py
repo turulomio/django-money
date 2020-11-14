@@ -309,6 +309,23 @@ class Dividends(models.Model):
         if dividends is None:
             dividends=0
         return dividends
+    ## TODO This method should take care of diffrent currencies in accounts. Dividens are in account currency
+    @staticmethod
+    def net_gains_baduser_between_datetimes_for_some_investments(ids, from_dt,  to_dt):
+        dividends=cursor_one_field("""
+    select 
+        sum(net) 
+    from 
+        dividends 
+    where 
+        datetime>=%s and
+        datetime<=%s  and
+        investments_id in %s
+    """, (from_dt, to_dt, tuple(ids) ))
+        if dividends is None:
+            dividends=0
+        return dividends
+
 
     def delete_associated_account_operation(self):
         if hasattr(self,  "accountsoperations") is True:
@@ -410,12 +427,14 @@ class Investments(models.Model):
 
     ## Lista los id, io, io_current_totals, io_historical_current  de esta inversion
     def get_investmentsoperations_totals(self, dt, local_currency):
+        print("DEPRECATED")
         row_io= cursor_one_row("select * from investment_operations_totals(%s,%s,%s)", (self.id, dt, local_currency))
         io= eval(row_io["io"])
         current= eval(row_io['io_current'])
         historical= eval(row_io['io_historical'])
         #print(io, current, historical)
         return io,  current, historical
+
     
     def get_investmentsoperations(self, dt, local_currency):
         row_io=cursor_one_row("select * from investment_operations(%s,%s,%s)", (self.id, dt, local_currency))
@@ -794,6 +813,7 @@ class Strategies(models.Model):
 
 ## Converting dates to string in postgres functions return a string datetime instead of a dtaware. Here we convert it
 def postgres_datetime_string_2_dtaware(s):
+    print("DEPRECATED ESTA EN investoperations.py")
     str_dt_end=s[:19]            
     dt_end_naive=string2dtnaive(str_dt_end, "%Y-%m-%d %H:%M:%S")#Es un string desde postgres
     dt_end=dtaware(dt_end_naive.date(), dt_end_naive.time(), 'UTC')
@@ -809,13 +829,13 @@ def percentage_to_selling_point(shares, selling_price, last_quote):
     else:#Long short products
         return Percentage(-(selling_price-last_quote), last_quote)
 
-## Genera una fila (io, io_current, io_historical) con los totales de todas las inversiones
-def get_investments_alltotals(dt, local_currency, only_active):
-    row_io= cursor_one_row("select * from  investment_operations_alltotals( %s,%s,%s)", (dt, local_currency, only_active))
-    io= eval(row_io["io"])
-    current= eval(row_io['io_current'])
-    historical= eval(row_io['io_historical'])
-    return io,  current, historical
+### Genera una fila (io, io_current, io_historical) con los totales de todas las inversiones
+#def get_investments_alltotals(dt, local_currency, only_active):
+#    row_io= cursor_one_row("select * from  investment_operations_alltotals( %s,%s,%s)", (dt, local_currency, only_active))
+#    io= eval(row_io["io"])
+#    current= eval(row_io['io_current'])
+#    historical= eval(row_io['io_historical'])
+#    return io,  current, historical
     
 ## Lista los id, io, io_current_totals, io_historical_current de todas las inversiones
 ## Devuelve un diccionario d[id][

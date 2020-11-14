@@ -52,9 +52,11 @@ from money.models import (
     qs_investments_netgains_usercurrency_in_year_month, 
     money_convert, 
 )
+from money.reusing.casts import string2list_of_integers
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_end, months
 from money.reusing.decorators import timeit
+from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset
 from money.reusing.percentage import percentage_between, Percentage
 from money.reusing.tabulator import TabulatorFromListDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -543,13 +545,20 @@ def listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_mon
 #            r=r+money_convert(dtaware_month_end(year, month, local_zone), balance, currency, local_currency)
     return r
     
-def listdict_strategies(active, local_currency, local_zone):
+    
+    
+def listdict_strategies(request, active):
     l=[]
-    strategies=Strategies.objects.all().filter(dt_to__isnull=active)
-    for strategy in strategies:
-        gains_net_current=0
-        gains_net_historical=0
-        dividends_net=0
+    qs_strategies=Strategies.objects.all().filter(dt_to__isnull=active)
+    for strategy in qs_strategies:
+        investments_ids=string2list_of_integers(strategy.investments)
+        qs_investments_in_strategy=Investments.objects.filter(id__in=(investments_ids))
+        io_in_strategy=InvestmentsOperationsManager_from_investment_queryset(qs_investments_in_strategy, timezone.now(), request)
+        
+        gains_net_current=io_in_strategy.current_gains_net_user()        
+        dt_to=timezone.now() if strategy.dt_to is None else strategy.dt_to
+        gains_net_historical=io_in_strategy.historical_gains_net_user_between_dt(strategy.dt_from, dt_to)
+        dividends_net=Dividends.net_gains_baduser_between_datetimes_for_some_investments(investments_ids, strategy.dt_from, dt_to)
         
         l.append({
                 "id": strategy.id, 
