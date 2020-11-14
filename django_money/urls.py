@@ -119,6 +119,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     
     path('strategy/list/', money_views.strategy_list, {'active':True}, name='strategy_list_active'),
     path('strategy/list/inactive/', money_views.strategy_list, {'active': False}, name='strategy_list_inactive'),
+    path('strategy/view/<int:pk>/', money_views.strategy_view, name='strategy_view'),
 )
 
 handler403 = 'money.views.error_403'

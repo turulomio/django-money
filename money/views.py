@@ -90,6 +90,7 @@ from money.models import (
     Products,  
     Quotes, 
     Orders, 
+    Strategies,  
     total_balance, 
     money_convert, 
 )
@@ -1113,10 +1114,16 @@ class creditcardoperation_update(UpdateView):
 @login_required
 def strategy_list(request, active=True):
     strategies=listdict_strategies(request, active)
-    table_strategies=TabulatorStrategies("table_strategies", None, strategies, request.local_currency).render()
+    table_strategies=TabulatorStrategies("table_strategies", "strategy_view", strategies, request.local_currency).render()
     return render(request, 'strategy_list.html', locals())
         
-        
+
+@timeit
+@login_required
+def strategy_view(request, pk):
+    strategy=get_object_or_404(Strategies, id=pk)
+
+    return render(request, 'strategy_view.html', locals())
         
 @method_decorator(login_required, name='dispatch')
 class investment_new(CreateView):

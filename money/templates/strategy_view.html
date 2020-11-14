@@ -1,0 +1,15 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+
+<h1>{% blocktrans with strategy=strategy.name %}Strategy details of '{{ strategy }}'{% endblocktrans %}</h1>
+<h2>{% trans "Information" %}</h2>
+
+<p><strong>{% trans 'Name' %}: </strong>{{ strategy.name }}</p>
+<p><strong>{% trans 'Investments' %}: </strong>{{ strategy.investments }}</p>
+<p><strong>{% trans 'From' %}: </strong>{{ strategy.dt_from }}</p>
+<p><strong>{% trans 'To' %}: </strong>{{ strategy.dt_to }}
+
+{% endblock %}
