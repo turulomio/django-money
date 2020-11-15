@@ -9,11 +9,12 @@ from datetime import date, timedelta
 from decimal import Decimal
 Decimal()#Internal eval
 
-from django.utils.translation import gettext as _
-from django.utils import timezone
+from django.core.validators import int_list_validator
 from django.db import models, connection
 from django.db.models import Case, When
 from django.db.models.expressions import RawSQL
+from django.utils.translation import gettext as _
+from django.utils import timezone
 
 from money.reusing.currency import Currency, currency_symbol
 from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows, execute
@@ -22,6 +23,7 @@ from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, 
 from money.reusing.percentage import Percentage
 
 from xulpymoney.libxulpymoneytypes import eProductType, eComment, eConcept
+
 RANGE_RECOMENDATION_CHOICES =( 
     ("1", "One"), 
     ("2", "Two"), 
@@ -29,7 +31,6 @@ RANGE_RECOMENDATION_CHOICES =(
     ("4", "Four"), 
     ("5", "Five"), 
 ) 
-   
 
 class Accounts(models.Model):
     name = models.TextField(blank=True, null=True)
@@ -796,19 +797,24 @@ class Splits(models.Model):
         db_table = 'splits'
 
 
+class StrategiesTypes(models.IntegerChoices):
+    PairsInSameAccount = 1, _('Pairs in same account') #additional {"worse":_, "better":_ "account" }
 
 class Strategies(models.Model):
     name = models.TextField()
     investments = models.TextField(blank=True, null=True)
     dt_from = models.DateTimeField(blank=True, null=True)
     dt_to = models.DateTimeField(blank=True, null=True)
-
+    type = models.IntegerField(choices=StrategiesTypes.choices)
+    additional1 = models.IntegerField(blank=True, null=True)   
+    additional2 = models.IntegerField(blank=True, null=True)   
+    additional3 = models.IntegerField(blank=True, null=True)   
+    additional4 = models.IntegerField(blank=True, null=True)   
+    
     class Meta:
         managed = False
         db_table = 'strategies'
-
-
-
+        ordering = ['name']
 
 
 ## Converting dates to string in postgres functions return a string datetime instead of a dtaware. Here we convert it

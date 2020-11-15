@@ -47,6 +47,7 @@ from money.tables import (
     TabulatorInvestmentsPairsInvestCalculator, 
     TabulatorStrategies
 )
+from money.reusing.casts import string2list_of_integers
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz, epochmicros2dtaware, dtaware2epochmicros
 from money.reusing.decorators import timeit
@@ -1121,7 +1122,10 @@ def strategy_list(request, active=True):
 @timeit
 @login_required
 def strategy_view(request, pk):
-    strategy=get_object_or_404(Strategies, id=pk)
+    strategy=get_object_or_404(Strategies, pk=pk)
+    investments_ids=string2list_of_integers(strategy.investments)
+    qs_investments_in_strategy=Investments.objects.select_related("accounts").filter(id__in=(investments_ids))
+    pairs_url=reverse_lazy('investment_pairs',args=(1, 1, 1))
 
     return render(request, 'strategy_view.html', locals())
         
