@@ -119,7 +119,11 @@ urlpatterns=urlpatterns+ i18n_patterns(
     
     path('strategy/list/', money_views.strategy_list, {'active':True}, name='strategy_list_active'),
     path('strategy/list/inactive/', money_views.strategy_list, {'active': False}, name='strategy_list_inactive'),
-    path('strategy/view/<int:pk>/', money_views.strategy_view, name='strategy_view'),
+    path('strategy/view/<slug:pk>/', money_views.strategy_view, name='strategy_view'),
+    path('strategy/new/', money_views.strategy_new.as_view(), name='strategy_new'),
+    path('strategy/update/<int:pk>', money_views.strategy_update.as_view(), name='strategy_update'),
+    path('strategy/delete/<int:pk>', money_views.strategy_delete.as_view(), name='strategy_delete'),
+    
 )
 
 handler403 = 'money.views.error_403'

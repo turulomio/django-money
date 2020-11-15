@@ -1,0 +1,13 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <h1>{% trans "Confirm strategy delete" %}</h1>
+    <form action="" method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to delete "{{ object }}"?</p>
+    <input type="submit" value="Confirm" />
+    {% include "messages.html" %}
+    </form>
+{% endblock %}

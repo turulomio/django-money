@@ -9,7 +9,6 @@ from datetime import date, timedelta
 from decimal import Decimal
 Decimal()#Internal eval
 
-from django.core.validators import int_list_validator
 from django.db import models, connection
 from django.db.models import Case, When
 from django.db.models.expressions import RawSQL
@@ -806,10 +805,12 @@ class Strategies(models.Model):
     dt_from = models.DateTimeField(blank=True, null=True)
     dt_to = models.DateTimeField(blank=True, null=True)
     type = models.IntegerField(choices=StrategiesTypes.choices)
+    comment = models.TextField(blank=True, null=True)
     additional1 = models.IntegerField(blank=True, null=True)   
     additional2 = models.IntegerField(blank=True, null=True)   
     additional3 = models.IntegerField(blank=True, null=True)   
     additional4 = models.IntegerField(blank=True, null=True)   
+    additional5 = models.IntegerField(blank=True, null=True)   
     
     class Meta:
         managed = False

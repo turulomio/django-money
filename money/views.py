@@ -92,6 +92,7 @@ from money.models import (
     Quotes, 
     Orders, 
     Strategies,  
+    StrategiesTypes, 
     total_balance, 
     money_convert, 
 )
@@ -1126,9 +1127,69 @@ def strategy_view(request, pk):
     investments_ids=string2list_of_integers(strategy.investments)
     qs_investments_in_strategy=Investments.objects.select_related("accounts").filter(id__in=(investments_ids))
     pairs_url=reverse_lazy('investment_pairs',args=(1, 1, 1))
+    print(dir(strategy.type))
+   
+    pairs_in_same_account=True if strategy.type==StrategiesTypes.PairsInSameAccount else False
 
     return render(request, 'strategy_view.html', locals())
+
         
+@method_decorator(login_required, name='dispatch')
+class strategy_new(CreateView):
+    model = Strategies
+    template_name="strategy_new.html"
+    fields = ( 'name','dt_from', 'dt_to', 'investments',  'comment','type',  'additional1',  'additional2',  'additional3',  'additional4', 'additional5')
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(strategy_new, self).get_form(form_class)
+        form.fields['dt_from'].widget.attrs['is'] ='input-datetime'
+        form.fields['dt_from'].widget.attrs['localzone'] =self.request.local_zone
+        form.fields['dt_from'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['dt_to'].widget.attrs['is'] ='input-datetime'
+        form.fields['dt_to'].widget.attrs['localzone'] =self.request.local_zone
+        form.fields['dt_to'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        return form
+
+    def get_initial(self):
+        return {
+            'dt_from': str(dtaware_changes_tz(timezone.now(), self.request.local_zone)),
+        }
+
+    def get_success_url(self):
+        return reverse_lazy('strategy_list_active')
+        
+@method_decorator(login_required, name='dispatch')
+class strategy_update(UpdateView):
+    model = Strategies
+    fields = ( 'name','dt_from', 'dt_to', 'investments',  'comment','type',  'additional1',  'additional2',  'additional3',  'additional4', 'additional5')
+    template_name="strategy_update.html"
+
+    def get_success_url(self):
+        return reverse_lazy('strategy_list_active')
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(strategy_update, self).get_form(form_class)
+        form.fields['dt_from'].widget.attrs['is'] ='input-datetime'
+        form.fields['dt_from'].widget.attrs['localzone'] =self.request.local_zone
+        form.fields['dt_from'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['dt_to'].widget.attrs['is'] ='input-datetime'
+        form.fields['dt_to'].widget.attrs['localzone'] =self.request.local_zone
+        form.fields['dt_to'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        return form
+
+@method_decorator(login_required, name='dispatch')
+class strategy_delete(DeleteView):
+    model = Strategies
+    template_name = 'strategy_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('strategy_list_active')
+        
+
 @method_decorator(login_required, name='dispatch')
 class investment_new(CreateView):
     model = Investments

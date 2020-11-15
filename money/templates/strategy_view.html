@@ -8,8 +8,18 @@
 <h2>{% trans "Information" %}</h2>
 
 <p><strong>{% trans 'Name' %}: </strong>{{ strategy.name }}</p>
-<p><strong>{% trans 'Investments' %}: </strong>{{ strategy.investments }}</p>
 <p><strong>{% trans 'From' %}: </strong>{{ strategy.dt_from }}</p>
-<p><strong>{% trans 'To' %}: </strong>{{ strategy.dt_to }}
+<p><strong>{% trans 'To' %}: </strong>{{ strategy.dt_to }}</p>
+<p><strong>{% trans 'Investments' %}: </strong>{{ strategy.investments }}</p>
 
+<p><strong>{% trans 'Comment' %}: </strong>{{ strategy.comment }}</p>
+<p><strong>{% trans 'Types' %}: </strong>{{ strategy.get_type_display }}</p>
+
+<p class="orders">
+    <a href="{% url 'strategy_update' pk=strategy.pk %}">{% trans "Update this strategy" %}</a>
+  
+    {% if pairs_in_same_account %}
+         | <a href="{% url 'investment_pairs' worse=strategy.additional1 better=strategy.additional2 accounts_id=strategy.additional3 %}">{% trans "Show detailed report" %}</a>
+  {% endif %}</p>
+</p>
 {% endblock %}
