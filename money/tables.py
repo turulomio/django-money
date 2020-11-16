@@ -177,15 +177,14 @@ class TabulatorInvestmentsOperationsHomogeneus(TabulatorFromListDict):
         self.setTypes("int","datetime", "str","Decimal", investment.products.currency, investment.accounts.currency, investment.accounts.currency)
         self.setBottomCalc(None, None, None, "sum", None, "sum", "sum")
         
-class TabulatorCreditCards(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset, account):
-        TabulatorFromQuerySet.__init__(self, name)
+class TabulatorCreditCards(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, account):
+        TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
-        self.setQuerySet(queryset)
-        self.setCallByNames("id", "name", "number", "deferred", "maximumbalance")
-        self.setHeaders(_("Id"), _("Name"), _("Number"), _("Deferred pay"), _("Maximum balance"))
-        self.setTypes("int", "str", "str", "bool", account.currency)
-        self.generate_listdict()        
+        self.setListDict(listdict)
+        self.setFields("id", "name", "number", "deferred", "maximumbalance", "balance")
+        self.setHeaders(_("Id"), _("Name"), _("Number"), _("Deferred pay"), _("Maximum balance"), _("balance"))
+        self.setTypes("int", "str", "str", "bool", account.currency, account.currency)
 
 class TabulatorCreditCardsOperations(TabulatorFromQuerySet):
     def __init__(self, name, destiny_url, queryset, creditcard, local_zone):

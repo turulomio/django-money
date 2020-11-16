@@ -306,23 +306,21 @@ def account_view(request, pk, year=date.today().year, month=date.today().month):
     qsaccountoperations= Accountsoperations.objects.all().select_related("concepts").filter(accounts_id=pk, datetime__year=year, datetime__month=month).order_by('datetime')
     listdic_accountsoperations=listdict_accountsoperations_from_queryset(qsaccountoperations, initial_balance)
     table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", listdic_accountsoperations, account.currency, request.local_zone).render()
-#    from django.db.models import OuterRef, Subquery, Sum
-#    #opercreditcards=Creditcardsoperations.objects.filter(creditcards=OuterRef('pk')).filter(paid=False).annotate(current=Sum('amount'))
-#    #creditcards= Creditcards.objects.all().filter(accounts_id=pk, active=True).annotate(current=Subquery(opercreditcards.values("current"))).order_by('name')
-#    creditcards=Creditcards.objects.annotate(
-#        current=Sum(
-#            Case(
-#                When(division__department__type=10, then=Value(1)),
-#                default=Value(0),
-#                output_field=IntegerField()
-#            )
-#        )
-#    )
-    creditcards= Creditcards.objects.all().filter(accounts_id=pk, active=True).order_by('name')
-
-### FUNCION BUENA A INTEGRAR
-###  select id, name, coalesce(sum,0) from creditcards left join  (select creditcards_id, sum(amount) sum from creditcardsoperations where paid is False group by creditcards_id) as t on t.creditcards_id=creditcards.id;
-
+    
+    #Creditcards
+    creditcards=cursor_rows("""
+        select 
+            id, 
+            name, 
+            coalesce(sum,0) balance, 
+            number, 
+            deferred, 
+            maximumbalance 
+        from 
+            creditcards left join  (select creditcards_id, sum(amount) sum from creditcardsoperations where paid is False group by creditcards_id) as t on t.creditcards_id=creditcards.id 
+        where 
+            active is true and
+            accounts_id=%s""", (account.id, ))
     table_creditcards=TabulatorCreditCards("table_creditcards", "creditcard_view", creditcards, account).render()
   
     return render(request, 'account_view.html', locals())        
