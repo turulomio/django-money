@@ -797,6 +797,7 @@ class Splits(models.Model):
 
 
 class StrategiesTypes(models.IntegerChoices):
+    Generic = 0, _('Genéric') #additional { }
     PairsInSameAccount = 1, _('Pairs in same account') #additional {"worse":_, "better":_ "account" }
 
 class Strategies(models.Model):

@@ -1170,6 +1170,15 @@ class strategy_new(CreateView):
             'dt_from': str(dtaware_changes_tz(timezone.now(), self.request.local_zone)),
         }
 
+    def form_valid(self, form):
+        if form.instance.type==StrategiesTypes.PairsInSameAccount:
+            if form.instance.additional1 is None or form.instance.additional2 is None or form.instance.additional3 is None:
+                form.add_error(None, ValidationError({"type": "Additional 1, 2 and 3 can't be empty"}))                
+                return super().form_invalid(form)
+        return super().form_valid(form)
+        
+
+
     def get_success_url(self):
         return reverse_lazy('strategy_list_active')
         
@@ -1193,6 +1202,14 @@ class strategy_update(UpdateView):
         form.fields['dt_to'].widget.attrs['localzone'] =self.request.local_zone
         form.fields['dt_to'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         return form
+
+    def form_valid(self, form):
+        if form.instance.type==StrategiesTypes.PairsInSameAccount:
+            if form.instance.additional1 is None or form.instance.additional2 is None or form.instance.additional3 is None:
+                form.add_error(None, ValidationError({"type": "Additional 1, 2 and 3 can't be empty"}))                
+                return super().form_invalid(form)
+        return super().form_valid(form)
+        
 
 @method_decorator(login_required, name='dispatch')
 class strategy_delete(DeleteView):
