@@ -17,9 +17,8 @@
 
 <p class="orders">
     <a href="{% url 'strategy_update' pk=strategy.pk %}">{% trans "Update this strategy" %}</a>
-  
-    {% if pairs_in_same_account %}
-         | <a href="{% url 'investment_pairs' worse=strategy.additional1 better=strategy.additional2 accounts_id=strategy.additional3 %}">{% trans "Show detailed report" %}</a>
-  {% endif %}</p>
+    {% if strategy.type != 0 %}
+         | <a href="{{ strategy.url_details }}">{% trans "Show detailed report" %}</a>
+    {% endif %}</p>
 </p>
 {% endblock %}

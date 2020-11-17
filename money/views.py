@@ -1140,9 +1140,6 @@ def strategy_view(request, pk):
     investments_ids=string2list_of_integers(strategy.investments)
     qs_investments_in_strategy=Investments.objects.select_related("accounts").filter(id__in=(investments_ids))
     pairs_url=reverse_lazy('investment_pairs',args=(1, 1, 1))
-    print(dir(strategy.type))
-   
-    pairs_in_same_account=True if strategy.type==StrategiesTypes.PairsInSameAccount else False
 
     return render(request, 'strategy_view.html', locals())
 

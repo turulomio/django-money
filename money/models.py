@@ -12,6 +12,7 @@ Decimal()#Internal eval
 from django.db import models, connection
 from django.db.models import Case, When
 from django.db.models.expressions import RawSQL
+from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.utils import timezone
 
@@ -818,6 +819,10 @@ class Strategies(models.Model):
         db_table = 'strategies'
         ordering = ['name']
 
+    ## Generates the url of details. I got errors in template reversing
+    def url_detail(self):
+        if self.type==StrategiesTypes.PairsInSameAccount:
+            reverse_lazy('investment_pairs',args=(self.additional1, self.additional2, self.additional3))
 
 ## Converting dates to string in postgres functions return a string datetime instead of a dtaware. Here we convert it
 def postgres_datetime_string_2_dtaware(s):
