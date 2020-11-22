@@ -8,7 +8,7 @@ class InputDatetime extends HTMLInputElement {
     this.addEventListener('click', e => this.changeDisplay());
   }
 
-  first_creation(){
+  connectedCallback(){
     if (this.hasAttribute("locale")){// Doesn't work in constructor and I don't know why.
         this.locale=this.getAttribute("locale");
     }else{
@@ -19,6 +19,7 @@ class InputDatetime extends HTMLInputElement {
     }else{
       this.localzone="UTC";
     }
+
     this.div=document.createElement("div")
     this.div.hidden=true;
     
@@ -68,11 +69,19 @@ class InputDatetime extends HTMLInputElement {
     this.div.appendChild(this.buttonToday);
     this.div.style.display="flex";
 
+    if (this.locale=="es"){
+      this.firstDay=1;
+    } else {
+      this.firstDay=0;
+    }
+
     jQuery(this.input).datetimepicker({
       inline:false,
       format:'Y-m-d H:i:s',
+      dayOfWeekStart: this.firstDay,
     });
-    $.datetimepicker.setLocale(this.locale);
+    
+    jQuery.datetimepicker.setLocale(this.locale);
 
     this.insertAdjacentElement("afterend",this.div) ;
   }
@@ -96,10 +105,7 @@ class InputDatetime extends HTMLInputElement {
     this.inputms.value=ms;
   }
 
-  changeDisplay(){  
-    if (this.hasOwnProperty( "div")==false){
-      this.first_creation();
-    } 
+  changeDisplay(){
     if (this.div.hidden==true){
       this.string2widget(this.value);
       this.div.hidden=false;

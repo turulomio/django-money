@@ -22,9 +22,7 @@ class InputDate extends HTMLInputElement {
     jQuery(this).datepicker({
       constrainInput: true,   // prevent letters in the input field
       inline:false,
-      format:'Y-m-d',
-      timepicker:false,
-      firstDay: this.firstDay,
+      format: 'Y-m-d',
     });
     if (this.locale=="es"){
       $.datepicker.regional['es'] = {
@@ -32,7 +30,9 @@ class InputDate extends HTMLInputElement {
         monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
         dayNames: ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'],
         dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
-        dayNamesMin: ['Do', 'Lu', 'Ma', 'Mc', 'Ju', 'Vi', 'Sa']
+        dayNamesMin: ['Do', 'Lu', 'Ma', 'Mc', 'Ju', 'Vi', 'Sa'],
+        dateFormat: 'yy-m-d',
+        firstDay: 1, 
       }
       $.datepicker.setDefaults($.datepicker.regional['es']);
     }
