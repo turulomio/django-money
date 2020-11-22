@@ -1,29 +1,41 @@
 
 class InputDate extends HTMLInputElement {
   constructor() {
-    super();   
-    jQuery(this).datetimepicker({
-      inline:false,
-      format:'Y-m-d',
-      timepicker:false,
-    });
-    this.addEventListener('click', e => this.changeDisplay());
+    super();
   }
 
-  first_creation(){
+  connectedCallback(){
     if (this.hasAttribute("locale")){// Doesn't work in constructor and I don't know why.
         this.locale=this.getAttribute("locale");
     }else{
         this.locale="en";
     }
-    $.datetimepicker.setLocale(this.locale);
+    if (this.locale=="es"){
+      this.firstDay=1;
+    } else {
+      this.firstDay=0;
+    }
 
-  }
 
-  changeDisplay(){
-    if (this.hasOwnProperty( "locale")==false){
-      this.first_creation();
-    } 
+
+
+    jQuery(this).datepicker({
+      constrainInput: true,   // prevent letters in the input field
+      inline:false,
+      format:'Y-m-d',
+      timepicker:false,
+      firstDay: this.firstDay,
+    });
+    if (this.locale=="es"){
+      $.datepicker.regional['es'] = {
+        monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+        monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+        dayNames: ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'],
+        dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+        dayNamesMin: ['Do', 'Lu', 'Ma', 'Mc', 'Ju', 'Vi', 'Sa']
+      }
+      $.datepicker.setDefaults($.datepicker.regional['es']);
+    }
   }
 }
 
