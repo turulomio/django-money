@@ -761,7 +761,7 @@ class investmentoperation_update(UpdateView):
 
     @transaction.atomic
     def form_valid(self, form):
-        form.instance.investments= Investmentsoperations.objects.related.get(pk=self.kwargs['pk']).investments
+        form.instance.investments= Investmentsoperations.objects.get(pk=self.kwargs['pk']).investments
         if (    form.instance.commission>=0 and 
                 form.instance.taxes>=0 and 
                 ((form.instance.shares>=0 and form.instance.operationstypes.id in (4, 6)) or (form.instance.shares<0 and form.instance.operationstypes.id==5) )) :
