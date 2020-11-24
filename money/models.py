@@ -22,7 +22,7 @@ from money.reusing.casts import string2list_of_integers
 from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware, dtaware2string
 from money.reusing.percentage import Percentage
 
-from xulpymoney.libxulpymoneytypes import eProductType, eComment, eConcept
+from xulpymoney.libxulpymoneytypes import eProductType, eComment, eConcept, eOperationType
 
 RANGE_RECOMENDATION_CHOICES =( 
     ("1", "One"), 
@@ -244,6 +244,18 @@ class Concepts(models.Model):
     def queryset_for_dividends_order_by_fullname():
         ids=[]
         for concept in sorted(Concepts.objects.select_related('operationstypes').filter(pk__in=(eConcept.Dividends, eConcept.AssistancePremium,  eConcept.DividendsSaleRights, eConcept.RolloverPaid, eConcept.RolloverReceived, eConcept.BondsCouponRunPayment, eConcept.BondsCouponRunIncome, eConcept.BondsCoupon)), key=lambda o: o.fullName()):
+            ids.append(concept.id)
+        preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
+        queryset = Concepts.objects.select_related('operationstypes').filter(pk__in=ids).order_by(preserved)
+        return queryset    
+
+    def queryset_for_accountsoperations_order_by_fullname():
+        ids=[]
+        for concept in sorted(Concepts.objects.select_related('operationstypes').filter(operationstypes_id__in=(
+            eOperationType.Income,  
+            eOperationType.Expense,  
+            eOperationType.DerivativeManagement
+        )), key=lambda o: o.fullName()):
             ids.append(concept.id)
         preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
         queryset = Concepts.objects.select_related('operationstypes').filter(pk__in=ids).order_by(preserved)

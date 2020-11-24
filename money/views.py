@@ -411,7 +411,7 @@ class accountoperation_new(CreateView):
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.local_zone
         form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
-        form.fields['concepts'].queryset=Concepts.queryset_order_by_fullname()
+        form.fields['concepts'].queryset=Concepts.queryset_for_accountsoperations_order_by_fullname()
         return form
         
     def get_initial(self):
@@ -430,7 +430,8 @@ class accountoperation_new(CreateView):
     def form_valid(self, form):
         if  (
                 (form.instance.concepts.operationstypes.id==eOperationType.Income and form.instance.amount>=0) or
-                (form.instance.concepts.operationstypes.id==eOperationType.Expense and form.instance.amount <0)
+                (form.instance.concepts.operationstypes.id==eOperationType.Expense and form.instance.amount <0) or
+                (form.instance.concepts.operationstypes.id==eOperationType.DerivativeManagement)
             ):
             form.instance.accounts=Accounts.objects.get(pk=self.kwargs['accounts_id'])
             form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
@@ -456,7 +457,7 @@ class accountoperation_update(UpdateView):
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.local_zone
         form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
-        form.fields['concepts'].queryset=Concepts.queryset_order_by_fullname()
+        form.fields['concepts'].queryset=Concepts.queryset_for_accountsoperations_order_by_fullname()
         return form
         
     def get_initial(self):
@@ -467,7 +468,8 @@ class accountoperation_update(UpdateView):
     def form_valid(self, form):
         if  (
                 (form.instance.concepts.operationstypes.id==eOperationType.Income and form.instance.amount>=0) or
-                (form.instance.concepts.operationstypes.id==eOperationType.Expense and form.instance.amount <0)
+                (form.instance.concepts.operationstypes.id==eOperationType.Expense and form.instance.amount <0) or
+                (form.instance.concepts.operationstypes.id==eOperationType.DerivativeManagement)
             ):
             form.instance.accounts=Accountsoperations.objects.get(pk=self.kwargs['pk']).accounts
             form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
