@@ -365,25 +365,19 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
 
 def listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_quotes, basic_results_worse,   basic_results_better):
     l=[]
-    last_diff=Percentage(0, 1)
-    first_a=common_quotes[0]["a_open"]
-    first_b=common_quotes[0]["b_open"]
+    last_pr=Percentage(0, 1)
+    first_pr=common_quotes[0]["a_open"]/common_quotes[0]["b_open"]
     for row in common_quotes:#a worse, b better
-        percentage_year_worse=percentage_between(first_a,  row["a_open"])
-        percentage_year_better=percentage_between(first_b, row["b_open"])
-        diff=percentage_year_worse- percentage_year_better
-        diff_before=diff-last_diff
+        pr=row["a_open"]/row["b_open"]
         l.append({
             "datetime": row["date"], 
             "price_worse": row["a_open"], 
             "price_better": row["b_open"], 
-            "price_ratio": row["a_open"]/row["b_open"], 
-            "percentage_year_worse": percentage_year_worse, 
-            "percentage_year_better": percentage_year_better, 
-            "percentage_year_diff": diff, 
-            "percentage_month_diff": diff_before
+            "price_ratio": pr, 
+            "price_ratio_percentage_from_start": percentage_between(first_pr, pr), 
+            "price_ratio_percentage_month_diff": percentage_between(last_pr, pr)
         })
-        last_diff=diff
+        last_pr=pr
     return l
 
 

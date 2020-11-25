@@ -150,9 +150,9 @@ class TabulatorProductsPairsEvolutionWithMonthDiff(TabulatorFromListDict):
         self.setDestinyUrl(destiny_url)
         self.setLocalZone(local_zone)
         self.setListDict(listdict)
-        self.setFields("datetime", "price_worse","price_better","price_ratio", "percentage_year_worse", "percentage_year_better", "percentage_year_diff", "percentage_month_diff")
-        self.setHeaders(_("Date"), _("Price worse"), _("Price better"),  _("Price ratio"), _("% worse from start"), _("% better from start"), _("% from start"), _("% from last step"))
-        self.setTypes("date", currency, currency,  "Decimal6", "percentage", "percentage", "percentage", "percentage")
+        self.setFields("datetime", "price_worse","price_better","price_ratio", "price_ratio_percentage_from_start", "price_ratio_percentage_month_diff")
+        self.setHeaders(_("Date"), _("Price worse"), _("Price better"),  _("Price ratio"),  _("% pr from start"), _("% pr from last step"))
+        self.setTypes("date", currency, currency,  "Decimal6", "percentage", "percentage")
         self.showLastRecord(False)
 
 class TabulatorInvestmentsOperationsHistoricalHeterogeneus(TabulatorFromListDict):
