@@ -9,5 +9,11 @@
         <h1> </h1>
     <p>{% trans "Wellcome to Django-Money, your personal accounting and financial system." %}</p></center>
 
+
+
+<ajax-modal-button id="ajax_button_evolution" url="{% url 'home'  %}" showbuttonafter buttontext="{% trans 'Modal ajax button' %}" csrf_token="{{csrf_token}}"></ajax-modal-button>
+
+
+
 {% endblock %}
 
