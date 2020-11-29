@@ -5,6 +5,10 @@
 {% block content %}
   <h1>{% blocktrans with creditcard_name=creditcard.name %} '{{ creditcard_name }}' details{% endblocktrans %}</h1>
 
+
+  <p><strong>{% trans 'Id' %}: </strong>{{ creditcard.id }}</p>
+  <p><strong>{% trans 'Number' %}: </strong>{{ creditcard.number }}</p>
+
   <p class="orders">
     <a href="{% url 'creditcard_update' pk=creditcard.id %}">{% trans "Update this credit card" %}</a>
   </p>

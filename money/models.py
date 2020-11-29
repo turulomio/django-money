@@ -501,7 +501,14 @@ class Investments(models.Model):
         for ioc in listdict_ioc:
             gains=gains+abs(ioc["shares"]*(self.selling_price-ioc['price_investment'])*ioc['real_leverages'])
         return Currency(gains, self.products.currency)
-        
+
+    def queryset_for_investments_products_combos_order_by_fullname():
+        ids=[]
+        for investment in sorted(Investments.objects.select_related('accounts').select_related('products').filter(products__obsolete=False), key=lambda o: (o.fullName(), o.accounts.name)):
+            ids.append(investment.id)
+        preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
+        queryset = Investments.objects.select_related('accounts').filter(pk__in=ids).order_by(preserved)
+        return queryset    
 
 class Investmentsoperations(models.Model):
     operationstypes = models.ForeignKey('Operationstypes', models.DO_NOTHING, blank=False, null=False)

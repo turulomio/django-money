@@ -2,8 +2,10 @@
 {% load i18n %}
 
 {% block content %}
-    <h1>{% trans "Add a new investment operation" %}</h1>
+    <h1>{% blocktrans with investment_fullName=view.investments.fullName %}Add a new investment operation to '{{ investment_fullName }}'{% endblocktrans %}</h1>
+
     <form method="post">
+
         <table>
         {% csrf_token %}
         {{ form.as_table }}

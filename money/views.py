@@ -99,8 +99,16 @@ from money.models import (
 from xulpymoney.libxulpymoneytypes import eConcept, eComment, eProductType, eOperationType
 
 @login_required
+def order_execute(request, pk):
+    order=get_object_or_404(Orders, id=pk)
+    order.executed=timezone.now()
+    order.save()
+    return HttpResponseRedirect(f"{reverse('investmentoperation_new', args=(order.investments.id, ))}?shares={order.shares}&price={order.price}")
+
+@login_required
 def order_list(request,  active):
-    listdict_orders=listdict_orders_active()
+    qs_orders=Orders.objects.all().select_related("investments").select_related("investments__accounts").select_related("investments__products").select_related("investments__products__productstypes").select_related("investments__products").select_related("investments__products__leverages").filter(expiration__gte=datetime.today(), executed=None)
+    listdict_orders=listdict_orders_active(qs_orders)
     table_orders=TabulatorOrders("table_orders", 'order_update', listdict_orders, request.local_currency).render()
     return render(request, 'order_list.html', locals())
 
@@ -701,7 +709,7 @@ class investmentoperation_new(CreateView):
         if form_class is None: 
             form_class = self.get_form_class()
 
-        self.investments=Investments.objects.select_related("products").select_related("products__productstypes").select_related("products__leverages").get(pk=self.kwargs['investments_id']) #We can use in template with view.investments
+        self.investments=Investments.objects.select_related("accounts").select_related("products").select_related("products__productstypes").select_related("products__leverages").get(pk=self.kwargs['investments_id']) #We can use in template with view.investments
         form = super(investmentoperation_new, self).get_form(form_class)
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.local_zone
@@ -713,6 +721,8 @@ class investmentoperation_new(CreateView):
         return {
             'datetime': str(dtaware_changes_tz(timezone.now(), self.request.local_zone)), 
             'currency_conversion':1, 
+            'shares': self.request.GET.get("shares", 0), 
+            'price': self.request.GET.get("price", 0), 
             'taxes':0, 
             'commission':0, 
             }
@@ -1020,10 +1030,8 @@ group by
     
 @login_required
 def creditcard_view(request, pk):
-    
-    
     creditcard=get_object_or_404(Creditcards, id=pk)
-    creditcardoperations=Creditcardsoperations.objects.all().filter(creditcards_id=pk,  paid=False)
+    creditcardoperations=Creditcardsoperations.objects.all().select_related("concepts").select_related("concepts__operationstypes").filter(creditcards_id=pk,  paid=False).order_by("datetime")
     table_creditcardoperations=TabulatorCreditCardsOperations("table_creditcardoperations", 'creditcardoperation_update', creditcardoperations, creditcard, request.local_zone).render()
 
     return render(request, 'creditcard_view.html', locals())
@@ -1094,9 +1102,17 @@ class creditcardoperation_new(CreateView):
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.local_zone
         form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['concepts'].queryset=Concepts.queryset_for_accountsoperations_order_by_fullname()
         form.fields['paid'].widget = forms.HiddenInput()
-        form.fields['paid'].initial=False
         return form
+        
+                        
+    def get_initial(self):
+        return {
+            'datetime': str(dtaware_changes_tz(timezone.now(), self.request.local_zone)), 
+            'paid':False,
+            }
+
         
     def get_success_url(self):
         return reverse_lazy('creditcard_view',args=(self.object.creditcards.id,))
@@ -1123,6 +1139,7 @@ class creditcardoperation_update(UpdateView):
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.local_zone
         form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['concepts'].queryset=Concepts.queryset_for_accountsoperations_order_by_fullname()
         return form
   
     def form_valid(self, form):
@@ -1301,6 +1318,7 @@ class order_new(CreateView):
         form.fields['date'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         form.fields['expiration'].widget.attrs['is'] ='input-date'
         form.fields['expiration'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['investments'].queryset=Investments.queryset_for_investments_products_combos_order_by_fullname()
         return form
     
     def get_initial(self):
@@ -1337,6 +1355,7 @@ class order_update(UpdateView):
         form.fields['date'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
         form.fields['expiration'].widget.attrs['is'] ='input-date'
         form.fields['expiration'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['investments'].queryset=Investments.queryset_for_investments_products_combos_order_by_fullname()
         return form
     
 #    def form_valid(self, form):

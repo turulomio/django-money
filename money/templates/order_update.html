@@ -11,7 +11,9 @@
     <button type="submit">{% trans "Save" %}</button>
     </form>
     <p class="orders">
-        <a href="{% url 'order_delete' pk=object.id %}">{% trans "Delete this order" %}</a>
+        <a href="{% url 'order_delete' pk=object.id %}">{% trans "Delete this order" %}</a> | 
+        <a href="{% url 'order_execute' pk=object.id %}">{% trans "Execute this order" %}</a> | 
+
     </p>
 
 {% endblock %}

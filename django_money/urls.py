@@ -1,33 +1,13 @@
-"""django_money URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/3.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from datetime import date
 from django.contrib import admin
 from django.urls import path,  include
 from django.conf.urls.i18n import i18n_patterns, set_language 
 from django.contrib.auth.views import LoginView, logout_then_login
-from django.views.generic.base import RedirectView
 import debug_toolbar
 
 from money import views as money_views
 
-urlpatterns=[
-    path('favicon.ico', RedirectView.as_view(url='/static/images/favicon.ico')),
-]
-
-urlpatterns=urlpatterns+ i18n_patterns(
+urlpatterns=i18n_patterns(
     path('__debug__/', include(debug_toolbar.urls)),
 
     path('i18n/setlang/',  set_language, name="set_language"), 
@@ -89,6 +69,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('order/new/', money_views.order_new.as_view(), name='order_new'),
     path('order/update/<int:pk>', money_views.order_update.as_view(), name='order_update'),
     path('order/delete/<int:pk>', money_views.order_delete.as_view(), name='order_delete'),
+    path('order/execute/<int:pk>', money_views.order_execute, name='order_execute'),
     
     path('product/benchmark/', money_views.product_benchmark, name='product_benchmark'),
     path('product/view/<slug:pk>/', money_views.product_view, name='product_view'),

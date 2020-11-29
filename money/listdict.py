@@ -52,7 +52,7 @@ from money.models import (
     qs_investments_netgains_usercurrency_in_year_month, 
     money_convert, 
 )
-from money.reusing.casts import string2list_of_integers
+from money.reusing.casts import string2list_of_integers, valueORempty
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_end, months
 from money.reusing.decorators import timeit
@@ -569,31 +569,47 @@ def listdict_strategies(request, active):
 
 
     
-def listdict_orders_active( ):
-    rows=cursor_rows("""
-        select  
-            orders.id, 
-            investments.name || ' (' || accounts.name || ')' as name, 
-            date, 
-            expiration, 
-            shares, 
-            price, 
-            shares+price as amount, 
-            (price-(select last from last_penultimate_lastyear(products_id,now())))/price *100 as percentage_from_price ,
-            products.currency
-        from 
-            orders,
-            investments,
-            products,
-            accounts 
-        where 
-            executed is null and 
-            expiration>=now() and 
-            orders.investments_id=investments.id and 
-            products.id=investments.products_id and 
-            investments.accounts_id=accounts.id
-    """)
-    return rows
+def listdict_orders_active( qs_orders):
+    l=[]
+    for o in qs_orders:
+        basic_results=o.investments.products.basic_results()
+        l.append({
+            "id": o.id, 
+            "name": f"{o.investments.name} ({o.investments.accounts.name})", 
+            "date": o.date, 
+            "expiration": valueORempty(o.expiration), 
+            "shares": o.shares, 
+            "price": o.price, 
+            "amount": o.shares*o.price*o.investments.products.real_leveraged_multiplier(), 
+            "percentage_from_price": percentage_between( basic_results["last"], o.price), 
+            "currency": o.investments.products.currency, 
+        })
+    return l
+        
+#    rows=cursor_rows("""
+#        select  
+#            orders.id, 
+#            investments.name || ' (' || accounts.name || ')' as name, 
+#            date, 
+#            expiration, 
+#            shares, 
+#            price, 
+#            shares*price as amount, 
+#            (price-(select last from last_penultimate_lastyear(products_id,now())))/price *100 as percentage_from_price ,
+#            products.currency
+#        from 
+#            orders,
+#            investments,
+#            products,
+#            accounts 
+#        where 
+#            executed is null and 
+#            expiration::date>=now()::date and 
+#            orders.investments_id=investments.id and 
+#            products.id=investments.products_id and 
+#            investments.accounts_id=accounts.id
+#    """)
+#    return rows
 
 
 
