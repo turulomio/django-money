@@ -336,7 +336,6 @@ def account_view(request, pk, year=date.today().year, month=date.today().month):
 @login_required       
 @transaction.atomic
 def account_transfer(request, origin): 
-    
     origin=get_object_or_404(Accounts, pk=origin)
     if request.method == 'POST':
         form = AccountsTransferForm(request.POST)

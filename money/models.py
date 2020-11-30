@@ -65,6 +65,15 @@ class Accounts(models.Model):
     def accounts_balance_user_currency(qs, dt):
         return cursor_one_field("select sum((account_balance(accounts.id,%s,'EUR')).balance_user_currency) from  accounts where id in %s", (dt, qs_list_of_ids(qs)))
     
+
+    @staticmethod
+    def queryset_active_order_by_fullname():
+        ids=[]
+        for account in sorted(Accounts.objects.select_related('banks').filter(active=True), key=lambda o: o.fullName()):
+            ids.append(account.id)
+        preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
+        queryset = Accounts.objects.select_related('banks').filter(pk__in=ids).order_by(preserved)
+        return queryset    
 ## This model is not in Xulpymoney to avoid changing a lot of code
 class Stockmarkets(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -437,16 +446,16 @@ class Investments(models.Model):
 
     def fullName(self):
         return "{} ({})".format(self.name, self.accounts.name)
-
-    ## Lista los id, io, io_current_totals, io_historical_current  de esta inversion
-    def get_investmentsoperations_totals(self, dt, local_currency):
-        print("DEPRECATED")
-        row_io= cursor_one_row("select * from investment_operations_totals(%s,%s,%s)", (self.id, dt, local_currency))
-        io= eval(row_io["io"])
-        current= eval(row_io['io_current'])
-        historical= eval(row_io['io_historical'])
-        #print(io, current, historical)
-        return io,  current, historical
+#
+#    ## Lista los id, io, io_current_totals, io_historical_current  de esta inversion
+#    def get_investmentsoperations_totals(self, dt, local_currency):
+#        print("DEPRECATED")
+#        row_io= cursor_one_row("select * from investment_operations_totals(%s,%s,%s)", (self.id, dt, local_currency))
+#        io= eval(row_io["io"])
+#        current= eval(row_io['io_current'])
+#        historical= eval(row_io['io_historical'])
+#        #print(io, current, historical)
+#        return io,  current, historical
 
     
     def get_investmentsoperations(self, dt, local_currency):

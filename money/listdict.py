@@ -40,7 +40,6 @@ from money.models import (
     Concepts, 
     Dividends, 
     Investments, 
-    Investmentsoperations, 
     Operationstypes, 
     Productstypes, 
     Strategies, 
@@ -56,7 +55,7 @@ from money.reusing.casts import string2list_of_integers, valueORempty
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_end, months
 from money.reusing.decorators import timeit
-from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset
+from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, InvestmentsOperationsTotals_from_investment, IOC
 from money.reusing.percentage import percentage_between, Percentage
 from money.reusing.tabulator import TabulatorFromListDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -94,10 +93,11 @@ def listdict_investments(queryset, dt,  local_currency, active):
     
     if active is True:
         for investment in queryset:
-            t_io,  t_io_current, t_io_historical=investment.get_investmentsoperations_totals(dt, local_currency)
+            iot=InvestmentsOperationsTotals_from_investment(investment, dt, local_currency)
+#            t_io,  t_io_current, t_io_historical=investment.get_investmentsoperations_totals(dt, local_currency)
             basic_quotes=investment.products.basic_results()
             try:
-                daily_diff=(basic_quotes['last']-basic_quotes['penultimate'])*t_io_current["shares"]*investment.products.real_leveraged_multiplier()
+                daily_diff=(basic_quotes['last']-basic_quotes['penultimate'])*iot.io_total_current["shares"]*investment.products.real_leveraged_multiplier()
             except:
                 daily_diff=0
             list_.append({
@@ -108,11 +108,11 @@ def listdict_investments(queryset, dt,  local_currency, active):
                     "last_quote": basic_quotes['last'], 
                     "daily_difference": daily_diff, 
                     "daily_percentage":percentage_between(basic_quotes['penultimate'], basic_quotes['last']),             
-                    "invested_local": t_io_current["invested_user"], 
-                    "balance": t_io_current["balance_user"], 
-                    "gains": t_io_current["gains_gross_user"],  
-                    "percentage_invested": Percentage(t_io_current["gains_gross_user"], t_io_current["invested_user"]), 
-                    "percentage_sellingpoint": percentage_to_selling_point(t_io_current["shares"], investment.selling_price, basic_quotes['last']), 
+                    "invested_local": iot.io_total_current["invested_user"], 
+                    "balance": iot.io_total_current["balance_user"], 
+                    "gains": iot.io_total_current["gains_gross_user"],  
+                    "percentage_invested": Percentage(iot.io_total_current["gains_gross_user"], iot.io_total_current["invested_user"]), 
+                    "percentage_sellingpoint": percentage_to_selling_point(iot.io_total_current["shares"], investment.selling_price, basic_quotes['last']), 
                     "selling_expiration": investment.selling_expiration, 
                 }
             )
@@ -248,15 +248,16 @@ where
     investments.products_id=%s and 
     investments.accounts_id=%s and 
     investments.id=investmentsoperations.investments_id""", ( d_product_with_basics["id"], account.id)):
-            io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), self.request.local_currency)
+            io=investment.operations(self.request.local_currency)
             
             
-            for ioc in io_current:
+            for ioc in io.io_current:
+                o=IOC(investment, ioc)
                 ioc["name"]=investment.fullName()
-                ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
-                ioc["percentage_annual"]=Investmentsoperations.investmentsoperationscurrent_percentage_annual(ioc, d_product_with_basics)
-                ioc["percentage_apr"]=Investmentsoperations.investmentsoperationscurrent_percentage_apr(ioc)
-                ioc["percentage_total"]=Investmentsoperations.investmentsoperationscurrent_percentage_total(ioc)
+                ioc["operationstypes"]=self.request.operationstypes[ioc["operationstypes_id"]]
+                ioc["percentage_annual"]=o.percentage_annual()
+                ioc["percentage_apr"]=o.percentage_apr()
+                ioc["percentage_total"]=o.percentage_total()
                 ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
                 list_ioc.append(ioc)
         self.ld=list_ioc

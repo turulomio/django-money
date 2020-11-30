@@ -7,6 +7,7 @@ from money.models import Accounts, Products, RANGE_RECOMENDATION_CHOICES
 class AccountsTransferForm(forms.Form):
     datetime = forms.DateTimeField(required=True)
     destiny = forms.ModelChoiceField(queryset=Accounts.objects.all().filter(active=True), required=True)
+    destiny.queryset=Accounts.queryset_active_order_by_fullname()
     amount=forms.DecimalField(min_value=0, decimal_places=2, required=True)
     commission=forms.DecimalField(min_value=0, decimal_places=2, required=True)
 

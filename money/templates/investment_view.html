@@ -12,7 +12,7 @@
 <p><strong>{% trans 'Product Id' %}: </strong>{{ investment.products.fullName }}</p>
 <p><strong>{% trans 'Active' %}: </strong>{{ investment.active }}</p>
 <p><strong>{% trans 'Selling point' %}: </strong>{{ investment.selling_price }}
-{% with gains_at_selling_price=operations.current_gains_gross_user_at_selling_price %}  
+{% with gains_at_selling_price=operations.current_gains_gross_investment_at_selling_price %}  
   {% if gains_at_selling_price %}
       . {% blocktrans %} to gain {{ gains_at_selling_price }}.{% endblocktrans %}
   {% endif %}</p>
@@ -23,7 +23,7 @@
   {% endif %}</p>
 <p><strong>{% trans 'Daily adjustment' %}: </strong>{{ investment.daily_adjustment }}</p>
 <p><strong>{% trans 'Currency' %}: </strong>{{ investment.products.currency }} ({{ investment.products.currency_symbol }})</p>
-
+<p><strong>{% trans 'Leverage' %}: </strong>{{ investment.products.leverages.multiplier }} (Real: {{investment.products.real_leveraged_multiplier}})</p>
 
 <p class="orders">
   <a href="{% url 'investment_update' pk=investment.id %}">Update this investment</a> | 

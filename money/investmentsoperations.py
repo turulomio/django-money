@@ -90,13 +90,13 @@ class InvestmentsOperations:
         return r
         
     ## @param listdict_ioc
-    def current_gains_gross_user_at_selling_price(self):
+    def current_gains_gross_investment_at_selling_price(self):
         #Get selling price gains
         if self.investment.selling_price is None:
             return None
         gains=0
         for o in self.io_current:
-            gains=gains+abs(o["shares"]*(self.investment.selling_price-o['price_investment'])*self.investment.products.real_leveraged_multiplier())
+            gains=gains+o["shares"]*(self.investment.selling_price-o['price_investment'])*self.investment.products.real_leveraged_multiplier()
         return Currency(gains, self.investment.products.currency)
 
     def o_listdict_tabulator_homogeneus(self, request):
