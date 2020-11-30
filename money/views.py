@@ -669,29 +669,12 @@ def ajax_investment_pairs_evolution(request, worse, better ):
 
 @login_required
 def investment_view(request, pk):
-    investment=get_object_or_404(Investments, id=pk)
-    basic_results=investment.products.basic_results()
-    dict_ot=Operationstypes.dictionary()
-    io, io_current, io_historical=investment.get_investmentsoperations(timezone.now(), request.local_currency)
-    
-    for ioc in io_current:
-        ioc["percentage_annual"]=Investmentsoperations.investmentsoperationscurrent_percentage_annual(ioc, basic_results)
-        ioc["percentage_apr"]=Investmentsoperations.investmentsoperationscurrent_percentage_apr(ioc)
-        ioc["percentage_total"]=Investmentsoperations.investmentsoperationscurrent_percentage_total(ioc)
-        ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
-        
-    for o in io:
-        o["operationstypes"]=dict_ot[o["operationstypes_id"]]
+    investment=get_object_or_404(Investments.objects.select_related("accounts").select_related("products").select_related("products__productstypes"), id=pk)
+    operations=investment.operations(request.local_currency)
 
-    for ioh in io_historical:
-        ioh["operationstypes"]=dict_ot[ioh["operationstypes_id"]]
-        ioh["years"]=0
-        
-    gains_at_selling_price=investment.currency_gains_at_selling_price(io_current)
-
-    table_io=TabulatorInvestmentsOperationsHomogeneus("IO", "investmentoperation_update", io, investment, request.local_zone).render()
-    table_ioc=TabulatorInvestmentsOperationsCurrentHomogeneus("IOC", None, io_current, investment, request.local_zone).render()
-    table_ioh=TabulatorInvestmentsOperationsHistoricalHomogeneus("IOH", None, io_historical, investment, request.local_zone).render()
+    table_io=TabulatorInvestmentsOperationsHomogeneus("IO", "investmentoperation_update", operations.o_listdict_tabulator_homogeneus(request), investment, request.local_zone).render()
+    table_ioc=TabulatorInvestmentsOperationsCurrentHomogeneus("IOC", None, operations.current_listdict_tabulator_homogeneus(request), investment, request.local_zone).render()
+    table_ioh=TabulatorInvestmentsOperationsHistoricalHomogeneus("IOH", None, operations.historical_homogeneus_listdict_tabulator(request), investment, request.local_zone).render()
 
     qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
     listdict_dividends=listdict_dividends_from_queryset(qs_dividends)

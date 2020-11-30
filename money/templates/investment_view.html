@@ -12,9 +12,11 @@
 <p><strong>{% trans 'Product Id' %}: </strong>{{ investment.products.fullName }}</p>
 <p><strong>{% trans 'Active' %}: </strong>{{ investment.active }}</p>
 <p><strong>{% trans 'Selling point' %}: </strong>{{ investment.selling_price }}
+{% with gains_at_selling_price=operations.current_gains_gross_user_at_selling_price %}  
   {% if gains_at_selling_price %}
-      . {% blocktrans with gains_at_selling_price=gains_at_selling_price.string %} to gain {{ gains_at_selling_price }}.{% endblocktrans %}
+      . {% blocktrans %} to gain {{ gains_at_selling_price }}.{% endblocktrans %}
   {% endif %}</p>
+{% endwith %}
 <p><strong>{% trans 'Selling expiration' %}: </strong>{{ investment.selling_expiration }}
   {% if investment.selling_expiration_alert %}
       . <span class="red">{% trans 'You must set a new selling order.' %}</span>

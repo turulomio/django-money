@@ -450,6 +450,7 @@ class Investments(models.Model):
 
     
     def get_investmentsoperations(self, dt, local_currency):
+        print("DEPRECATED get_investmentsoperations")
         row_io=cursor_one_row("select * from investment_operations(%s,%s,%s)", (self.id, dt, local_currency))
         io= eval(row_io["io"])
         for d in io:
@@ -469,7 +470,11 @@ class Investments(models.Model):
 #            print (row['id'],  row['dt_end'],  row['shares'])
         return io,  current, historical
 
-
+    def operations(self, local_currency):
+        if hasattr(self, "_operations") is False:
+            from money.investmentsoperations import InvestmentsOperations_from_investment
+            self._operations=InvestmentsOperations_from_investment(self, timezone.now(), local_currency)
+        return self._operations
                 
     def hasSameAccountCurrency(self):
         """
@@ -491,16 +496,7 @@ class Investments(models.Model):
         if self.selling_expiration<date.today():
             return True
         return False
-        
-    ## @param listdict_ioc
-    def currency_gains_at_selling_price(self, listdict_ioc):
-        #Get selling price gains
-        if self.selling_price is None:
-            return None
-        gains=0
-        for ioc in listdict_ioc:
-            gains=gains+abs(ioc["shares"]*(self.selling_price-ioc['price_investment'])*ioc['real_leverages'])
-        return Currency(gains, self.products.currency)
+
 
     def queryset_for_investments_products_combos_order_by_fullname():
         ids=[]
@@ -589,40 +585,6 @@ class Investmentsoperations(models.Model):
         for o in listdict_io:
             if o["id"]==id:
                 return o
-        
-    ## @param d dictionary with investmentsoperationscurrent
-    ## @param d dictionary with basic results of investment product
-    @staticmethod
-    def investmentsoperationscurrent_percentage_annual(d_ioc, d_basic):
-        if d_ioc["datetime"].year==date.today().year:
-            lastyear=d_ioc["price_investment"] #Product value, self.money_price(type) not needed.
-        else:
-            lastyear=d_basic["lastyear"]
-        if d_basic["lastyear"] is None or lastyear is None:
-            return Percentage()
-
-        if d_ioc["shares"]>0:
-            return Percentage(d_basic["last"]-lastyear, lastyear)
-        else:
-            return Percentage(-(d_basic["last"]-lastyear), lastyear)
-        
-    @staticmethod
-    def investmentsoperationscurrent_age(d_ioc):
-            return (date.today()-d_ioc["datetime"].date()).days
-
-    @staticmethod
-    def investmentsoperationscurrent_percentage_apr(d_ioc):
-            dias=Investmentsoperations.investmentsoperationscurrent_age(d_ioc)
-            if dias==0:
-                dias=1
-            return Percentage(Investmentsoperations.investmentsoperationscurrent_percentage_total(d_ioc)*365,  dias)
-
-
-    @staticmethod
-    def investmentsoperationscurrent_percentage_total(d_ioc):
-        if d_ioc["invested_investment"] is None:#initiating xulpymoney
-            return Percentage()
-        return Percentage(d_ioc['gains_gross_investment'], d_ioc["invested_investment"])
 
 
 class Investmentsaccountsoperations(models.Model):
@@ -734,7 +696,10 @@ class Products(models.Model):
         return currency_symbol(self.currency)
 
     def basic_results(self):
-        return cursor_one_row("select * from last_penultimate_lastyear(%s,%s)", (self.id, timezone.now() ))
+        if hasattr(self, "_basic_results") is False:
+            self._basic_results=cursor_one_row("select * from last_penultimate_lastyear(%s,%s)", (self.id, timezone.now() ))
+        return self._basic_results
+        
         
     @staticmethod
     def get_d_product_with_basics(id):

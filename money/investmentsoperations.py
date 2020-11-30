@@ -1,5 +1,8 @@
+from money.reusing.currency import Currency
 from money.reusing.datetime_functions import string2dtnaive, dtaware
 from money.reusing.listdict_functions import listdict_sum
+from money.reusing.percentage import Percentage
+from datetime import date
 from decimal import Decimal
 Decimal
 
@@ -12,6 +15,42 @@ def postgres_datetime_string_2_dtaware(s):
     dt_end=dtaware(dt_end_naive.date(), dt_end_naive.time(), 'UTC')
     return dt_end
 
+## Class to manage a single investment operation crrent
+class IOC:
+    def __init__(self, investment, d_ioc):
+        self.investment=investment
+        self.d=d_ioc
+        
+                
+    def percentage_annual(self):
+        if self.d["datetime"].year==date.today().year:
+            lastyear=self.d["price_investment"] #Product value, self.money_price(type) not needed.
+        else:
+            lastyear=self.investment.products.basic_results()["lastyear"]
+        if self.investment.products.basic_results()["lastyear"] is None or lastyear is None:
+            return Percentage()
+
+        if self.d["shares"]>0:
+            return Percentage(self.investment.products.basic_results()["last"]-lastyear, lastyear)
+        else:
+            return Percentage(-(self.investment.products.basic_results()["last"]-lastyear), lastyear)
+
+    def age(self):
+            return (date.today()-self.d["datetime"].date()).days
+
+    def percentage_apr(self):
+            dias=self.age()
+            if dias==0:
+                dias=1
+            return Percentage(self.percentage_total()*365,  dias)
+
+
+    def percentage_total(self):
+        if self.d["invested_investment"] is None:#initiating xulpymoney
+            return Percentage()
+        return Percentage(self.d['gains_gross_investment'], self.d["invested_investment"])
+
+
 class IoManager:
     def __init__(self, request):
         self.request=request
@@ -23,6 +62,7 @@ class IoManager:
 ## Manage output of  investment_operations
 class InvestmentsOperations:
     def __init__(self, investment,  str_ld_io, str_ld_io_current, str_ld_io_historical):
+        self.investment=investment
         self.io=eval(str_ld_io)
         for o in self.io:
             o["datetime"]=postgres_datetime_string_2_dtaware(o["datetime"])
@@ -48,6 +88,37 @@ class InvestmentsOperations:
             if dt_from<=o["dt_end"] and o["dt_end"]<=dt_to:
                 r=r + o["gains_net_user"]
         return r
+        
+    ## @param listdict_ioc
+    def current_gains_gross_user_at_selling_price(self):
+        #Get selling price gains
+        if self.investment.selling_price is None:
+            return None
+        gains=0
+        for o in self.io_current:
+            gains=gains+abs(o["shares"]*(self.investment.selling_price-o['price_investment'])*self.investment.products.real_leveraged_multiplier())
+        return Currency(gains, self.investment.products.currency)
+
+    def o_listdict_tabulator_homogeneus(self, request):
+        for o in self.io:
+            o["operationstypes"]=request.operationstypes[o["operationstypes_id"]]
+        return self.io        
+
+    def current_listdict_tabulator_homogeneus(self, request):
+        for ioc in self.io_current:
+            o=IOC(self.investment, ioc)
+            ioc["percentage_annual"]=o.percentage_annual()
+            ioc["percentage_apr"]=o.percentage_apr()
+            ioc["percentage_total"]=o.percentage_total()
+            ioc["operationstypes"]=request.operationstypes[ioc["operationstypes_id"]]
+        return self.io_current
+        
+    def historical_homogeneus_listdict_tabulator(self, request):
+        for ioh in self.io_historical:
+            ioh["operationstypes"]=request.operationstypes[ioh["operationstypes_id"]]
+            ioh["years"]=0
+        return self.io_historical
+        
                 
 def InvestmentsOperations_from_investment( investment, dt, local_currency):
     row_io= cursor_one_row("select * from investment_operations(%s,%s,%s)", (investment.pk, dt, local_currency))

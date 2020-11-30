@@ -1,5 +1,5 @@
 from money import __version__, __versiondate__
-from money.models import Globals
+from money.models import Globals, Operationstypes
 from money.reusing.currency import currency_symbol
 from money.templatetags.mymenu import Menu, Action,  Group
 from django.utils.translation import gettext_lazy as _
@@ -50,6 +50,11 @@ class MoneyMiddleware:
         self.menu.append(grReport)
         self.menu.append(Action(_("Strategies"), None,  "strategy_list_active",  True))
         self.menu.append(grAdministration)
+        
+        
+        self.dict_operationstypes=Operationstypes.dictionary()
+        
+        
         print(_("Middleware start time took {} seconds".format(time.time()-start)))
 
     def __call__(self, request):
@@ -68,6 +73,7 @@ class MoneyMiddleware:
         request.VERSION=__version__
         request.VERSIONDATE=__versiondate__
         request.menu=self.menu
+        request.operationstypes=self.dict_operationstypes
         globals=Globals.objects.all()
         request.globals={}
         for g in globals:
