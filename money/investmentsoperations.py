@@ -92,7 +92,7 @@ class InvestmentsOperations:
     ## @param listdict_ioc
     def current_gains_gross_investment_at_selling_price(self):
         #Get selling price gains
-        if self.investment.selling_price is None:
+        if self.investment.selling_price in (None, 0):
             return None
         gains=0
         for o in self.io_current:
