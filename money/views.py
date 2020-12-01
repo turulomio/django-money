@@ -1,5 +1,5 @@
 import asyncio
-from datetime import  date, datetime
+from datetime import  date, datetime, timedelta
 from decimal import Decimal
 from django import forms
 from django.core.exceptions import ValidationError
@@ -424,11 +424,21 @@ class accountoperation_new(CreateView):
     def get_initial(self):
         d={}
         if self.kwargs['dt']==0:
-            d["datetime"]= str(dtaware_changes_tz(timezone.now(), self.request.local_zone))
+            dt_=dtaware_changes_tz(timezone.now(), self.request.local_zone)
         else:
-            d["datetime"]= str(dtaware_changes_tz(epochmicros2dtaware(self.kwargs['dt']), self.request.local_zone))
+            dt_=dtaware_changes_tz(epochmicros2dtaware(self.kwargs['dt']), self.request.local_zone)
+        d["datetime"]= str(dt_)
         if self.kwargs['concepts_id']!=0:
             d["concepts"]=Concepts.objects.get(pk=self.kwargs['concepts_id'])
+
+        account=Accounts.objects.get(pk=self.kwargs['accounts_id'])
+        from_=dt_- timedelta(days=5)
+        to_=dt_+ timedelta(days=5)
+        initial_balance=float(account.balance( from_, self.request.local_currency)[0].amount)
+        qsaccountoperations= Accountsoperations.objects.all().select_related("concepts").filter(accounts_id=account.id, datetime__gte=from_,  datetime__lte=to_).order_by('datetime')
+        listdic_accountsoperations=listdict_accountsoperations_from_queryset(qsaccountoperations, initial_balance)
+        self.table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", listdic_accountsoperations, account.currency, self.request.local_zone).render()
+
         return d
     
     def get_success_url(self):
@@ -441,7 +451,7 @@ class accountoperation_new(CreateView):
                 (form.instance.concepts.operationstypes.id==eOperationType.DerivativeManagement)
             ):
             form.instance.accounts=Accounts.objects.get(pk=self.kwargs['accounts_id'])
-            form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes
+            form.instance.operationstypes = form.cleaned_data["concepts"].operationstypes    
             return super().form_valid(form)
         else:
             if form.instance.concepts.operationstypes.id==eOperationType.Expense and form.instance.amount>=0:
