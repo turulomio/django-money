@@ -29,7 +29,7 @@ if (column !== false){//Only for active investments
     for (var row of table.getRows()) {
         var dat=row.getData();
         var date = moment(dat.selling_expiration, "YYYY-MM-DD");
-        if (date.isValid() && date< moment()){
+        if (date.isValid() && date< moment().startOf('day')){
             cell=row.getCell("percentage_sellingpoint");
             cell.getElement().style.backgroundRepeat= 'no-repeat';
             cell.getElement().style.backgroundPosition= '3px 3px';
