@@ -206,31 +206,30 @@ def product_view(request, pk):
 @timeit
 @login_required
 def product_ranges(request):
+    print(request.globals)
     if request.method == 'POST':
         form = ProductsRangeForm(request.POST)
         if form.is_valid():
-#            if form.cleaned_data['commission']>0:
-#                ao_commission=Accountsoperations()
-#                ao_commission.datetime=form.cleaned_data['datetime']
-#                concept_commision=Concepts.objects.get(pk=eConcept.BankCommissions)
-#                ao_commission.concepts=concept_commision
-#                ao_commission.operationstypes=concept_commision.operationstypes
-#                ao_commission.amount=-form.cleaned_data['commission']
-#                ao_commission.accounts=origin
-#                ao_commission.save()
-#            else:
-#                ao_commission=None
+            print("BIEN")
+            from money.productrange import ProductRangeManager
+            prm=ProductRangeManager(request, form.cleaned_data['products'], form.cleaned_data['percentage_between_ranges'], form.cleaned_data['percentage_gains'])
 
-           return HttpResponseRedirect( reverse_lazy('product_ranges'))
+            return render(request, 'product_ranges.html', locals())
+        else:
+            print("MAL")
+
+
     else:
         form = ProductsRangeForm()
 #        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
 #        form.fields['datetime'].widget.attrs['localzone'] =request.local_zone
 #        form.fields['datetime'].widget.attrs['locale'] =request.LANGUAGE_CODE
 #        form.fields['datetime'].initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
-        form.fields['percentage_between_ranges'].initial=5
-        form.fields['percentage_gains'].initial=15
-        form.fields['amount_to_invest'].initial=5000
+        products=Products.objects.get(pk=request.globals['wdgProductRange__product'])
+        form.fields["products"].initial=products
+        form.fields['percentage_between_ranges'].initial=request.globals[f'wdgProductRange__spnDown_product_{products.id}']
+        form.fields['percentage_gains'].initial=request.globals[f'wdgProductRange__spnGains_product_{products.id}']
+        form.fields['amount_to_invest'].initial=request.globals[f'wdgProductRange__invest_product_{products.id}']
   
     return render(request, 'product_ranges.html', locals())
 

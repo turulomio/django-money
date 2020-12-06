@@ -733,6 +733,32 @@ class Products(models.Model):
     def qs_products_of_investments():
         return Products.objects.filter(id__in=RawSQL('select products.id from products, investments where products.id=investments.products_id', ()))
 
+
+    def highest_investment_operation_price(self):
+        return cursor_one_field("""
+select 
+    max(price) 
+from 
+    investmentsoperations, 
+    investments 
+where 
+    products_id=%s and 
+    investmentsoperations.investments_id=investments.id
+""", (self.id, ))    
+
+    def lowest_investment_operation_price(self):
+        return cursor_one_field("""
+select 
+    min(price) 
+from 
+    investmentsoperations, 
+    investments 
+where 
+    products_id=%s and 
+    investmentsoperations.investments_id=investments.id
+""", (self.id, ))
+        
+
 class Productstypes(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.TextField()

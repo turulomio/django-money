@@ -12,7 +12,6 @@ class AccountsTransferForm(forms.Form):
     commission=forms.DecimalField(min_value=0, decimal_places=2, required=True)
 
 class ProductsRangeForm(forms.Form):
-
     products = forms.ModelChoiceField(queryset=Products.qs_products_of_investments(), required=True)
     percentage_between_ranges = forms.DecimalField(min_value=0, decimal_places=2, required=True)
     percentage_gains=forms.DecimalField(min_value=0, decimal_places=2, required=True)
