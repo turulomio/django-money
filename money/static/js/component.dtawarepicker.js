@@ -4,8 +4,6 @@ class InputDatetime extends HTMLInputElement {
     super();
     this.format_naive="YYYY-MM-DD HH:mm:ss";
     this.format_aware="YYYY-MM-DD HH:mm:ssZ";
-
-    this.addEventListener('click', e => this.changeDisplay());
   }
 
   connectedCallback(){
@@ -14,21 +12,24 @@ class InputDatetime extends HTMLInputElement {
     }else{
         this.locale="en";
     }
+    
     if (this.hasAttribute("localzone")){
       this.localzone=this.getAttribute("localzone");
     }else{
       this.localzone="UTC";
     }
 
+    
+    this.parentNode.style.display="flex";//td
+    
     this.div=document.createElement("div")
     this.div.hidden=true;
     
     this.button=document.createElement("button");
     this.button.setAttribute("type","button");
-    this.button.innerHTML="<"; 
+    this.button.innerHTML=">";
     this.button.addEventListener("click", (event) => {
-      this.div.hidden=true;
-      this.value=this.widget2string();
+        this.changeDisplay();
     });
 
     this.buttonToday=document.createElement("button");
@@ -43,9 +44,7 @@ class InputDatetime extends HTMLInputElement {
 
 
     this.input=document.createElement("input");
-    this.input.addEventListener('change', (event) => {
-      this.value=this.widget2string();
-    });
+
 
     this.inputms=document.createElement("input")
     this.inputms.addEventListener('change', (event) => {
@@ -62,7 +61,6 @@ class InputDatetime extends HTMLInputElement {
 
     this.select.value=this.localzone;
 
-    this.div.appendChild(this.button);
     this.div.appendChild(this.input);
     this.div.appendChild(this.inputms);
     this.div.appendChild(this.select);
@@ -81,10 +79,18 @@ class InputDatetime extends HTMLInputElement {
       dayOfWeekStart: this.firstDay,
     });
     
+    var this_=this;
+    jQuery(this.input).on('change', function () {
+       this_.value=this_.widget2string();
+     });
+    
     jQuery.datetimepicker.setLocale(this.locale);
 
-    this.insertAdjacentElement("afterend",this.div) ;
+    this.insertAdjacentElement("afterend",this.button) ;
+    this.button.insertAdjacentElement("afterend",this.div) ;
   }
+
+  //Converts 3 widgets value to a string
   widget2string(){
     var dtaware=moment.tz(this.input.value, this.select.value);
     var date=dtaware.format("YYYY-MM-DD HH:mm:ss");
@@ -92,6 +98,7 @@ class InputDatetime extends HTMLInputElement {
     return date.concat(".")+this.inputms.value + tz;
   }
 
+  //Converts string to 3 widgets values 
   string2widget(s){
     var spl=s.split(".");
     if (spl.length==1){//Without ms 
@@ -107,10 +114,14 @@ class InputDatetime extends HTMLInputElement {
 
   changeDisplay(){
     if (this.div.hidden==true){
+      this.hidden=true;
       this.string2widget(this.value);
       this.div.hidden=false;
+      this.button.innerHTML="<";
     } else {
+      this.hidden=false;
       this.div.hidden=true;
+      this.button.innerHTML=">";
     }
   }
 }
