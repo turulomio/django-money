@@ -1,22 +1,24 @@
+from datetime import date
 from decimal import Decimal
-from xulpymoney.libmanagers import ObjectManager
-from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
-
-class ProductRangeInvestRecomendation:
-    None_=0
-    All=1
-    ThreeSMA=2
-    SMA100=3
+from django.utils import timezone
+from xulpymoney.libmanagers import ObjectManager, DatetimeValueManager
+from money.models import Investments, Orders
+from money.reusing.tabulator import TabulatorFromListDict
+from money.reusing.currency import Currency
+from money.reusing.percentage import Percentage
+from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset
 
 class ProductRange():
-    def __init__(self, request,  id=None,  product=None,  value=None, percentage_down=None,  percentage_up=None, decimals=2):
+    def __init__(self, request,  id=None,  product=None,  value=None, percentage_down=None,  percentage_up=None, only_first=True, only_account=None, decimals=2):
         self.request=request
         self.id=id
         self.product=product
         self.value=value
         self.percentage_down=percentage_down
         self.percentage_up=percentage_up
+        self.only_first=only_first
+        self.only_account=only_account
         self.decimals=decimals
         self.recomendation_invest=False
         self.recomendation_reinvest=False
@@ -47,56 +49,41 @@ class ProductRange():
             return True
         else:
             return False
-        
-    ## Search for investments in self.mem.data and 
-    def getInvestmentsInside(self):
-        r=InvestmentManager(self.mem)
-        for o in self.mem.data.investments.InvestmentManager_with_investments_with_the_same_product(self.product).arr:
-            for op in o.op_actual.arr:
-                if self.isInside(op.price)==True:
-                    r.append(o)
-        return r        
 
     ## Search for investments in self.mem.data and 
-    def getInvestmentsOperationsInside(self, only_first, only_account):
-        r=InvestmentOperationCurrentHeterogeneusManager(self.mem)
-        for o in self.mem.data.investments.InvestmentManager_with_investments_with_the_same_product(self.product).arr:
-            if only_account>=0:#If different account continues
-                if o.account.id != only_account:
+    def getInvestmentsOperationsInside(self, iom):
+        r=[]
+        for io in iom.list:
+            if self.only_account is not None:#If different account continues
+                if io.investment.accounts.id != self.only_account.id:
                     continue
             
-            for op in o.op_actual.arr:
-                if only_first is True:#Only first when neccesary
-                    if o.op_actual.arr.index(op)!=0:
+            for op in io.io_current:
+                if self.only_first is True:#Only first when neccesary
+                    if io.io_current.index(op)!=0:
                         continue
-                if self.isInside(op.price)==True:
-                    r.append(op)
+                if self.isInside(op["price_investment"])==True:
+                    print(op)
+                    r.append(f"{io.investment.fullName()}. Invested: {Currency(op[ 'invested_user'], io.investment.products.currency)}")
         return r
         
     ## Search for orders in self.mem.data and 
-    def getOrdersInside(self, only_account): 
-        orders=OrderManager(self.mem).init__from_db("""
-            SELECT * 
-            FROM 
-                ORDERS
-            WHERE
-                EXPIRATION>=NOW()::DATE AND
-                EXECUTED IS NULL
-            ORDER BY DATE
-       """)
-        r=OrderManager(self.mem)
-        for o in orders.arr:
-            if only_account>=0:#If different account continues
-                if o.investment.account.id != only_account:
+    def getOrdersInside(self, orders): 
+        r=[]
+        for o in orders:
+            if self.only_account is not None:#If different account continues
+                if o.investments.accounts.id != self.only_account.id:
                     continue
-            if o.investment.product==self.product and self.isInside(o.price)==True:
-                r.append(o)
+            if o.investments.products.id==self.product.id and self.isInside(o.price)==True:
+                r.append(f"{o.investments.fullName()}. Amount: {o.currency_amount()}")
         return r
       
 
 class ProductRangeManager(ObjectManager):
-    def __init__(self, request, product, percentage_down, percentage_up, decimals=2):
+    def __init__(self, request, product, percentage_down, percentage_up, only_first=True, only_account=None, decimals=2):
         ObjectManager.__init__(self)
+        self.only_first=only_first
+        self.only_account=only_account
         self.request=request
         self.product=product
         self.percentage_down=Percentage(percentage_down, 100)
@@ -105,7 +92,6 @@ class ProductRangeManager(ObjectManager):
         
         max_=self.product.highest_investment_operation_price()
         min_=self.product.lowest_investment_operation_price()
-        print(max_, min_)
         
         
         if max_ is not None and min_ is not None: #Investment with shares
@@ -114,8 +100,6 @@ class ProductRangeManager(ObjectManager):
         else: # No investment jet and shows ranges from product current price
             range_highest=self.product.result.basic.last.quote*Decimal(1+self.percentage_down.value*10)#5 times up value
             range_lowest=self.product.result.basic.last.quote*Decimal(1-self.percentage_down.value*10)#5 times down value
-
-        print(range_highest, range_lowest, self.percentage_down.value)
 
         if range_lowest<Decimal(0.001):#To avoid infinity loop
             range_lowest=Decimal(0.001)
@@ -127,26 +111,35 @@ class ProductRangeManager(ObjectManager):
         i=0
         while current_value>range_lowest:
             if current_value>=range_lowest and current_value<=range_highest:
-                self.append(ProductRange(self.request,  i, self.product,current_value, self.percentage_down, percentage_up))
+                self.append(ProductRange(self.request,  i, self.product,current_value, self.percentage_down, percentage_up, self.only_first, self.only_account))
             current_value=current_value*(1-self.percentage_down.value)
             i=i+1
-            
-        print(self.arr)
 
+        self.qs_investments=Investments.objects.select_related("accounts").filter(active=True, products_id=self.product.id)
+        self.iom=InvestmentsOperationsManager_from_investment_queryset(self.qs_investments, timezone.now(), self.request)
+        
+        self.orders=Orders.objects.select_related("investments").select_related("investments__accounts").select_related("investments__products").select_related("investments__products__leverages").select_related("investments__products__productstypes").filter(executed=None, expiration__gte=date.today())
+
+        
     ## @return LIst of range values of the manager
     def list_of_range_values(self):
         return self.list_of("value")
 
     ## Set investment recomendations to all ProductRange objects in array 
     def setInvestRecomendation(self, method, method1_smas=[10, 50, 200]):
-        if method==ProductRangeInvestRecomendation. None_:
+        method=int(method)
+        if method==0:#ProductRangeInvestRecomendation. None_:
             for o in self.arr:
                 o.recomendation_invest=False
-        elif method==ProductRangeInvestRecomendation.All:
+        elif method==1:#ProductRangeInvestRecomendation.All:
             for o in self.arr:
                 o.recomendation_invest=True
-        elif method==ProductRangeInvestRecomendation.ThreeSMA:      
-            dvm=self.product.result.ohclDaily.DatetimeValueManager("close")
+        elif method==2:#ProductRangeInvestRecomendation.ThreeSMA:      
+            list_ohcl=self.product.ohclDailyBeforeSplits()
+            dvm=DatetimeValueManager()
+            for d in list_ohcl:
+                dvm.appendDV(d["date"], d["close"])
+#            dvm=self.product.result.ohclDaily.DatetimeValueManager("close")
             dvm_smas=[]
             for sma in method1_smas:
                 dvm_smas.append(dvm.sma(sma))
@@ -159,7 +152,7 @@ class ProductRangeManager(ObjectManager):
                     o.recomendation_invest=True
                 elif number_sma_over_price<=1:
                     o.recomendation_invest=True
-        elif method==ProductRangeInvestRecomendation.SMA100:           
+        elif method==3: #ProductRangeInvestRecomendation.SMA100:           
             dvm=self.product.result.ohclDaily.DatetimeValueManager("close")
             dvm_smas=[]
             for sma in [100, ]:
@@ -174,55 +167,23 @@ class ProductRangeManager(ObjectManager):
                 else: #number_sma_over_price=1 and o.id%4!=0
                     o.recomendation_invest=False
 
-
     def listdict(self):
         r=[]
         for i, o in enumerate(self.arr):
             r.append({
                 "value": int(o.value), 
-                "recomendation_invest":o.recomendation_invest, 
-                "investments_inside":"", 
-                "orders_inside":"", 
+                "recomendation_invest": o.recomendation_invest, 
+                "investments_inside": o.getInvestmentsOperationsInside(self.iom), 
+                "orders_inside": o.getOrdersInside(self.orders), 
             })
         return r
                     
     def tabulator(self):
-        from money.reusing.tabulator import TabulatorFromListDict
-        print ("AQUIN")
         r=TabulatorFromListDict("productrange_table")
         r.setDestinyUrl(None)
         r.setLocalZone(self.request.local_zone)
         r.setListDict(self.listdict())
         r.setFields("id","value","recomendation_invest", "investments_inside","orders_inside")
         r.setHeaders("Id", _("Value"), _("Recomendation"),  _("Investments"),  _("Orders"))
-        r.setTypes("int","int", "boolean", "str",  "str")
+        r.setTypes("int","int", "bool", "str",  "str")
         return r.render()
-            
-#    def mqtw(self, wdg, only_first, only_account):
-#        data=[]
-#        for i, o in enumerate(self.arr):
-#            data.append([
-#                o.value, 
-#                o.recomendation_invest, 
-#                o.getInvestmentsOperationsInside(only_first, only_account).string_with_names(), 
-#                o.getOrdersInside( only_account).string_with_names(), 
-#                o, 
-#            ])
-#        wdg.setDataWithObjects(
-#            [self.tr("Center"), self.tr("Invest"), self.tr("Product operations"), self.tr("Product orders"),
-#            ], 
-#            None, 
-#            data,  
-#            decimals=[self.decimals, 0, 6, 6, 0, 0, 0], 
-#            zonename=self.mem.localzone_name, 
-#            additional=self.mqtw_additional
-#        )   
-#        
-#    def mqtw_additional(self, wdg):
-#        for i, o in enumerate(wdg.objects()):
-#            if o.isInside(o.product.result.basic.last.quote)==True:
-#                wdg.table.item(i, 0).setBackground(eQColor.Green)
-#                wdg.table.scrollToItem(wdg.table.item(i, 0), QAbstractItemView.PositionAtCenter)
-#                wdg.table.selectRow(i)
-#                wdg.table.clearSelection()
-#        

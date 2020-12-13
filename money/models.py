@@ -25,12 +25,11 @@ from money.reusing.percentage import Percentage
 from xulpymoney.libxulpymoneytypes import eProductType, eComment, eConcept, eOperationType
 
 RANGE_RECOMENDATION_CHOICES =( 
-    ("1", "One"), 
-    ("2", "Two"), 
-    ("3", "Three"), 
-    ("4", "Four"), 
-    ("5", "Five"), 
-) 
+    (0, _("None")), 
+    (1, _("All")), 
+    (2, _("Three SMA")), 
+    (3, _("SMA 100")), 
+)
 
 class Accounts(models.Model):
     name = models.TextField(blank=True, null=True)
@@ -668,6 +667,9 @@ class Orders(models.Model):
     class Meta:
         managed = False
         db_table = 'orders'
+        
+    def currency_amount(self):
+        return Currency(self.price*self.shares*self.investments.products.real_leveraged_multiplier())
 
 
 class Products(models.Model):
@@ -732,6 +734,10 @@ class Products(models.Model):
     @staticmethod
     def qs_products_of_investments():
         return Products.objects.filter(id__in=RawSQL('select products.id from products, investments where products.id=investments.products_id', ()))
+        
+    @staticmethod
+    def qs_products_of_active_investments():
+        return Products.objects.filter(id__in=RawSQL('select products.id from products, investments where products.id=investments.products_id and investments.active is true', ()))
 
 
     def highest_investment_operation_price(self):

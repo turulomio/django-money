@@ -22,6 +22,7 @@ from money.charts import (
     chart_lines_total, 
     chart_product_quotes_historical, 
 )
+from money.productrange import ProductRangeManager
 from money.tables import (
     TabulatorDividends, 
     TabulatorReportConcepts, 
@@ -206,27 +207,17 @@ def product_view(request, pk):
 @timeit
 @login_required
 def product_ranges(request):
-    print(request.globals)
     if request.method == 'POST':
         form = ProductsRangeForm(request.POST)
         if form.is_valid():
-            print("BIEN")
-            from money.productrange import ProductRangeManager
-            prm=ProductRangeManager(request, form.cleaned_data['products'], form.cleaned_data['percentage_between_ranges'], form.cleaned_data['percentage_gains'])
-
+            prm=ProductRangeManager(request, form.cleaned_data['products'], form.cleaned_data['percentage_between_ranges'], form.cleaned_data['percentage_gains'], form.cleaned_data['only_first'], form.cleaned_data["accounts"])
+            prm.setInvestRecomendation(form.cleaned_data['recomendation_methods'])
             return render(request, 'product_ranges.html', locals())
-        else:
-            print("MAL")
-
-
     else:
         form = ProductsRangeForm()
-#        form.fields['datetime'].widget.attrs['is'] ='input-datetime'
-#        form.fields['datetime'].widget.attrs['localzone'] =request.local_zone
-#        form.fields['datetime'].widget.attrs['locale'] =request.LANGUAGE_CODE
-#        form.fields['datetime'].initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
         products=Products.objects.get(pk=request.globals['wdgProductRange__product'])
         form.fields["products"].initial=products
+        form.fields["only_first"].initial=True
         form.fields['percentage_between_ranges'].initial=request.globals[f'wdgProductRange__spnDown_product_{products.id}']
         form.fields['percentage_gains'].initial=request.globals[f'wdgProductRange__spnGains_product_{products.id}']
         form.fields['amount_to_invest'].initial=request.globals[f'wdgProductRange__invest_product_{products.id}']
