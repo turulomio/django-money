@@ -231,6 +231,7 @@ class TabulatorOrders(TabulatorFromListDict):
         self.setFields("id", "date", "expiration", "name", "currency","shares", "price", "amount", "percentage_from_price","executed")
         self.setHeaders(_("Id"), _("Date"),_("Expiration"), _("Investment"), _("Currency"),   _("Shares"), _("Price"), _("Amount"), _("% from price"), _("Executed"))
         self.setTypes("int", "str", "str", "str",  "str",   "Decimal", "Decimal", "Decimal", "percentage","str")
+        self.setBottomCalc(None, None, None, None, None,None,None,"sum", None, None)        
         
 
 class TabulatorReportTotal(TabulatorFromListDict):
