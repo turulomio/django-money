@@ -1,3 +1,4 @@
+// This class is used as a datetime input in django
 
 class InputDatetime extends HTMLInputElement {
   constructor() {
@@ -36,7 +37,7 @@ class InputDatetime extends HTMLInputElement {
     this.buttonToday.setAttribute("type","button");
     this.buttonToday.innerHTML="Today";
     this.buttonToday.addEventListener("click", (event) => {
-      var dtaware=moment.tz();
+      var dtaware=moment.tz(this.localzone);
       this.string2widget(dtaware.format("YYYY-MM-DD HH:mm:ss"));
       this.value=this.widget2string();
       
