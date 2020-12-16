@@ -313,7 +313,7 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
             price_better=money_convert(ioc_better[i]["datetime"], ioc_better[i]["price_investment"], product_better.currency, product_worse.currency)
             percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], ioc_worse[i]["price_investment"])
             percentage_year_better=percentage_between(first_price_better, price_better)
-            price_ratio=ioc_worse[i]["price_investment"]/price_better
+            price_ratio=price_better/ioc_worse[i]["price_investment"]
             invested=abs(ioc_better[i]["invested_user"])+abs(ioc_worse[i]["invested_user"])
             l.append({
                 "datetime":ioc_better[i ]["datetime"], 
@@ -333,7 +333,7 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
             "invested": 0, 
             "price_worse": basic_results_worse["last"], 
             "price_better": price_better, 
-            "price_ratio": basic_results_worse["last"]/price_better, 
+            "price_ratio": price_better/basic_results_worse["last"], 
             "percentage_year_worse": percentage_year_worse, 
             "percentage_year_better": percentage_year_better, 
             "percentage_year_diff": percentage_year_worse-percentage_year_better, 
@@ -347,7 +347,7 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
         sum_inv_pr=0
         for i in range(len(self.ioc_better)):            
             price_better=money_convert(self.ioc_better[i]["datetime"], self.ioc_better[i]["price_investment"], self.product_better.currency, self.product_worse.currency)
-            price_ratio=self.ioc_worse[i]["price_investment"]/price_better
+            price_ratio=price_better/self.ioc_worse[i]["price_investment"]
             invested=abs(self.ioc_better[i]["invested_user"])+abs(self.ioc_worse[i]["invested_user"])
             sum_inv=sum_inv+invested
             sum_inv_pr=sum_inv_pr+invested*price_ratio
@@ -367,9 +367,26 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
 def listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_quotes, basic_results_worse,   basic_results_better):
     l=[]
     last_pr=Percentage(0, 1)
-    first_pr=common_quotes[0]["a_open"]/common_quotes[0]["b_open"]
+    first_pr=common_quotes[0]["b_open"]/common_quotes[0]["a_open"]
     for row in common_quotes:#a worse, b better
-        pr=row["a_open"]/row["b_open"]
+        pr=row["b_open"]/row["a_open"]
+        l.append({
+            "datetime": row["date"], 
+            "price_worse": row["a_open"], 
+            "price_better": row["b_open"], 
+            "price_ratio": pr, 
+            "price_ratio_percentage_from_start": percentage_between(first_pr, pr), 
+            "price_ratio_percentage_month_diff": percentage_between(last_pr, pr)
+        })
+        last_pr=pr
+    return l
+
+def listdict_products_pairs_evolution_to_filter_reinvest(product_worse, product_better, common_quotes, basic_results_worse,   basic_results_better):
+    l=[]
+    last_pr=Percentage(0, 1)
+    first_pr=common_quotes[0]["b_open"]/common_quotes[0]["a_open"]
+    for row in common_quotes:#a worse, b better
+        pr=row["b_open"]/row["a_open"]
         l.append({
             "datetime": row["date"], 
             "price_worse": row["a_open"], 

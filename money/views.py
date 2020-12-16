@@ -540,9 +540,6 @@ def investment_pairs(request, worse, better, accounts_id):
     ldo_products_evolution=LdoProductsPairsEvolution(request,"LdoProductsPairsEvolution")
     ldo_products_evolution.set_from_db_and_variables(product_worse, product_better, ldo_ioc_worse.ld, ldo_ioc_better.ld, basic_results_worse,  basic_results_better)
     
-    price_ratio_of_100=100##TODO
-    price_ratio_to_gain_100=ldo_products_evolution.price_ratio_ponderated_average()*(pair_invested+100)/pair_invested
-    
     #Variables to calculate reinvest loses
     gains=ldo_ioc_better.sum("gains_gross_user")+ldo_ioc_worse.sum("gains_gross_user")
     return render(request, 'investment_pairs.html', locals())

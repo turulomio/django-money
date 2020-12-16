@@ -29,6 +29,10 @@
 
 <p>{% blocktrans with pair_gains=pair_gains %}Current pair balance is {{ pair_gains }}.{% endblocktrans %}</p>
 
+<h2>{% trans "Pair reinvest filters" %}</h2>
+
+
+
 
 <h2>{% trans "Next investment calculator" %}</h2>
 
@@ -68,8 +72,6 @@ $(document).ready(function() {
 <h2>{% trans "Products evolution" %}</h2>
 {{ldo_products_evolution.tabulator|safe}}
 <p>{% trans "Ponderated average price ratio: " %}{{ ldo_products_evolution.price_ratio_ponderated_average}}</p>
-<p>{% trans "Price ratio to gain 100 €: " %}{{ price_ratio_to_gain_100 }}</p>
-
 
 
 <h2>{% trans "Pair historical evolution" %}</h2>
