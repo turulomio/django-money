@@ -294,6 +294,8 @@ where
     def balance_cfd(self):
         return Currency(self.invested()+self.gains_gross_user(), self.request.local_currency)
 
+
+#GOOD JOB
 class LdoProductsPairsEvolution(LdoDjangoMoney):
     def __init__(self, request, name):
         LdoDjangoMoney.__init__(self, request, name)        
@@ -308,35 +310,32 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
 
         ## Get listdict
         l=[]
-        first_price_better=money_convert(ioc_better[0]["datetime"], ioc_better[0]["price_investment"], product_better.currency, product_worse.currency)
+        first_pr=0
         for i in range(len(ioc_better)):
             price_better=money_convert(ioc_better[i]["datetime"], ioc_better[i]["price_investment"], product_better.currency, product_worse.currency)
-            percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], ioc_worse[i]["price_investment"])
-            percentage_year_better=percentage_between(first_price_better, price_better)
-            price_ratio=price_better/ioc_worse[i]["price_investment"]
+            price_worse=ioc_worse[i]["price_investment"]
+            price_ratio=price_better/price_worse
+            if i==0:
+                first_pr=price_ratio
             invested=abs(ioc_better[i]["invested_user"])+abs(ioc_worse[i]["invested_user"])
             l.append({
                 "datetime":ioc_better[i ]["datetime"], 
                 "invested": invested, 
-                "price_worse": ioc_worse[i]["price_investment"], 
+                "price_worse": price_worse, 
                 "price_better": price_better, 
                 "price_ratio": price_ratio, 
-                "percentage_year_worse": percentage_year_worse, 
-                "percentage_year_better": percentage_year_better, 
-                "percentage_year_diff": percentage_year_worse-percentage_year_better, 
+                "percentage_pr": percentage_between(first_pr, price_ratio),
             })
-        price_better=money_convert(timezone.now(), basic_results_better["last"], product_better.currency, product_worse.currency)
-        percentage_year_worse=percentage_between(ioc_worse[0]["price_investment"], basic_results_worse["last"]) 
-        percentage_year_better=percentage_between(first_price_better, price_better)
+        price_better_last=money_convert(timezone.now(), basic_results_better["last"], product_better.currency, product_worse.currency)
+        price_worse_last=basic_results_worse["last"]
+        price_ratio_last=price_better_last/price_worse_last
         l.append({
             "datetime":timezone.now(), 
             "invested": 0, 
-            "price_worse": basic_results_worse["last"], 
-            "price_better": price_better, 
-            "price_ratio": price_better/basic_results_worse["last"], 
-            "percentage_year_worse": percentage_year_worse, 
-            "percentage_year_better": percentage_year_better, 
-            "percentage_year_diff": percentage_year_worse-percentage_year_better, 
+            "price_worse": price_worse_last, 
+            "price_better": price_better_last, 
+            "price_ratio": price_better_last/price_worse_last, 
+            "percentage_pr": percentage_between(first_pr, price_ratio_last),
         })
         l= sorted(l,  key=lambda item: item['datetime'])
         self.ld=l
@@ -358,9 +357,9 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
         r.setDestinyUrl(None)
         r.setLocalZone(self.request.local_zone)
         r.setListDict(self.ld)
-        r.setFields("datetime", "invested",  "price_worse","price_better","price_ratio", "percentage_year_worse", "percentage_year_better", "percentage_year_diff")
-        r.setHeaders(_("Date and time"), _("Invested"), _("Price worse"), _("Price better"), _("Price ratio"), _("% year worse"), _("% year better"), _("% year diff"))
-        r.setTypes("datetime", self.request.local_currency, self.request.local_currency, self.request.local_currency, "Decimal6", "percentage", "percentage", "percentage")
+        r.setFields("datetime", "invested",  "price_better","price_worse","price_ratio", "percentage_pr")
+        r.setHeaders(_("Date and time"), _("Invested"), _("Price better"), _("Price worse"), _("Price ratio"), _("% price ratio from start"))
+        r.setTypes("datetime", self.request.local_currency, self.request.local_currency, self.request.local_currency, "Decimal6", "percentage")
         r.showLastRecord(False)
         return r.render()
 
