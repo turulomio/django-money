@@ -100,10 +100,13 @@ from money.models import (
 from xulpymoney.libxulpymoneytypes import eConcept, eComment, eProductType, eOperationType
 
 @login_required
+@transaction.atomic
 def order_execute(request, pk):
     order=get_object_or_404(Orders, id=pk)
     order.executed=timezone.now()
     order.save()
+    order.investments.active=True
+    order.investments.save()
     return HttpResponseRedirect(f"{reverse('investmentoperation_new', args=(order.investments.id, ))}?shares={order.shares}&price={order.price}")
 
 @login_required
