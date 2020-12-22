@@ -437,16 +437,21 @@ span.red{
 /*My table*/
 table.mytable{
   border: 1px solid black;
+  padding:2px;
 }
 
 table.mytable th{
   border: 1px solid black;
   text-align:center;
+  padding:2px;
+
 }
 table.mytable tr{
   border: 1px solid black;
+  padding:2px;
 }
 table.mytable td{
   border: 1px solid black;
+  padding:2px;
 }
     

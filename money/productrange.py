@@ -124,6 +124,31 @@ class ProductRangeManager(ObjectManager):
     def list_of_range_values(self):
         return self.list_of("value")
 
+
+    ## Returns a list of sma from smas, which dt values are over price parameter
+    ## @param dt. datetime
+    ## @param price Decimal to compare
+    ## @param smas List of integers with the period of the sma
+    ## @param dvm_smas. List of DatetimeValueManager with the SMAS with integers are in smas
+    ## @param attribute. Can be "open", "high", "close","low"
+    ## @return int. With the number of standard sma (10, 50,200) that are over product current price
+    def list_of_sma_over_price(self,  dt, price, smas=[10, 50, 200], dvm_smas=None, attribute="close"):
+        if dvm_smas==None:#Used when I only neet to calculate one value
+            dvm=self.DatetimeValueManager(attribute)
+        
+            #Calculate smas for all values in smas
+            dvm_smas=[]#Temporal list to store sma to fast calculations
+            for sma in smas:
+                dvm_smas.append(dvm.sma(sma))
+            
+        # Compare dt sma with price and return a List with smas integers
+        r=[]
+        for i, dvm_sma in enumerate(dvm_smas):
+            sma_value=dvm_sma.find_le(dt).value
+            if price<sma_value:
+                r.append(smas[i])
+        return r
+
     ## Set investment recomendations to all ProductRange objects in array 
     def setInvestRecomendation(self, method, method1_smas=[10, 50, 200]):
         method=int(method)
@@ -138,13 +163,12 @@ class ProductRangeManager(ObjectManager):
             dvm=DatetimeValueManager()
             for d in list_ohcl:
                 dvm.appendDV(d["date"], d["close"])
-#            dvm=self.product.result.ohclDaily.DatetimeValueManager("close")
             dvm_smas=[]
             for sma in method1_smas:
                 dvm_smas.append(dvm.sma(sma))
             
             for o in self.arr:
-                number_sma_over_price=len(self.product.result.ohclDaily.list_of_sma_over_price(self.mem.localzone_now(), o.value, method1_smas, dvm_smas,  "close"))
+                number_sma_over_price=len(self.list_of_sma_over_price(date.today(), o.value, method1_smas, dvm_smas,  "close"))
                 if number_sma_over_price==3 and o.id % 4==0:
                     o.recomendation_invest=True
                 elif number_sma_over_price==2 and o.id %2==0:
@@ -152,13 +176,16 @@ class ProductRangeManager(ObjectManager):
                 elif number_sma_over_price<=1:
                     o.recomendation_invest=True
         elif method==3: #ProductRangeInvestRecomendation.SMA100:           
-            dvm=self.product.result.ohclDaily.DatetimeValueManager("close")
+            list_ohcl=self.product.ohclDailyBeforeSplits()
+            dvm=DatetimeValueManager()
+            for d in list_ohcl:
+                dvm.appendDV(d["date"], d["close"])
             dvm_smas=[]
             for sma in [100, ]:
                 dvm_smas.append(dvm.sma(sma))
             
             for o in self.arr:
-                number_sma_over_price=len(self.product.result.ohclDaily.list_of_sma_over_price(self.mem.localzone_now(), o.value, [100, ], dvm_smas,  "close"))
+                number_sma_over_price=len(self.list_of_sma_over_price(date.today(), o.value, [100, ], dvm_smas,  "close"))
                 if number_sma_over_price==0:
                     o.recomendation_invest=True
                 elif number_sma_over_price==1 and o.id % 4==0:
@@ -191,15 +218,22 @@ class ProductRangeManager(ObjectManager):
         def rows():
             r=""
             for o in self:
+                if o.recomendation_invest is True:
+                    neworder=f"<a href='{reverse_lazy('order_new')}?price={round(o.value, self.product.decimals)}'>{_('Order')}</a>"
+                    checked="checked"
+                else:
+                    neworder=""
+                    checked=""
+                    
+                
+                
                 r=r+ f"""
 <tr>
-    <td><a href="javascript:alert('{o}');">{int(o.value)}</a></td>
-    <td>{"" if o.recomendation_invest==False else o.recomendation_invest}</td>
+    <td><a href="javascript:alert('{o}');">{round(o.value, self.product.decimals)}</a></td>
+    <td><input type="checkbox" onclick="return false;" {checked}/></td>
     <td>{o.getInvestmentsOperationsInside(self.iom)}</td>
     <td>{o.getOrdersInside(self.orders)}</td>
-    <td>
-        <a href='{reverse_lazy('order_new')}'>{_('Order')}</a>
-    </td>
+    <td>{neworder}</td>
 </tr>"""
             return r
         #-------------------------------------------

@@ -1306,6 +1306,8 @@ class order_new(CreateView):
     def get_initial(self):
         return {
             'date': str(date.today()), 
+            'price': self.request.GET.get("price", 0),
+            'shares': self.request.GET.get("shares", 0),
         }
 #    def form_valid(self, form):
 #        form.instance.accounts =Accounts.objects.get(pk=self.kwargs['accounts_id'])
