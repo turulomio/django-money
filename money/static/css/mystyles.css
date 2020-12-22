@@ -433,3 +433,20 @@ div.tabulator{
 span.red{
     color:red;
 }
+
+/*My table*/
+table.mytable{
+  border: 1px solid black;
+}
+
+table.mytable th{
+  border: 1px solid black;
+  text-align:center;
+}
+table.mytable tr{
+  border: 1px solid black;
+}
+table.mytable td{
+  border: 1px solid black;
+}
+    

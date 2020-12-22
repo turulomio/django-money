@@ -1,10 +1,10 @@
 from datetime import date
 from decimal import Decimal
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from xulpymoney.libmanagers import ObjectManager, DatetimeValueManager
 from money.models import Investments, Orders
-from money.reusing.tabulator import TabulatorFromListDict
 from money.reusing.currency import Currency
 from money.reusing.percentage import Percentage
 from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset
@@ -52,7 +52,7 @@ class ProductRange():
 
     ## Search for investments in self.mem.data and 
     def getInvestmentsOperationsInside(self, iom):
-        r=[]
+        r=""
         for io in iom.list:
             if self.only_account is not None:#If different account continues
                 if io.investment.accounts.id != self.only_account.id:
@@ -63,19 +63,18 @@ class ProductRange():
                     if io.io_current.index(op)!=0:
                         continue
                 if self.isInside(op["price_investment"])==True:
-                    print(op)
-                    r.append(f"{io.investment.fullName()}. Invested: {Currency(op[ 'invested_user'], io.investment.products.currency)}")
-        return r
+                    r=r+ f"<a href='{reverse_lazy('investment_view', args=(io.investment.id,))}'>{io.investment.fullName()}</a>. Invested: {Currency(op[ 'invested_user'], io.investment.products.currency)}<br>"
+        return r[:-1]
         
     ## Search for orders in self.mem.data and 
     def getOrdersInside(self, orders): 
-        r=[]
+        r=""
         for o in orders:
             if self.only_account is not None:#If different account continues
                 if o.investments.accounts.id != self.only_account.id:
                     continue
             if o.investments.products.id==self.product.id and self.isInside(o.price)==True:
-                r.append(f"{o.investments.fullName()}. Amount: {o.currency_amount()}")
+                r=r+f"<a href='{reverse_lazy('order_update',  args=(o.id, ))}'>{o.investments.fullName()}</a>. Amount: {o.currency_amount()}<br>"
         return r
       
 
@@ -178,12 +177,43 @@ class ProductRangeManager(ObjectManager):
             })
         return r
                     
-    def tabulator(self):
-        r=TabulatorFromListDict("productrange_table")
-        r.setDestinyUrl(None)
-        r.setLocalZone(self.request.local_zone)
-        r.setListDict(self.listdict())
-        r.setFields("id","value","recomendation_invest", "investments_inside","orders_inside")
-        r.setHeaders("Id", _("Value"), _("Recomendation"),  _("Investments"),  _("Orders"))
-        r.setTypes("int","int", "bool", "str",  "str")
-        return r.render()
+#    def tabulator(self):
+#        r=TabulatorFromListDict("productrange_table")
+#        r.setDestinyUrl(None)
+#        r.setLocalZone(self.request.local_zone)
+#        r.setListDict(self.listdict())
+#        r.setFields("id","value","recomendation_invest", "investments_inside","orders_inside")
+#        r.setHeaders("Id", _("Value"), _("Recomendation"),  _("Investments"),  _("Orders"))
+#        r.setTypes("int","int", "bool", "str",  "str")
+#        return r.render()
+
+    def mytable(self):        
+        def rows():
+            r=""
+            for o in self:
+                r=r+ f"""
+<tr>
+    <td><a href="javascript:alert('{o}');">{int(o.value)}</a></td>
+    <td>{"" if o.recomendation_invest==False else o.recomendation_invest}</td>
+    <td>{o.getInvestmentsOperationsInside(self.iom)}</td>
+    <td>{o.getOrdersInside(self.orders)}</td>
+    <td>
+        <a href='{reverse_lazy('order_new')}'>{_('Order')}</a>
+    </td>
+</tr>"""
+            return r
+        #-------------------------------------------
+        r=f"""
+<table class="mytable">
+<tr>
+    <th>{_("Value")}</th>
+    <th>{_("Must invert")}</th>
+    <th>{_("Investments")}</th>
+    <th>{_("Orders")}</th>
+    <th>{_("Commands")}</th>
+    
+</tr>
+{rows()}
+</table>
+"""
+        return r
