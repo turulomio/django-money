@@ -5,6 +5,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Q
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.shortcuts import render,  get_object_or_404
@@ -71,7 +72,7 @@ from money.listdict import (
     listdict_dividends_from_queryset, 
     listdict_investments_gains_by_product_type, 
     listdict_investmentsoperationshistorical, 
-    listdict_orders_active, 
+    listdict_orders, 
     listdict_product_quotes_month_comparation, 
     LdoProductsPairsEvolution, 
     listdict_products_pairs_evolution_from_datetime, 
@@ -111,17 +112,17 @@ def order_execute(request, pk):
 
 ## @param year Only used when active=false
 @login_required
-def order_list(request,  active, year=None):
+def order_list(request,  active, year=date.today().year):
     year_start=1970
     year_end=date.today().year
+    
     if active is True:
         qs_orders=Orders.objects.all().select_related("investments").select_related("investments__accounts").select_related("investments__products").select_related("investments__products__productstypes").select_related("investments__products").select_related("investments__products__leverages").filter(expiration__gte=datetime.today(), executed=None)
     else:
-        year=date.today().year if year is None else year
-        qs_orders=Orders.objects.all().select_related("investments").select_related("investments__accounts").select_related("investments__products").select_related("investments__products__productstypes").select_related("investments__products").select_related("investments__products__leverages").filter(datetime__year=year, executed__isnull=False)
+        qs_orders=Orders.objects.all().select_related("investments").select_related("investments__accounts").select_related("investments__products").select_related("investments__products__productstypes").select_related("investments__products").select_related("investments__products__leverages").filter(Q(date__year=year),  Q(executed__isnull=False) | Q(expiration__lt=datetime.today())).order_by('date')
 
-    listdict_orders=listdict_orders_active(qs_orders)
-    table_orders=TabulatorOrders("table_orders", 'order_update', listdict_orders, request.local_currency).render()
+    ld=listdict_orders(qs_orders)
+    table_orders=TabulatorOrders("table_orders", 'order_update', ld, request.local_currency).render()
     return render(request, 'order_list.html', locals())
 
     
