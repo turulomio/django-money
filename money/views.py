@@ -109,9 +109,17 @@ def order_execute(request, pk):
     order.investments.save()
     return HttpResponseRedirect(f"{reverse('investmentoperation_new', args=(order.investments.id, ))}?shares={order.shares}&price={order.price}")
 
+## @param year Only used when active=false
 @login_required
-def order_list(request,  active):
-    qs_orders=Orders.objects.all().select_related("investments").select_related("investments__accounts").select_related("investments__products").select_related("investments__products__productstypes").select_related("investments__products").select_related("investments__products__leverages").filter(expiration__gte=datetime.today(), executed=None)
+def order_list(request,  active, year=None):
+    year_start=1970
+    year_end=date.today().year
+    if active is True:
+        qs_orders=Orders.objects.all().select_related("investments").select_related("investments__accounts").select_related("investments__products").select_related("investments__products__productstypes").select_related("investments__products").select_related("investments__products__leverages").filter(expiration__gte=datetime.today(), executed=None)
+    else:
+        year=date.today().year if year is None else year
+        qs_orders=Orders.objects.all().select_related("investments").select_related("investments__accounts").select_related("investments__products").select_related("investments__products__productstypes").select_related("investments__products").select_related("investments__products__leverages").filter(datetime__year=year, executed__isnull=False)
+
     listdict_orders=listdict_orders_active(qs_orders)
     table_orders=TabulatorOrders("table_orders", 'order_update', listdict_orders, request.local_currency).render()
     return render(request, 'order_list.html', locals())

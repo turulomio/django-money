@@ -6,14 +6,17 @@
 <h1>{% trans "My orders" %}</h1>
 
 {% url 'order_list_active' as url_unchecked %}
-{% url 'order_list_inactive' as url_checked %}
+{% url 'order_list_inactive' date as url_checked %}
 {% trans "Check to show old orders" as mylabel %}
 {% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
+
 
 <p></p>
 {{ table_orders|safe}}
 <script>
 // Adding background color 
+//<selector-year title="{% trans 'Select a year' %}" year_start="{{ year_start }}" year_end="{{ year_end }}" year="{{ year }}" url="{% url 'order_list_inactive' %}"></selector-year>
+
 var column = table.getColumn("percentage_from_price");
 for (var cell of column.getCells()) {
     if (cell.getValue()>-5 ){

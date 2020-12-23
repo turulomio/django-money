@@ -64,6 +64,7 @@ class SelectorYear extends HTMLElement {
       this.cmdGo.addEventListener('click', (event) => {
 
         var newurl=this.url.concat(this.year.toString()).concat("/");
+        alert(newurl);
         window.location.replace(newurl);
       });
     }
