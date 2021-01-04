@@ -330,6 +330,7 @@ class Dividends(models.Model):
         if dividends is None:
             dividends=0
         return dividends
+
     ## TODO This method should take care of diffrent currencies in accounts. Dividens are in account currency
     @staticmethod
     def net_gains_baduser_between_datetimes_for_some_investments(ids, from_dt,  to_dt):

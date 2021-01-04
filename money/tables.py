@@ -275,5 +275,5 @@ class TabulatorInvestmentsGainsByProductType(TabulatorFromListDict):
         self.setListDict(listdict)
         self.setFields("id","name", "gains_gross",  "dividends_gross","gains_net","dividends_net")
         self.setHeaders("Id", _("Name"), _("Gross gains"), _("Gross dividends"), _("Net gains"), _("Net dividends"))
-        self.setTypes("int","str", "EUR", "EUR", "EUR","EUR")
+        self.setTypes("int","str", local_currency, local_currency, local_currency, local_currency)
         self.setBottomCalc(None, None, "sum", "sum", "sum", "sum")

@@ -1,5 +1,5 @@
 import asyncio
-from datetime import  date, datetime, timedelta
+from datetime import  date, datetime
 from decimal import Decimal
 from django import forms
 from django.core.exceptions import ValidationError
@@ -434,10 +434,8 @@ class accountoperation_new(CreateView):
             d["concepts"]=Concepts.objects.get(pk=self.kwargs['concepts_id'])
 
         account=Accounts.objects.get(pk=self.kwargs['accounts_id'])
-        from_=dt_- timedelta(days=5)
-        to_=dt_+ timedelta(days=5)
-        initial_balance=float(account.balance( from_, self.request.local_currency)[0].amount)
-        qsaccountoperations= Accountsoperations.objects.all().select_related("concepts").filter(accounts_id=account.id, datetime__gte=from_,  datetime__lte=to_).order_by('datetime')
+        initial_balance=float(account.balance( dtaware_month_start(dt_.year, dt_.month, self.request.local_zone), self.request.local_currency)[0].amount)
+        qsaccountoperations= Accountsoperations.objects.all().select_related("concepts").filter(accounts_id=account.id, datetime__year=dt_.year,  datetime__month=dt_.month).order_by('datetime')
         listdic_accountsoperations=listdict_accountsoperations_from_queryset(qsaccountoperations, initial_balance)
         self.table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", listdic_accountsoperations, account.currency, self.request.local_zone).render()
 

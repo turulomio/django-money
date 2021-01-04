@@ -626,7 +626,7 @@ select
 from 
     products
     left join investments on products.id=investments.products_id
-    left join (select * from dividends where extract('year' from datetime)=2020) dividends on investments.id=dividends.investments_id
+    left join (select * from dividends where extract('year' from datetime)=%s) dividends on investments.id=dividends.investments_id
 group by productstypes_id""", (year, ))
     dividends_dict=listdict2dict(dividends, "productstypes_id")
     l=[]
