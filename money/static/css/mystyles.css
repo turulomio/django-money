@@ -444,6 +444,7 @@ table.mytable th{
   border: 1px solid black;
   text-align:center;
   padding:2px;
+    background-color: LightGrey;
 
 }
 table.mytable tr{
@@ -453,5 +454,11 @@ table.mytable tr{
 table.mytable td{
   border: 1px solid black;
   padding:2px;
+}
+
+td.green{
+  border: 1px solid black;
+  padding:2px;
+    background-color: PaleGreen;
 }
     

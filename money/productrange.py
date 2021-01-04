@@ -226,10 +226,11 @@ class ProductRangeManager(ObjectManager):
                     checked=""
                     
                 
-                
+              
+                classcurrent=' class="green"'  if o.isInside(self.product.basic_results()["last"]) is True else ""
                 r=r+ f"""
 <tr>
-    <td><a href="javascript:alert('{o}');">{round(o.value, self.product.decimals)}</a></td>
+    <td{classcurrent}><a href="javascript:alert('{o}');">{round(o.value, self.product.decimals)}</a></td>
     <td><input type="checkbox" onclick="return false;" {checked}/></td>
     <td>{o.getInvestmentsOperationsInside(self.iom)}</td>
     <td>{o.getOrdersInside(self.orders)}</td>
