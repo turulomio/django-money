@@ -826,7 +826,7 @@ class Splits(models.Model):
 class StrategiesTypes(models.IntegerChoices):
     Generic = 0, _('Genéric') #additional { }
     PairsInSameAccount = 1, _('Pairs in same account') #additional {"worse":_, "better":_ "account" }
-
+    Ranges = 2,  _('Product ranges') 
 class Strategies(models.Model):
     name = models.TextField()
     investments = models.TextField(blank=True, null=True)
@@ -839,6 +839,11 @@ class Strategies(models.Model):
     additional3 = models.IntegerField(blank=True, null=True)   
     additional4 = models.IntegerField(blank=True, null=True)   
     additional5 = models.IntegerField(blank=True, null=True)   
+    additional6 = models.IntegerField(blank=True, null=True)   
+    additional7 = models.IntegerField(blank=True, null=True)   
+    additional8 = models.IntegerField(blank=True, null=True)   
+    additional9 = models.IntegerField(blank=True, null=True)   
+    additional10 = models.IntegerField(blank=True, null=True)   
     
     class Meta:
         managed = False
@@ -849,6 +854,20 @@ class Strategies(models.Model):
     def url_details(self):
         if self.type==StrategiesTypes.PairsInSameAccount:
             return reverse_lazy('investment_pairs',args=(self.additional1, self.additional2, self.additional3))
+            
+        
+            #additional1=products_id, additional2=percentage_between_ranges*1000, additional3=percentage_gains*1000, additional4=amount,additional5=recomendationmethod,additional6=onlyfirst,additional7=accounts_id}
+        elif self.type==StrategiesTypes.Ranges:
+            return reverse_lazy('product_ranges')+f"?product={self.additional1}&percentagebetween={self.additional2}&percentagegains={self.additional3}&amount={self.additional4}&method={self.additional5}&onlyfirst={self.additional6}&account={self.additional7}"
+           
+          
+#        form.fields["products"].initial=product
+#        form.fields["only_first"].initial=bool(int(request.GET.get("onlyfirst", 0)))
+#        form.fields['percentage_between_ranges'].initial=request.GET.get("percentagebetween", 2500)
+#        form.fields['percentage_gains'].initial=request.GET.get("percentagegains", 2500)
+#        form.fields['amount_to_invest'].initial=request.GET.get("amount", 10000)
+#        form.fields["recomendation_methods"].initial=request.GET.get("method", 0)
+#        form.fields["accounts"].initial=request.GET.get("account", None)
 
 ## Converting dates to string in postgres functions return a string datetime instead of a dtaware. Here we convert it
 def postgres_datetime_string_2_dtaware(s):
@@ -867,14 +886,6 @@ def percentage_to_selling_point(shares, selling_price, last_quote):
         return Percentage(selling_price-last_quote, last_quote)
     else:#Long short products
         return Percentage(-(selling_price-last_quote), last_quote)
-
-### Genera una fila (io, io_current, io_historical) con los totales de todas las inversiones
-#def get_investments_alltotals(dt, local_currency, only_active):
-#    row_io= cursor_one_row("select * from  investment_operations_alltotals( %s,%s,%s)", (dt, local_currency, only_active))
-#    io= eval(row_io["io"])
-#    current= eval(row_io['io_current'])
-#    historical= eval(row_io['io_historical'])
-#    return io,  current, historical
     
 ## Lista los id, io, io_current_totals, io_historical_current de todas las inversiones
 ## Devuelve un diccionario d[id][

@@ -227,13 +227,14 @@ def product_ranges(request):
             return render(request, 'product_ranges.html', locals())
     else:
         form = ProductsRangeForm()
-        products=Products.objects.get(pk=request.globals['wdgProductRange__product'])
-        form.fields["products"].initial=products
-        form.fields["only_first"].initial=True
-        form.fields['percentage_between_ranges'].initial=request.globals[f'wdgProductRange__spnDown_product_{products.id}']
-        form.fields['percentage_gains'].initial=request.globals[f'wdgProductRange__spnGains_product_{products.id}']
-        form.fields['amount_to_invest'].initial=request.globals[f'wdgProductRange__invest_product_{products.id}']
-  
+        product=Products.objects.get(pk=int(request.GET.get("product", request.globals['wdgProductRange__product'])))
+        form.fields["products"].initial=product
+        form.fields["only_first"].initial=bool(int(request.GET.get("onlyfirst", 0)))
+        form.fields['percentage_between_ranges'].initial=Decimal(request.GET.get("percentagebetween", "2500"))/1000
+        form.fields['percentage_gains'].initial=Decimal(request.GET.get("percentagegains", "2500"))/1000
+        form.fields['amount_to_invest'].initial=request.GET.get("amount", 10000)
+        form.fields["recomendation_methods"].initial=request.GET.get("method", 0)
+        form.fields["accounts"].initial=request.GET.get("account", None)
     return render(request, 'product_ranges.html', locals())
 
     
@@ -1157,7 +1158,7 @@ def strategy_view(request, pk):
 class strategy_new(CreateView):
     model = Strategies
     template_name="strategy_new.html"
-    fields = ( 'name','dt_from', 'dt_to', 'investments',  'comment','type',  'additional1',  'additional2',  'additional3',  'additional4', 'additional5')
+    fields = ( 'name','dt_from', 'dt_to', 'investments',  'comment','type',  'additional1',  'additional2',  'additional3',  'additional4', 'additional5', 'additional6', 'additional7', 'additional8', 'additional9', 'additional10')
 
     def get_form(self, form_class=None): 
         if form_class is None: 
@@ -1191,7 +1192,7 @@ class strategy_new(CreateView):
 @method_decorator(login_required, name='dispatch')
 class strategy_update(UpdateView):
     model = Strategies
-    fields = ( 'name','dt_from', 'dt_to', 'investments',  'comment','type',  'additional1',  'additional2',  'additional3',  'additional4', 'additional5')
+    fields = ( 'name','dt_from', 'dt_to', 'investments',  'comment','type',  'additional1',  'additional2',  'additional3',  'additional4', 'additional5', 'additional6', 'additional7', 'additional8', 'additional9', 'additional10')
     template_name="strategy_update.html"
 
     def get_success_url(self):
