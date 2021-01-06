@@ -704,6 +704,12 @@ class investmentoperation_new(CreateView):
         form.fields['datetime'].widget.attrs['is'] ='input-datetime'
         form.fields['datetime'].widget.attrs['localzone'] =self.request.local_zone
         form.fields['datetime'].widget.attrs['locale'] =self.request.LANGUAGE_CODE
+        form.fields['currency_conversion'].widget.attrs['is']='input-currency-factor'
+        form.fields['currency_conversion'].widget.attrs['from'] =self.investments.accounts.currency
+        form.fields['currency_conversion'].widget.attrs['to'] =self.investments.products.currency
+#        form.fields['currency_conversion'].widget.attrs['type'] ="text"
+        #del  form.fields['currency_conversion'].widget.attrs['step']
+        #del  form.fields['currency_conversion'].widget.attrs['type']
         form.fields['operationstypes'].queryset=Operationstypes.objects.filter(pk__in=[4, 5, 6])
         return form
                 
