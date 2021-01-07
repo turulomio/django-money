@@ -670,7 +670,7 @@ class Orders(models.Model):
         db_table = 'orders'
         
     def currency_amount(self):
-        return Currency(self.price*self.shares*self.investments.products.real_leveraged_multiplier())
+        return Currency(self.price*self.shares*self.investments.products.real_leveraged_multiplier(), self.investments.products.currency)
 
 
 class Products(models.Model):
