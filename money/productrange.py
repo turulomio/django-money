@@ -192,6 +192,21 @@ class ProductRangeManager(ObjectManager):
                     o.recomendation_invest=True
                 else: #number_sma_over_price=1 and o.id%4!=0
                     o.recomendation_invest=False
+        elif method==4:#ProductRangeInvestRecomendation.StrictThreeSMA:      
+            list_ohcl=self.product.ohclDailyBeforeSplits()
+            dvm=DatetimeValueManager()
+            for d in list_ohcl:
+                dvm.appendDV(d["date"], d["close"])
+            dvm_smas=[]
+            for sma in method1_smas:
+                dvm_smas.append(dvm.sma(sma))
+            
+            for o in self.arr:
+                number_sma_over_price=len(self.list_of_sma_over_price(date.today(), o.value, method1_smas, dvm_smas,  "close"))
+                if number_sma_over_price==2 and o.id %2==0:
+                    o.recomendation_invest=True
+                elif number_sma_over_price<=1:
+                    o.recomendation_invest=True
 
     def listdict(self):
         r=[]

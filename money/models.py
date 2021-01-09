@@ -29,6 +29,7 @@ RANGE_RECOMENDATION_CHOICES =(
     (1, _("All")), 
     (2, _("Three SMA")), 
     (3, _("SMA 100")), 
+    (4, _("Strict three SMA")), 
 )
 
 class Accounts(models.Model):
@@ -826,7 +827,8 @@ class Splits(models.Model):
 class StrategiesTypes(models.IntegerChoices):
     Generic = 0, _('Genéric') #additional { }
     PairsInSameAccount = 1, _('Pairs in same account') #additional {"worse":_, "better":_ "account" }
-    Ranges = 2,  _('Product ranges') 
+    Ranges = 2,  _('Product ranges')
+
 class Strategies(models.Model):
     name = models.TextField()
     investments = models.TextField(blank=True, null=True)
