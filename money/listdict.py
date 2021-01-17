@@ -47,7 +47,6 @@ from money.models import (
     percentage_to_selling_point, 
     total_balance, 
     currencies_in_accounts, 
-    qs_investments_netgains_usercurrency_in_year_month, 
     money_convert, 
 )
 from money.reusing.casts import string2list_of_integers, valueORempty
@@ -396,12 +395,25 @@ def listdict_products_pairs_evolution_to_filter_reinvest(product_worse, product_
 
 
 def listdict_report_total_income(qs_investments, year, local_currency, local_zone):
+    def qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, month, local_currency, local_zone):
+        r =0
+        #Git investments with investmentsoperations in this year, month
+        dt_year_month=dtaware_month_end(year, month, local_zone)
+        for investment in Investments.objects.raw("select distinct(investments.*) from investmentsoperations, investments where date_part('year', datetime)=%s and date_part('month', datetime)=%s and investments.id=investmentsoperations.investments_id", (year, month)):
+            investments_operations=InvestmentsOperations_from_investment(investment, dt_year_month, local_currency)
+            for ioh in investments_operations.io_historical:
+                if ioh['dt_end'].year==year and ioh['dt_end'].month==month:
+                        r=r+ioh['gains_net_user']
+        return r
+    
     def month_results(year,  month, month_name):
         dividends=Dividends.netgains_dividends(year, month)
         incomes=balance_user_by_operationstypes(year,  month,  eOperationType.Income, local_currency, local_zone)-dividends
         expenses=balance_user_by_operationstypes(year,  month,  eOperationType.Expense, local_currency, local_zone)
         
         start=timezone.now()
+    
+
         gains=qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, month, local_currency, local_zone)
         print("Loading list netgains opt took {} (CUELLO BOTELLA UNICO)".format(timezone.now()-start))        
         

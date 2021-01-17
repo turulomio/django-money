@@ -900,17 +900,6 @@ def balance_user_by_operationstypes(year,  month,  operationstypes_id, local_cur
     return r
 
 
-    
-def qs_investments_netgains_usercurrency_in_year_month(qs_investments, year, month, local_currency, local_zone):
-    r =0
-    #Git investments with investmentsoperations in this year, month
-    dt_year_month=dtaware_month_end(year, month, local_zone)
-    for investment in Investments.objects.raw("select distinct(investments.*) from investmentsoperations, investments where date_part('year', datetime)=%s and date_part('month', datetime)=%s and investments.id=investmentsoperations.investments_id", (year, month)):
-        io, io_current, io_historical=investment.get_investmentsoperations(dt_year_month, 'EUR')
-        for ioh in io_historical:
-            if ioh['dt_end'].year==year and ioh['dt_end'].month==month:
-                    r=r+ioh['gains_net_user']
-    return r
 
 
 def qs_list_of_ids(qs):
