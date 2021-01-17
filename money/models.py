@@ -182,6 +182,11 @@ class Accountsoperations(models.Model):
         if Comment().getCode(self.comment) in (eComment.AccountTransferOrigin, eComment.AccountTransferDestiny, eComment.AccountTransferOriginCommission):
             return True
         return False
+        
+    def is_investmentoperation(self):
+        if Comment().getCode(self.comment) in (eComment.InvestmentOperation, ):
+            return True
+        return False
 
 class Annualtargets(models.Model):
     year = models.IntegerField(primary_key=True)

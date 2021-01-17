@@ -468,6 +468,10 @@ class accountoperation_update(UpdateView):
         form = super(accountoperation_update, self).get_form(form_class)
         widget_datetime(self.request, form.fields['datetime'], None)
         form.fields['concepts'].queryset=Concepts.queryset_for_accountsoperations_order_by_fullname()
+            
+        ## Gets the investment operation for io account ooperations only for that
+        if self.object.is_investmentoperation() is True:
+            self.io=Comment().decode_objects(self.object.comment)        
         return form
         
     def get_initial(self):
@@ -745,6 +749,9 @@ class investmentoperation_update(UpdateView):
     template_name="investmentoperation_update.html"
         
     def get_success_url(self):
+        if self.request.GET.get("next", None) is not None:
+            return self.request.GET.get("next")
+            
         return reverse_lazy('investment_view',args=(self.object.investments.id,))
 
     def get_form(self, form_class=None): 
