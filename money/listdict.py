@@ -55,7 +55,7 @@ from money.reusing.casts import string2list_of_integers, valueORempty
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_end, months
 from money.reusing.decorators import timeit
-from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, InvestmentsOperationsTotals_from_investment, IOC
+from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, InvestmentsOperationsTotals_from_investment, IOC, InvestmentsOperations_from_investment
 from money.reusing.percentage import percentage_between, Percentage
 from money.reusing.tabulator import TabulatorFromListDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -94,7 +94,6 @@ def listdict_investments(queryset, dt,  local_currency, active):
     if active is True:
         for investment in queryset:
             iot=InvestmentsOperationsTotals_from_investment(investment, dt, local_currency)
-#            t_io,  t_io_current, t_io_historical=investment.get_investmentsoperations_totals(dt, local_currency)
             basic_quotes=investment.products.basic_results()
             try:
                 daily_diff=(basic_quotes['last']-basic_quotes['penultimate'])*iot.io_total_current["shares"]*investment.products.real_leveraged_multiplier()
@@ -216,9 +215,9 @@ def listdict_investmentsoperationshistorical(year, month, local_currency, local_
     dict_ot=Operationstypes.dictionary()
     dt_year_month=dtaware_month_end(year, month, local_zone)
     for investment in Investments.objects.raw("select distinct(investments.*) from investmentsoperations, investments where date_part('year', datetime)=%s and date_part('month', datetime)=%s and investments.id=investmentsoperations.investments_id", (year, month)):
-        io, io_current, io_historical=investment.get_investmentsoperations(dt_year_month, local_currency)
+        investments_operations=InvestmentsOperations_from_investment(investment, dt_year_month, local_currency)
         
-        for ioh in io_historical:
+        for ioh in investments_operations.io_historical:
             if ioh['dt_end'].year==year and ioh['dt_end'].month==month:
                 ioh["name"]=investment.fullName()
                 ioh["operationstypes"]=dict_ot[ioh["operationstypes_id"]]
@@ -226,7 +225,6 @@ def listdict_investmentsoperationshistorical(year, month, local_currency, local_
                 list_ioh.append(ioh)
     list_ioh= sorted(list_ioh,  key=lambda item: item['dt_end'])
     return list_ioh
-        
 
 ## Different o Heterogeneus, due to sum shares...
 class LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(LdoDjangoMoney):

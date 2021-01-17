@@ -9,16 +9,17 @@ from datetime import date, timedelta
 from decimal import Decimal
 Decimal()#Internal eval
 
-from django.db import models, connection
+from django.db import models, connection, transaction
 from django.db.models import Case, When
 from django.db.models.expressions import RawSQL
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.utils import timezone
 
-from money.reusing.currency import Currency, currency_symbol
 from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows, execute
+from money.investmentsoperations import InvestmentsOperations_from_investment
 from money.reusing.casts import string2list_of_integers
+from money.reusing.currency import Currency, currency_symbol
 from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware, dtaware2string
 from money.reusing.percentage import Percentage
 
@@ -452,39 +453,7 @@ class Investments(models.Model):
 
     def fullName(self):
         return "{} ({})".format(self.name, self.accounts.name)
-#
-#    ## Lista los id, io, io_current_totals, io_historical_current  de esta inversion
-#    def get_investmentsoperations_totals(self, dt, local_currency):
-#        print("DEPRECATED")
-#        row_io= cursor_one_row("select * from investment_operations_totals(%s,%s,%s)", (self.id, dt, local_currency))
-#        io= eval(row_io["io"])
-#        current= eval(row_io['io_current'])
-#        historical= eval(row_io['io_historical'])
-#        #print(io, current, historical)
-#        return io,  current, historical
-
     
-    def get_investmentsoperations(self, dt, local_currency):
-        print("DEPRECATED get_investmentsoperations")
-        row_io=cursor_one_row("select * from investment_operations(%s,%s,%s)", (self.id, dt, local_currency))
-        io= eval(row_io["io"])
-        for d in io:
-            d['datetime']=postgres_datetime_string_2_dtaware(d['datetime'])
-#        for row in io:
-#            print (row['id'],  row['datetime'],  row['shares'], row['price'])
-        current= eval(row_io['io_current'])
-        for d in current:
-            d['datetime']=postgres_datetime_string_2_dtaware(d['datetime'])
-#        for row in current:
-#            print (row['id'],  row['datetime'],  row['shares'], row['price_investment'])
-        historical= eval(row_io['io_historical'])
-        for d in historical:
-            d['dt_start']=postgres_datetime_string_2_dtaware(d['dt_start'])
-            d['dt_end']=postgres_datetime_string_2_dtaware(d['dt_end'])
-#        for row in historical:
-#            print (row['id'],  row['dt_end'],  row['shares'])
-        return io,  current, historical
-
     def operations(self, local_currency):
         if hasattr(self, "_operations") is False:
             from money.investmentsoperations import InvestmentsOperations_from_investment
@@ -543,15 +512,14 @@ class Investmentsoperations(models.Model):
     ## Esta función actualiza la tabla investmentsaccountsoperations que es una tabla donde 
     ## se almacenan las accountsoperations automaticas por las operaciones con investments. Es una tabla 
     ## que se puede actualizar en cualquier momento con esta función
+
+    @transaction.atomic
     def update_associated_account_operation(self,  local_currency):
         #/Borra de la tabla investmentsaccountsoperations los de la operinversión pasada como parámetro
         execute("delete from investmentsaccountsoperations where investmentsoperations_id=%s",(self.id, )) 
 
-        
-        listdict_io, listdict_ioc, listdict_ioh  =self.investments.get_investmentsoperations(timezone.now(), local_currency)
-        
-        io=Investmentsoperations.investmentsoperations_find_by_id(listdict_io, self.id)
-        print(io)
+        investment_operations=InvestmentsOperations_from_investment(self.investments, timezone.now(), local_currency)
+        io=investment_operations.o_find_by_id(self.id)
         
         if self.investments.daily_adjustment is True: #Because it uses adjustment information
             return
@@ -592,14 +560,7 @@ class Investmentsoperations(models.Model):
                 c.investmentsoperations=self
                 c.save()
 
-    ## Gets and investment operation from its listdict_io using an id
-    ## @param listdict_io Listdict with investmentsoperations
-    ## @param id integer with the id of the investment operation
-    @staticmethod
-    def investmentsoperations_find_by_id(listdict_io,  id):
-        for o in listdict_io:
-            if o["id"]==id:
-                return o
+
 
 
 class Investmentsaccountsoperations(models.Model):
@@ -899,6 +860,7 @@ def percentage_to_selling_point(shares, selling_price, last_quote):
 ##        investments_totals_all_investments=get_investmentsoperations_totals_of_all_investments(dt, local_currency)
 ## investments_totals_all_investments[str(investment.id)]["io_current"]["balance_user"]
 def get_investmentsoperations_totals_of_all_investments(dt, local_currency):
+    print("DEPRECATED??")
     d={}
     for row in cursor_rows("select id, (investment_operations_totals(id, %s,%s)).io, (investment_operations_totals(id, %s, %s)).io_current, (investment_operations_totals(id, %s, %s)).io_historical from  investments;", (dt, local_currency, dt, local_currency, dt, local_currency)):
         d[str(row['id'])]={"io": eval(row['io']),"io_current": eval(row['io_current']),"io_historical": eval(row['io_historical']), }

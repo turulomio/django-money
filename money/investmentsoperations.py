@@ -119,6 +119,13 @@ class InvestmentsOperations:
             ioh["years"]=0
         return self.io_historical
         
+        
+    ## Gets and investment operation from its listdict_io using an id
+    ## @param id integer with the id of the investment operation
+    def o_find_by_id(self,  id):
+        for o in self.io:
+            if o["id"]==id:
+                return o
                 
 def InvestmentsOperations_from_investment( investment, dt, local_currency):
     row_io= cursor_one_row("select * from investment_operations(%s,%s,%s)", (investment.pk, dt, local_currency))
