@@ -43,8 +43,7 @@ from money.models import (
     Operationstypes, 
     Productstypes, 
     Strategies, 
-    balance_user_by_operationstypes, 
-    get_investmentsoperations_totals_of_all_investments, 
+    balance_user_by_operationstypes,
     percentage_to_selling_point, 
     total_balance, 
     currencies_in_accounts, 
@@ -55,7 +54,7 @@ from money.reusing.casts import string2list_of_integers, valueORempty
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_end, months
 from money.reusing.decorators import timeit
-from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, InvestmentsOperationsTotals_from_investment, IOC, InvestmentsOperations_from_investment
+from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, InvestmentsOperationsTotals_from_investment, IOC, InvestmentsOperations_from_investment, InvestmentsOperationsTotalsManager_from_all_investments
 from money.reusing.percentage import percentage_between, Percentage
 from money.reusing.tabulator import TabulatorFromListDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -124,15 +123,15 @@ def listdict_investments(queryset, dt,  local_currency, active):
             })
     return list_
 
-def listdict_banks(queryset, dt, active, local_currency):
+def listdict_banks(request, queryset, dt, active):
     list_=[]
     
-    investments_totals_all_investments=get_investmentsoperations_totals_of_all_investments(dt, local_currency)
+    iotm=InvestmentsOperationsTotalsManager_from_all_investments(request, dt)
     for bank in queryset:
         accounts_balance=Accounts.accounts_balance_user_currency(bank.accounts(active), timezone.now())
         investments_balance =0
         for investment in bank.investments(active):
-            investments_balance=investments_balance+investments_totals_all_investments[str(investment.id)]["io_current"]["balance_user"]
+            investments_balance=investments_balance+iotm.find_by_id(investment.id).io_total_current["balance_user"]
         list_.append({
                 "id": bank.id, 
                 "active":bank.active, 

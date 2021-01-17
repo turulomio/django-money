@@ -200,6 +200,12 @@ class InvestmentsOperationsTotalsManager(IoManager):
             r=r + o.io_total_historical["gains_net_user"]
         return r
         
+    def find_by_id(self, id):
+        for o in self.list:
+            if o.investment.id==id:
+                return o
+        return None
+        
 
 ## Generate object from and ids list
 def InvestmentsOperationsTotalsManager_from_investment_queryset(qs_investments, dt, request):
@@ -207,6 +213,11 @@ def InvestmentsOperationsTotalsManager_from_investment_queryset(qs_investments, 
     for investment in qs_investments:
         r.append(InvestmentsOperationsTotals_from_investment(investment, dt, request.local_currency))
     return r
+    
+def InvestmentsOperationsTotalsManager_from_all_investments(request, dt):
+    from money.models import Investments
+    qs=Investments.objects.all()
+    return InvestmentsOperationsTotalsManager_from_investment_queryset(qs, dt, request)
     
 ## Manage output of  investment_operation_alltotals is one row
 class InvestmentsOperationsAllTotals:

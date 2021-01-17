@@ -20,7 +20,7 @@ from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_
 from money.investmentsoperations import InvestmentsOperations_from_investment
 from money.reusing.casts import string2list_of_integers
 from money.reusing.currency import Currency, currency_symbol
-from money.reusing.datetime_functions import dtaware_month_end, string2dtnaive, dtaware, dtaware2string
+from money.reusing.datetime_functions import dtaware_month_end, dtaware, dtaware2string
 from money.reusing.percentage import Percentage
 
 from xulpymoney.libxulpymoneytypes import eProductType, eComment, eConcept, eOperationType
@@ -827,23 +827,7 @@ class Strategies(models.Model):
             #additional1=products_id, additional2=percentage_between_ranges*1000, additional3=percentage_gains*1000, additional4=amount,additional5=recomendationmethod,additional6=onlyfirst,additional7=accounts_id}
         elif self.type==StrategiesTypes.Ranges:
             return reverse_lazy('product_ranges')+f"?product={self.additional1}&percentagebetween={self.additional2}&percentagegains={self.additional3}&amount={self.additional4}&method={self.additional5}&onlyfirst={self.additional6}&account={self.additional7}"
-           
-          
-#        form.fields["products"].initial=product
-#        form.fields["only_first"].initial=bool(int(request.GET.get("onlyfirst", 0)))
-#        form.fields['percentage_between_ranges'].initial=request.GET.get("percentagebetween", 2500)
-#        form.fields['percentage_gains'].initial=request.GET.get("percentagegains", 2500)
-#        form.fields['amount_to_invest'].initial=request.GET.get("amount", 10000)
-#        form.fields["recomendation_methods"].initial=request.GET.get("method", 0)
-#        form.fields["accounts"].initial=request.GET.get("account", None)
 
-## Converting dates to string in postgres functions return a string datetime instead of a dtaware. Here we convert it
-def postgres_datetime_string_2_dtaware(s):
-    print("DEPRECATED ESTA EN investoperations.py")
-    str_dt_end=s[:19]            
-    dt_end_naive=string2dtnaive(str_dt_end, "%Y-%m-%d %H:%M:%S")#Es un string desde postgres
-    dt_end=dtaware(dt_end_naive.date(), dt_end_naive.time(), 'UTC')
-    return dt_end
 
 def percentage_to_selling_point(shares, selling_price, last_quote):       
     """Función que calcula el tpc selling_price partiendo de las el last y el valor_venta
@@ -854,17 +838,6 @@ def percentage_to_selling_point(shares, selling_price, last_quote):
         return Percentage(selling_price-last_quote, last_quote)
     else:#Long short products
         return Percentage(-(selling_price-last_quote), last_quote)
-    
-## Lista los id, io, io_current_totals, io_historical_current de todas las inversiones
-## Devuelve un diccionario d[id][
-##        investments_totals_all_investments=get_investmentsoperations_totals_of_all_investments(dt, local_currency)
-## investments_totals_all_investments[str(investment.id)]["io_current"]["balance_user"]
-def get_investmentsoperations_totals_of_all_investments(dt, local_currency):
-    print("DEPRECATED??")
-    d={}
-    for row in cursor_rows("select id, (investment_operations_totals(id, %s,%s)).io, (investment_operations_totals(id, %s, %s)).io_current, (investment_operations_totals(id, %s, %s)).io_historical from  investments;", (dt, local_currency, dt, local_currency, dt, local_currency)):
-        d[str(row['id'])]={"io": eval(row['io']),"io_current": eval(row['io_current']),"io_historical": eval(row['io_historical']), }
-    return d
 
 def currencies_in_accounts():
     return cursor_one_column("select distinct(currency) from accounts")
@@ -877,9 +850,6 @@ def money_convert(dt, amount, from_,  to_):
     if from_==to_:
         return amount
     return cursor_one_field("select * from money_convert(%s, %s, %s, %s)", (dt, amount, from_,  to_))
-
-
-
 
 ## This method should take care of diffrent currencies
 def balance_user_by_operationstypes(year,  month,  operationstypes_id, local_currency, local_zone):

@@ -290,7 +290,7 @@ def home(request):
 def bank_list(request,  active):
     
     banks= Banks.objects.all().filter(active=active).order_by('name')
-    banks_list=listdict_banks(banks, timezone.now(), active, request.local_currency)
+    banks_list=listdict_banks(request, banks, timezone.now(), active)
     table_banks=TabulatorBanks("table_banks", 'bank_view', banks_list, request.local_currency).render()
     return render(request, 'bank_list.html', locals())
 
