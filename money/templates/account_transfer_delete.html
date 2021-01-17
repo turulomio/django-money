@@ -8,6 +8,5 @@
     {% csrf_token %}
     <p>Are you sure you want to delete transfer from '{{ decode_objects.origin.accounts.name }}'?</p>
     <input type="submit" value="Confirm" />
-    {% include "messages.html" %}
     </form>
 {% endblock %}

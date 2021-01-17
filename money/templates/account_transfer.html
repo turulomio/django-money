@@ -11,10 +11,6 @@
         {{ form.as_table }}
         </table>
         <button type="submit" name="button">{% trans "Make transfer" %}</button>
-
-        {% if form.is_valid %}
-            {% include "messages.html" %}
-        {% endif %}
     </form>
   
   

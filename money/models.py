@@ -638,7 +638,19 @@ class Orders(models.Model):
         
     def currency_amount(self):
         return Currency(self.price*self.shares*self.investments.products.real_leveraged_multiplier(), self.investments.products.currency)
-
+        
+    ## Used to display bank order execution alert using form cleaned_data
+    @staticmethod
+    def bank_alert(cleaned_data):
+        return _(f"""<p>Order was created sucessfully.</p>
+        <p>Don't forget to set this order in your bank:</p>
+        <ul>
+            <li>Expiration: {cleaned_data['expiration']}</li>
+            <li>Investment: {cleaned_data['investments'].fullName()}</li>
+            <li>Shares: {cleaned_data['shares']} </li>
+            <li>Price: {Currency(cleaned_data['price'], cleaned_data['investments'].products.currency)} </li>
+        </ul>
+        """)
 
 class Products(models.Model):
     name = models.TextField(blank=True, null=True)

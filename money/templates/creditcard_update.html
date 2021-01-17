@@ -17,7 +17,6 @@
         </script>
     <button type="submit">{% trans "Save" %}</button>
     </form>
-    {% include "messages.html" %}
 
     <p>
             <a href="{% url 'creditcard_delete' pk=object.id %}">{% trans "Delete this credit card" %}</a>

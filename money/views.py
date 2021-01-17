@@ -4,6 +4,7 @@ from decimal import Decimal
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
 from django.db.models import Q
 from django.urls import reverse_lazy, reverse
@@ -1289,12 +1290,14 @@ class investment_delete(DeleteView):
     def get_success_url(self):
         return reverse_lazy('investment_list_active')
         
-        
 @method_decorator(login_required, name='dispatch')
-class order_new(CreateView):
+class order_new(SuccessMessageMixin, CreateView):
     model = Orders
     template_name="order_new.html"
     fields = ( 'date', 'expiration', 'investments',  'shares',  'price')
+
+    def get_success_message(self, cleaned_data):
+        return Orders.bank_alert(cleaned_data)
 
     def get_form(self, form_class=None): 
         if form_class is None: 
@@ -1316,10 +1319,13 @@ class order_new(CreateView):
         return reverse_lazy('order_list_active')
         
 @method_decorator(login_required, name='dispatch')
-class order_update(UpdateView):
+class order_update(SuccessMessageMixin, UpdateView):
     model = Orders
     fields = ( 'date', 'expiration', 'investments',  'shares',  'price')
     template_name="order_update.html"
+
+    def get_success_message(self, cleaned_data):
+        return Orders.bank_alert(cleaned_data)
 
     def get_initial(self):
         return {
@@ -1340,10 +1346,14 @@ class order_update(UpdateView):
         return form
 
 @method_decorator(login_required, name='dispatch')
-class order_delete(DeleteView):
+class order_delete(SuccessMessageMixin, DeleteView):
     model = Orders
     template_name = 'order_delete.html'
     
+
+    def get_success_message(self, cleaned_data):
+        return Orders.bank_alert(cleaned_data)
+
     def get_success_url(self):
         return reverse_lazy('order_list_active')
         

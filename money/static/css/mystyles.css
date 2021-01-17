@@ -98,16 +98,6 @@ p.orders > a:hover {
 }
 
 
-.alert-success {
-    background: transparent;
-    color:green;
-    font-weight: bold;
-    display: block;
-    border: none;
-    padding: 7px 0px 0px 0px;
-    margin: 0px;
-}
-
 /*
  * DJANGO FORM TABLES
  */

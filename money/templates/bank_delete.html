@@ -10,7 +10,6 @@
     <p>Are you sure you want to delete "{{ object }}"?</p>
     <input type="submit" value="Confirm" />
     </form>
-{% include "messages.html" %}
 {% else %}
     <h1>{% trans "Error deleting" %}</h1>
     <p>{% trans "You can't delete other users valorations" %}</p>

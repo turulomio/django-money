@@ -8,7 +8,15 @@
             {% csrf_token %}
             {{ form.as_table }}
         </table>
-     <button type="submit">{% trans "Save" %}</button>
+     <button onclick="button_submit();">{% trans "Save" %}</button>
     </form>
+    
+    <script>
+        function button_submit() {
+            s=`HOLA`
+            alert();
+        }
+    </script>
+    
 
 {% endblock %}
