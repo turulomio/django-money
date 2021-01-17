@@ -55,7 +55,7 @@ class MoneyMiddleware:
         self.dict_operationstypes=Operationstypes.dictionary()
         
         
-        print(_("Middleware start time took {} seconds".format(time.time()-start)))
+        #print(_("Middleware start time took {} seconds".format(time.time()-start)))
 
     def __call__(self, request):
         # Code to be executed for each request before

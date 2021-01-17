@@ -1346,18 +1346,21 @@ class order_update(SuccessMessageMixin, UpdateView):
         return form
 
 @method_decorator(login_required, name='dispatch')
-class order_delete(SuccessMessageMixin, DeleteView):
+class order_delete(DeleteView):
     model = Orders
     template_name = 'order_delete.html'
-    
 
     def get_success_message(self, cleaned_data):
-        return Orders.bank_alert(cleaned_data)
+        return 
+        
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, _("Order was successfully deleted. Please delete it from your bank if necessary."))#SuccessMessageMixin Needs form valid
+        return super(DeleteView, self).delete(request, *args, **kwargs)
+
 
     def get_success_url(self):
         return reverse_lazy('order_list_active')
-        
-        
+
 @method_decorator(login_required, name='dispatch')
 class dividend_new(CreateView):
     model = Dividends
