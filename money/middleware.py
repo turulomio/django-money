@@ -11,7 +11,7 @@ class MoneyMiddleware:
         self.get_response = get_response
         # One-time configuration and initialization.
 
-        start=time.time()
+#        start=time.time()
         self.menu=Menu(_("Django Money"))
         self.menu.append(Action(_("Banks"), None,  "bank_list_active",  True))
         self.menu.append(Action(_("Accounts"), None,  "account_list_active",  True))
