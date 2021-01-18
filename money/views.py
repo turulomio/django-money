@@ -752,7 +752,6 @@ class investmentoperation_update(UpdateView):
     def get_success_url(self):
         if self.request.GET.get("next", None) is not None:
             return self.request.GET.get("next")
-            
         return reverse_lazy('investment_view',args=(self.object.investments.id,))
 
     def get_form(self, form_class=None): 
@@ -762,6 +761,13 @@ class investmentoperation_update(UpdateView):
         widget_datetime(self.request, form.fields['datetime'], None)
         form.fields['operationstypes'].queryset=Operationstypes.objects.filter(pk__in=[4, 5, 6])
         return form
+
+    def get_initial(self):
+        print(str(dtaware_changes_tz(self.object.datetime, self.request.local_zone)))
+        return {
+            'datetime': str(dtaware_changes_tz(self.object.datetime, self.request.local_zone)), 
+            }
+
 
     @transaction.atomic
     def form_valid(self, form):
