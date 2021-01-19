@@ -500,7 +500,7 @@ class Investmentsoperations(models.Model):
     datetime = models.DateTimeField(blank=False, null=False)
     comment = models.TextField(blank=True, null=True)
     show_in_ranges = models.BooleanField(blank=False, null=False)
-    currency_conversion = models.DecimalField(max_digits=30, decimal_places=10, blank=False, null=False)
+    currency_conversion = models.DecimalField(max_digits=30, decimal_places=8, blank=False, null=False)
 
     class Meta:
         managed = False

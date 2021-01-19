@@ -116,6 +116,11 @@ class Currency:
         from .. ui.myqtablewidget import qcurrency
         return qcurrency(self, decimals=2)
 
+    ## Returns a string with the amount with a decimal with point
+    ## Django returns amount with , perhaps due to localization
+    def toJS(self):
+        return str(self.amount).replace(",",".")
+
 ## Returns the symbol of the currency
 def currency_symbol(currency):
     if currency=="EUR":

@@ -1,6 +1,7 @@
 
 {% extends 'base.html' %}
 {% load i18n %}
+{% load l10n %}
 
 {% block content %}
 
@@ -61,9 +62,25 @@
     {{ table_dividends |safe}}
   </div>
 </div>
-
+  <script>
+    function newio_adjusting_cc(){
+        var selling_price_product_currency=parseFloat(prompt( "{% trans "Please add the operation close price in product currency" %}", 0 ));
+        var gains_account_currency=parseFloat(prompt( "{% trans "Please add the final gains in account currency" %}", 0 ));
+        var shares=-parseFloat("{{ operations.current_shares|unlocalize}}");//-self.investment.op_actual.shares())
+       alert(shares);
+        var average_price_current_account=parseFloat("{{operations.current_average_price_account.amount|unlocalize}}");
+        var leverage=parseFloat("{{operations.investment.products.real_leveraged_multiplier}}")
+        
+        var currency_conversion=(gains_account_currency+shares*average_price_current_account*leverage)/(shares*selling_price_product_currency*leverage)
+        var url=`{% url 'investmentoperation_new' investments_id=investment.id %}?currency_conversion=${currency_conversion}&price=${selling_price_product_currency}&shares=${shares}`;
+        window.location.href=url;
+    };
+  </script>        
   <p class="orders">
       <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">{% trans "Add an investment operation" %}</a> | 
+      <a onclick="newio_adjusting_cc()" href="#">{% trans "Add an investment operation adjusting currency conversion factor" %}</a> | 
       <a href="{% url 'dividend_new' investments_id=investment.id %}">{% trans "Add a dividend" %}</a>
   </p>
+  
+
 {% endblock %}

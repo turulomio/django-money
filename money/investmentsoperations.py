@@ -76,6 +76,28 @@ class InvestmentsOperations:
             o["dt_start"]=postgres_datetime_string_2_dtaware(o["dt_start"])
             o["dt_end"]=postgres_datetime_string_2_dtaware(o["dt_end"])
         
+    def current_shares(self):
+        return listdict_sum(self.io_current, "shares")
+        
+    def current_average_price_account(self):
+        """Calcula el precio medio de compra"""
+        shares=self.current_shares()
+        currency=self.investment.accounts.currency
+        sharesxprice=Decimal(0)
+        for o in self.io_current:
+            sharesxprice=sharesxprice+o["shares"]*o["price_account"]
+        return Currency(0, currency) if shares==Decimal(0) else Currency(sharesxprice/shares,  currency)
+
+    def current_average_price_investment(self):
+        """Calcula el precio medio de compra"""
+        
+        shares=self.shares()
+        currency=self.investment.products.currency
+        sharesxprice=Decimal(0)
+        for o in self.io_current:
+            sharesxprice=sharesxprice+o["shares"]*o["price_investment"]
+        return Currency(0, currency) if shares==Decimal(0) else Currency(sharesxprice/shares,  currency)
+        
     def current_gains_net_user(self):
         return listdict_sum(self.io_current, "gains_net_user")
 
@@ -126,7 +148,7 @@ class InvestmentsOperations:
         for o in self.io:
             if o["id"]==id:
                 return o
-                
+
 def InvestmentsOperations_from_investment( investment, dt, local_currency):
     row_io= cursor_one_row("select * from investment_operations(%s,%s,%s)", (investment.pk, dt, local_currency))
     r=InvestmentsOperations(investment,  row_io["io"], row_io['io_current'],  row_io['io_historical'])

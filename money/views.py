@@ -702,16 +702,16 @@ class investmentoperation_new(CreateView):
         form.fields['currency_conversion'].widget.attrs['is']='input-currency-factor'
         form.fields['currency_conversion'].widget.attrs['from'] =self.investments.accounts.currency
         form.fields['currency_conversion'].widget.attrs['to'] =self.investments.products.currency
-#        form.fields['currency_conversion'].widget.attrs['type'] ="text"
-        #del  form.fields['currency_conversion'].widget.attrs['step']
-        #del  form.fields['currency_conversion'].widget.attrs['type']
+        del form.fields['currency_conversion'].widget.attrs['step']
+        form.fields['currency_conversion'].widget.attrs['type']="text"
         form.fields['operationstypes'].queryset=Operationstypes.objects.filter(pk__in=[4, 5, 6])
         return form
                 
     def get_initial(self):
+        print(self.request.GET.get("currency_conversion"))
         return {
             'datetime': str(dtaware_changes_tz(timezone.now(), self.request.local_zone)), 
-            'currency_conversion':1, 
+            'currency_conversion': str(self.request.GET.get("currency_conversion", 1)), 
             'shares': self.request.GET.get("shares", 0), 
             'price': self.request.GET.get("price", 0), 
             'taxes':0, 
