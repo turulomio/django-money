@@ -78,6 +78,8 @@ class InvestmentsOperations:
         
     def current_shares(self):
         return listdict_sum(self.io_current, "shares")
+    def current_invested_user(self):
+        return listdict_sum(self.io_current, "invested_user")
         
     def current_average_price_account(self):
         """Calcula el precio medio de compra"""
@@ -91,7 +93,7 @@ class InvestmentsOperations:
     def current_average_price_investment(self):
         """Calcula el precio medio de compra"""
         
-        shares=self.shares()
+        shares=self.current_shares()
         currency=self.investment.products.currency
         sharesxprice=Decimal(0)
         for o in self.io_current:
@@ -103,6 +105,9 @@ class InvestmentsOperations:
 
     def current_gains_gross_user(self):
         return listdict_sum(self.io_current, "gains_gross_user")
+    
+    def current_gains_gross_investment(self):
+        return listdict_sum(self.io_current, "gains_gross_investment")
 
     def historical_gains_net_user_between_dt(self, dt_from, dt_to):
         r=0

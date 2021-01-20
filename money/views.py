@@ -24,6 +24,7 @@ from money.charts import (
     chart_lines_total, 
     chart_product_quotes_historical, 
 )
+from money.investmentsoperations import InvestmentsOperations_from_investment
 from money.productrange import ProductRangeManager
 from money.tables import (
     TabulatorDividends, 
@@ -1299,6 +1300,7 @@ class investment_update(UpdateView):
         form = super(investment_update, self).get_form(form_class)
         form.fields['name'].widget = forms.TextInput()
         widget_date(self.request, form.fields['selling_expiration'], None)
+        self.investments_operations=InvestmentsOperations_from_investment(self.object, timezone.now(), self.request.local_currency)
         return form
     
     def form_valid(self, form):

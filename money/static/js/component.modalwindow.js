@@ -5,10 +5,7 @@
 // After clicking makes and ajax connection
 // parameters:
 //   - id. Name of the element 
-//   - url. Ajax request url
-//   - buttontext. Button text
-//   - showbuttonafter. Attribute without value. If missing hides the button after connection
-//   - csrf_token
+//   - closed. Doesn't show, By default is showed. Attribute without value
 class ModalWindow extends HTMLElement {
   constructor() {
     super();
@@ -22,7 +19,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
 
 /* The Modal (background) */
 .modal {
-  display: block; /* Hidden none, Modal: block*/
+  display: none; /* Hidden none, Modal: block*/
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
   padding-top: 100px; /* Location of the box */
@@ -75,10 +72,31 @@ body {font-family: Arial, Helvetica, sans-serif;}
         innermodal.innerHTML=this.innerHTML;
         this.span=shadowRoot.querySelector("#close");
         this.modal=shadowRoot.querySelector("#myModal");
+        
+        if (this.hasAttribute("closed")==false){// Doesn't work in constructor and I don't know why.
+          this.modal.style.display = "block";
+        }
+        
+        
         // When the user clicks on <span> (x), close the modal
         var this_=this;
         this.span.onclick = function() {
-          this_.modal.style.display = "none";
+            this_.close();
+        }
+  }
+  
+
+  show() {
+    this.modal.style.display="block";
+    if (this.hasAttribute("closed")){
+        this.removeAttribute("closed")
+    }
+  }
+  
+  close() {
+        this.modal.style.display="none";
+        if (this.hasAttribute("closed")==false){
+            this.createAttribute("closed")
         }
   }
 }
