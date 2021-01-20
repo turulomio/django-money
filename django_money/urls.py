@@ -10,6 +10,8 @@ from money import views as money_views
 urlpatterns=i18n_patterns(
     path('__debug__/', include(debug_toolbar.urls)),
 
+    path('ajax/', money_views.ajax_modal_button, name='ajax_modal_button'),
+
     path('i18n/setlang/',  set_language, name="set_language"), 
     path('admin/', admin.site.urls,  name="admin-site"),
     path('', money_views.home, name='home'),

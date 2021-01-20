@@ -898,6 +898,13 @@ def ajax_report_gains_by_product_type(request, year=date.today().year):
     net=Currency(listdict_sum(list_report, "dividends_net")+ listdict_sum(list_report, "gains_net"), request.local_currency)
     s=f"<p>Gross gains + Gross dividends = {gross.string()}.</p><p>Net gains + Net dividends = {net.string()}.</p>"
     return HttpResponse(table_investments_gains_by_product_type+s)
+    
+
+def ajax_modal_button(request):
+    return HttpResponse("""<modal-window>
+    Dentro modal window
+    <p> HOLA </p>
+</modal-window>""")
 
 @timeit
 @login_required
