@@ -1270,6 +1270,15 @@ class investment_new(CreateView):
     def get_success_url(self):
         return reverse_lazy('investment_view',args=(self.object.id,))
         
+        
+@login_required
+def investment_change_active(request, pk):
+    investment=get_object_or_404(Investments, id=pk)
+    investment.active=not investment.active
+    investment.save()
+    return HttpResponseRedirect(reverse("investment_view", args=(investment.id, )))
+    
+        
 @method_decorator(login_required, name='dispatch')
 class investment_update(UpdateView):
     model = Investments
