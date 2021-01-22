@@ -4,6 +4,7 @@
 
 {% block content %}
     <h1>{% trans "Update an investment" %}</h1>
+    <p>{{view.object.accounts.fullName}}</p>
     <form method="post">
         <table>
         {% csrf_token %}
@@ -13,82 +14,76 @@
     </form>
     
     <modal-window id="sellingprice" closed>
+<h1>{% trans "Investment data" %}</h1>
+<label id="investmentData"></label>
 <h1>{% trans "Set selling price by percentage" %}</h1>
 <input type="number" value="5" id="percentage">
  <button onclick="set_by_percentage();">{% trans "Set" %}</button> 
 <h1>{% trans "Set selling price to obtain a predefined gain" %}</h1>
-<input type="number" value="500" id="predefined_gains">
+<input type="number" value="500" id="predefinedGains">
  <button onclick="set_by_predefined_gains();">{% trans "Set" %}</button> 
  <hr>
- <label id="sellingprice_result">{% trans "Select a method to calculate the investment selling price" %}<label>
+ <label id="sellingpriceResult">{% trans "Select a method to calculate the investment selling price" %}</label>
 
     <script>
     var dialog=document.getElementById("sellingprice");
     var txtSellingPrice=document.getElementById("id_selling_price");
     var txtPercentage=document.getElementById("percentage");
-    var txtPredefinedGains=document.getElementById("predefined_gains");
-    var lblResult=document.getElementById("sellingprice_result")
+    var txtPredefinedGains=document.getElementById("predefinedGains");
+    var lblInvestmentData=dialog.shadowRoot.getElementById("investmentData");
+    var lblResult=dialog.shadowRoot.getElementById("sellingpriceResult");
     var invested_user=parseFloat({{view.investments_operations.current_invested_user|unlocalize}});
-    var leverage=parseFloat({{view.object.products.real_leveraged_multiplier}});
-    var average_price_investment=parseFloat({{view.investments_operations.current_average_price_investment.amount}});
-    var gains_investment=parseFloat({{view.investments_operations.current_gains_gross_investment}});
-    var shares=parseFloat({{view.investments_operations.current_shares}});
-    
-    alert(`Invested: ${invested_user}
-leverage: ${leverage}
-average_price: ${average_price_investment}
-gains_investment: ${gains_investment}
-shares: ${shares}
-`);
+    var leverage=parseFloat({{view.object.products.real_leveraged_multiplier | unlocalize}});
+    var average_price_investment=parseFloat({{view.investments_operations.current_average_price_investment.amount|unlocalize}});
+    //var gains_investment=parseFloat({{view.investments_operations.current_gains_gross_investment | unlocalize}});
+    var shares=parseFloat({{view.investments_operations.current_shares | unlocalize}});
+    lblInvestmentData.innerHTML=`
+<ul>
+    <li>Invested: ${invested_user}</li>
+    <li>leverage: ${leverage}</li>
+    <li>shares: ${shares}</li>
+</ul>
+`;
     
     function open_sellingprice_dialog(){
         dialog.show();
     }
     
     function set_by_percentage(){
-        display_result(selling_price_to_gain_percentage_of_invested(parseFloat(txtSellingPrice.value)));
+        return display_result(selling_price_to_gain_percentage_of_invested(parseFloat(txtSellingPrice.value)));
     }
     function set_by_predefined_gains(){
-        alert(parseFloat(txtPercentage.value));
-        display_result(selling_price_to_gain_money(parseFloat(txtPredefinedGains.value)));
+        return display_result(selling_price_to_gain_money(parseFloat(txtPredefinedGains.value)));
     }
     
     function selling_price_to_gain_percentage_of_invested(percentage){
-        var gains=invested_user*txtPercentage.value;
+        var gains=invested_user*(parseFloat(txtPercentage.value)/100);
         return self.selling_price_to_gain_money(gains);
     }
 
-    function selling_price_to_gain_money(money){/*
-        AveragePrice=self.average_price(eMoneyCurrency.Product).amount
-        Gains=money.convert(self.investment.product.currency).amount
-        Shares=abs(self.shares())
-
-        if self.investment.op_actual.shares()>0:
-            PF=(Gains+AveragePrice*Shares*Leverage)/(Shares*Leverage) 
-        elif self.investment.op_actual.shares()<0:#Short position
-            ## (AveragePrice-PF) · Shares·Leverage=Gains.  #Short position
-            ## PF=(-Gains+AveragePrice*Shares*Leverage)/(Shares*Leverage)
-            PF=(-Gains+AveragePrice*Shares*Leverage)/(Shares*Leverage)
-        else:
-            PF=0
-        return Money(self.mem, PF, self.investment.product.currency)*/
+    function selling_price_to_gain_money(money){
         var PF=0;
         if (shares>0){
-        
-            // (PF - AveragePrice) · Shares·Leverage=Gains.  #Long position
-            // PF=(Gains+AveragePrice*Shares*Leverage)/(Shares*Leverage)
-            PF=(gains_investment+average_price_investment*shares*leverage)/(shares*leverage)        
+            PF=(money+average_price_investment*shares*leverage)/(shares*leverage)        
         } 
-        alert(PF)
+        else if (shares<0){
+            PF=(-money+average_price_investment*shares*leverage)/(shares*leverage)        
+        }
         return PF;
     }
     
+    function gains_at_price(price){
+        return gains=(price-average_price_investment)*shares*leverage
+    }
+    
+    
     function display_result(selling_price){
-        lblResult.innerHTML=`selling price ${selling_price}`;
+        lblResult.innerHTML=`Investment selling price set to ${selling_price} to gain ${gains_at_price(selling_price)}.`;
         txtSellingPrice.value=selling_price;
+        return;
     }
     </script>
-    </modal-window>
+</modal-window>
     
 
     

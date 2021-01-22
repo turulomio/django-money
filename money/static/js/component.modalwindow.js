@@ -6,6 +6,12 @@
 // parameters:
 //   - id. Name of the element 
 //   - closed. Doesn't show, By default is showed. Attribute without value
+
+// IMPORTANT
+// TO ACCESS ModalWindow innerHTML 
+// var lblResult=dialog.shadowRoot.getElementById("sellingpriceResult");
+
+
 class ModalWindow extends HTMLElement {
   constructor() {
     super();
@@ -66,7 +72,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
   </div>
 </div>
 `;
-        let shadowRoot = this.attachShadow({mode: 'closed'});
+        let shadowRoot = this.attachShadow({mode: 'open'});
         shadowRoot.appendChild(this.template.content.cloneNode(true));
         var innermodal=shadowRoot.querySelector('#innermodal');
         innermodal.innerHTML=this.innerHTML;
