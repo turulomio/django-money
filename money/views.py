@@ -1282,7 +1282,7 @@ def investment_change_active(request, pk):
         
 @method_decorator(login_required, name='dispatch')
 class investment_update(UpdateView):
-    model = Investments
+    queryset = Investments.objects.select_related("products").select_related("products__productstypes").select_related("products__leverages")
     fields = ( 'name', 'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
     template_name="investment_update.html"
 

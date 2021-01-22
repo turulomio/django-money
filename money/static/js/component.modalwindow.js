@@ -96,7 +96,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
   close() {
         this.modal.style.display="none";
         if (this.hasAttribute("closed")==false){
-            this.createAttribute("closed")
+            this.setAttribute("closed","")
         }
   }
 }
