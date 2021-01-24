@@ -825,7 +825,7 @@ def bank_view(request, pk):
     table_investments=TabulatorInvestments("table_investments", "investment_view", listdic, request.local_currency, True, request.local_zone).render()
     
     accounts= bank.accounts(True)
-    list_accounts=listdict_accounts(accounts)
+    list_accounts=listdict_accounts(accounts, request.local_currency)
     table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, request.local_currency).render()
     return render(request, 'bank_view.html', locals())
     
