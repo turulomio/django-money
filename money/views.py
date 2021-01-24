@@ -19,7 +19,11 @@ from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from math import floor
 
 from money.connection_dj import cursor_rows, cursor_one_column, execute
-from money.forms import AccountsTransferForm, ProductsRangeForm
+from money.forms import (
+    AccountsTransferForm, 
+    CreditCardPayForm, 
+    ProductsRangeForm, 
+)
 from money.charts import (
     chart_lines_total, 
     chart_product_quotes_historical, 
@@ -1031,7 +1035,19 @@ group by
     table_report_concepts_negative=TabulatorReportConcepts("table_report_concepts_negative", None, list_report_concepts_negative, request.local_currency).render()
 
     return render(request, 'report_concepts.html', locals())
-    
+
+@timeit
+@login_required
+def creditcard_pay(request, pk):
+    creditcard=Creditcards.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = CreditCardPayForm(request.POST)
+        if form.is_valid():
+            return render(request, 'creditcard_pay.html', locals())
+    else:
+        form = CreditCardPayForm()
+    return render(request, 'creditcard_pay.html', locals())
+
 @login_required
 def creditcard_view(request, pk):
     creditcard=get_object_or_404(Creditcards, id=pk)

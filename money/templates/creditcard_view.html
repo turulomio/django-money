@@ -19,7 +19,8 @@
   {{ table_creditcardoperations|safe }}
 
   <p class="orders">
-    <a href="{% url 'creditcardoperation_new' creditcards_id=creditcard.id %}">{% trans "Add a credit card operation"%}</a>
+    <a href="{% url 'creditcardoperation_new' creditcards_id=creditcard.id %}">{% trans "Add a credit card operation"%}</a> | 
+    <a href="{% url 'creditcard_pay' pk=creditcard.id %}">{% trans "Pay deferred credit card operations"%}</a> | 
   </p>
 
   {% else %}

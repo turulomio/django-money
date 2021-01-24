@@ -1,6 +1,6 @@
 from django import forms
         
-from money.models import Accounts, Products, RANGE_RECOMENDATION_CHOICES
+from money.models import Accounts, Products, RANGE_RECOMENDATION_CHOICES, Creditcardsoperations
 
 
 
@@ -11,6 +11,12 @@ class AccountsTransferForm(forms.Form):
     amount=forms.DecimalField(min_value=0, decimal_places=2, required=True)
     commission=forms.DecimalField(min_value=0, decimal_places=2, required=True)
 
+
+class CreditCardPayForm(forms.Form):
+    datetime = forms.DateTimeField(required=True)
+    cco = forms.ModelMultipleChoiceField(queryset=Creditcardsoperations.objects.all(),widget=forms.CheckboxSelectMultiple)
+    
+    
 class ProductsRangeForm(forms.Form):
     products = forms.ModelChoiceField(queryset=Products.qs_products_of_active_investments(), required=True)
     percentage_between_ranges = forms.DecimalField(min_value=0, decimal_places=2, required=True)

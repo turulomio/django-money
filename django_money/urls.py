@@ -37,7 +37,8 @@ urlpatterns=i18n_patterns(
     path('accountoperation/update/<int:pk>/', money_views.accountoperation_update.as_view(), name='accountoperation_update'),
     path('accountoperation/delete/<int:pk>', money_views.accountoperation_delete.as_view(), name='accountoperation_delete'),
     
-    path('creditcard/view/<slug:pk>/', money_views.creditcard_view, name='creditcard_view'),
+    path('creditcard/view/<int:pk>/', money_views.creditcard_view, name='creditcard_view'),
+    path('creditcard/pay/<int:pk>/', money_views.creditcard_pay, name='creditcard_pay'),
     path('creditcard/new/<int:accounts_id>/', money_views.creditcard_new.as_view(), name='creditcard_new'),
     path('creditcard/update/<slug:pk>/', money_views.creditcard_update.as_view(), name='creditcard_update'),
     path('creditcard/delete/<slug:pk>/', money_views.creditcard_delete.as_view(), name='creditcard_delete'),
