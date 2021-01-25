@@ -3,11 +3,13 @@ from django.contrib import admin
 from django.urls import path,  include
 from django.conf.urls.i18n import i18n_patterns, set_language 
 from django.contrib.auth.views import LoginView, logout_then_login
+from django.views.i18n import JavaScriptCatalog
 import debug_toolbar
 
 from money import views as money_views
 
 urlpatterns=i18n_patterns(
+    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
     path('__debug__/', include(debug_toolbar.urls)),
 
     path('ajax/', money_views.ajax_modal_button, name='ajax_modal_button'),

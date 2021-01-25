@@ -28,6 +28,7 @@
 
     {% block head_js %}
         {% block head_js_site %}
+            <script src="{% url 'javascript-catalog' %}"></script>
             <script type="text/javascript" src='{% static "js/jquery.js" %}'></script>
             <script type="text/javascript" src='{% static "js/jquery-ui.js" %}'></script>
             <script type="text/javascript" src='{% static "js/bootstrap.js" %}'></script>            

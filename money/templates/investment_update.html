@@ -87,7 +87,7 @@
     
     
     function display_result(selling_price){
-        lblResult.innerHTML=`Investment selling price set to ${selling_price} to gain ${gains_at_price(selling_price)}.`;
+        lblResult.innerHTML=gettext("Investment selling price set to {0} to gain {1}.").format(selling_price, gains_at_price(selling_price));
         txtSellingPrice.value=selling_price;
         return;
     }

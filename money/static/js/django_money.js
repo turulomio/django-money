@@ -1,3 +1,14 @@
+// Function to use "{0} {1}".format(a, b) style
+String.prototype.format = function() {
+    var formatted = this;
+    for (var i = 0; i < arguments.length; i++) {
+        var regexp = new RegExp('\\{'+i+'\\}', 'gi');
+        formatted = formatted.replace(regexp, arguments[i]);
+    }
+    return formatted;
+};
+
+
 function currency_string(num, currency){
     if (currency=='EUR'){
         var symbol='€';
@@ -31,3 +42,4 @@ function parseNumber(strg){
     strg = strg.replace(',', '.');
     return parseFloat(strg);
 }
+
