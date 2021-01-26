@@ -773,10 +773,10 @@ class Quotes(models.Model):
             for quote in quotes:
                 quote.quote=self.quote
                 models.Model.save(quote)
-                print(f"Updating {quote}")
+                return (f"Updating {quote}")
         else:
             models.Model.save(self)
-            print(f"Inserting {self}")
+            return (f"Inserting {self}")
 
 
 class Simulations(models.Model):

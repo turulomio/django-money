@@ -19,17 +19,18 @@ class InvestingCom:
         self.request=request
         self.product=product
         self.columns=self.get_number_of_csv_columns()
+        self.log=[]
         if self.product==None: #Several products
             if self.columns==8:
                 messages.info(self.request,"append_from_default")
                 self.append_from_default()
             elif self.columns==39:
-                messages.info(self.request,"append_from_portfolio")
+                self.log.append(_("Adding quotes from Investing.com portfolio"))
                 self.append_from_portfolio()
             else:
                 messages.error(self.request,"The number of columns doesn't match: {}".format(self.columns))
         else:
-            messages.info("append_from_historical")
+            messages.info(self.request, "append_from_historical")
             self.append_from_historical()
             
     def get_csv_object_seeking(self):
@@ -121,7 +122,7 @@ class InvestingCom:
                     products=Products.objects.raw('SELECT products.* FROM products where tickers[5]=%s', (row[1], ))
 
                 if len(products)==0:
-                    print(_(f"Product with InvestingCom ticker {row[1]} wasn't found"))
+                    self.log.append(_(f"Product with InvestingCom ticker {row[1]} wasn't found"))
 
                 for product in products:
                     if row[16].find(":")==-1:#It's a date
@@ -132,9 +133,9 @@ class InvestingCom:
                             quote.datetime=dtaware(date_, product.stockmarkets.closes, product.stockmarkets.zone)#Without 4 microseconds becaouse is not a ohcl
                             quote.quote=string2decimal(row[3])
                             quotes_count=quotes_count+1
-                            quote.save()
+                            self.log.append(quote.save())
                         except:
-                            messages.error(self.request,"Error parsing date"+ str(row))
+                            self.log.append("Error parsing date"+ str(row) )
                     else: #It's an hour
                         try:
                             quote=Quotes()
@@ -142,11 +143,17 @@ class InvestingCom:
                             quote.datetime=string2dtaware(row[16],"%H:%M:%S", self.request.globals["mem__localzone"])
                             quote.quote=string2decimal(row[3])
                             quotes_count=quotes_count+1
-                            quote.save()
+                            self.log.append(quote.save())
                         except:
-                            messages.error(self.request, "Error parsing hour" + str(row))
+                            self.log.append("Error parsing hour" + str(row))
             line_count += 1
-        messages.info(self.request,"Managed {} quotes from {} CSV lines".format(quotes_count, line_count))      
+        lis=""
+        for o in self.log:
+            lis=lis+f"<li>{o}</li>"
+        messages.info(self.request,f"""Managed {quotes_count} quotes from {line_count} CSV lines
+    <ul>
+        {lis}
+    </ul>""")
 
     ## Imports data from a CSV file with this struct. It has 6 columns
     ## "Fecha","Último","Apertura","Máximo","Mínimo","Vol.","% var."
