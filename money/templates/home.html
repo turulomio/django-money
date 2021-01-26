@@ -12,15 +12,19 @@
 
 
 <ajax-button id="ajax_button_evolution" url="{% url 'ajax_modal_button'  %}" showbuttonafter buttontext="{% trans 'Modal ajax button' %}" csrf_token="{{csrf_token}}"></ajax-button>
-
+  <select id = "selLanguage"
+    multiple = "multiple"
+    size = "10">
+   <option value = "HTML">HTML</option>
+   <option value = "CSS">CSS</option>
+   <option value = "JavaScript">JavaScript</option>
+   <option value = "PHP">PHP</option>
+   <option value = "MySQL">MySQL</option>
+   <option value = "Java">Java</option>
+   <option value = "VB.NET">VB.NET</option>
+   <option value = "Python">Python</option>
+   <option value = "Flash">Flash</option>
+   <option value = "Perl">perl</option> 
+  </select>
 
 {% endblock %}
-
-<modal-window>
-    Dentro modal window 1
-    <p> HOLA </p>
-</modal-window>
-<modal-window closed>
-    Dentro modal window 2
-    <p> HOLA </p>
-</modal-window>

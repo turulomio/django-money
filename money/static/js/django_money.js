@@ -8,16 +8,18 @@ String.prototype.format = function() {
     return formatted;
 };
 
-
-function currency_string(num, currency){
+function currency_symbol(currency){
     if (currency=='EUR'){
-        var symbol='€';
+        return '€';
     } 
     else if (currency=='USD'){
-        var symbol='$';
+        return'$';
     }
+}
+
+function currency_string(num, currency){
     num=Math.round(num*100)/100;
-    return `${num} ${symbol}`;
+    return "{0} {1}".format(num, currency_symbol(currency));
 }
 
 //Returns a float with . 

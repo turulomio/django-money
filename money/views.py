@@ -33,7 +33,6 @@ from money.productrange import ProductRangeManager
 from money.tables import (
     TabulatorDividends, 
     TabulatorReportConcepts, 
-    TabulatorCreditCardsOperations, 
     TabulatorAccountOperations, 
     TabulatorAccounts, 
     TabulatorBanks, 
@@ -83,6 +82,7 @@ from money.listdict import (
     LdoProductsPairsEvolution, 
     listdict_products_pairs_evolution_from_datetime, 
     listdict_strategies, 
+    QsoCreditcardsoperations
 )
 from money.models import (
     Operationstypes, 
@@ -284,12 +284,6 @@ def error_403(request, exception):
 ## @todo Add a tab Widget, author, books, valorations with number in ttab
 @timeit
 def home(request):
-    qsInvestments=Investments.objects.all().select_related('accounts') .filter(pk=7)[0]
-    print (qsInvestments.name)
-    print(qsInvestments.fullName())
-    print(qsInvestments.accounts.name)
-    print(qsInvestments.accounts.fullName())
-    
     return render(request, 'home.html', locals())
 
 @login_required
@@ -1040,20 +1034,29 @@ group by
 @login_required
 def creditcard_pay(request, pk):
     creditcard=Creditcards.objects.get(pk=pk)
+    qso_creditcardoperations=QsoCreditcardsoperations(
+        request, 
+        Creditcardsoperations.objects.all().select_related("concepts").select_related("concepts__operationstypes").filter(creditcards_id=creditcard.id,  paid=False).order_by("datetime"), 
+        "qso_cco"
+    )
     if request.method == 'POST':
         form = CreditCardPayForm(request.POST)
         if form.is_valid():
             return render(request, 'creditcard_pay.html', locals())
     else:
         form = CreditCardPayForm()
+    widget_datetime(request, form.fields['datetime'], None)
+        
     return render(request, 'creditcard_pay.html', locals())
 
 @login_required
 def creditcard_view(request, pk):
     creditcard=get_object_or_404(Creditcards, id=pk)
-    creditcardoperations=Creditcardsoperations.objects.all().select_related("concepts").select_related("concepts__operationstypes").filter(creditcards_id=pk,  paid=False).order_by("datetime")
-    table_creditcardoperations=TabulatorCreditCardsOperations("table_creditcardoperations", 'creditcardoperation_update', creditcardoperations, creditcard, request.local_zone).render()
-
+    qso_creditcardoperations=QsoCreditcardsoperations(
+        request, 
+        Creditcardsoperations.objects.all().select_related("concepts").select_related("concepts__operationstypes").filter(creditcards_id=pk,  paid=False).order_by("datetime"), 
+        "qso_cco"
+    )
     return render(request, 'creditcard_view.html', locals())
     
 class creditcard_delete(DeleteView):

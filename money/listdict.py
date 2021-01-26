@@ -55,7 +55,7 @@ from money.reusing.datetime_functions import dtaware_month_end, months
 from money.reusing.decorators import timeit
 from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, InvestmentsOperationsTotals_from_investment, IOC, InvestmentsOperations_from_investment, InvestmentsOperationsTotalsManager_from_all_investments
 from money.reusing.percentage import percentage_between, Percentage
-from money.reusing.tabulator import TabulatorFromListDict
+from money.reusing.tabulator import TabulatorFromListDict, TabulatorFromQuerySet
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 ld_print=listdict_print
@@ -290,6 +290,71 @@ where
     def balance_cfd(self):
         return Currency(self.invested()+self.gains_gross_user(), self.request.local_currency)
 
+
+class QsoCommon:
+    def __init__(self, request, qs, name):
+        self.request=request
+        self.qs=qs
+        self.name=name
+
+## @param qs QuerySet of Creditcardsoperations
+class QsoCreditcardsoperations(QsoCommon):
+    def __init__(self, request, qs, name):
+        QsoCommon.__init__(self, request, qs, name)
+        if self.qs.count()>0:
+            self.creditcard=self.qs[0].creditcards
+        else:
+            self.creditcard=None
+            print("Credit card not fount in QsoCreditcardsoperations")
+            
+    def tabulator_for_update(self):
+        r=TabulatorFromQuerySet(f"{self.name}_table")
+        r.setDestinyUrl('creditcardoperation_update')
+        r.setQuerySet(self.qs)
+        r.setLocalZone(self.request.local_zone)
+        r.setCallByNames("id", "datetime", "concepts", "amount", "comment")
+        r.setHeaders(_("Id"), _("Date and time"), _("Concept"), _("Amount"), _("Comment"))
+        r.setTypes("int", "datetime","str", self.creditcard.accounts.currency, "str")
+        r.setBottomCalc(None, None, None, "sum", None)        
+        r.generate_listdict()
+        return r
+        
+        ## Returns html and js code to link tabulator to a total label
+    def widget_for_pay(self):
+        r=TabulatorFromQuerySet(f"{self.name}_table")
+        r.setDestinyUrl(None)
+        r.setQuerySet(self.qs)
+        r.setLocalZone(self.request.local_zone)
+        r.setCallByNames("id", "datetime", "concepts", "amount", "comment")
+        r.setHeaders(_("Id"), _("Date and time"), _("Concept"), _("Amount"), _("Comment"))
+        r.setTypes("int", "datetime","str", self.creditcard.accounts.currency, "str")
+        r.setBottomCalc(None, None, None, "sum", None)        
+        r.generate_listdict()
+        r.setInitialOptions(f"""
+            rowClick:function(e, row){{
+                var operations_id=document.getElementById("id_operations_id");
+                selected=table.getSelectedData();
+                var text="";
+                var amount=0;
+                for (i = 0; i < selected.length; i++) {{
+                    text += selected[i].id + ",";
+                    amount += selected[i].amount;
+                }}
+                operations_id.value=text.slice(0, -1);
+                
+                var label= document.getElementById("result");
+                label.innerHTML=gettext("{{0}} operations selected ({{1}})").format(selected.length, currency_string(amount, '{self.creditcard.accounts.currency}'));
+        }}, 
+        """)
+            
+        s=r.render()
+        s=s+'<br><label id="result">'+"No operations selected"+"</label>"
+        s=s + """
+            <script>
+            </script>
+        """
+        return s
+    
 
 #GOOD JOB
 class LdoProductsPairsEvolution(LdoDjangoMoney):

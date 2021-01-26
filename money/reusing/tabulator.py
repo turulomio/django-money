@@ -62,6 +62,8 @@ class TabulatorCommons:
     
     ## Render from listdict
     def render(self):
+        if len(self.listdict)==0:
+             return "There are no records"
         ## Fills bottomCalc if None
         if self.bottomcalc is None:
             self.bottomcalc=[None]*len(self.fields)

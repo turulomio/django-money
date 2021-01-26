@@ -16,7 +16,7 @@
   <h2>{% trans "Credit card operations" %}</h2>
   {% if creditcard.deferred is True %}
 
-  {{ table_creditcardoperations|safe }}
+  {{ qso_creditcardoperations.tabulator_for_update.render|safe }}
 
   <p class="orders">
     <a href="{% url 'creditcardoperation_new' creditcards_id=creditcard.id %}">{% trans "Add a credit card operation"%}</a> | 

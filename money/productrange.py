@@ -207,6 +207,21 @@ class ProductRangeManager(ObjectManager):
                     o.recomendation_invest=True
                 elif number_sma_over_price<=1:
                     o.recomendation_invest=True
+        elif method==5: #ProductRangeInvestRecomendation.SMA100 STRICT:           
+            list_ohcl=self.product.ohclDailyBeforeSplits()
+            dvm=DatetimeValueManager()
+            for d in list_ohcl:
+                dvm.appendDV(d["date"], d["close"])
+            dvm_smas=[]
+            for sma in [100, ]:
+                dvm_smas.append(dvm.sma(sma))
+            
+            for o in self.arr:
+                number_sma_over_price=len(self.list_of_sma_over_price(date.today(), o.value, [100, ], dvm_smas,  "close"))
+                if number_sma_over_price==0:
+                    o.recomendation_invest=True
+                else:
+                    o.recomendation_invest=False
 
     def listdict(self):
         r=[]

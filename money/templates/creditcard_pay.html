@@ -9,7 +9,10 @@
         {% csrf_token %}
         {{ form.as_table }}
         </table>
-        <button type="submit" name="button">{% trans "Make transfer" %}</button>
+        {{qso_creditcardoperations.widget_for_pay | safe}}
+        <br>
+        <button type="submit" name="button">{% trans "Make payment" %}</button>
     </form>
-  
+    <p></p>
+    
 {% endblock %}

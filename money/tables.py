@@ -186,17 +186,6 @@ class TabulatorCreditCards(TabulatorFromListDict):
         self.setHeaders(_("Id"), _("Name"), _("Number"), _("Deferred pay"), _("Maximum balance"), _("balance"))
         self.setTypes("int", "str", "str", "bool", account.currency, account.currency)
 
-class TabulatorCreditCardsOperations(TabulatorFromQuerySet):
-    def __init__(self, name, destiny_url, queryset, creditcard, local_zone):
-        TabulatorFromQuerySet.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setQuerySet(queryset)
-        self.setLocalZone(local_zone)
-        self.setCallByNames("id", "datetime", "concepts", "amount", "comment")
-        self.setHeaders(_("Id"), _("Date and time"), _("Concept"), _("Amount"), _("Comment"))
-        self.setTypes("int", "datetime","str", creditcard.accounts.currency, "str")
-        self.setBottomCalc(None, None, None, "sum", None)        
-        self.generate_listdict()
 
 class TabulatorDividends(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, currency, local_zone):

@@ -31,6 +31,7 @@ RANGE_RECOMENDATION_CHOICES =(
     (2, _("Three SMA")), 
     (3, _("SMA 100")), 
     (4, _("Strict three SMA")), 
+    (5, _("Strict SMA 100")), 
 )
 
 class Accounts(models.Model):
