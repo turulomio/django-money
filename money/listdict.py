@@ -382,21 +382,6 @@ class QsoAccountsOperationsHeterogeneus(QsoCommon):
         r.setTypes("int","datetime", "str","str",  "str",  "str")
         return r
         
-        
-class TabulatorAccountOperations(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, currency,  local_zone):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setListDict(listdict)
-        self.setLayout("fitDataStretch")
-        self.setLocalZone(local_zone)
-        self.setFields("id","datetime", "concepts","amount", "balance","comment")
-        self.setHeaders("Id", _("Date and time"), _("Concept"), _("Amount"),_("Balance"),  _("Comment"))
-        self.setTypes("int","datetime", "str", currency, currency,  "str")
-        self.setBottomCalc(None,  None, None, "sum", None, None)
-
-
-
 ## @param qs QuerySet of Creditcardsoperations
 class QsoDividendsHomogeneus(QsoCommon):
     def __init__(self, request, qs, investment, name=None):
