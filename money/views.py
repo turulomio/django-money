@@ -456,13 +456,14 @@ class accountoperation_new(CreateView):
 
 @login_required
 def accountoperation_search(request):
-    search = request.GET.get('search') 
+    search = request.GET.get('search')
     if search is not None:
         searchtitle=_(f"Searching accounts operations that contain '{search}'")
         qso_ao=QsoAccountsOperationsHeterogeneus(
             request,  
             Accountsoperations.objects.all().select_related("concepts").select_related("accounts").select_related("accounts__banks").filter(comment__icontains=search).order_by('datetime')
         )
+    strsearch="" if search is None else search
     return render(request, 'accountoperation_search.html', locals())
 
 @method_decorator(login_required, name='dispatch')
