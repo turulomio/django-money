@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% load i18n %}
 
 {% block content %}
@@ -11,5 +10,11 @@
 {% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
 <p> </p>
 {{table_accounts|safe}}
+
+<p class="orders">
+  <a href="{% url 'accountoperation_search' %}">{% trans 'Search in accounts operations' %}</a>
+</p>
+
 {% endblock %}
+
 

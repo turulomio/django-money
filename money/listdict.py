@@ -295,12 +295,16 @@ class QsoCommon:
     def __init__(self, request, qs, name):
         self.request=request
         self.qs=qs
-        self.name=name
+        if name is None:
+            self.name=self.__class__.__name__
+        else:
+            self.name=name
 
 ## @param qs QuerySet of Creditcardsoperations
 class QsoCreditcardsoperations(QsoCommon):
-    def __init__(self, request, qs, name):
+    def __init__(self, request, qs, name=None):
         QsoCommon.__init__(self, request, qs, name)
+
         if self.qs.count()>0:
             self.creditcard=self.qs[0].creditcards
         else:
@@ -357,8 +361,45 @@ class QsoCreditcardsoperations(QsoCommon):
     
 
 ## @param qs QuerySet of Creditcardsoperations
+class QsoAccountsOperationsHeterogeneus(QsoCommon):
+    def __init__(self, request, qs, name=None):
+        QsoCommon.__init__(self, request, qs, name)
+        
+    def listdict(self):
+        r=[]
+        for op in self.qs:
+            r.append({"id":op.id, "datetime": op.datetime, "account": op.accounts.fullName(),"concepts": op.concepts.name,"amount": Currency(op.amount, op.accounts.currency).string(), "comment": Comment().decode(op.comment)})
+        return r
+
+    def tabulator(self):
+        r=TabulatorFromListDict(f"{self.name}_tabulator")
+        r.setDestinyUrl("accountoperation_update")
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.listdict())
+
+        r.setFields("id","datetime", "account","concepts","amount", "comment")
+        r.setHeaders("Id", _("Date and time"), _("Account"),  _("Concept"), _("Amount"), _("Comment"))
+        r.setTypes("int","datetime", "str","str",  "str",  "str")
+        return r
+        
+        
+class TabulatorAccountOperations(TabulatorFromListDict):
+    def __init__(self, name, destiny_url, listdict, currency,  local_zone):
+        TabulatorFromListDict.__init__(self, name)
+        self.setDestinyUrl(destiny_url)
+        self.setListDict(listdict)
+        self.setLayout("fitDataStretch")
+        self.setLocalZone(local_zone)
+        self.setFields("id","datetime", "concepts","amount", "balance","comment")
+        self.setHeaders("Id", _("Date and time"), _("Concept"), _("Amount"),_("Balance"),  _("Comment"))
+        self.setTypes("int","datetime", "str", currency, currency,  "str")
+        self.setBottomCalc(None,  None, None, "sum", None, None)
+
+
+
+## @param qs QuerySet of Creditcardsoperations
 class QsoDividendsHomogeneus(QsoCommon):
-    def __init__(self, request, qs, investment, name="QsoDividendsHomogeneus"):
+    def __init__(self, request, qs, investment, name=None):
         QsoCommon.__init__(self, request, qs, name)
         self.investment=investment            
     
@@ -384,7 +425,7 @@ class QsoDividendsHomogeneus(QsoCommon):
 
 ## @param qs QuerySet of Creditcardsoperations
 class QsoDividendsHeterogeneus(QsoCommon):
-    def __init__(self, request, qs,  name="QsoDividendsHeterogeneus"):
+    def __init__(self, request, qs,  name=None):
         QsoCommon.__init__(self, request, qs, name)
     
     def listdict_dividends_from_queryset(self):

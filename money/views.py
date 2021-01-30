@@ -76,6 +76,7 @@ from money.listdict import (
     LdoProductsPairsEvolution, 
     listdict_products_pairs_evolution_from_datetime, 
     listdict_strategies, 
+    QsoAccountsOperationsHeterogeneus, 
     QsoCreditcardsoperations, 
     QsoDividendsHomogeneus, 
     QsoDividendsHeterogeneus, 
@@ -450,6 +451,19 @@ class accountoperation_new(CreateView):
             if form.instance.concepts.operationstypes.id==eOperationType.Income and form.instance.amount<=0:
                     form.add_error(None, ValidationError(_('Amount must be positive')))
             return super().form_invalid(form)
+
+
+
+@login_required
+def accountoperation_search(request):
+    search = request.GET.get('search') 
+    if search is not None:
+        searchtitle=_(f"Searching accounts operations that contain '{search}'")
+        qso_ao=QsoAccountsOperationsHeterogeneus(
+            request,  
+            Accountsoperations.objects.all().select_related("concepts").select_related("accounts").select_related("accounts__banks").filter(comment__icontains=search).order_by('datetime')
+        )
+    return render(request, 'accountoperation_search.html', locals())
 
 @method_decorator(login_required, name='dispatch')
 class accountoperation_update(UpdateView):
@@ -901,11 +915,8 @@ def report_total_income_details(request, year=date.today().year, month=date.toda
     table_expenses=TabulatorAccountOperations("table_expenses", None, expenses, request.local_currency,  request.local_zone).render()
     incomes=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 1,  request.local_currency, request.local_zone)
     table_incomes=TabulatorAccountOperations("table_incomes", None, incomes, request.local_currency,  request.local_zone).render()
-    
-    
+        
     qso_dividends=QsoDividendsHeterogeneus(request,  Dividends.objects.all().filter(datetime__year=year, datetime__month=month).order_by('datetime'))
-    #dividends=listdict_dividends_by_month(year, month)
-    #table_dividends=TabulatorDividends("table_dividends", None, dividends, request.local_currency,  request.local_zone).render()
     
     gains=listdict_investmentsoperationshistorical(request, year, month, request.local_currency, request.local_zone)
     table_gains=TabulatorInvestmentsOperationsHistoricalHeterogeneus("table_gains", None, gains, request.local_currency, request.local_zone).render()

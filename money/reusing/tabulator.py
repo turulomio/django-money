@@ -192,15 +192,16 @@ class TabulatorCommons:
 }};    
 
     
-        var tabledata = {tb_list};  
-        var table = new Tabulator("#{self.name}", {{
+        var tabledata_{self.name} = {tb_list};  
+        var table_{self.name} = new Tabulator("#{self.name}", {{
             clipboard:true, //enable clipboard functionality
             selectable:true,
+            tooltips:true,
             persistence: true, 
             printAsHtml:true, //enable html table printing
             printStyled:true, //copy Tabulator styling to HTML table
             {str_height}
-            data:tabledata, //assign data to table
+            data:tabledata_{self.name}, //assign data to table
             layout:"{self.layout}", //fit columns to width of table (optional)
             columns:[ {columns}
             ],
