@@ -69,7 +69,6 @@ from money.listdict import (
     listdict_report_total,     
     listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month, 
     listdict_accountsoperations_from_queryset, 
-    listdict_dividends_by_month, 
     listdict_investments_gains_by_product_type, 
     listdict_investmentsoperationshistorical, 
     listdict_orders, 
@@ -79,6 +78,7 @@ from money.listdict import (
     listdict_strategies, 
     QsoCreditcardsoperations, 
     QsoDividendsHomogeneus, 
+    QsoDividendsHeterogeneus, 
 )
 from money.models import (
     Operationstypes, 
@@ -902,7 +902,9 @@ def report_total_income_details(request, year=date.today().year, month=date.toda
     incomes=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 1,  request.local_currency, request.local_zone)
     table_incomes=TabulatorAccountOperations("table_incomes", None, incomes, request.local_currency,  request.local_zone).render()
     
-    dividends=listdict_dividends_by_month(year, month)
+    
+    qso_dividends=QsoDividendsHeterogeneus(request,  Dividends.objects.all().filter(datetime__year=year, datetime__month=month).order_by('datetime'))
+    #dividends=listdict_dividends_by_month(year, month)
     #table_dividends=TabulatorDividends("table_dividends", None, dividends, request.local_currency,  request.local_zone).render()
     
     gains=listdict_investmentsoperationshistorical(request, year, month, request.local_currency, request.local_zone)

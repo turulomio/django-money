@@ -154,10 +154,7 @@ class TabulatorCreditCards(TabulatorFromListDict):
         self.setListDict(listdict)
         self.setFields("id", "name", "number", "deferred", "maximumbalance", "balance")
         self.setHeaders(_("Id"), _("Name"), _("Number"), _("Deferred pay"), _("Maximum balance"), _("balance"))
-        self.setTypes("int", "str", "str", "bool", account.currency, account.currency)
-
-
-  
+        self.setTypes("int", "str", "str", "bool", account.currency, account.currency)  
 
 class TabulatorReportConcepts(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency):
