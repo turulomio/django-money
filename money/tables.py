@@ -97,17 +97,6 @@ class TabulatorInvestmentsPairsInvestCalculator(TabulatorFromListDict):
         self.setTypes("str", "datetime", "Decimal", local_currency, local_currency,local_currency,local_currency,"Decimal")
         self.setBottomCalc(None, None, None,  "sum", "sum",  "sum", "sum", None)
 
-class TabulatorInvestmentsOperationsCurrentHomogeneus(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, investment, local_zone):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setLocalZone(local_zone)
-        self.setListDict(listdict)
-        self.setFields("id","datetime", "operationstypes",  "shares", "price_investment", "invested_investment", "balance_investment", "gains_gross_investment", "percentage_annual", "percentage_apr", "percentage_total")
-        self.setHeaders("Id", _("Date and time"), _("Operation type"),  _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Gross gains"), _("% year"), _("% APR"), _("% Total"))
-        self.setTypes("int","datetime", "str",  "Decimal", investment.products.currency, investment.products.currency, investment.products.currency,  investment.products.currency, "percentage", "percentage", "percentage")
-        self.setBottomCalc(None, None, None, "sum", None, "sum", "sum", "sum", None, None, None)
-        self.showLastRecord(False)
 
 class TabulatorInvestmentsOperationsCurrentHeterogeneus(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency, local_zone):
@@ -121,16 +110,7 @@ class TabulatorInvestmentsOperationsCurrentHeterogeneus(TabulatorFromListDict):
         self.setBottomCalc(None, None,  None, None, None, None, "sum", "sum", "sum", None, None, None)
         self.showLastRecord(False)
 
-class TabulatorInvestmentsOperationsHistoricalHomogeneus(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, investment, local_zone):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setLocalZone(local_zone)
-        self.setListDict(listdict)
-        self.setFields("id","dt_end", "years","operationstypes","shares", "gross_start_investment", "gross_end_investment", "gains_gross_investment", "commissions_account", "taxes_account", "gains_net_investment")
-        self.setHeaders("Id", _("Date and time"), _("Years"), _("Operation type"),  _("Shares"), _("Gross start"), _("Gross end"), _("Gross gains"), _("Commissions"), _("Taxes"), _("Net gains"))
-        self.setTypes("int","datetime", "int",  "str", "Decimal", investment.products.currency, investment.products.currency, investment.products.currency, investment.products.currency, investment.products.currency, investment.products.currency)
-        self.setBottomCalc(None, None, None,None, None, "sum", "sum", "sum", "sum", "sum", "sum")
+
 
 class TabulatorProducts(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency, local_zone):
@@ -165,17 +145,7 @@ class TabulatorInvestmentsOperationsHistoricalHeterogeneus(TabulatorFromListDict
         self.setHeaders("Id", _("Date and time"), _("Years"),_("Investment"), _("Operation type"),  _("Shares"), _("Gross start"), _("Gross end"), _("Gross gains"), _("Commissions"), _("Taxes"), _("Net gains"))
         self.setTypes("int","datetime", "int", "str",   "str", "Decimal", local_currency, local_currency, local_currency, local_currency, local_currency, local_currency)
         self.setBottomCalc(None, None, None, None, None, None, "sum", "sum", "sum", "sum", "sum", "sum")
-        
-class TabulatorInvestmentsOperationsHomogeneus(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, investment, local_zone):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setLocalZone(local_zone)
-        self.setListDict(listdict)
-        self.setFields("id","datetime", "operationstypes","shares", "price", "commission", "taxes")
-        self.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Commission"), _("Taxes"))
-        self.setTypes("int","datetime", "str","Decimal", investment.products.currency, investment.accounts.currency, investment.accounts.currency)
-        self.setBottomCalc(None, None, None, "sum", None, "sum", "sum")
+
         
 class TabulatorCreditCards(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, account):

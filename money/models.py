@@ -455,10 +455,10 @@ class Investments(models.Model):
     def fullName(self):
         return "{} ({})".format(self.name, self.accounts.name)
     
-    def operations(self, local_currency):
+    def operations(self, request, local_currency):
         if hasattr(self, "_operations") is False:
             from money.investmentsoperations import InvestmentsOperations_from_investment
-            self._operations=InvestmentsOperations_from_investment(self, timezone.now(), local_currency)
+            self._operations=InvestmentsOperations_from_investment(request, self, timezone.now(), local_currency)
         return self._operations
                 
     def hasSameAccountCurrency(self):

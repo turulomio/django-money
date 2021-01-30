@@ -39,14 +39,11 @@ from money.tables import (
     TabulatorConcepts, 
     TabulatorCreditCards, 
     TabulatorInvestments, 
-    TabulatorInvestmentsOperationsHomogeneus, 
-    TabulatorInvestmentsOperationsCurrentHomogeneus,
     TabulatorProducts, 
     TabulatorOrders, 
     TabulatorReportIncomeTotal, 
     TabulatorReportTotal, 
     TabulatorInvestmentsGainsByProductType, 
-    TabulatorInvestmentsOperationsHistoricalHomogeneus, 
     TabulatorInvestmentsOperationsHistoricalHeterogeneus, 
     TabulatorProductsPairsEvolutionWithMonthDiff, 
     TabulatorProductQuotesMonthPercentages, 
@@ -673,11 +670,7 @@ def ajax_investment_pairs_evolution(request, worse, better ):
 @login_required
 def investment_view(request, pk):
     investment=get_object_or_404(Investments.objects.select_related("accounts").select_related("products").select_related("products__productstypes"), id=pk)
-    operations=investment.operations(request.local_currency)
-
-    table_io=TabulatorInvestmentsOperationsHomogeneus("IO", "investmentoperation_update", operations.o_listdict_tabulator_homogeneus(request), investment, request.local_zone).render()
-    table_ioc=TabulatorInvestmentsOperationsCurrentHomogeneus("IOC", None, operations.current_listdict_tabulator_homogeneus(request), investment, request.local_zone).render()
-    table_ioh=TabulatorInvestmentsOperationsHistoricalHomogeneus("IOH", None, operations.historical_homogeneus_listdict_tabulator(request), investment, request.local_zone).render()
+    operations=investment.operations(request, request.local_currency)
 
     qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
     listdict_dividends=listdict_dividends_from_queryset(qs_dividends)
@@ -884,7 +877,7 @@ def ajax_chart_product_quotes_historical(request, pk):
 @login_required
 def ajax_report_total_income(request, year=date.today().year):  
     qs_investments=Investments.objects.all()
-    list_report2=listdict_report_total_income(qs_investments, year, request.local_currency, request.local_zone)
+    list_report2=listdict_report_total_income(request, qs_investments, year, request.local_currency, request.local_zone)
     table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", "report_total_income_details", list_report2, request.local_currency).render()
     return HttpResponse(table_report_total_income)
 
@@ -916,7 +909,7 @@ def report_total_income_details(request, year=date.today().year, month=date.toda
     dividends=listdict_dividends_by_month(year, month)
     table_dividends=TabulatorDividends("table_dividends", None, dividends, request.local_currency,  request.local_zone).render()
     
-    gains=listdict_investmentsoperationshistorical(year, month, request.local_currency, request.local_zone)
+    gains=listdict_investmentsoperationshistorical(request, year, month, request.local_currency, request.local_zone)
     table_gains=TabulatorInvestmentsOperationsHistoricalHeterogeneus("table_gains", None, gains, request.local_currency, request.local_zone).render()
     return render(request, 'report_total_income_details.html', locals())
 
@@ -1319,7 +1312,7 @@ class investment_update(UpdateView):
         form = super(investment_update, self).get_form(form_class)
         form.fields['name'].widget = forms.TextInput()
         widget_date(self.request, form.fields['selling_expiration'], None)
-        self.investments_operations=InvestmentsOperations_from_investment(self.object, timezone.now(), self.request.local_currency)
+        self.investments_operations=InvestmentsOperations_from_investment(self.request, self.object, timezone.now(), self.request.local_currency)
         return form
     
     def form_valid(self, form):
