@@ -31,7 +31,6 @@ from money.charts import (
 from money.investmentsoperations import InvestmentsOperations_from_investment
 from money.productrange import ProductRangeManager
 from money.tables import (
-    TabulatorDividends, 
     TabulatorReportConcepts, 
     TabulatorAccountOperations, 
     TabulatorAccounts, 
@@ -71,7 +70,6 @@ from money.listdict import (
     listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month, 
     listdict_accountsoperations_from_queryset, 
     listdict_dividends_by_month, 
-    listdict_dividends_from_queryset, 
     listdict_investments_gains_by_product_type, 
     listdict_investmentsoperationshistorical, 
     listdict_orders, 
@@ -79,7 +77,8 @@ from money.listdict import (
     LdoProductsPairsEvolution, 
     listdict_products_pairs_evolution_from_datetime, 
     listdict_strategies, 
-    QsoCreditcardsoperations
+    QsoCreditcardsoperations, 
+    QsoDividendsHomogeneus, 
 )
 from money.models import (
     Operationstypes, 
@@ -671,11 +670,8 @@ def ajax_investment_pairs_evolution(request, worse, better ):
 def investment_view(request, pk):
     investment=get_object_or_404(Investments.objects.select_related("accounts").select_related("products").select_related("products__productstypes"), id=pk)
     operations=investment.operations(request, request.local_currency)
-
-    qs_dividends=Dividends.objects.all().filter(investments_id=pk).order_by('datetime')
-    listdict_dividends=listdict_dividends_from_queryset(qs_dividends)
-    table_dividends=TabulatorDividends("table_dividends", "dividend_update", listdict_dividends, investment.accounts.currency,  request.local_zone).render()
-   
+    
+    qso_dividends=QsoDividendsHomogeneus(request,  Dividends.objects.all().filter(investments_id=pk).order_by('datetime'),  investment)
     return render(request, 'investment_view.html', locals())
 
 @method_decorator(login_required, name='dispatch')
@@ -907,7 +903,7 @@ def report_total_income_details(request, year=date.today().year, month=date.toda
     table_incomes=TabulatorAccountOperations("table_incomes", None, incomes, request.local_currency,  request.local_zone).render()
     
     dividends=listdict_dividends_by_month(year, month)
-    table_dividends=TabulatorDividends("table_dividends", None, dividends, request.local_currency,  request.local_zone).render()
+    #table_dividends=TabulatorDividends("table_dividends", None, dividends, request.local_currency,  request.local_zone).render()
     
     gains=listdict_investmentsoperationshistorical(request, year, month, request.local_currency, request.local_zone)
     table_gains=TabulatorInvestmentsOperationsHistoricalHeterogeneus("table_gains", None, gains, request.local_currency, request.local_zone).render()

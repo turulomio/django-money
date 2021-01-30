@@ -356,6 +356,31 @@ class QsoCreditcardsoperations(QsoCommon):
         return s
     
 
+## @param qs QuerySet of Creditcardsoperations
+class QsoDividendsHomogeneus(QsoCommon):
+    def __init__(self, request, qs, investment, name="QsoDividendsHomogeneus"):
+        QsoCommon.__init__(self, request, qs, name)
+        self.investment=investment            
+    
+    def listdict_dividends_from_queryset(self):
+        r=[]
+        for o in self.qs:
+            r.append({"id":o.id, "datetime":o.datetime, "concepts":o.concepts.name, "gross":o.gross, "net":o.net, "taxes":o.taxes, "commission":o.commission})
+        return r
+            
+    def tabulator(self):
+        currency=self.investment.accounts.currency
+        r=TabulatorFromListDict(f"{self.name}_tabulator")
+        r.setDestinyUrl("dividend_update")
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.listdict_dividends_from_queryset())
+        r.setFields("id", "datetime","concepts", "gross", "taxes", "commission", "net")
+        r.setHeaders(_("Id"), _("Date and time"), _("Concept"), _("Gross"), _("Taxes"), _("Commission"), _("Net"))
+        r.setTypes("int", "datetime","str", currency, currency, currency, currency)
+        r.setBottomCalc(None, None, None, "sum", "sum", "sum", "sum")    
+        r.showLastRecord(False)
+        return r
+            
 #GOOD JOB
 class LdoProductsPairsEvolution(LdoDjangoMoney):
     def __init__(self, request, name):
@@ -570,12 +595,14 @@ def listdict_report_total(year, last_year_balance, local_currency, local_zone):
     return list_
     
 def listdict_dividends_from_queryset(qs_dividends):
+    print("CHANGED TO QSO")
     r=[]
     for o in qs_dividends:
         r.append({"id":o.id, "datetime":o.datetime, "concepts":o.concepts.name, "gross":o.gross, "net":o.net, "taxes":o.taxes, "commission":o.commission})
     return r
 
 def listdict_dividends_by_month(year, month):
+    
     qs_dividends=Dividends.objects.all().filter(datetime__year=year, datetime__month=month).order_by('datetime')
     return listdict_dividends_from_queryset(qs_dividends)
 

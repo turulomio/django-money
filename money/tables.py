@@ -157,16 +157,7 @@ class TabulatorCreditCards(TabulatorFromListDict):
         self.setTypes("int", "str", "str", "bool", account.currency, account.currency)
 
 
-class TabulatorDividends(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, currency, local_zone):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setListDict(listdict)
-        self.setLocalZone(local_zone)
-        self.setFields("id", "datetime","concepts", "gross", "taxes", "commission", "net")
-        self.setHeaders(_("Id"), _("Date and time"), _("Concept"), _("Gross"), _("Taxes"), _("Commission"), _("Net"))
-        self.setTypes("int", "datetime","str", currency, currency, currency, currency)
-        self.setBottomCalc(None, None, None, "sum", "sum", "sum", "sum")        
+  
 
 class TabulatorReportConcepts(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency):
