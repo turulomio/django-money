@@ -69,6 +69,10 @@ ld_print=listdict_print
 class LdoDjangoMoney(Ldo):
     def __init__(self, request, name=None):
         Ldo.__init__(self, name)
+        if name is None:
+            self.name=self.__class__.__name__
+        else:
+            self.name=name
         self.request=request
 
 def listdict_accounts(queryset, local_currency):
@@ -223,6 +227,44 @@ def listdict_investmentsoperationshistorical(request, year, month, local_currenc
                 list_ioh.append(ioh)
     list_ioh= sorted(list_ioh,  key=lambda item: item['dt_end'])
     return list_ioh
+
+
+## IOC of several investments
+class LdoInvestmentsOperationsCurrentHeterogeneus(LdoDjangoMoney):
+    def __init__(self, request, name=None):
+        LdoDjangoMoney.__init__(self, request, name)
+
+        
+    def tabulator(self):
+        currency=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.ld)
+        r.setFields("id","datetime", "name","operationstypes",  "shares", "price_investment", "invested_investment", "balance_investment", "gains_gross_investment", "percentage_annual", "percentage_apr", "percentage_total")
+        r.setHeaders("Id", _("Date and time"), _("Name"),  _("Operation type"),  _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Gross gains"), _("% year"), _("% APR"), _("% Total"))
+        r.setTypes("int","datetime", "str", "str",  "Decimal", currency, currency, currency,  currency, "percentage", "percentage", "percentage")
+        r.setBottomCalc(None, None, None, None, "sum", None,  "sum", "sum", "sum", None, None, None)
+        r.showLastRecord(False)
+        return r
+
+## IOC of several investments
+class LdoInvestmentsOperationsHistoricalHeterogeneus(LdoDjangoMoney):
+    def __init__(self, request, name=None):
+        LdoDjangoMoney.__init__(self, request, name)
+
+    def tabulator(self):
+        currency=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.ld)
+        r.setFields("id","dt_end", "years", "name", "operationstypes","shares", "gross_start_user", "gross_end_user", "gains_gross_user", "commissions_user", "taxes_user", "gains_net_user")
+        r.setHeaders("Id", _("Date and time"), _("Years"),_("Investment"), _("Operation type"),  _("Shares"), _("Gross start"), _("Gross end"), _("Gross gains"), _("Commissions"), _("Taxes"), _("Net gains"))
+        r.setTypes("int","datetime", "int", "str",   "str", "Decimal", currency, currency, currency, currency, currency, currency)
+        r.setBottomCalc(None, None, None, None, None, None, "sum", "sum", "sum", "sum", "sum", "sum")
+        return r
+        
 
 ## Different o Heterogeneus, due to sum shares...
 class LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(LdoDjangoMoney):
@@ -408,7 +450,7 @@ class QsoDividendsHomogeneus(QsoCommon):
         return r
         
 
-## @param qs QuerySet of Creditcardsoperations
+## @param qs QuerySet of Dividends
 class QsoDividendsHeterogeneus(QsoCommon):
     def __init__(self, request, qs,  name=None):
         QsoCommon.__init__(self, request, qs, name)
@@ -417,6 +459,7 @@ class QsoDividendsHeterogeneus(QsoCommon):
         r=[]
         for o in self.qs:
             r.append({"id":o.id, "datetime":o.datetime, "concepts":o.concepts.name, "gross":o.gross, "net":o.net, "taxes":o.taxes, "commission":o.commission})
+            print(o)
         return r
             
     def tabulator(self):

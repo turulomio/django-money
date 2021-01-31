@@ -15,6 +15,34 @@
 <p><strong>{% trans 'Comment' %}: </strong>{{ strategy.comment }}</p>
 <p><strong>{% trans 'Types' %}: </strong>{{ strategy.get_type_display }}</p>
 
+<p>
+<script>
+  $( function() {
+    $( "#tabs" ).tabs();
+  } );
+</script>
+ 
+<div id="tabs">
+  <ul>
+    <li><a href="#tabs-2">{% trans "Current investment operations" %}</a></li>
+    <li><a href="#tabs-3">{% trans "Historical investment operations" %}</a></li>
+    <li><a href="#tabs-4">{% trans "Dividends" %}</a></li>
+  </ul>
+
+
+
+  <div id="tabs-2">
+  {{ current.tabulator.render| safe }}
+  </div>
+
+  <div id="tabs-3">
+    {{ historical.tabulator.render |safe}}
+  </div>
+  <div id="tabs-4">
+    {{ qso_dividends.tabulator.render |safe}}
+  </div>
+</div>
+
 <p class="orders">
     <a href="{% url 'strategy_update' pk=strategy.pk %}">{% trans "Update this strategy" %}</a>
     {% if strategy.type != 0 %}

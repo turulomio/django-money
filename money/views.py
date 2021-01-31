@@ -28,7 +28,7 @@ from money.charts import (
     chart_lines_total, 
     chart_product_quotes_historical, 
 )
-from money.investmentsoperations import InvestmentsOperations_from_investment
+from money.investmentsoperations import InvestmentsOperations_from_investment, InvestmentsOperationsManager_from_investment_queryset
 from money.productrange import ProductRangeManager
 from money.tables import (
     TabulatorReportConcepts, 
@@ -1180,8 +1180,18 @@ def strategy_list(request, active=True):
 def strategy_view(request, pk):
     strategy=get_object_or_404(Strategies, pk=pk)
     investments_ids=string2list_of_integers(strategy.investments)
-    qs_investments_in_strategy=Investments.objects.select_related("accounts").filter(id__in=(investments_ids))
-    pairs_url=reverse_lazy('investment_pairs',args=(1, 1, 1))
+    iom=InvestmentsOperationsManager_from_investment_queryset(
+        Investments.objects.select_related("accounts").filter(id__in=(investments_ids)), 
+        timezone.now(), 
+        request
+    )
+    current=iom.LdoInvestmentsOperationsCurrentHeterogeneus_between(strategy.dt_from, strategy.dt_to_for_comparations())
+    historical=iom.LdoInvestmentsOperationsHistoricalHeterogeneus_between(strategy.dt_from, strategy.dt_to_for_comparations())
+    
+    qso_dividends=QsoDividendsHeterogeneus(
+        request,  
+        Dividends.objects.all().filter(investments_id__in=investments_ids, datetime__range=(strategy.dt_from, strategy.dt_to_for_comparations())).order_by('datetime'),  
+    )
 
     return render(request, 'strategy_view.html', locals())
 

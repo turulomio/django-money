@@ -7,7 +7,6 @@ from money.tables import TabulatorFromListDict
 from datetime import date
 from decimal import Decimal
 Decimal
-
 from money.connection_dj import cursor_one_row
 
 ## Converting dates to string in postgres functions return a string datetime instead of a dtaware. Here we convert it
@@ -228,6 +227,29 @@ class InvestmentsOperationsManager(IoManager):
                 r=r + o.historical_gains_net_user_between_dt(dt_from, dt_to)
         return r
         
+    def LdoInvestmentsOperationsCurrentHeterogeneus_between(self, dt_from, dt_to):
+        from money.listdict import LdoInvestmentsOperationsCurrentHeterogeneus
+        r=LdoInvestmentsOperationsCurrentHeterogeneus(self.request)
+        for io in self.list:
+            for o in io.io_current:
+                if dt_from<=o["datetime"] and o["datetime"]<=dt_to:
+                    o["name"]=io.investment.fullName()
+                    o["operationstypes"]=self.request.operationstypes[o["operationstypes_id"]]
+                    r.append(o)
+        r.order_by("datetime")
+        return r
+        
+    def LdoInvestmentsOperationsHistoricalHeterogeneus_between(self, dt_from, dt_to):
+        from money.listdict import LdoInvestmentsOperationsHistoricalHeterogeneus
+        r=LdoInvestmentsOperationsHistoricalHeterogeneus(self.request)
+        for io in self.list:
+            for o in io.io_historical:
+                if dt_from<=o["dt_end"] and o["dt_end"]<=dt_to:
+                    o["name"]=io.investment.fullName()
+                    o["operationstypes"]=self.request.operationstypes[o["operationstypes_id"]]
+                    r.append(o)
+        r.order_by("dt_end")
+        return r
 
 ## Generate object from and ids list
 def InvestmentsOperationsManager_from_investment_queryset(qs_investments, dt, request):

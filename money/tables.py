@@ -137,6 +137,7 @@ class TabulatorProductsPairsEvolutionWithMonthDiff(TabulatorFromListDict):
 
 class TabulatorInvestmentsOperationsHistoricalHeterogeneus(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency, local_zone):
+        print("deprecated use LdoInvestmentsOperationsHistoricalHeterogeneus")
         TabulatorFromListDict.__init__(self, name)
         self.setDestinyUrl(destiny_url)
         self.setLocalZone(local_zone)

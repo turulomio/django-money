@@ -840,7 +840,12 @@ class Strategies(models.Model):
             #additional1=products_id, additional2=percentage_between_ranges*1000, additional3=percentage_gains*1000, additional4=amount,additional5=recomendationmethod,additional6=onlyfirst,additional7=accounts_id}
         elif self.type==StrategiesTypes.Ranges:
             return reverse_lazy('product_ranges')+f"?product={self.additional1}&percentagebetween={self.additional2}&percentagegains={self.additional3}&amount={self.additional4}&method={self.additional5}&onlyfirst={self.additional6}&account={self.additional7}"
-
+        
+    ## Replaces None for dt_to and sets a very big datetine
+    def dt_to_for_comparations(self):
+        if self.dt_to is None:
+            return timezone.now()+timedelta(days=365*100)
+        return self.dt_to
 
 def percentage_to_selling_point(shares, selling_price, last_quote):       
     """Función que calcula el tpc selling_price partiendo de las el last y el valor_venta
