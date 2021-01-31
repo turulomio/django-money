@@ -731,7 +731,7 @@ class investmentoperation_new(CreateView):
                 form.instance.taxes>=0 and 
                 ((form.instance.shares>=0 and form.instance.operationstypes.id in (4, 6)) or (form.instance.shares<0 and form.instance.operationstypes.id==5) )) :
             form.instance.save()
-            form.instance.update_associated_account_operation(self.request.local_currency)
+            form.instance.update_associated_account_operation(self.request, self.request.local_currency)
             return super().form_valid(form)
         else:
             if form.instance.commission<0:
@@ -779,7 +779,7 @@ class investmentoperation_update(UpdateView):
                 form.instance.taxes>=0 and 
                 ((form.instance.shares>=0 and form.instance.operationstypes.id in (4, 6)) or (form.instance.shares<0 and form.instance.operationstypes.id==5) )) :
             form.instance.save()
-            form.instance.update_associated_account_operation(self.request.local_currency)
+            form.instance.update_associated_account_operation(self.request, self.request.local_currency)
             return super().form_valid(form)
         else:
             if form.instance.commission<0:
@@ -1153,7 +1153,12 @@ class creditcardoperation_update(UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('creditcard_view',kwargs={"pk":self.object.creditcards.id})
-
+        
+    def get_initial(self):
+        return {
+            'datetime': str(dtaware_changes_tz(self.object.datetime, self.request.local_zone)), 
+        }
+        
     def get_form(self, form_class=None): 
         if form_class is None: 
             form_class = self.get_form_class()

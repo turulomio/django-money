@@ -13,7 +13,9 @@
         <button type="submit" name="button">{% trans "Show ranges" %}</button>
     </form>
 <p>
-
+{% if prm.product.basic_results.last %}
+    <p>{% trans "Current price: " %}{{prm.product.basic_results.last}}</p>
+{% endif %}
 {{prm.mytable| safe}} 
   
 {% endblock %}

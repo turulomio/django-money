@@ -515,11 +515,11 @@ class Investmentsoperations(models.Model):
     ## que se puede actualizar en cualquier momento con esta función
 
     @transaction.atomic
-    def update_associated_account_operation(self,  local_currency):
+    def update_associated_account_operation(self,  request, local_currency):
         #/Borra de la tabla investmentsaccountsoperations los de la operinversión pasada como parámetro
         execute("delete from investmentsaccountsoperations where investmentsoperations_id=%s",(self.id, )) 
 
-        investment_operations=InvestmentsOperations_from_investment(self.investments, timezone.now(), local_currency)
+        investment_operations=InvestmentsOperations_from_investment(request, self.investments, timezone.now(), local_currency)
         io=investment_operations.o_find_by_id(self.id)
         
         if self.investments.daily_adjustment is True: #Because it uses adjustment information

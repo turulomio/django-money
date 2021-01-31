@@ -15,7 +15,7 @@
 
 <script>
 // Adding background color 
-var column = table.getColumn("percentage_sellingpoint");
+var column = table_table_investments.getColumn("percentage_sellingpoint");
 if (column !== false){//Only for active investments
     for (var cell of column.getCells()) {
         if (cell.getValue()<5 && cell.getValue()>0){
@@ -26,7 +26,7 @@ if (column !== false){//Only for active investments
     }
 
     // Adding icon 
-    for (var row of table.getRows()) {
+    for (var row of table_table_investments.getRows()) {
         var dat=row.getData();
         var date = moment(dat.selling_expiration, "YYYY-MM-DD");
         if (date.isValid() && date< moment().startOf('day')){
@@ -39,7 +39,7 @@ if (column !== false){//Only for active investments
     }
 
     //Sorting
-    table.setSort([
+    table_table_investments.setSort([
         {column:"gains", dir:"desc"}, //sort by this first
         {column:"percentage_sellingpoint", dir:"asc"}, //sort by this first
     ]);
