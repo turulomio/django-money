@@ -1196,6 +1196,7 @@ class strategy_new(CreateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(strategy_new, self).get_form(form_class)
+        form.fields['name'].widget = forms.TextInput()
         widget_datetime(self.request, form.fields['dt_from'], "now")
         widget_datetime(self.request, form.fields['dt_to'], "")
         return form
@@ -1230,6 +1231,7 @@ class strategy_update(UpdateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(strategy_update, self).get_form(form_class)
+        form.fields['name'].widget = forms.TextInput()
         widget_datetime(self.request, form.fields['dt_from'], None)
         widget_datetime(self.request, form.fields['dt_to'], None)
         return form

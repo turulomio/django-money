@@ -45,3 +45,82 @@ function parseNumber(strg){
     return parseFloat(strg);
 }
 
+// Function used in several project pages. Adding or updating strategies
+function strategy_update_labels(cmbType){
+    var additional1 = $('label[for="id_additional1"]');
+    var additional2 = $('label[for="id_additional2"]');
+    var additional3 = $('label[for="id_additional3"]');
+    var additional4 = $('label[for="id_additional4"]');
+    var additional5 = $('label[for="id_additional5"]');
+    var additional6 = $('label[for="id_additional6"]');
+    var additional7 = $('label[for="id_additional7"]');
+    var additional8 = $('label[for="id_additional8"]');
+    var additional9 = $('label[for="id_additional9"]');
+    var additional10 = $('label[for="id_additional10"]');
+    if (cmbType.selectedIndex=="0"){//Generic
+        additional1.html(gettext("Additional 1"));
+        additional2.html(gettext("Additional 2"));
+        additional3.html(gettext("Additional 3"));
+        additional4.html(gettext("Additional 4"));
+        additional5.html(gettext("Additional 5"));
+        additional6.html(gettext("Additional 6"));
+        additional7.html(gettext("Additional 7"));
+        additional8.html(gettext("Additional 8"));
+        additional9.html(gettext("Additional 9"));
+        additional10.html(gettext("Additional 10"));
+        additional1.parent().parent().show();
+        additional2.parent().parent().show();
+        additional3.parent().parent().show();
+        additional4.parent().parent().show();
+        additional5.parent().parent().show();
+        additional6.parent().parent().show();
+        additional7.parent().parent().show();
+        additional8.parent().parent().show();
+        additional9.parent().parent().show();
+        additional10.parent().parent().show();
+    } else if (cmbType.selectedIndex=="1"){//Generic
+        additional1.parent().parent().hide();
+        additional2.parent().parent().hide();
+        additional3.parent().parent().hide();
+        additional4.parent().parent().hide();
+        additional5.parent().parent().hide();
+        additional6.parent().parent().hide();
+        additional7.parent().parent().hide();
+        additional8.parent().parent().hide();
+        additional9.parent().parent().hide();
+        additional10.parent().parent().hide();
+    } else if (cmbType.selectedIndex=="2"){//Pairs in same account
+        additional1.html(gettext("Worse product"));
+        additional2.html(gettext("Best product"));
+        additional3.html(gettext("Account"));
+        additional1.parent().parent().show();
+        additional2.parent().parent().show();
+        additional3.parent().parent().show();
+        additional4.parent().parent().hide();
+        additional5.parent().parent().hide();
+        additional6.parent().parent().hide();
+        additional7.parent().parent().hide();
+        additional8.parent().parent().hide();
+        additional9.parent().parent().hide();
+        additional10.parent().parent().hide();
+    } else if (cmbType.selectedIndex=="3"){//Product ranges
+        additional1.html(gettext("Product"));
+        additional2.html(gettext("Percentage between ranges x1000"));
+        additional3.html(gettext("Percentage gains x1000"));
+        additional4.html(gettext("Amount"));
+        additional5.html(gettext("Recomendation method"));
+        additional6.html(gettext("Only first"));
+        additional7.html(gettext("Account"));
+        additional1.parent().parent().show();
+        additional2.parent().parent().show();
+        additional3.parent().parent().show();
+        additional4.parent().parent().show();
+        additional5.parent().parent().show();
+        additional6.parent().parent().show();
+        additional7.parent().parent().show();
+        additional8.parent().parent().hide();
+        additional9.parent().parent().hide();
+        additional10.parent().parent().hide();
+    }
+    
+}

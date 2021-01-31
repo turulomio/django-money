@@ -10,4 +10,9 @@
         </table>
      <button type="submit">{% trans "Save" %}</button>
     </form>
+    <script>
+        var cmbType=document.getElementById("id_type");
+        window.onload=function(){strategy_update_labels(cmbType)};
+        cmbType.onchange = function() {strategy_update_labels(cmbType)};
+    </script>
 {% endblock %}

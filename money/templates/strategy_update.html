@@ -14,4 +14,9 @@
         <a href="{% url 'strategy_delete' pk=object.id %}">{% trans "Delete this strategy" %}</a>
     </p>
 
+    <script>
+        var cmbType=document.getElementById("id_type");
+        window.onload=function(){strategy_update_labels(cmbType)};
+        cmbType.onchange = function() {strategy_update_labels(cmbType)};
+    </script>
 {% endblock %}
