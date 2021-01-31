@@ -343,15 +343,11 @@ class QsoCommon:
             self.name=name
 
 ## @param qs QuerySet of Creditcardsoperations
-class QsoCreditcardsoperations(QsoCommon):
-    def __init__(self, request, qs, name=None):
+class QsoCreditcardsoperationsHomogeneus(QsoCommon):
+    def __init__(self, request, qs, creditcard, name=None):
         QsoCommon.__init__(self, request, qs, name)
+        self.creditcard=creditcard
 
-        if self.qs.count()>0:
-            self.creditcard=self.qs[0].creditcards
-        else:
-            self.creditcard=None
-            print("Credit card not fount in QsoCreditcardsoperations")
             
     def tabulator_for_update(self):
         r=TabulatorFromQuerySet(f"{self.name}_table")
@@ -379,7 +375,7 @@ class QsoCreditcardsoperations(QsoCommon):
         r.setInitialOptions(f"""
             rowClick:function(e, row){{
                 var operations_id=document.getElementById("id_operations_id");
-                selected=table.getSelectedData();
+                selected=table_{self.name}_table.getSelectedData();
                 var text="";
                 var amount=0;
                 for (i = 0; i < selected.length; i++) {{

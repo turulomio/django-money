@@ -77,7 +77,7 @@ from money.listdict import (
     listdict_products_pairs_evolution_from_datetime, 
     listdict_strategies, 
     QsoAccountsOperationsHeterogeneus, 
-    QsoCreditcardsoperations, 
+    QsoCreditcardsoperationsHomogeneus, 
     QsoDividendsHomogeneus, 
     QsoDividendsHeterogeneus, 
 )
@@ -1037,17 +1037,20 @@ group by
 @login_required
 def creditcard_pay(request, pk):
     creditcard=Creditcards.objects.get(pk=pk)
-    qso_creditcardoperations=QsoCreditcardsoperations(
+    qso_creditcardoperations=QsoCreditcardsoperationsHomogeneus(
         request, 
         Creditcardsoperations.objects.all().select_related("concepts").select_related("concepts__operationstypes").filter(creditcards_id=creditcard.id,  paid=False).order_by("datetime"), 
+        creditcard, 
         "qso_cco"
     )
     if request.method == 'POST':
         form = CreditCardPayForm(request.POST)
         if form.is_valid():
+            messages.success(request, _("Credit card payed."))
             return render(request, 'creditcard_pay.html', locals())
     else:
         form = CreditCardPayForm()
+        form.fields["datetime"].initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
     widget_datetime(request, form.fields['datetime'], None)
         
     return render(request, 'creditcard_pay.html', locals())
@@ -1055,9 +1058,10 @@ def creditcard_pay(request, pk):
 @login_required
 def creditcard_view(request, pk):
     creditcard=get_object_or_404(Creditcards, id=pk)
-    qso_creditcardoperations=QsoCreditcardsoperations(
+    qso_creditcardoperations=QsoCreditcardsoperationsHomogeneus(
         request, 
         Creditcardsoperations.objects.all().select_related("concepts").select_related("concepts__operationstypes").filter(creditcards_id=pk,  paid=False).order_by("datetime"), 
+        creditcard, 
         "qso_cco"
     )
     return render(request, 'creditcard_view.html', locals())
