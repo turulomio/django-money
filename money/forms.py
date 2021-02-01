@@ -15,6 +15,7 @@ class AccountsTransferForm(forms.Form):
 class CreditCardPayForm(forms.Form):
     datetime= forms.DateTimeField(required=True)
     operations_id=forms.CharField(        widget=forms.HiddenInput())
+    amount=forms.DecimalField()#(widget=forms.HiddenInput())
 
 class ProductsRangeForm(forms.Form):
     products = forms.ModelChoiceField(queryset=Products.qs_products_of_active_investments(), required=True)

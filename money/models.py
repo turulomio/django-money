@@ -180,6 +180,10 @@ class Accountsoperations(models.Model):
             return False        
         return True
         
+    def is_creditcardbilling(self):
+        if self.concepts.id==eConcept.CreditCardBilling:
+            return True
+        return False
     def is_transfer(self):
         if Comment().getCode(self.comment) in (eComment.AccountTransferOrigin, eComment.AccountTransferDestiny, eComment.AccountTransferOriginCommission):
             return True
@@ -1017,10 +1021,11 @@ class Comment:
                 return _("Error decoding dividend comment")
 
             elif code==eComment.CreditCardBilling:#Facturaci´on de tarjeta diferida
-                if not self.validateLength(2, code, args): return string
-                creditcard=Creditcards.objects.get(pk=args[0])
-                number=cursor_one_field("select count(*) from creditcardsoperations where accountsoperations_id=%s", (args[1], ))
-                return _("Billing {} movements of {}").format(number, creditcard.name)
+                d=self.decode_objects(string)
+                if d["creditcard"] is not None:
+                    number=cursor_one_field("select count(*) from creditcardsoperations where accountsoperations_id=%s", (d["operaccount"].id, ))
+                    return _("Billing {} movements of {}").format(number, d["creditcard"].name)
+                return _("Error decoding credit card billing comment")
 
             elif code==eComment.CreditCardRefund:#Devolución de tarjeta
                 if not self.validateLength(1, code, args): return string
@@ -1062,8 +1067,10 @@ class Comment:
             elif code==eComment.CreditCardBilling:#Facturaci´on de tarjeta diferida
                 if not self.validateLength(2, code, args): return string
                 creditcard=Creditcards.objects.get(pk=args[0])
-                number=cursor_one_field("select count(*) from creditcardsoperations where accountsoperations_id=%s", (args[1], ))
-                return _("Billing {} movements of {}").format(number, creditcard.name)
+                print(args[1], args[1].__class__)
+                operaccount=Accountsoperations.objects.get(pk=args[1])
+                print(operaccount)
+                return {"creditcard":creditcard, "operaccount":operaccount}
 
             elif code==eComment.CreditCardRefund:#Devolución de tarjeta
                 if not self.validateLength(1, code, args): return string

@@ -384,6 +384,9 @@ class QsoCreditcardsoperationsHomogeneus(QsoCommon):
                 }}
                 operations_id.value=text.slice(0, -1);
                 
+                var amount_id=document.getElementById("id_amount");
+                amount_id.value=amount;
+                
                 var label= document.getElementById("result");
                 label.innerHTML=gettext("{{0}} operations selected ({{1}})").format(selected.length, currency_string(amount, '{self.creditcard.accounts.currency}'));
         }}, 

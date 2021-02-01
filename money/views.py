@@ -1035,6 +1035,7 @@ group by
 
 @timeit
 @login_required
+@transaction.atomic
 def creditcard_pay(request, pk):
     creditcard=Creditcards.objects.get(pk=pk)
     qso_creditcardoperations=QsoCreditcardsoperationsHomogeneus(
@@ -1045,15 +1046,46 @@ def creditcard_pay(request, pk):
     )
     if request.method == 'POST':
         form = CreditCardPayForm(request.POST)
+        widget_datetime(request, form.fields['datetime'], None)
         if form.is_valid():
             messages.success(request, _("Credit card payed."))
+            c=Accountsoperations()
+            c.datetime=form.cleaned_data['datetime']
+            c.concepts=Concepts.objects.get(pk=eConcept.CreditCardBilling)
+            c.operationstypes=c.concepts.operationstypes
+            c.amount=form.cleaned_data['amount']
+            c.accounts=creditcard.accounts
+            c.comment="Transaction in progress"
+            c.save()
+            c.comment=Comment().encode(eComment.CreditCardBilling, creditcard, c)
+            c.save()
+        
+            qs_cco=Creditcardsoperations.objects.all().filter(pk__in=(string2list_of_integers(form.cleaned_data['operations_id'])))
+            #Modifica el registro y lo pone como paid y la datetime de pago y añade la opercuenta
+            for o in qs_cco:
+                o.paid_datetime=form.cleaned_data['datetime']
+                o.paid=True
+                o.accountsoperations_id=c.id
+                o.save()
             return render(request, 'creditcard_pay.html', locals())
     else:
         form = CreditCardPayForm()
         form.fields["datetime"].initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
-    widget_datetime(request, form.fields['datetime'], None)
+        widget_datetime(request, form.fields['datetime'], None)
         
     return render(request, 'creditcard_pay.html', locals())
+
+@login_required
+@transaction.atomic
+def creditcard_pay_refund(request, accountsoperations_id):
+    ao=get_object_or_404(Accountsoperations, pk=accountsoperations_id)
+    d=Comment().decode_objects(ao.comment)
+    
+    Creditcardsoperations.objects.filter(accountsoperations_id=ao.id).update(paid_datetime=None,  paid=False, accountsoperations_id=None)
+
+    ao.delete() #Must be at the end due to middle queries
+    messages.success(request, _("Credit card bill refunded"))
+    return HttpResponseRedirect(reverse("creditcard_view", args=(d["creditcard"].id, )))
 
 @login_required
 def creditcard_view(request, pk):

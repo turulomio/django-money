@@ -20,6 +20,9 @@
         {% if object.is_transfer %}
             <a href="{% url 'account_transfer_delete' comment=object.comment %}">{% trans "Delete this transfer" %}</a>
         {% endif %}
+        {% if object.is_creditcardbilling %}
+            <a href="{% url 'creditcard_pay_refund' accountsoperations_id=object.id %}">{% trans "Return credit card billing" %}</a>
+        {% endif %}
         {% if object.is_investmentoperation %}
             <a href="{% url 'investmentoperation_update' pk=view.io.id %}?next={{ request.META.HTTP_REFERER }}">{% trans "Update associated investment operation" %}</a>
         {% endif %}
