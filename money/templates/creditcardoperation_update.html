@@ -8,13 +8,6 @@
         {% csrf_token %}
         {{ form.as_table }}
         </table>
-        <script type="text/javascript">
-            jQuery('#datetimepicker').datetimepicker({
-                inline:false,
-                format:'d/m/Y H:i:s',
-                lang:'{{LANGUAGE_CODE}}',
-            });
-        </script>
     <button type="submit">{% trans "Save" %}</button>
     </form>
 
