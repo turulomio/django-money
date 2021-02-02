@@ -41,6 +41,7 @@ from money.models import (
     Dividends, 
     Investments, 
     Operationstypes, 
+    Products, 
     Productstypes, 
     Strategies, 
     balance_user_by_operationstypes,
@@ -245,6 +246,50 @@ class LdoInvestmentsOperationsCurrentHeterogeneus(LdoDjangoMoney):
         r.setHeaders("Id", _("Date and time"), _("Name"),  _("Operation type"),  _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Gross gains"), _("% year"), _("% APR"), _("% Total"))
         r.setTypes("int","datetime", "str", "str",  "Decimal", currency, currency, currency,  currency, "percentage", "percentage", "percentage")
         r.setBottomCalc(None, None, None, None, "sum", None,  "sum", "sum", "sum", None, None, None)
+        r.showLastRecord(False)
+        return r
+        
+## IOC of several investments
+class LdoInvestmentsRanking(LdoDjangoMoney):
+    def __init__(self, request, name=None):
+        LdoDjangoMoney.__init__(self, request, name)
+        
+        self.iotm=InvestmentsOperationsTotalsManager_from_all_investments(self.request, timezone.now())
+        products= Products.objects.raw('select distinct(products.*) from investments,products where products.id=investments.products_id;')
+        for product in products:
+            d={}
+            d["id"]=product.id
+            d["name"]=product.fullName()
+            d["current_net_gains"]=0
+            d["historical_net_gains"]=0
+            d["dividends"]=0
+            for iot in self.iotm.list:
+                if iot.investment.products.id==product.id:
+                    d["current_net_gains"]=d["current_net_gains"]+iot.io_total_current["gains_net_user"]
+                    d["historical_net_gains"]=d["historical_net_gains"]+iot.io_total_historical["gains_net_user"]
+                    d["dividends"]=d["dividends"]+0
+            d["total"]=d["current_net_gains"]+d["historical_net_gains"]+d["dividends"]
+            self.ld.append(d)
+            
+        self.order_by("total", True)
+        ranking=1
+        for d in self.ld:
+            d["ranking"]=ranking
+            ranking=ranking+1
+            
+            
+
+        
+    def tabulator(self):
+        currency=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl("product_view")
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.ld)
+        r.setFields("id", "ranking","name", "current_net_gains","historical_net_gains", "dividends", "total")
+        r.setHeaders("Id", "Ranking",  _("Name"),  _("Current net gains"),  _("Historical net gains"), _("Dividends"), _("Total"))
+        r.setTypes("int", "int","str", "Decimal", currency, currency, currency,  currency)
+        r.setBottomCalc(None, None,  None,  "sum",  "sum", "sum", "sum")
         r.showLastRecord(False)
         return r
 

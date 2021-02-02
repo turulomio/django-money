@@ -59,6 +59,7 @@ from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict import (
     LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount, 
+    LdoInvestmentsRanking, 
     listdict_accounts, 
     listdict_banks, 
     listdict_chart_total_async, 
@@ -1348,6 +1349,10 @@ def investment_change_active(request, pk):
     investment.save()
     return HttpResponseRedirect(reverse("investment_view", args=(investment.id, )))
     
+@login_required
+def investment_ranking(request):
+    ldo=LdoInvestmentsRanking(request)
+    return render(request, 'investment_ranking.html', locals())
         
 @method_decorator(login_required, name='dispatch')
 class investment_update(UpdateView):
