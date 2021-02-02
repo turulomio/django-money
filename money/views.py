@@ -384,7 +384,8 @@ def account_transfer(request, origin):
             return HttpResponseRedirect( reverse_lazy('account_view', args=(origin.id,)))
     else:
         form = AccountsTransferForm()
-        widget_datetime(request, form.fields['datetime'], "now")
+        widget_datetime(request, form.fields['datetime'])
+        form.fields['datetime'].initial=str(dtaware_changes_tz(timezone.now(), request.local_zone))
         form.fields['commission'].initial=0
   
     return render(request, 'account_transfer.html', locals())
@@ -411,7 +412,7 @@ class accountoperation_new(CreateView):
 
     def get_form(self, form_class=None): 
         form = super(accountoperation_new, self).get_form(form_class)
-        widget_datetime(self.request, form.fields['datetime'], None)
+        widget_datetime(self.request, form.fields['datetime'])
         form.fields['concepts'].queryset=Concepts.queryset_for_accountsoperations_order_by_fullname()
         return form
         
@@ -477,7 +478,7 @@ class accountoperation_update(UpdateView):
 
     def get_form(self, form_class=None): 
         form = super(accountoperation_update, self).get_form(form_class)
-        widget_datetime(self.request, form.fields['datetime'], None)
+        widget_datetime(self.request, form.fields['datetime'])
         form.fields['concepts'].queryset=Concepts.queryset_for_accountsoperations_order_by_fullname()
             
         ## Gets the investment operation for io account ooperations only for that
@@ -701,7 +702,7 @@ class investmentoperation_new(CreateView):
 
         self.investments=Investments.objects.select_related("accounts").select_related("products").select_related("products__productstypes").select_related("products__leverages").get(pk=self.kwargs['investments_id']) #We can use in template with view.investments
         form = super(investmentoperation_new, self).get_form(form_class)
-        widget_datetime(self.request, form.fields['datetime'], None)
+        widget_datetime(self.request, form.fields['datetime'])
         widget_currency_conversion(self.request, form.fields['currency_conversion'], self.investments.accounts.currency, self.investments.products.currency)
         form.fields['operationstypes'].queryset=Operationstypes.objects.filter(pk__in=[4, 5, 6])
         return form
@@ -757,17 +758,15 @@ class investmentoperation_update(UpdateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(investmentoperation_update, self).get_form(form_class) 
-        widget_datetime(self.request, form.fields['datetime'], None)
+        widget_datetime(self.request, form.fields['datetime'])
         widget_currency_conversion(self.request, form.fields['currency_conversion'], self.object.investments.accounts.currency, self.object.investments.products.currency)
         form.fields['operationstypes'].queryset=Operationstypes.objects.filter(pk__in=[4, 5, 6])
         return form
 
     def get_initial(self):
-        print(str(dtaware_changes_tz(self.object.datetime, self.request.local_zone)))
         return {
             'datetime': str(dtaware_changes_tz(self.object.datetime, self.request.local_zone)), 
             }
-
 
     @transaction.atomic
     def form_valid(self, form):
@@ -933,7 +932,7 @@ class quote_new(CreateView):
             form_class = self.get_form_class()
         form = super(quote_new, self).get_form(form_class)
         form.fields['products'].widget = forms.HiddenInput()
-        widget_datetime(self.request, form.fields['datetime'], None)
+        widget_datetime(self.request, form.fields['datetime'])
         return form
         
     def get_context_data(self, **kwargs):
@@ -1043,7 +1042,7 @@ def creditcard_pay(request, pk):
     )
     if request.method == 'POST':
         form = CreditCardPayForm(request.POST)
-        widget_datetime(request, form.fields['datetime'], None)
+        widget_datetime(request, form.fields['datetime'])
         if form.is_valid():
             messages.success(request, _("Credit card payed."))
             c=Accountsoperations()
@@ -1068,7 +1067,7 @@ def creditcard_pay(request, pk):
     else:
         form = CreditCardPayForm()
         form.fields["datetime"].initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
-        widget_datetime(request, form.fields['datetime'], None)
+        widget_datetime(request, form.fields['datetime'])
         
     return render(request, 'creditcard_pay.html', locals())
 
@@ -1158,7 +1157,7 @@ class creditcardoperation_new(CreateView):
         form = super(creditcardoperation_new, self).get_form(form_class)
         form.fields['creditcards'].widget = forms.HiddenInput()
         form.fields['creditcards'].initial=Creditcards.objects.get(pk=self.kwargs['creditcards_id'])
-        widget_datetime(self.request, form.fields['datetime'], None)
+        widget_datetime(self.request, form.fields['datetime'])
         form.fields['concepts'].queryset=Concepts.queryset_for_accountsoperations_order_by_fullname()
         form.fields['paid'].widget = forms.HiddenInput()
         return form
@@ -1198,7 +1197,7 @@ class creditcardoperation_update(UpdateView):
         form = super(creditcardoperation_update, self).get_form(form_class)
         form.fields['creditcards'].widget = forms.HiddenInput()
         form.fields['paid'].widget = forms.HiddenInput()
-        widget_datetime(self.request, form.fields['datetime'], None)
+        widget_datetime(self.request, form.fields['datetime'])
         form.fields['concepts'].queryset=Concepts.queryset_for_accountsoperations_order_by_fullname()
         return form
   
@@ -1245,9 +1244,14 @@ class strategy_new(CreateView):
             form_class = self.get_form_class()
         form = super(strategy_new, self).get_form(form_class)
         form.fields['name'].widget = forms.TextInput()
-        widget_datetime(self.request, form.fields['dt_from'], "now")
-        widget_datetime(self.request, form.fields['dt_to'], "")
+        widget_datetime(self.request, form.fields['dt_from'])
+        widget_datetime(self.request, form.fields['dt_to'])
         return form
+
+    def get_initial(self):
+        return {
+            'dt_from': str(dtaware_changes_tz(self.object.datetime, self.request.local_zone)), 
+        }
 
     def form_valid(self, form):
         if form.instance.type==StrategiesTypes.PairsInSameAccount:
@@ -1273,8 +1277,8 @@ class strategy_update(UpdateView):
             form_class = self.get_form_class()
         form = super(strategy_update, self).get_form(form_class)
         form.fields['name'].widget = forms.TextInput()
-        widget_datetime(self.request, form.fields['dt_from'], None)
-        widget_datetime(self.request, form.fields['dt_to'], None)
+        widget_datetime(self.request, form.fields['dt_from'])
+        widget_datetime(self.request, form.fields['dt_to'])
         return form
 
     def get_initial(self):
@@ -1364,7 +1368,7 @@ class investment_update(UpdateView):
             form_class = self.get_form_class()
         form = super(investment_update, self).get_form(form_class)
         form.fields['name'].widget = forms.TextInput()
-        widget_date(self.request, form.fields['selling_expiration'], None)
+        widget_date(self.request, form.fields['selling_expiration'])
         self.investments_operations=InvestmentsOperations_from_investment(self.request, self.object, timezone.now(), self.request.local_currency)
         return form
     
@@ -1392,8 +1396,8 @@ class order_new(SuccessMessageMixin, CreateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(order_new, self).get_form(form_class)
-        widget_date(self.request, form.fields['date'], None)
-        widget_date(self.request, form.fields['expiration'], None)
+        widget_date(self.request, form.fields['date'])
+        widget_date(self.request, form.fields['expiration'])
         form.fields['investments'].queryset=Investments.queryset_for_investments_products_combos_order_by_fullname()
         return form
     
@@ -1429,8 +1433,8 @@ class order_update(SuccessMessageMixin, UpdateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(order_update, self).get_form(form_class)
-        widget_date(self.request, form.fields['date'], None)
-        widget_date(self.request, form.fields['expiration'], None)
+        widget_date(self.request, form.fields['date'])
+        widget_date(self.request, form.fields['expiration'])
         form.fields['investments'].queryset=Investments.queryset_for_investments_products_combos_order_by_fullname()
         return form
 
@@ -1460,7 +1464,7 @@ class dividend_new(CreateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(dividend_new, self).get_form(form_class)
-        widget_datetime(self.request, form.fields["datetime"], None)
+        widget_datetime(self.request, form.fields["datetime"])
         form.fields['concepts'].queryset=Concepts.queryset_for_dividends_order_by_fullname()
         return form
     
@@ -1504,7 +1508,7 @@ class dividend_update(UpdateView):
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(dividend_update, self).get_form(form_class)
-        widget_datetime(self.request, form.fields['datetime'], None )
+        widget_datetime(self.request, form.fields['datetime'] )
         form.fields['concepts'].queryset=Concepts.queryset_for_dividends_order_by_fullname()
         return form
 
@@ -1547,30 +1551,30 @@ class dividend_delete(DeleteView):
 
 ## Sets a datetime widget for django forms
 ## @param initial datetime or "now" or None or "". If None pass. If "" returns it empty field. If "now" returns current. If datetime resturns datetime
-def widget_datetime(request, field, initial=None):
+def widget_datetime(request, field):
     field.widget.attrs['is'] ='input-datetime'
     field.widget.attrs['localzone'] =request.local_zone
     field.widget.attrs['locale'] =request.LANGUAGE_CODE
-    if initial is not None:
-        if initial == "now":
-            field.initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
-        elif initial == "":
-            field.initial= ""
-        else:
-            field.initial=str(dtaware_changes_tz(initial, request.local_zone))
+#    if initial is not None:
+#        if initial == "now":
+#            field.initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
+#        elif initial == "":
+#            field.initial= ""
+#        else:
+#            field.initial=str(dtaware_changes_tz(initial, request.local_zone))
 
 ## Sets a datetime widget for django forms
 ## @param initial date or "today" or None or "". If None pass. If "" returns it empty field. If "today" returns current. If date resturns date
-def widget_date(request, field, initial=None):
+def widget_date(request, field):
     field.widget.attrs['is'] ='input-date'
     field.widget.attrs['locale'] =request.LANGUAGE_CODE
-    if initial is not None:
-        if initial =="today":
-            field.initial=str(date.today())
-        elif initial == "":
-            field.initial=""
-        else:
-            field.initial=str(initial)
+#        if initial is not None:
+#        if initial =="today":
+#            field.initial=str(date.today())
+#        elif initial == "":
+#            field.initial=""
+#        else:
+#            field.initial=str(initial)
     
 def widget_currency_conversion(request, field, from_currency, to_currency):
     field.widget.attrs['is']='input-currency-factor'
