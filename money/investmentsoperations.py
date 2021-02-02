@@ -166,10 +166,10 @@ class InvestmentsOperations:
         r.setDestinyUrl("investmentoperation_update")
         r.setLocalZone(self.request.local_zone)
         r.setListDict(self.o_listdict_tabulator_homogeneus(self.request))
-        r.setFields("id","datetime", "operationstypes","shares", "price", "commission", "taxes")
-        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Commission"), _("Taxes"))
-        r.setTypes("int","datetime", "str","Decimal", self.investment.products.currency, self.investment.accounts.currency, self.investment.accounts.currency)
-        r.setBottomCalc(None, None, None, "sum", None, "sum", "sum")
+        r.setFields("id","datetime", "operationstypes","shares", "price", "commission", "taxes",  "currency_conversion",  "comment")
+        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Commission"), _("Taxes"), _("Currency convertion"),  _("Comment"))
+        r.setTypes("int","datetime", "str","Decimal", self.investment.products.currency, self.investment.accounts.currency, self.investment.accounts.currency, "Decimal6", "str")
+        r.setBottomCalc(None, None, None, "sum", None, "sum", "sum", None, None)
         r.showLastRecord(False)
         return r
 

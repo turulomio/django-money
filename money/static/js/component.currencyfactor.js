@@ -37,9 +37,9 @@ class InputCurrencyFactor extends HTMLInputElement {
         this.inputfrom=document.createElement("input");
         this.inputto=document.createElement("input");
         this.labelfrom=document.createElement("label");
-        this.labelfrom.innerHTML=this.currency_symbol(this.from);
+        this.labelfrom.innerHTML=currency_symbol(this.from);
         this.labelto=document.createElement("label");
-        this.labelto.innerHTML=this.currency_symbol(this.to);
+        this.labelto.innerHTML=currency_symbol(this.to);
 
         if (this.hasAttribute("value")){// Doesn't work in constructor and I don't know why.
             this.value=this.getAttribute("value");
@@ -71,17 +71,7 @@ class InputCurrencyFactor extends HTMLInputElement {
     }
 
     calculate(){
-        this.value=parseFloat(this.inputto.value/this.inputfrom.value).toFixed(10);
-    }
-
-    currency_symbol(currency){
-        if (currency=="EUR"){
-            return "€";
-        } else if (currency=="USD") {
-            return "$";
-        } else {
-            return "???";
-        }
+        this.value=my_round(parseFloat(this.inputto.value/this.inputfrom.value), 10);
     }
 
   changeDisplay(){

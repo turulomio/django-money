@@ -14,12 +14,17 @@ function currency_symbol(currency){
     } 
     else if (currency=='USD'){
         return'$';
+    } else {
+            return "???";
     }
 }
 
-function currency_string(num, currency){
-    num=Math.round(num*100)/100;
-    return "{0} {1}".format(num, currency_symbol(currency));
+function my_round(num, decimals = 2) {
+    return Math.round(num*Math.pow(10, decimals))/Math.pow(10, decimals);
+}
+
+function currency_string(num, currency, decimals=2){
+    return "{0} {1}".format(my_round(num,decimals), currency_symbol(currency));
 }
 
 //Returns a float with . 

@@ -505,7 +505,7 @@ class Investmentsoperations(models.Model):
     datetime = models.DateTimeField(blank=False, null=False)
     comment = models.TextField(blank=True, null=True)
     show_in_ranges = models.BooleanField(blank=False, null=False)
-    currency_conversion = models.DecimalField(max_digits=30, decimal_places=8, blank=False, null=False)
+    currency_conversion = models.DecimalField(max_digits=30, decimal_places=10, blank=False, null=False)
 
     class Meta:
         managed = False
@@ -1035,8 +1035,6 @@ class Comment:
 #        except:
 #            return _("Error decoding comment {}").format(string)
 
-
-
     def decode_objects(self, string):
             (code, args)=self.get(string)
             if code==None:
@@ -1067,7 +1065,6 @@ class Comment:
             elif code==eComment.CreditCardBilling:#Facturaci´on de tarjeta diferida
                 if not self.validateLength(2, code, args): return string
                 creditcard=Creditcards.objects.get(pk=args[0])
-                print(args[1], args[1].__class__)
                 operaccount=Accountsoperations.objects.get(pk=args[1])
                 print(operaccount)
                 return {"creditcard":creditcard, "operaccount":operaccount}

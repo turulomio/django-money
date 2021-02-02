@@ -702,11 +702,7 @@ class investmentoperation_new(CreateView):
         self.investments=Investments.objects.select_related("accounts").select_related("products").select_related("products__productstypes").select_related("products__leverages").get(pk=self.kwargs['investments_id']) #We can use in template with view.investments
         form = super(investmentoperation_new, self).get_form(form_class)
         widget_datetime(self.request, form.fields['datetime'], None)
-        form.fields['currency_conversion'].widget.attrs['is']='input-currency-factor'
-        form.fields['currency_conversion'].widget.attrs['from'] =self.investments.accounts.currency
-        form.fields['currency_conversion'].widget.attrs['to'] =self.investments.products.currency
-        del form.fields['currency_conversion'].widget.attrs['step']
-        form.fields['currency_conversion'].widget.attrs['type']="text"
+        widget_currency_conversion(self.request, form.fields['currency_conversion'], self.investments.accounts.currency, self.investments.products.currency)
         form.fields['operationstypes'].queryset=Operationstypes.objects.filter(pk__in=[4, 5, 6])
         return form
                 
@@ -762,6 +758,7 @@ class investmentoperation_update(UpdateView):
             form_class = self.get_form_class()
         form = super(investmentoperation_update, self).get_form(form_class) 
         widget_datetime(self.request, form.fields['datetime'], None)
+        widget_currency_conversion(self.request, form.fields['currency_conversion'], self.object.investments.accounts.currency, self.object.investments.products.currency)
         form.fields['operationstypes'].queryset=Operationstypes.objects.filter(pk__in=[4, 5, 6])
         return form
 
@@ -1582,3 +1579,9 @@ def widget_date(request, field, initial=None):
         else:
             field.initial=str(initial)
     
+def widget_currency_conversion(request, field, from_currency, to_currency):
+    field.widget.attrs['is']='input-currency-factor'
+    field.widget.attrs['from'] = from_currency
+    field.widget.attrs['to'] = to_currency
+        #del form.fields['currency_conversion'].widget.attrs['step']
+    #field.widget.attrs['type']="text"
