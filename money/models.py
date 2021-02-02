@@ -28,10 +28,11 @@ from xulpymoney.libxulpymoneytypes import eProductType, eComment, eConcept, eOpe
 RANGE_RECOMENDATION_CHOICES =( 
     (0, _("None")), 
     (1, _("All")), 
-    (2, _("Three SMA")), 
+    (2, _("SMA 10, 50, 200")), 
     (3, _("SMA 100")), 
-    (4, _("Strict three SMA")), 
+    (4, _("Strict SMA 10, 50, 200")), 
     (5, _("Strict SMA 100")), 
+    (6, _("Strict SMA 10, 100")), 
 )
 
 class Accounts(models.Model):
