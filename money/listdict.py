@@ -28,7 +28,7 @@ import asyncio
 from asgiref.sync import sync_to_async
 from datetime import date, timedelta
 from decimal import Decimal
-from money.connection_dj import  cursor_rows
+from money.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_dict
 from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo
 from django.conf import settings
 from django.utils import timezone
@@ -255,7 +255,10 @@ class LdoInvestmentsRanking(LdoDjangoMoney):
         LdoDjangoMoney.__init__(self, request, name)
         
         self.iotm=InvestmentsOperationsTotalsManager_from_all_investments(self.request, timezone.now())
-        products= Products.objects.raw('select distinct(products.*) from investments,products where products.id=investments.products_id;')
+        products_ids=cursor_one_column('select distinct(products_id) from investments')
+        products=Products.objects.all().filter(id__in=products_ids)
+        
+        dividends=cursor_rows_as_dict("investments_id","select investments_id, sum(net) from dividends group by investments_id")
         for product in products:
             d={}
             d["id"]=product.id
@@ -267,7 +270,10 @@ class LdoInvestmentsRanking(LdoDjangoMoney):
                 if iot.investment.products.id==product.id:
                     d["current_net_gains"]=d["current_net_gains"]+iot.io_total_current["gains_net_user"]
                     d["historical_net_gains"]=d["historical_net_gains"]+iot.io_total_historical["gains_net_user"]
-                    d["dividends"]=d["dividends"]+0
+                    try:
+                        d["dividends"]=d["dividends"]+dividends[iot.investment.id]["sum"]
+                    except:
+                        pass
             d["total"]=d["current_net_gains"]+d["historical_net_gains"]+d["dividends"]
             self.ld.append(d)
             
@@ -288,7 +294,7 @@ class LdoInvestmentsRanking(LdoDjangoMoney):
         r.setListDict(self.ld)
         r.setFields("id", "ranking","name", "current_net_gains","historical_net_gains", "dividends", "total")
         r.setHeaders("Id", "Ranking",  _("Name"),  _("Current net gains"),  _("Historical net gains"), _("Dividends"), _("Total"))
-        r.setTypes("int", "int","str", "Decimal", currency, currency, currency,  currency)
+        r.setTypes("int", "int" ,"str", currency, currency, currency, currency)
         r.setBottomCalc(None, None,  None,  "sum",  "sum", "sum", "sum")
         r.showLastRecord(False)
         return r

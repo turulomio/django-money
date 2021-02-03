@@ -311,7 +311,7 @@ def InvestmentsOperationsTotalsManager_from_investment_queryset(qs_investments, 
     
 def InvestmentsOperationsTotalsManager_from_all_investments(request, dt):
     from money.models import Investments
-    qs=Investments.objects.all()
+    qs=Investments.objects.all().select_related("products")
     return InvestmentsOperationsTotalsManager_from_investment_queryset(qs, dt, request)
     
 ## Manage output of  investment_operation_alltotals is one row

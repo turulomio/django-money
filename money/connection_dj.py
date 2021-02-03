@@ -15,6 +15,13 @@ def cursor_rows(sql, params=[]):
         row = dictfetchall(cursor)
     return row
     
+## Returns a dictionary where key is its key. key must be in db result
+def cursor_rows_as_dict(key, sql,  params=[]):
+    d={}
+    for row in cursor_rows(sql, params):
+        d[row[key]]=row
+    return d
+    
 def cursor_one_row(sql, params=[]):
     return cursor_rows(sql, params)[0]
 
