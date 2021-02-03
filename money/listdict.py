@@ -280,7 +280,7 @@ class LdoInvestmentsRanking(LdoDjangoMoney):
         self.order_by("total", True)
         ranking=1
         for d in self.ld:
-            d["ranking"]=ranking
+            d["ranking"]=str(ranking)
             ranking=ranking+1
             
             
@@ -294,7 +294,7 @@ class LdoInvestmentsRanking(LdoDjangoMoney):
         r.setListDict(self.ld)
         r.setFields("id", "ranking","name", "current_net_gains","historical_net_gains", "dividends", "total")
         r.setHeaders("Id", "Ranking",  _("Name"),  _("Current net gains"),  _("Historical net gains"), _("Dividends"), _("Total"))
-        r.setTypes("int", "int" ,"str", currency, currency, currency, currency)
+        r.setTypes("int", "str" ,"str", currency, currency, currency, currency)
         r.setBottomCalc(None, None,  None,  "sum",  "sum", "sum", "sum")
         r.showLastRecord(False)
         return r
