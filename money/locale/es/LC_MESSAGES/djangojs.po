@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-25 05:20+0000\n"
+"POT-Creation-Date: 2021-02-04 04:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,9 +19,14 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: money/templates/investment_update.html:90
-msgid "Probing js translations"
-msgstr "Probando traducciones en js"
-
-#: money/templates/investment_update.html:92
 msgid "Investment selling price set to {0} to gain {1}."
-msgstr "El precio de venta de la inversión se ha establecido a {0} para ganar {1}."
+msgstr ""
+"El precio de venta de la inversión se ha establecido a {0} para ganar {1}."
+
+#: money/templates/investmentoperation_new.html:42
+#: money/templates/investmentoperation_update.html:38
+msgid "Gross balance is {0}. Net balance is {1}. Leverage multiplier is {2}"
+msgstr ""
+
+#~ msgid "Probing js translations"
+#~ msgstr "Probando traducciones en js"
