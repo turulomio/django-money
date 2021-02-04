@@ -79,6 +79,12 @@ class InvestmentsOperations:
             o["dt_start"]=postgres_datetime_string_2_dtaware(o["dt_start"])
             o["dt_end"]=postgres_datetime_string_2_dtaware(o["dt_end"])
         
+    ## Returns the last operation of the io_current
+    def  current_last_operation(self):
+        r= self.io_current[len(self.io_current)-1]
+        print(r)
+        return r
+        
     def current_shares(self):
         return listdict_sum(self.io_current, "shares")
 

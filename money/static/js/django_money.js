@@ -1,3 +1,76 @@
+const Range= class{
+    constructor(value,percentage_down_decimal){
+        this.value=value;
+        this.percentage_down_decimal=percentage_down_decimal;
+    }
+    
+    range_highest_value(){
+        var points_to_next_high= this.value/(1-this.percentage_down_decimal)-this.value;
+        return this.value+points_to_next_high/2;
+    }
+    
+    range_lowest_value(){
+        var points_to_next_low=this.value-this.value*(1-this.percentage_down_decimal);
+        return this.value-points_to_next_low/2;
+    }
+        
+    isInside(value){
+        if (value<this.range_highest_value() && value>=this.range_lowest_value()){
+            return true;
+        } else {
+            return false;
+        }
+    }
+};
+
+const RangeManager = class {
+    constructor(guide_value, percentage_down_decimal) {
+        this.percentage_down_decimal= percentage_down_decimal;
+        this.ranges=[]
+        var max_=guide_value;
+        var min_=guide_value;
+            
+        var range_highest=max_*(1+this.percentage_down_decimal*10);//5 times up value
+        var range_lowest=min_*(1-this.percentage_down_decimal*10);//5 times down value
+
+        if (range_lowest<0.001) {//To avoid infinity loop
+            range_lowest=0.001;
+        }
+
+        this.highest_range_value=10000000;
+        var current_value=this.highest_range_value;
+        while (current_value>range_lowest){
+            if (current_value>=range_lowest && current_value<=range_highest){
+                this.ranges.push(new Range(current_value, this.percentage_down_decimal));            
+            }
+            current_value=current_value*(1-this.percentage_down_decimal);
+        }
+    }
+    
+    print() {
+        console.log(this.ranges);
+    }
+    
+    get_range_index(value){
+        for (var i = 0; i < this.ranges.length; i++) {
+            if (this.ranges[i].isInside(value)){
+                return i;
+            }
+        }
+    }
+    
+    get_range(value){
+        return this.ranges[this.get_range_index(value)];
+    }
+    
+    // near 1 above, -1 below
+    get_near_range(value, near){
+        var index= this.get_range_index(value);
+        return this.ranges[index-near];
+    }
+};
+
+
 // Function to use "{0} {1}".format(a, b) style
 String.prototype.format = function() {
     var formatted = this;

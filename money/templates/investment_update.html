@@ -25,19 +25,41 @@
         <h1>{% trans "Set selling price to obtain a predefined gain" %}</h1>
         <input type="number" value="500" id="predefinedGains">
          <button onclick="set_by_predefined_gains();">{% trans "Set" %}</button> 
+        <h1>{% trans "Using range position movement of the last investment operation price" %}</h1>
+            <label>{% trans "Select a range position movement" %}</label>
+            <select id="cmbRangeMovement">
+                <option value="3">3</option>
+                <option value="2">2</option>
+                <option value="1">1</option>
+                <option value="0" selected>0</option>
+                <option value="-1">-1</option>
+                <option value="-2">-2</option>
+                <option value="-3">-3</option>
+            </select><br>
+            <label>{% trans "Select the percentage down of the range" %}</label><input id="txtPercentageDownRange" value="1.25" ></input><br>
+         <button onclick="set_by_range_position();">{% trans "Set" %}</button> <p>
+        <label id="lblRangePosition"></label><p>
+         
          <hr>
          <label id="sellingpriceResult">{% trans "Select a method to calculate the investment selling price" %}</label>
 
     <script>
+    var product_basic_last={{view.object.products.basic_results.last | unlocalize}};
+    var investment_last_operation_price={{view.investments_operations.current_last_operation.price_investment |unlocalize}};
+
+
     var currency_user= '{{request.local_currency}}';
     var currency_investment= '{{view.object.products.currency}}';
     var decimals={{view.object.products.decimals}};
     var dialog=document.getElementById("sellingprice");
+    var cmbRangeMovement=dialog.shadowRoot.getElementById("cmbRangeMovement");
     var txtSellingPrice=document.getElementById("id_selling_price");
     var txtByPrice=dialog.shadowRoot.getElementById("byprice");
+    var txtPercentageDownRange=dialog.shadowRoot.getElementById("txtPercentageDownRange");
     var txtPercentage=dialog.shadowRoot.getElementById("percentage");
     var txtPredefinedGains=dialog.shadowRoot.getElementById("predefinedGains");
     var lblInvestmentData=dialog.shadowRoot.getElementById("investmentData");
+    var lblRangePosition=dialog.shadowRoot.getElementById("lblRangePosition");
     var lblResult=dialog.shadowRoot.getElementById("sellingpriceResult");
     var invested_user=parseNumber({{view.investments_operations.current_invested_user|unlocalize}});
     var leverage=parseNumber({{view.object.products.real_leveraged_multiplier | unlocalize}});
@@ -51,6 +73,7 @@
     <li>Average price: ${currency_string(average_price_investment,currency_investment,decimals)}</li>
 </ul>
 `;
+    
     
     function open_sellingprice_dialog(){
         dialog.show();
@@ -66,6 +89,16 @@
 
     function set_by_predefined_gains(){
         return display_result(selling_price_to_gain_money(parseNumber(txtPredefinedGains.value)));
+    }
+    
+    
+    function set_by_range_position(){
+        var percentage_down=parseNumber(txtPercentageDownRange.value);
+        var pr=new RangeManager( product_basic_last, percentage_down/100);
+        var range_of_investment_last_operation_price=pr.get_range(investment_last_operation_price);
+        var selling_price=pr.get_near_range(investment_last_operation_price, parseNumber(cmbRangeMovement.value)).value;
+        lblRangePosition.innerHTML=gettext("Last investment operation price {0}. It's range center is {1}").format(currency_string(investment_last_operation_price,currency_investment), currency_string(range_of_investment_last_operation_price.value,currency_investment));
+        return display_result(selling_price);
     }
     
     function selling_price_to_gain_percentage_of_invested(percentage){
@@ -94,6 +127,8 @@
         txtSellingPrice.value=selling_price;
         return;
     }
+    
+    
     </script>
 </modal-window>
     
