@@ -53,7 +53,10 @@
 
 
   <div id="tabs-2">
-  {{ operations.current_tabulator_homogeneus_investment.render | safe }}
+    {{ operations.current_tabulator_homogeneus_investment.render | safe }}
+    {% if  investment.hasSameAccountCurrency is False%}
+        {{ operations.current_tabulator_homogeneus_user.render | safe }}
+    {%endif %}
   </div>
 
   <div id="tabs-3">

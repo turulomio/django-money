@@ -282,10 +282,7 @@ class LdoInvestmentsRanking(LdoDjangoMoney):
         for d in self.ld:
             d["ranking"]=str(ranking)
             ranking=ranking+1
-            
-            
 
-        
     def tabulator(self):
         currency=self.request.local_currency
         r=TabulatorFromListDict(f"{self.name}_table")
@@ -297,6 +294,7 @@ class LdoInvestmentsRanking(LdoDjangoMoney):
         r.setTypes("int", "str" ,"str", currency, currency, currency, currency)
         r.setBottomCalc(None, None,  None,  "sum",  "sum", "sum", "sum")
         r.showLastRecord(False)
+        r.setFilterHeaders(None, None, "input", None, None, None, None)
         return r
 
 ## IOC of several investments
@@ -344,9 +342,9 @@ where
                 o=IOC(investment, ioc)
                 ioc["name"]=investment.fullName()
                 ioc["operationstypes"]=self.request.operationstypes[ioc["operationstypes_id"]]
-                ioc["percentage_annual"]=o.percentage_annual()
-                ioc["percentage_apr"]=o.percentage_apr()
-                ioc["percentage_total"]=o.percentage_total()
+                ioc["percentage_annual"]=o.percentage_annual_investment()
+                ioc["percentage_apr"]=o.percentage_apr_investment()
+                ioc["percentage_total"]=o.percentage_total_investment()
                 ioc["operationstypes"]=dict_ot[ioc["operationstypes_id"]]
                 list_ioc.append(ioc)
         self.ld=list_ioc

@@ -48,7 +48,8 @@ from money.tables import (
     TabulatorProductQuotesMonthPercentages, 
     TabulatorProductQuotesMonthQuotes,  
     TabulatorInvestmentsPairsInvestCalculator, 
-    TabulatorStrategies
+    TabulatorStrategies, 
+    table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency
 )
 from money.reusing.casts import string2list_of_integers
 from money.reusing.currency import Currency
@@ -548,7 +549,6 @@ def investment_pairs(request, worse, better, accounts_id):
     ldo_ioc_worse=LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(request, "ldo_worse")
     ldo_ioc_worse.set_from_db_and_variables(d_product_worse, account)
     
-    from money.widgets import table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency
     table_ioc_better_usercurrency=table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency(ldo_ioc_better.ld,  request.local_zone, "table_ioc_better_usercurrency")
     table_ioc_worse_usercurrency=table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency(ldo_ioc_worse.ld,  request.local_zone, "table_ioc_worse_usercurrency")
 

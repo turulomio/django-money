@@ -23,7 +23,7 @@ class IOC:
         self.d=d_ioc
         
                 
-    def percentage_annual(self):
+    def percentage_annual_investment(self):
         if self.d["datetime"].year==date.today().year:
             lastyear=self.d["price_investment"] #Product value, self.money_price(type) not needed.
         else:
@@ -39,14 +39,14 @@ class IOC:
     def age(self):
             return (date.today()-self.d["datetime"].date()).days
 
-    def percentage_apr(self):
+    def percentage_apr_investment(self):
             dias=self.age()
             if dias==0:
                 dias=1
-            return Percentage(self.percentage_total()*365,  dias)
+            return Percentage(self.percentage_total_investment()*365,  dias)
 
 
-    def percentage_total(self):
+    def percentage_total_investment(self):
         if self.d["invested_investment"] is None:#initiating xulpymoney
             return Percentage()
         return Percentage(self.d['gains_gross_investment'], self.d["invested_investment"])
@@ -103,6 +103,16 @@ class InvestmentsOperations:
         for o in self.io_current:
             sharesxprice=sharesxprice+o["shares"]*o["price_investment"]
         return Currency(0, currency) if shares==Decimal(0) else Currency(sharesxprice/shares,  currency)
+
+    def current_average_price_user(self):
+        """Calcula el precio medio de compra"""
+        
+        shares=self.current_shares()
+        currency=self.request.local_currency
+        sharesxprice=Decimal(0)
+        for o in self.io_current:
+            sharesxprice=sharesxprice+o["shares"]*o["price_user"]
+        return Currency(0, currency) if shares==Decimal(0) else Currency(sharesxprice/shares,  currency)
         
     def current_gains_net_user(self):
         return listdict_sum(self.io_current, "gains_net_user")
@@ -135,12 +145,12 @@ class InvestmentsOperations:
             o["operationstypes"]=request.operationstypes[o["operationstypes_id"]]
         return self.io        
 
-    def current_listdict_tabulator_homogeneus(self, request):
+    def current_listdict_tabulator_homogeneus_investment(self, request):
         for ioc in self.io_current:
             o=IOC(self.investment, ioc)
-            ioc["percentage_annual"]=o.percentage_annual()
-            ioc["percentage_apr"]=o.percentage_apr()
-            ioc["percentage_total"]=o.percentage_total()
+            ioc["percentage_annual_investment"]=o.percentage_annual_investment()
+            ioc["percentage_apr_investment"]=o.percentage_apr_investment()
+            ioc["percentage_total_investment"]=o.percentage_total_investment()
             ioc["operationstypes"]=request.operationstypes[ioc["operationstypes_id"]]
         return self.io_current
         
@@ -149,8 +159,8 @@ class InvestmentsOperations:
         r=TabulatorFromListDict(f"{self.name}_current_tabulator_homogeneus_investment")
         r.setDestinyUrl(None)
         r.setLocalZone(self.request.local_zone)
-        r.setListDict(self.current_listdict_tabulator_homogeneus(self.request))
-        r.setFields("id","datetime", "operationstypes",  "shares", "price_investment", "invested_investment", "balance_investment", "gains_gross_investment", "percentage_annual", "percentage_apr", "percentage_total")
+        r.setListDict(self.current_listdict_tabulator_homogeneus_investment(self.request))
+        r.setFields("id","datetime", "operationstypes",  "shares", "price_investment", "invested_investment", "balance_investment", "gains_gross_investment", "percentage_annual_investment", "percentage_apr_investment", "percentage_total_investment")
         r.setHeaders("Id", _("Date and time"), _("Operation type"),  _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Gross gains"), _("% year"), _("% APR"), _("% Total"))
         r.setTypes("int","datetime", "str",  "Decimal", self.investment.products.currency, self.investment.products.currency, self.investment.products.currency,  self.investment.products.currency, "percentage", "percentage", "percentage")
         r.setBottomCalc(None, None, None, "sum", None, "sum", "sum", "sum", None, None, None)
@@ -160,6 +170,23 @@ class InvestmentsOperations:
     <p>{_("Current average price is {} in investment currency").format(self.current_average_price_investment())}</p>
 """)
         return r        
+
+    def current_tabulator_homogeneus_user(self):
+        currency=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}_current_tabulator_homogeneus_user")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.current_listdict_tabulator_homogeneus_investment(self.request))
+        r.setFields("id","datetime", "name","operationstypes",  "shares", "price_user", "invested_user", "balance_user", "gains_gross_user", "percentage_annual", "percentage_apr", "percentage_total")
+        r.setHeaders("Id", _("Date and time"), _("Name"),  _("Operation type"),  _("Shares"), _("Price"), _("Invested"), _("Current balance"), _("Gross gains"), _("% year"), _("% APR"), _("% Total"))
+        r.setTypes("int","datetime", "str", "str",  "Decimal", currency, currency, currency, currency, "percentage", "percentage", "percentage")
+        r.setBottomCalc(None, None, None, None, "sum", None,  "sum", "sum", "sum", None, None, None)
+        r.showLastRecord(False)
+        r.setHTMLCodeAfterObjectCreation(f"""
+    <p>{_("Current average price is {} in user currency").format(self.current_average_price_user())}</p>
+""")
+        return r
+
 
     def o_tabulator_homogeneus_investment(self):
         r=TabulatorFromListDict(f"{self.name}_o_tabulator_homogeneus_investment")
