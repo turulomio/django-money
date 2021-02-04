@@ -99,6 +99,39 @@ class TabulatorInvestments(TabulatorFromListDict):
         self.setTypes("int", "str", "str", "float6",  local_currency, "percentage", local_currency, local_currency, local_currency,"percentage", "percentage")
         self.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
         self.setFilterHeaders(None, "input", None, None, None, None, None, None, None, None, None)
+        
+        self.setJSCodeAfterObjectCreation(f"""
+// Adding background color 
+var column = {self.name}.getColumn("percentage_sellingpoint");
+if (column !== false){{//Only for active investments
+    for (var cell of column.getCells()) {{
+        if (cell.getValue()<5 && cell.getValue()>0){{
+            cell.getElement().style.backgroundColor='#92ffab';
+        }} else if (cell.getValue()>100){{
+            cell.getElement().style.backgroundColor='#ff92ab';
+        }}
+    }}
+
+    // Adding icon 
+    for (var row of {self.name}.getRows()) {{
+        var dat=row.getData();
+        var date = moment(dat.selling_expiration, "YYYY-MM-DD");
+        if (date.isValid() && date< moment().startOf('day')){{
+            cell=row.getCell("percentage_sellingpoint");
+            cell.getElement().style.backgroundRepeat= 'no-repeat';
+            cell.getElement().style.backgroundPosition= '3px 3px';
+            cell.getElement().style.backgroundImage="url('/static/images/alarm_clock.png')";
+            cell.getElement().style.backgroundSize = "16px 16px";
+        }}
+    }}
+
+    //Sorting
+    {self.name}.setSort([
+        {{column:"gains", dir:"desc"}}, //sort by this first
+        {{column:"percentage_sellingpoint", dir:"asc"}}, //sort by this first
+    ]);
+}}
+""")
 
 class TabulatorInvestmentsPairsInvestCalculator(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency, local_zone):
@@ -109,7 +142,6 @@ class TabulatorInvestmentsPairsInvestCalculator(TabulatorFromListDict):
         self.setHeaders(_("Investment name"), _("Last quote update"),  _("Last quote"), _("Invested"), _("Current balance"),   _("New inversion"), _("Current + new"), _("Shares to invest"))
         self.setTypes("str", "datetime", "Decimal", local_currency, local_currency,local_currency,local_currency,"Decimal")
         self.setBottomCalc(None, None, None,  "sum", "sum",  "sum", "sum", None)
-
 
 class TabulatorInvestmentsOperationsCurrentHeterogeneus(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency, local_zone):
@@ -122,8 +154,6 @@ class TabulatorInvestmentsOperationsCurrentHeterogeneus(TabulatorFromListDict):
         self.setTypes("int","datetime", "str", "str",  "Decimal", local_currency, local_currency, local_currency,  local_currency, "percentage", "percentage", "percentage")
         self.setBottomCalc(None, None,  None, None, None, None, "sum", "sum", "sum", None, None, None)
         self.showLastRecord(False)
-
-
 
 class TabulatorProducts(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency, local_zone):

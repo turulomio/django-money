@@ -71,7 +71,6 @@
         var selling_price_product_currency=parseFloat(prompt( "{% trans "Please add the operation close price in product currency" %}", 0 ));
         var gains_account_currency=parseFloat(prompt( "{% trans "Please add the final gains in account currency" %}", 0 ));
         var shares=-parseFloat("{{ operations.current_shares|unlocalize}}");//-self.investment.op_actual.shares())
-       alert(shares);
         var average_price_current_account=parseFloat("{{operations.current_average_price_account.amount|unlocalize}}");
         var leverage=parseFloat("{{operations.investment.products.real_leveraged_multiplier}}")
         

@@ -24,7 +24,7 @@ function my_round(num, decimals = 2) {
 }
 
 function currency_string(num, currency, decimals=2){
-    return "{0} {1}".format(my_round(num,decimals), currency_symbol(currency));
+    return "{0} {1}".format(my_round(num,decimals).toString(), currency_symbol(currency));
 }
 
 //Returns a float with . 
@@ -39,7 +39,7 @@ function currency_string(num, currency, decimals=2){
 //0,123 => 0.123
 
 function parseNumber(strg){
-    strg = strg.replace(',', '.');
+    strg = strg.toString().replace(',', '.');
     return parseFloat(strg);
 }
 

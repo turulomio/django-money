@@ -520,7 +520,7 @@ class accountoperation_delete(DeleteView):
 def investment_list(request,  active):
     investments= Investments.objects.all().select_related('accounts').select_related('products').select_related("products__productstypes").select_related("products__leverages").filter(active=active).order_by('name')
     listdict=listdict_investments(investments, timezone.now(), request.local_currency, active)
-    table_investments=TabulatorInvestments("table_investments", "investment_view", listdict, request.local_currency, active, request.local_zone).render()
+    tblInvestments=TabulatorInvestments("tblInvestments", "investment_view", listdict, request.local_currency, active, request.local_zone).render()
     
     # Foot only for active investments
     if listdict_has_key(listdict, "gains") is True:
