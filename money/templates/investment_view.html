@@ -75,7 +75,7 @@
         var leverage=parseFloat("{{operations.investment.products.real_leveraged_multiplier}}")
         
         var currency_conversion=(gains_account_currency+shares*average_price_current_account*leverage)/(shares*selling_price_product_currency*leverage)
-        var url=`{% url 'investmentoperation_new' investments_id=investment.id %}?currency_conversion=${currency_conversion}&price=${selling_price_product_currency}&shares=${shares}`;
+        var url=`{% url 'investmentoperation_new' investments_id=investment.id %}?currency_conversion=${my_round(currency_conversion,10)}&price=${selling_price_product_currency}&shares=${shares}`;
         window.location.href=url;
     };
   </script>        
