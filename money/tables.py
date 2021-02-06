@@ -167,16 +167,6 @@ class TabulatorProducts(TabulatorFromListDict):
         self.setFilterHeaders(None,  *["input"]*8)
 
 
-class TabulatorProductsPairsEvolutionWithMonthDiff(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, currency, local_zone):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setLocalZone(local_zone)
-        self.setListDict(listdict)
-        self.setFields("datetime", "price_worse","price_better","price_ratio", "price_ratio_percentage_from_start", "price_ratio_percentage_month_diff")
-        self.setHeaders(_("Date"), _("Price worse"), _("Price better"),  _("Price ratio"),  _("% pr from start"), _("% pr from last step"))
-        self.setTypes("date", currency, currency,  "Decimal6", "percentage", "percentage")
-        self.showLastRecord(False)
 
 class TabulatorInvestmentsOperationsHistoricalHeterogeneus(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency, local_zone):

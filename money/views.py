@@ -43,8 +43,7 @@ from money.tables import (
     TabulatorReportIncomeTotal, 
     TabulatorReportTotal, 
     TabulatorInvestmentsGainsByProductType, 
-    TabulatorInvestmentsOperationsHistoricalHeterogeneus, 
-    TabulatorProductsPairsEvolutionWithMonthDiff, 
+    TabulatorInvestmentsOperationsHistoricalHeterogeneus,
     TabulatorProductQuotesMonthPercentages, 
     TabulatorProductQuotesMonthQuotes,  
     TabulatorInvestmentsPairsInvestCalculator, 
@@ -60,6 +59,7 @@ from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict import (
     LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount, 
+    LdoProductsPairsMonthHistoricalEvolution, 
     LdoInvestmentsRanking, 
     listdict_accounts, 
     listdict_banks, 
@@ -76,7 +76,6 @@ from money.listdict import (
     listdict_orders, 
     listdict_product_quotes_month_comparation, 
     LdoProductsPairsEvolution, 
-    listdict_products_pairs_evolution_from_datetime, 
     listdict_strategies, 
     QsoAccountsOperationsHeterogeneus, 
     QsoCreditcardsoperationsHomogeneus, 
@@ -267,6 +266,9 @@ def product_update(request):
     from money.investing_com import InvestingCom
     InvestingCom(request, csv_file, product=None)
     return HttpResponseRedirect(reverse("product_update"))
+
+
+
 
 @login_required
 def concept_list(request):
@@ -563,6 +565,16 @@ def investment_pairs(request, worse, better, accounts_id):
     gains=ldo_ioc_better.sum("gains_gross_user")+ldo_ioc_worse.sum("gains_gross_user")
     return render(request, 'investment_pairs.html', locals())
 
+@login_required
+def chart_investments_pairs_evolution(request, worse, better):
+    product_better=get_object_or_404(Products, pk=better)
+    product_worse=get_object_or_404(Products, pk=worse)
+    
+    fromyear=date.today().year-3 if request.GET.get("fromyear", None) is None else request.GET["fromyear"]
+    ldo=LdoProductsPairsMonthHistoricalEvolution(request, product_worse, product_better)
+        
+    return render(request, 'chart_investments_pairs_evolution.html', locals())
+
 
 @login_required
 def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
@@ -618,69 +630,11 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
 def ajax_investment_pairs_evolution(request, worse, better ):
     product_better=Products.objects.all().filter(id=better)[0]
     product_worse=Products.objects.all().filter(id=worse)[0]
-    basic_results_better=product_better.basic_results()
-    basic_results_worse=product_worse.basic_results()
     
-    if product_better.currency==product_worse.currency:
-        common_monthly_quotes=cursor_rows("""
-            select 
-                make_date(a.year, a.month,1) as date, 
-                a.products_id as a, 
-                a.open as a_open, 
-                b.products_id as b, 
-                b.open as b_open 
-            from 
-                ohclmonthlybeforesplits(%s) as a ,
-                ohclmonthlybeforesplits(%s) as b 
-            where 
-                a.year=b.year and 
-                a.month=b.month
-        UNION ALL
-            select
-                now()::date as date,
-                %s as a, 
-                (select last from last_penultimate_lastyear(%s,now())) as a_open, 
-                %s as b, 
-                (select last from last_penultimate_lastyear(%s,now())) as b_open
-                """, (product_worse.id, product_better.id, 
-                product_worse.id, product_worse.id, product_better.id, product_better.id))
-    else: #Uses worse currency
-        #Fist condition in where it's to remove quotes without money_convert due to no data
-        common_monthly_quotes=cursor_rows("""
-            select 
-                make_date(a.year,a.month,1) as date, 
-                a.products_id as a, 
-                a.open as a_open, 
-                b.products_id as b, 
-                money_convert(make_date(a.year,a.month,1)::timestamp with time zone, b.open, %s, %s) as b_open
-            from 
-                ohclmonthlybeforesplits(%s) as a 
-                ,ohclmonthlybeforesplits(%s) as b 
-            where 
-                b.open != money_convert(make_date(a.year,a.month,1)::timestamp with time zone, b.open, %s, %s)  and
-                a.year=b.year and 
-                a.month=b.month
-        UNION ALL
-            select
-                now()::date as date,
-                %s as a, 
-                (select last from last_penultimate_lastyear(%s,now())) as a_open, 
-                %s as b, 
-                money_convert(now(), (select last from last_penultimate_lastyear(%s,now())), %s,%s) as b_open
-                """, ( product_better.currency,  product_worse.currency, 
-                        product_worse.id, 
-                        product_better.id, 
-                        product_better.currency,  product_worse.currency, 
-                        
-                        product_worse.id,
-                        product_worse.id,
-                        product_better.id, 
-                        product_better.id, product_better.currency,  product_worse.currency))
+    ldo=LdoProductsPairsMonthHistoricalEvolution(request, product_worse, product_better)
     
-    list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_monthly_quotes, basic_results_worse,  basic_results_better)
-    table_products_pair_evolution_from=TabulatorProductsPairsEvolutionWithMonthDiff("table_products_pair_evolution_from", None, list_products_evolution, product_worse.currency, request.local_zone).render()
-    
-    return HttpResponse(table_products_pair_evolution_from)
+
+    return HttpResponse(ldo.tabulator().render())
 
 @login_required
 def investment_view(request, pk):

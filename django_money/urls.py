@@ -69,6 +69,8 @@ urlpatterns=i18n_patterns(
     path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/', money_views.investment_pairs, name='investment_pairs'),
     path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/<int:amount>/', money_views.ajax_investment_pairs_invest, name='ajax_investment_pairs_invest'),
     path('investment/pairs/evolution/<int:worse>/<int:better>/', money_views.ajax_investment_pairs_evolution, name='ajax_investment_pairs_evolution'),
+    path('investment/pairs/evolution/chart/<int:worse>/<int:better>/', money_views.chart_investments_pairs_evolution,  name='chart_investments_pairs_evolution'),
+
     
     path('investmentoperation/new/<int:investments_id>/', money_views.investmentoperation_new.as_view(), name='investmentoperation_new'),
     path('investmentoperation/update/<int:pk>', money_views.investmentoperation_update.as_view(), name='investmentoperation_update'),
@@ -98,7 +100,7 @@ urlpatterns=i18n_patterns(
     path('chart/total/', money_views.ajax_chart_total, {'year_from': date.today().year},  name='ajax_chart_total'),
     path('chart/total/async/', money_views.ajax_chart_total_async, {'year_from': date.today().year},  name='ajax_chart_total_async'),
     path('chart/total/<int:year_from>/', money_views.ajax_chart_total,  name='ajax_chart_total'),
-    
+
     path('report/concepts/',  money_views.report_concepts,  name='report_concepts'), 
     path('report/concepts/<int:year>/<int:month>/',  money_views.report_concepts,  name='report_concepts'), 
     path('report/total/', money_views.report_total,  name='report_total'),

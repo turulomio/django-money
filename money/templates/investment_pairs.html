@@ -77,6 +77,7 @@ $(document).ready(function() {
 <h2>{% trans "Pair historical evolution" %}</h2>
 <ajax-button id="ajax_button_evolution" url="{% url 'ajax_investment_pairs_evolution' product_worse.id product_better.id %}" buttontext="{% trans 'Press to see pair historical evolution' %}" csrf_token="{{csrf_token}}"></ajax-button>
 
+<p><a href="{% url 'chart_investments_pairs_evolution' product_worse.id product_better.id %}" target="_blank">{% trans "Pair historical evolution chart"%}</a></p>
 
 <h2>{% trans "Loses of next reinvestment" %}</h2>
 <p><strong>{% trans "Gains" %}: </strong>{{ gains }}</p>

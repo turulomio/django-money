@@ -52,7 +52,7 @@ from money.models import (
 )
 from money.reusing.casts import string2list_of_integers, valueORempty
 from money.reusing.currency import Currency
-from money.reusing.datetime_functions import dtaware_month_end, months
+from money.reusing.datetime_functions import dtaware_month_end, months, dtaware_day_end_from_date
 from money.reusing.decorators import timeit
 from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, InvestmentsOperationsTotals_from_investment, IOC, InvestmentsOperations_from_investment, InvestmentsOperationsTotalsManager_from_all_investments
 from money.reusing.percentage import percentage_between, Percentage
@@ -522,8 +522,159 @@ class QsoDividendsHeterogeneus(QsoCommon):
         r.setBottomCalc(None, None, None, "sum", "sum", "sum", "sum")    
         r.showLastRecord(False)
         return r
-            
+
+
+
 #GOOD JOB
+## Currency used to compare is product worse currency
+class LdoProductsPairsMonthHistoricalEvolution(LdoDjangoMoney):
+    def __init__(self, request, product_worse, product_better, name=None):
+        LdoDjangoMoney.__init__(self, request, name)        
+        self.product_better=product_better
+        self.product_worse=product_worse
+        self.currency=self.product_worse.currency
+        self._generate_listdict()
+        
+    def _generate_listdict(self):
+        if self.product_better.currency==self.product_worse.currency:
+            common_quotes=cursor_rows("""
+                select 
+                    make_date(a.year, a.month,1) as date, 
+                    a.products_id as a, 
+                    a.open as a_open, 
+                    b.products_id as b, 
+                    b.open as b_open 
+                from 
+                    ohclmonthlybeforesplits(%s) as a ,
+                    ohclmonthlybeforesplits(%s) as b 
+                where 
+                    a.year=b.year and 
+                    a.month=b.month
+            UNION ALL
+                select
+                    now()::date as date,
+                    %s as a, 
+                    (select last from last_penultimate_lastyear(%s,now())) as a_open, 
+                    %s as b, 
+                    (select last from last_penultimate_lastyear(%s,now())) as b_open
+                    """, (self.product_worse.id, self.product_better.id, 
+                    self.product_worse.id, self.product_worse.id, self.product_better.id, self.product_better.id))
+        else: #Uses worse currency
+            #Fist condition in where it's to remove quotes without money_convert due to no data
+            common_quotes=cursor_rows("""
+                select 
+                    make_date(a.year,a.month,1) as date, 
+                    a.products_id as a, 
+                    a.open as a_open, 
+                    b.products_id as b, 
+                    money_convert(make_date(a.year,a.month,1)::timestamp with time zone, b.open, %s, %s) as b_open
+                from 
+                    ohclmonthlybeforesplits(%s) as a 
+                    ,ohclmonthlybeforesplits(%s) as b 
+                where 
+                    b.open != money_convert(make_date(a.year,a.month,1)::timestamp with time zone, b.open, %s, %s)  and
+                    a.year=b.year and 
+                    a.month=b.month
+            UNION ALL
+                select
+                    now()::date as date,
+                    %s as a, 
+                    (select last from last_penultimate_lastyear(%s,now())) as a_open, 
+                    %s as b, 
+                    money_convert(now(), (select last from last_penultimate_lastyear(%s,now())), %s,%s) as b_open
+                    """, ( self.product_better.currency,  self.product_worse.currency, 
+                            self.product_worse.id, 
+                            self.product_better.id, 
+                            self.product_better.currency,  self.product_worse.currency, 
+                            
+                            self.product_worse.id,
+                            self.product_worse.id,
+                            self.product_better.id, 
+                            self.product_better.id, self.product_better.currency,  self.product_worse.currency))
+#def listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_quotes, basic_results_worse,   basic_results_better):
+
+        last_pr=Percentage(0, 1)
+        first_pr=common_quotes[0]["b_open"]/common_quotes[0]["a_open"]
+        for row in common_quotes:#a worse, b better
+            pr=row["b_open"]/row["a_open"]
+            self.append({
+                "datetime": dtaware_day_end_from_date(row["date"], self.request.local_zone), 
+                "price_worse": row["a_open"], 
+                "price_better": row["b_open"], 
+                "price_ratio": pr, 
+                "price_ratio_percentage_from_start": percentage_between(first_pr, pr), 
+                "price_ratio_percentage_month_diff": percentage_between(last_pr, pr)
+            })
+            last_pr=pr
+        #list_products_evolution=listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_monthly_quotes, basic_results_worse,  basic_results_better)
+
+    def tabulator(self):
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.ld)
+        r.setFields("datetime", "price_worse","price_better","price_ratio", "price_ratio_percentage_from_start", "price_ratio_percentage_month_diff")
+        r.setHeaders(_("Date"), _("Price worse"), _("Price better"),  _("Price ratio"),  _("% pr from start"), _("% pr from last step"))
+        r.setTypes("date", self.currency, self.currency,  "Decimal6", "percentage", "percentage")
+        r.showLastRecord(False)
+        return r
+        
+    def chart(self):
+        from money.charts import listdict_to_chartdata
+        return f"""
+<div style="width:75%;">
+    <canvas id="canvas"></canvas>
+</div>
+<script>
+    var timeFormat = 'YYYY-MM-DD HH:mm:SS';
+    var config = {{
+        type: 'line',
+        data: {{
+            labels: [],
+            datasets: [
+                {{
+                    label: "{_("Price ratio")}", 
+                    data: {listdict_to_chartdata(self.ld, "datetime", "price_ratio")},
+                    backgroundColor:'rgb(255,0,0)',
+                    borderColor: 'rgb(200,0,0)',
+                    fill: false,
+                }},
+            ]
+        }},
+        options: {{
+            title: {{
+                display: true, 
+                text: '{_("Price ratio evolution chart")}'
+            }},
+                scales: {{
+                    xAxes: [{{
+                        type: 'time',
+                        distribution: 'series',
+                        time: {{
+                            unit: 'month', 
+                            parser: timeFormat,
+                        }},
+                        scaleLabel: {{
+                            display: true,
+                        }}, 
+                    }}],
+                    yAxes: [{{
+                        scaleLabel: {{
+                            display: true,
+                            labelString: '{self.product_worse.currency}'
+                        }}, 
+                        ticks: {{
+                            min: 0
+                        }}, 
+                    }}]
+                }}
+            }}
+        }};
+
+                        var ctx = document.getElementById('canvas').getContext('2d');
+                        window.myLine = new Chart(ctx, config);
+        </script>"""
+
 class LdoProductsPairsEvolution(LdoDjangoMoney):
     def __init__(self, request, name):
         LdoDjangoMoney.__init__(self, request, name)        
@@ -591,22 +742,6 @@ class LdoProductsPairsEvolution(LdoDjangoMoney):
         r.showLastRecord(False)
         return r.render()
 
-def listdict_products_pairs_evolution_from_datetime(product_worse, product_better, common_quotes, basic_results_worse,   basic_results_better):
-    l=[]
-    last_pr=Percentage(0, 1)
-    first_pr=common_quotes[0]["b_open"]/common_quotes[0]["a_open"]
-    for row in common_quotes:#a worse, b better
-        pr=row["b_open"]/row["a_open"]
-        l.append({
-            "datetime": row["date"], 
-            "price_worse": row["a_open"], 
-            "price_better": row["b_open"], 
-            "price_ratio": pr, 
-            "price_ratio_percentage_from_start": percentage_between(first_pr, pr), 
-            "price_ratio_percentage_month_diff": percentage_between(last_pr, pr)
-        })
-        last_pr=pr
-    return l
 
 def listdict_products_pairs_evolution_to_filter_reinvest(product_worse, product_better, common_quotes, basic_results_worse,   basic_results_better):
     l=[]
