@@ -11,6 +11,8 @@
     <button type="submit">{% trans "Save" %}</button>
     </form>
     <p>
+    <p id="pOrderBalance"></p>
+    
     <p>{% trans "To calculate order shares use next options:" %}</p>
     <label>{% trans "Wished amount to invest" %}</label>&nbsp;<input id="txtToInvest" value="7500"></input>
 &nbsp;
@@ -29,12 +31,14 @@
         {# SCRIPT TO CALCULATE SHARES #}
         var eShares=document.getElementsByName("shares")[0];
         var ePrice=document.getElementsByName("price")[0];
+        var pOrderBalance=document.getElementById("pOrderBalance");
         var txtLeverage=document.getElementById("txtLeverage");
         var txtToInvest=document.getElementById("txtToInvest");
         var cmbShares=document.getElementById("cmbShares");
         var cmbInvestments=document.getElementById("id_investments");
         var cmdSetShares=document.getElementById("cmdSetShares");
         var decimals=2;
+        var currency='{{request.local_currency}}';
 
         cmdSetShares.addEventListener('click', (event) => {
             let toInvest=parseNumber(txtToInvest.value);
@@ -46,6 +50,7 @@
             } else if (cmbShares.value=="2"){ //Decimal shares
                 eShares.value=parseNumber(my_round(toInvest/price/real_leverage, decimals));
             }
+            update_balance();
         });
         
         cmbInvestments.addEventListener('change', (event) => {
@@ -58,12 +63,32 @@
                 },
                 success: function(result) {
                     txtLeverage.value=result.leverages;
-                    decimals=result.decimals
+                    decimals=result.decimals;
+                    currency=result.currency;
+                    update_balance();
                 },
                 error: function(result) {
                     txtLeverage.value('Something is wrong with ajax');
                 }
             });
         });
+        
+        function update_balance(){
+            let price=parseNumber(ePrice.value);
+            let real_leverage=parseNumber(txtLeverage.value);
+            let shares=parseNumber(eShares.value);
+            pOrderBalance.innerHTML=gettext("Current order balance is {0}").format(currency_string(my_round(price*real_leverage*shares, decimals), currency));
+        }
+        
+        
+        
+        eShares.addEventListener('change', (event) => {
+            update_balance();
+        });    
+        ePrice.addEventListener('change', (event) => {
+            update_balance();
+        });
+        update_balance();
+
     </script>
 {% endblock %}

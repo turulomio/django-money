@@ -877,6 +877,7 @@ def ajax_investment_to_json(request, pk):
     investment=get_object_or_404(Investments.objects.select_related("products").select_related("products__leverages"), id=pk)
     result = { 'leverages': investment.products.real_leveraged_multiplier(), 
            'decimals': investment.products.decimals,
+           'currency': investment.products.currency, 
          }
     return JsonResponse(result)
 
