@@ -16,10 +16,8 @@
 <p>
 <label id="balance"></label>
 
-
-// DO NOT EDIT COPY IT FROM investmentoperations_update.html
     <script>
-        var real_leverage={{ object.investments.products.real_leveraged_multiplier }}
+        var real_leverage={{ view.investments.products.real_leveraged_multiplier }}
         var eLabel=document.getElementById("balance");
         var eShares=document.getElementsByName("shares")[0];
         var ePrice=document.getElementsByName("price")[0];
@@ -37,8 +35,8 @@
             } else {
                 net = Math.abs(gross - taxes - commission);
             }
-            let cGross=currency_string(gross, '{{object.investments.products.currency}}');
-            let cNet = currency_string(net, '{{object.investments.products.currency}}');  
+            let cGross=currency_string(gross, '{{view.investments.products.currency}}');
+            let cNet = currency_string(net, '{{view.investments.products.currency}}');  
             eLabel.innerHTML=gettext("Gross balance is {0}. Net balance is {1}. Leverage multiplier is {2}").format(cGross, cNet, real_leverage);
         }
         update_label();
@@ -56,5 +54,4 @@
             update_label();
         });
     </script>
-
 {% endblock %}

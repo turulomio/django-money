@@ -709,7 +709,6 @@ class investmentoperation_new(CreateView):
         return form
                 
     def get_initial(self):
-        print(self.request.GET.get("currency_conversion"))
         return {
             'datetime': str(dtaware_changes_tz(timezone.now(), self.request.local_zone)), 
             'currency_conversion': str(self.request.GET.get("currency_conversion", 1)), 
@@ -720,7 +719,7 @@ class investmentoperation_new(CreateView):
             }
 
     def get_success_url(self):
-        return reverse_lazy('investment_view',args=(self.object.investments.id,))
+        return reverse_lazy('investment_view', args=(self.object.investments.id,))
 
     @transaction.atomic
     def form_valid(self, form):
@@ -741,8 +740,6 @@ class investmentoperation_new(CreateView):
             if form.instance.shares>0 and form.instance.operationstypes.id in (5, ):
                 form.add_error(None, ValidationError({"shares": "Shares can't be positive for this operation type..."}))    
             return super().form_invalid(form)
-
-
 
 @method_decorator(login_required, name='dispatch')
 class investmentoperation_update(UpdateView):
