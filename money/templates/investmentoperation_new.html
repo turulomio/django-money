@@ -14,8 +14,15 @@
     </form>
 <p>
 <p>
-<label id="balance"></label>
-
+<label id="balance"></label><p>
+<label>{% trans "Wished amount to invest to calculate shares" %}</label>&nbsp;<input id="txtToInvest" value="7500"></input>
+&nbsp;
+    <select id="cmbShares">
+        <option value="0" selected>{% trans '--- Select an option ---' %}</option>
+        <option value="1" >{% trans 'Integer shares' %}</option>
+        <option value="2" >{% trans 'Decimal shares' %}</option>
+    </select>
+    <button type="button" id="cmdSetShares">{% trans "Set shares" %}</input>
     <script>
         var real_leverage={{ view.investments.products.real_leveraged_multiplier }}
         var eLabel=document.getElementById("balance");
@@ -23,6 +30,7 @@
         var ePrice=document.getElementsByName("price")[0];
         var eTaxes=document.getElementsByName("taxes")[0];
         var eCommission=document.getElementsByName("commission")[0];
+        {# SCRIPT TO CALCULATE GROSS AND NET BALANCE #}
         function update_label(){
             let shares=parseNumber(eShares.value);
             let price=parseNumber(ePrice.value);
@@ -53,5 +61,23 @@
         eCommission.addEventListener('change', (event) => {
             update_label();
         });
+        
+        {# SCRIPT TO CALCULATE SHARES #}
+        var txtToInvest=document.getElementById("txtToInvest");
+        var cmbShares=document.getElementById("cmbShares");
+        var cmdSetShares=document.getElementById("cmdSetShares");
+        
+        cmdSetShares.addEventListener('click', (event) => {
+            let toInvest=parseNumber(txtToInvest.value);
+            let price=parseNumber(ePrice.value);
+            
+            if (cmbShares.value=="1"){ //Integer shares
+                eShares.value=parseNumber(my_round(toInvest/price/real_leverage,0));
+            } else if (cmbShares.value=="2"){ //Decimal shares
+                eShares.value=parseNumber(my_round(toInvest/price/real_leverage, {{view.investment.products.decimal}}));
+            }
+            update_label();
+        });
+        
     </script>
 {% endblock %}
