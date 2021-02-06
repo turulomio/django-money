@@ -10,4 +10,60 @@
         </table>
     <button type="submit">{% trans "Save" %}</button>
     </form>
+    <p>
+    <p>{% trans "To calculate order shares use next options:" %}</p>
+    <label>{% trans "Wished amount to invest" %}</label>&nbsp;<input id="txtToInvest" value="7500"></input>
+&nbsp;
+    <label>{% trans "Selected investment leverage" %}</label>&nbsp;<input id="txtLeverage" value="1" readonly></input>
+&nbsp;
+    <label>{% trans "Shares calculation method" %}</label>&nbsp;
+    <select id="cmbShares">
+        <option value="0" selected>{% trans '--- Select an option ---' %}</option>
+        <option value="1" >{% trans 'Integer shares' %}</option>
+        <option value="2" >{% trans 'Decimal shares' %}</option>
+    </select>
+    
+    
+    <button type="button" id="cmdSetShares">{% trans "Calculate shares" %}</button>
+        <script>
+        {# SCRIPT TO CALCULATE SHARES #}
+        var eShares=document.getElementsByName("shares")[0];
+        var ePrice=document.getElementsByName("price")[0];
+        var txtLeverage=document.getElementById("txtLeverage");
+        var txtToInvest=document.getElementById("txtToInvest");
+        var cmbShares=document.getElementById("cmbShares");
+        var cmbInvestments=document.getElementById("id_investments");
+        var cmdSetShares=document.getElementById("cmdSetShares");
+        var decimals=2;
+
+        cmdSetShares.addEventListener('click', (event) => {
+            let toInvest=parseNumber(txtToInvest.value);
+            let price=parseNumber(ePrice.value);
+            let real_leverage=parseNumber(txtLeverage.value);
+            
+            if (cmbShares.value=="1"){ //Integer shares
+                eShares.value=parseNumber(my_round(toInvest/price/real_leverage,0));
+            } else if (cmbShares.value=="2"){ //Decimal shares
+                eShares.value=parseNumber(my_round(toInvest/price/real_leverage, decimals));
+            }
+        });
+        
+        cmbInvestments.addEventListener('change', (event) => {
+            $.ajax({
+                type: "POST",
+                dataType:'json',
+                url: "{% url 'ajax_investment_to_json' 9999999 %}".replace("9999999", cmbInvestments.value),
+                data: {
+                    csrfmiddlewaretoken: '{{csrf_token}}',
+                },
+                success: function(result) {
+                    txtLeverage.value=result.leverages;
+                    decimals=result.decimals
+                },
+                error: function(result) {
+                    txtLeverage.value('Something is wrong with ajax');
+                }
+            });
+        });
+    </script>
 {% endblock %}

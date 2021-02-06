@@ -11,7 +11,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.shortcuts import render,  get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
@@ -869,6 +869,16 @@ def ajax_chart_total_async(request, year_from):
     print(f"listdict_chart_total_async took {datetime.now()-start}")
     chart_total=chart_lines_total(ld_chart_total, request.local_currency)
     return render(request, 'chart_total.html', locals())
+
+
+@timeit
+@login_required
+def ajax_investment_to_json(request, pk):
+    investment=get_object_or_404(Investments.objects.select_related("products").select_related("products__leverages"), id=pk)
+    result = { 'leverages': investment.products.real_leveraged_multiplier(), 
+           'decimals': investment.products.decimals,
+         }
+    return JsonResponse(result)
 
 @timeit
 @login_required
