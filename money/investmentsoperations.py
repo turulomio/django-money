@@ -294,12 +294,6 @@ def InvestmentsOperationsManager_from_investment_queryset(qs_investments, dt, re
     for investment in qs_investments:  
         row=rows[investment.id]
         r.append(InvestmentsOperations(request, investment,  row["io"], row['io_current'],  row['io_historical']))
-#    
-#    
-#    print("OPTIMIZAR InvestmentsOperationsManager_from_investment_queryset")
-#    r=InvestmentsOperationsManager(request)
-#    for investment in qs_investments:
-#        r.append(InvestmentsOperations_from_investment(request, investment, dt, request.local_currency))
     return r
         
         
@@ -319,6 +313,13 @@ class InvestmentsOperationsTotals:
         self.io_total_current=eval(str_d_io_current_total)
         self.io_total_historical=eval(str_d_io_historical_total)
                 
+    def current_last_day_diff(self):
+            basic_quotes=self.investment.products.basic_results()
+            try:
+                return (basic_quotes['last']-basic_quotes['penultimate'])*self.io_total_current["shares"]*self.investment.products.real_leveraged_multiplier()
+            except:
+                return 0
+
 def InvestmentsOperationsTotals_from_investment( investment, dt, local_currency):
     row_io= cursor_one_row("select * from investment_operations_totals(%s,%s,%s)", (investment.pk, dt, local_currency))
     r=InvestmentsOperationsTotals(investment,  row_io["io"], row_io['io_current'],  row_io['io_historical'])
@@ -353,7 +354,9 @@ class InvestmentsOperationsTotalsManager:
         for o in self.list:
             r=r + o.io_total_current["balance_futures_user"]
         return r   
-        
+
+            
+
     def current_gains_gross_user(self):
         r=0
         for o in self.list:
@@ -383,10 +386,11 @@ class InvestmentsOperationsTotalsManager:
 def InvestmentsOperationsTotalsManager_from_investment_queryset(qs_investments, dt, request):
     ids=tuple(qs_investments.values_list('pk',flat=True))
     r=InvestmentsOperationsTotalsManager(request)
-    rows=cursor_rows_as_dict("id","select id, investment_operations_totals.* from investments, investment_operations_totals(investments.id, %s, %s ) as investment_operations_totals where investments.id in %s;", (dt, request.local_currency, ids))
-    for investment in qs_investments:  
-        row=rows[investment.id]
-        r.append(InvestmentsOperationsTotals(investment,  row["io"], row['io_current'],  row['io_historical']))
+    if len(ids)>0:
+        rows=cursor_rows_as_dict("id","select id, investment_operations_totals.* from investments, investment_operations_totals(investments.id, %s, %s ) as investment_operations_totals where investments.id in %s;", (dt, request.local_currency, ids))
+        for investment in qs_investments:  
+            row=rows[investment.id]
+            r.append(InvestmentsOperationsTotals(investment,  row["io"], row['io_current'],  row['io_historical']))
     return r
     
 def InvestmentsOperationsTotalsManager_from_all_investments(request, dt):

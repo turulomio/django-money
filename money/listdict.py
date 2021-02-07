@@ -499,22 +499,16 @@ class QsoInvestments(QsoCommon):
         list_=[]
         
         iotm=InvestmentsOperationsTotalsManager_from_investment_queryset(self.qs, timezone.now(), self.request)
-        
-        print(iotm.list[0].io_total_current.keys())
-        
+                
         for iot in iotm:
             basic_quotes=iot.investment.products.basic_results()
-            try:
-                daily_diff=(basic_quotes['last']-basic_quotes['penultimate'])*iot.io_total_current["shares"]*iot.investment.products.real_leveraged_multiplier()
-            except:
-                daily_diff=0
             list_.append({
                     "id": iot.investment.id, 
                     "active":iot.investment.active, 
                     "name": iot.investment.fullName(), 
                     "last_datetime": basic_quotes['last_datetime'], 
                     "last_quote": basic_quotes['last'], 
-                    "daily_difference": daily_diff, 
+                    "daily_difference": iot.current_last_day_diff(), 
                     "daily_percentage":percentage_between(basic_quotes['penultimate'], basic_quotes['last']),             
                     "invested_local": iot.io_total_current["invested_user"], 
                     "balance": iot.io_total_current["balance_user"], 
