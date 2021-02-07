@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-04 04:06+0000\n"
+"POT-Creation-Date: 2021-02-07 18:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: money/templates/investment_update.html:90
+#: money/templates/investment_update.html:100
+msgid "Last investment operation price {0}. It's range center is {1}"
+msgstr ""
+
+#: money/templates/investment_update.html:126
 msgid "Investment selling price set to {0} to gain {1}."
 msgstr ""
 
-#: money/templates/investmentoperation_new.html:42
+#: money/templates/investmentoperation_new.html:48
 #: money/templates/investmentoperation_update.html:38
 msgid "Gross balance is {0}. Net balance is {1}. Leverage multiplier is {2}"
+msgstr ""
+
+#: money/templates/order_new.html:80
+msgid "Current order balance is {0}"
 msgstr ""
