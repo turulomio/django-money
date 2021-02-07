@@ -8,5 +8,5 @@
   <h2>{% trans "Accounts" %}</h2>
   {{ table_accounts|safe}}
   <h2>{% trans "Investments" %}</h2>
-  {{ table_investments|safe}}
+  {{ qso_investments.tabulator_active.render|safe}}
 {% endblock %}

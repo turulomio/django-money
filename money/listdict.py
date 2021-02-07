@@ -54,7 +54,7 @@ from money.reusing.casts import string2list_of_integers, valueORempty
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_end, months, dtaware_day_end_from_date
 from money.reusing.decorators import timeit
-from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, InvestmentsOperationsTotals_from_investment, IOC, InvestmentsOperations_from_investment, InvestmentsOperationsTotalsManager_from_all_investments
+from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, IOC, InvestmentsOperations_from_investment, InvestmentsOperationsTotalsManager_from_all_investments, InvestmentsOperationsTotalsManager_from_investment_queryset
 from money.reusing.percentage import percentage_between, Percentage
 from money.reusing.tabulator import TabulatorFromListDict, TabulatorFromQuerySet
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -91,41 +91,6 @@ def listdict_accounts(queryset, local_currency):
         )
     return list_    
 
-def listdict_investments(queryset, dt,  local_currency, active):
-    list_=[]
-    
-    if active is True:
-        for investment in queryset:
-            iot=InvestmentsOperationsTotals_from_investment(investment, dt, local_currency)
-            basic_quotes=investment.products.basic_results()
-            try:
-                daily_diff=(basic_quotes['last']-basic_quotes['penultimate'])*iot.io_total_current["shares"]*investment.products.real_leveraged_multiplier()
-            except:
-                daily_diff=0
-            list_.append({
-                    "id": investment.id, 
-                    "active":investment.active, 
-                    "name": investment.fullName(), 
-                    "last_datetime": basic_quotes['last_datetime'], 
-                    "last_quote": basic_quotes['last'], 
-                    "daily_difference": daily_diff, 
-                    "daily_percentage":percentage_between(basic_quotes['penultimate'], basic_quotes['last']),             
-                    "invested_local": iot.io_total_current["invested_user"], 
-                    "balance": iot.io_total_current["balance_user"], 
-                    "gains": iot.io_total_current["gains_gross_user"],  
-                    "percentage_invested": Percentage(iot.io_total_current["gains_gross_user"], iot.io_total_current["invested_user"]), 
-                    "percentage_sellingpoint": percentage_to_selling_point(iot.io_total_current["shares"], investment.selling_price, basic_quotes['last']), 
-                    "selling_expiration": investment.selling_expiration, 
-                }
-            )
-    else:        
-        for investment in queryset:
-            list_.append({
-                "id": investment.id, 
-                "active":investment.active, 
-                "name": investment.fullName(), 
-            })
-    return list_
 
 def listdict_banks(request, queryset, dt, active):
     list_=[]
@@ -229,6 +194,8 @@ def listdict_investmentsoperationshistorical(request, year, month, local_currenc
     list_ioh= sorted(list_ioh,  key=lambda item: item['dt_end'])
     return list_ioh
 
+
+        
 
 ## IOC of several investments
 class LdoInvestmentsOperationsCurrentHeterogeneus(LdoDjangoMoney):
@@ -522,6 +489,121 @@ class QsoDividendsHeterogeneus(QsoCommon):
         r.setBottomCalc(None, None, None, "sum", "sum", "sum", "sum")    
         r.showLastRecord(False)
         return r
+## IOC of several investments
+class QsoInvestments(QsoCommon):
+    def __init__(self, request, qs,  name=None):
+        QsoCommon.__init__(self, request, qs, name)
+        
+
+    def listdict_active(self):
+        list_=[]
+        
+        iotm=InvestmentsOperationsTotalsManager_from_investment_queryset(self.qs, timezone.now(), self.request)
+        
+        print(iotm.list[0].io_total_current.keys())
+        
+        for iot in iotm:
+            basic_quotes=iot.investment.products.basic_results()
+            try:
+                daily_diff=(basic_quotes['last']-basic_quotes['penultimate'])*iot.io_total_current["shares"]*iot.investment.products.real_leveraged_multiplier()
+            except:
+                daily_diff=0
+            list_.append({
+                    "id": iot.investment.id, 
+                    "active":iot.investment.active, 
+                    "name": iot.investment.fullName(), 
+                    "last_datetime": basic_quotes['last_datetime'], 
+                    "last_quote": basic_quotes['last'], 
+                    "daily_difference": daily_diff, 
+                    "daily_percentage":percentage_between(basic_quotes['penultimate'], basic_quotes['last']),             
+                    "invested_local": iot.io_total_current["invested_user"], 
+                    "balance": iot.io_total_current["balance_user"], 
+                    "gains": iot.io_total_current["gains_gross_user"],  
+                    "percentage_invested": Percentage(iot.io_total_current["gains_gross_user"], iot.io_total_current["invested_user"]), 
+                    "percentage_sellingpoint": percentage_to_selling_point(iot.io_total_current["shares"], iot.investment.selling_price, basic_quotes['last']), 
+                    "selling_expiration": iot.investment.selling_expiration, 
+                }
+            )
+        return list_
+    def listdict_inactive(self):
+        list_=[]
+        for investment in self.qs:
+            list_.append({
+                "id": investment.id, 
+                "active":investment.active, 
+                "name": investment.fullName(), 
+            })
+        return list_
+            
+    def tabulator_active(self):
+        local_currency=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl("investment_view")
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.listdict_active())
+        r.setFields("id","name", "last_datetime","last_quote","daily_difference", "daily_percentage", "invested_local",  "balance", "gains", "percentage_invested", "percentage_sellingpoint")
+
+        r.setHeaders(_("Id"), _("Name"), _("Last dt.") ,  _("Last quote"), _("Daily diff"), 
+        # Translator: xgettext:no-python-format
+        _("% daily"), 
+        _("Invested"),_("Balance"),  _("Gains"), 
+        # Translator: xgettext:no-python-format
+        _("% Invested"), 
+        # Translator: xgettext:no-python-format
+        _("% selling point"))
+        r.setTypes("int", "str", "str", "float6",  local_currency, "percentage", local_currency, local_currency, local_currency,"percentage", "percentage")
+        r.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
+        r.setFilterHeaders(None, "input", None, None, None, None, None, None, None, None, None)
+            
+        r.setJSCodeAfterObjectCreation(f"""
+    // Adding background color 
+    var column = {r.name}.getColumn("percentage_sellingpoint");
+    if (column !== false){{//Only for active investments
+        for (var cell of column.getCells()) {{
+            if (cell.getValue()<5 && cell.getValue()>0){{
+                cell.getElement().style.backgroundColor='#92ffab';
+            }} else if (cell.getValue()>100){{
+                cell.getElement().style.backgroundColor='#ff92ab';
+            }}
+        }}
+
+        // Adding icon 
+        for (var row of {r.name}.getRows()) {{
+            var dat=row.getData();
+            var date = moment(dat.selling_expiration, "YYYY-MM-DD");
+            if (date.isValid() && date< moment().startOf('day')){{
+                cell=row.getCell("percentage_sellingpoint");
+                cell.getElement().style.backgroundRepeat= 'no-repeat';
+                cell.getElement().style.backgroundPosition= '3px 3px';
+                cell.getElement().style.backgroundImage="url('/static/images/alarm_clock.png')";
+                cell.getElement().style.backgroundSize = "16px 16px";
+            }}
+        }}
+
+        //Sorting
+        {r.name}.setSort([
+            {{column:"gains", dir:"desc"}}, //sort by this first
+            {{column:"percentage_sellingpoint", dir:"asc"}}, //sort by this first
+        ]);
+    }}
+    """)
+        return r
+        
+        
+    def tabulator_inactive(self):
+        local_currency=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl("investment_view")
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.listdict_inactive())
+
+        r.setFields("id","name")
+        r.setHeaders(_("Id"), _("Name"))
+        r.setTypes("int", "str", "str", "float6",  local_currency, "percentage", local_currency, local_currency, local_currency,"percentage", "percentage")
+        r.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
+        r.setFilterHeaders(None, "input", None, None, None, None, None, None, None, None, None)
+            
+        return r
 
 ## Currency used to compare is product worse currency
 class LdoAssetsEvolution(LdoDjangoMoney):
@@ -531,13 +613,18 @@ class LdoAssetsEvolution(LdoDjangoMoney):
         self._generate_listdict()
 
     def _generate_listdict(self):
+        tb={}
+        for year in range(self.from_year-1, date.today().year+1):
+            tb[year]=total_balance(dtaware_month_end(year, 12, self.request.local_zone), self.request.local_currency)
+        
+        
         for year in range(self.from_year, date.today().year+1): 
             #iotm=InvestmentsOperationsTotalsManager_from_all_investments(self.request, dtaware_month_end(year, 12, self.request.local_zone))
             self.append({
                 "year": str(year), 
-                "balance_start": 0, 
-                "balance_end": 0, 
-                "diff":0, 
+                "balance_start": tb[year-1]["total_user"], 
+                "balance_end": tb[year]["total_user"],  
+                "diff": tb[year]["total_user"]-tb[year-1]["total_user"], 
                 "incomes":0, 
                 "gains_net":0, 
                 "dividends_net":0, 
@@ -553,7 +640,7 @@ class LdoAssetsEvolution(LdoDjangoMoney):
         r.setLocalZone(self.request.local_zone)
         r.setListDict(self.ld)
         r.setFields("year", "balance_start","balance_end","diff", "incomes", "gains_net", "dividends_net", "expenses", "total")
-        r.setHeaders(_("Year"), _("Invested"), _("Balance"),  _("Difference"),  _("Percentage"), _("Net gains + Dividends"), _("Custody commissions"), _("Taxes"), _("Investment commissions"))
+        r.setHeaders(_("Year"), _("Initial balance"), _("Final balance"),  _("Difference"),  _("Incomes"), _("Net gains"), _("Net dividends"), _("Expenses"), _("I+G+D-E"))
         r.setTypes("str", c, c, c, c, c, c, c, c)
         r.showLastRecord(False)
         return r

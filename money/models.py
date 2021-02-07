@@ -17,6 +17,7 @@ from django.utils.translation import gettext as _
 from django.utils import timezone
 
 from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows, execute
+
 from money.investmentsoperations import InvestmentsOperations_from_investment
 from money.reusing.casts import string2list_of_integers
 from money.reusing.currency import Currency, currency_symbol
@@ -223,10 +224,10 @@ class Banks(models.Model):
             return Currency(row[0], "EUR")
             
     def accounts(self, active):
-        return Accounts.objects.all().filter(banks_id=self.id, active=active)
+        return Accounts.objects.all().select_related("banks").filter(banks_id=self.id, active=active)
 
     def investments(self, active):
-        investments= Investments.objects.raw('SELECT investments.* FROM investments, accounts where accounts.id=investments.accounts_id and accounts.banks_id=%s and investments.active=%s', (self.id, active))
+        investments= Investments.objects.all().select_related("products").select_related("products__productstypes").select_related("accounts").filter(accounts__banks__id=self.id, active=active)
         return investments
         
 
@@ -459,7 +460,18 @@ class Investments(models.Model):
 
     def fullName(self):
         return "{} ({})".format(self.name, self.accounts.name)
-    
+            
+    ## Used to display bank order execution alert using form cleaned_data
+    @staticmethod
+    def bank_alert(cleaned_data):
+        return _(f"""<p>Investment was updated sucessfully.</p>
+        <p>Don't forget to set this information to your bank if neccessary:</p>
+        <ul>
+            <li>Selling price: {Currency(cleaned_data['selling_price'], cleaned_data["products"].currency)}</li>
+            <li>Expiration selling order: {cleaned_data['selling_expiration']}</li>
+        </ul>
+        """)
+        
     def operations(self, request, local_currency):
         if hasattr(self, "_operations") is False:
             from money.investmentsoperations import InvestmentsOperations_from_investment
@@ -494,7 +506,9 @@ class Investments(models.Model):
             ids.append(investment.id)
         preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
         queryset = Investments.objects.select_related('accounts').filter(pk__in=ids).order_by(preserved)
-        return queryset    
+        return queryset
+
+            
 
 class Investmentsoperations(models.Model):
     operationstypes = models.ForeignKey('Operationstypes', models.DO_NOTHING, blank=False, null=False)
@@ -1076,3 +1090,9 @@ class Comment:
                 money=Currency(cco.amount, cco.creditcards.accounts.currency)
                 return _("Refund of {} payment of which had an amount of {}").format(dtaware2string(cco.datetime), money)
 
+#def queryset_investments_load_basic_results(qs_investments):
+#    products_ids=tuple(qs_investments.values_list('products__id',flat=True))
+#    basic_results=cursor_rows_as_dict("id", "select t.* from products, last_penultimate_lastyear(products.id, now()) as t where products.id in %s",  products_ids)
+#    print(basic_results)
+#    for investment in qs_investments:
+#        investment.products._basic_results=basic_results[investment.products.id]

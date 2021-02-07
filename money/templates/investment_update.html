@@ -124,7 +124,7 @@
     
     function display_result(selling_price){
         lblResult.innerHTML=gettext("Investment selling price set to {0} to gain {1}.").format(currency_string(selling_price, currency_investment, decimals), currency_string(gains_at_price(selling_price), currency_user, 2));
-        txtSellingPrice.value=selling_price;
+        txtSellingPrice.value=my_round(selling_price,decimals);
         return;
     }
     

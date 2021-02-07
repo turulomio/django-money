@@ -36,7 +36,6 @@ from money.tables import (
     TabulatorBanks, 
     TabulatorConcepts, 
     TabulatorCreditCards, 
-    TabulatorInvestments, 
     TabulatorProducts, 
     TabulatorOrders, 
     TabulatorReportIncomeTotal, 
@@ -67,7 +66,6 @@ from money.listdict import (
     listdict_chart_total_async, 
     listdict_chart_total_threadpool, 
     listdict_chart_product_quotes_historical, 
-    listdict_investments, 
     listdict_report_total_income, 
     listdict_report_total,     
     listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month, 
@@ -82,6 +80,7 @@ from money.listdict import (
     QsoCreditcardsoperationsHomogeneus, 
     QsoDividendsHomogeneus, 
     QsoDividendsHeterogeneus, 
+    QsoInvestments, 
 )
 from money.models import (
     Operationstypes, 
@@ -520,10 +519,15 @@ class accountoperation_delete(DeleteView):
 
 @login_required
 def investment_list(request,  active):
-    investments= Investments.objects.all().select_related('accounts').select_related('products').select_related("products__productstypes").select_related("products__leverages").filter(active=active).order_by('name')
-    listdict=listdict_investments(investments, timezone.now(), request.local_currency, active)
-    tblInvestments=TabulatorInvestments("tblInvestments", "investment_view", listdict, request.local_currency, active, request.local_zone).render()
-    
+    investments= Investments.objects.all().select_related('accounts').select_related('products').select_related("products__productstypes").select_related("products__leverages").filter(active=active)
+    qso=QsoInvestments(request, investments)
+
+    if active is True:
+        listdict=qso.listdict_active()
+        table=qso.tabulator_active()
+    else:
+        listdict=qso.listdict_inactive()
+        table=qso.tabulator_inactive()
     # Foot only for active investments
     if listdict_has_key(listdict, "gains") is True:
         positives=Currency(listdict_sum_positives(listdict, "gains"), request.local_currency)
@@ -760,9 +764,7 @@ def bank_view(request, pk):
     bank=get_object_or_404(Banks, pk=pk)
 
     investments=bank.investments(True)
-    listdic=listdict_investments(investments, timezone.now(), request.local_currency, True)
-    table_investments=TabulatorInvestments("table_investments", "investment_view", listdic, request.local_currency, True, request.local_zone).render()
-    
+    qso_investments=QsoInvestments(request, investments)
     accounts= bank.accounts(True)
     list_accounts=listdict_accounts(accounts, request.local_currency)
     table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, request.local_currency).render()
@@ -795,7 +797,7 @@ def report_total(request, year=date.today().year):
 @timeit
 @login_required
 def report_evolution(request):
-    from_year=date.today().year-3 if request.GET.get("from_year", None) is None else request.GET["from_year"]
+    from_year=date.today().year-3 if request.GET.get("from_year", None) is None else int(request.GET["from_year"])
 
     ldo_assets=LdoAssetsEvolution(request,  from_year)
     ldo_invested=LdoAssetsEvolutionInvested(request, from_year)
@@ -1314,13 +1316,16 @@ def investment_change_active(request, pk):
 def investment_ranking(request):
     ldo=LdoInvestmentsRanking(request)
     return render(request, 'investment_ranking.html', locals())
-        
+
 @method_decorator(login_required, name='dispatch')
-class investment_update(UpdateView):
+class investment_update(SuccessMessageMixin, UpdateView):
     queryset = Investments.objects.select_related("products").select_related("products__productstypes").select_related("products__leverages")
     fields = ( 'name', 'selling_price', 'products',  'selling_expiration',  'daily_adjustment', 'balance_percentage', 'active')
     template_name="investment_update.html"
 
+    def get_success_message(self, cleaned_data):
+        return Investments.bank_alert(cleaned_data)
+        
     def get_initial(self):
         return {
             'selling_expiration': str(self.object.selling_expiration), 

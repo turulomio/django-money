@@ -76,62 +76,6 @@ class TabulatorConcepts(TabulatorFromQuerySet):
         self.setTypes("int", "str", "str", "bool")
         self.generate_listdict()
 
-class TabulatorInvestments(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, local_currency, active, local_zone):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setListDict(listdict)
-        self.setLocalZone(local_zone)
-        if active is True:
-            self.setFields("id","name", "last_datetime","last_quote","daily_difference", "daily_percentage", "invested_local",  "balance", "gains", "percentage_invested", "percentage_sellingpoint")
-
-            self.setHeaders(_("Id"), _("Name"), _("Last dt.") ,  _("Last quote"), _("Daily diff"), 
-            # Translator: xgettext:no-python-format
-            _("% daily"), 
-            _("Invested"),_("Balance"),  _("Gains"), 
-            # Translator: xgettext:no-python-format
-            _("% Invested"), 
-            # Translator: xgettext:no-python-format
-            _("% selling point"))
-        else:
-            self.setFields("id","name")
-            self.setHeaders(_("Id"), _("Name"))
-        self.setTypes("int", "str", "str", "float6",  local_currency, "percentage", local_currency, local_currency, local_currency,"percentage", "percentage")
-        self.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
-        self.setFilterHeaders(None, "input", None, None, None, None, None, None, None, None, None)
-        
-        self.setJSCodeAfterObjectCreation(f"""
-// Adding background color 
-var column = {self.name}.getColumn("percentage_sellingpoint");
-if (column !== false){{//Only for active investments
-    for (var cell of column.getCells()) {{
-        if (cell.getValue()<5 && cell.getValue()>0){{
-            cell.getElement().style.backgroundColor='#92ffab';
-        }} else if (cell.getValue()>100){{
-            cell.getElement().style.backgroundColor='#ff92ab';
-        }}
-    }}
-
-    // Adding icon 
-    for (var row of {self.name}.getRows()) {{
-        var dat=row.getData();
-        var date = moment(dat.selling_expiration, "YYYY-MM-DD");
-        if (date.isValid() && date< moment().startOf('day')){{
-            cell=row.getCell("percentage_sellingpoint");
-            cell.getElement().style.backgroundRepeat= 'no-repeat';
-            cell.getElement().style.backgroundPosition= '3px 3px';
-            cell.getElement().style.backgroundImage="url('/static/images/alarm_clock.png')";
-            cell.getElement().style.backgroundSize = "16px 16px";
-        }}
-    }}
-
-    //Sorting
-    {self.name}.setSort([
-        {{column:"gains", dir:"desc"}}, //sort by this first
-        {{column:"percentage_sellingpoint", dir:"asc"}}, //sort by this first
-    ]);
-}}
-""")
 
 class TabulatorInvestmentsPairsInvestCalculator(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency, local_zone):
