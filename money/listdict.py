@@ -498,9 +498,9 @@ class QsoInvestments(QsoCommon):
     def listdict_active(self):
         list_=[]
         
-        iotm=InvestmentsOperationsTotalsManager_from_investment_queryset(self.qs, timezone.now(), self.request)
+        self.iotm=InvestmentsOperationsTotalsManager_from_investment_queryset(self.qs, timezone.now(), self.request)
                 
-        for iot in iotm:
+        for iot in self.iotm:
             basic_quotes=iot.investment.products.basic_results()
             list_.append({
                     "id": iot.investment.id, 

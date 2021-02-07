@@ -532,7 +532,8 @@ def investment_list(request,  active):
     if listdict_has_key(listdict, "gains") is True:
         positives=Currency(listdict_sum_positives(listdict, "gains"), request.local_currency)
         negatives=Currency(listdict_sum_negatives(listdict, "gains"), request.local_currency)
-        foot=_(f"Positive gains - Negative gains = {positives} {negatives} = {positives+negatives}")    
+        foot=_(f"Positive gains - Negative gains = {positives} {negatives} = {positives+negatives}")
+        balance_futures=_(f"Investments balance with futures is {Currency(qso.iotm.current_balance_futures_user(), request.local_currency)}")
 
     return render(request, 'investment_list.html', locals())
     
