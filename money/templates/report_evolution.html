@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "Evolution report" %}</h1>
+
+
+<h2>{% trans "Assets evolution report" %}</h2>
+{{ldo_assets.tabulator.render|safe}}
+
+<h2>{% trans "Invested assets evolution report" %}</h2>
+{{ldo_invested.tabulator.render|safe}}
+
+
+{% endblock %}
+
+\ef investment_operations

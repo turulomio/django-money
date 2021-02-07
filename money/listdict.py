@@ -523,8 +523,76 @@ class QsoDividendsHeterogeneus(QsoCommon):
         r.showLastRecord(False)
         return r
 
+## Currency used to compare is product worse currency
+class LdoAssetsEvolution(LdoDjangoMoney):
+    def __init__(self, request, from_year, name=None):
+        LdoDjangoMoney.__init__(self, request, name)        
+        self.from_year=from_year
+        self._generate_listdict()
 
+    def _generate_listdict(self):
+        for year in range(self.from_year, date.today().year+1): 
+            #iotm=InvestmentsOperationsTotalsManager_from_all_investments(self.request, dtaware_month_end(year, 12, self.request.local_zone))
+            self.append({
+                "year": str(year), 
+                "balance_start": 0, 
+                "balance_end": 0, 
+                "diff":0, 
+                "incomes":0, 
+                "gains_net":0, 
+                "dividends_net":0, 
+                "expenses":0, 
+                "total":0, 
+                
+            })
+            
+    def tabulator(self):
+        c=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.ld)
+        r.setFields("year", "balance_start","balance_end","diff", "incomes", "gains_net", "dividends_net", "expenses", "total")
+        r.setHeaders(_("Year"), _("Invested"), _("Balance"),  _("Difference"),  _("Percentage"), _("Net gains + Dividends"), _("Custody commissions"), _("Taxes"), _("Investment commissions"))
+        r.setTypes("str", c, c, c, c, c, c, c, c)
+        r.showLastRecord(False)
+        return r
+#GOOD JOB
+## Currency used to compare is product worse currency
+class LdoAssetsEvolutionInvested(LdoDjangoMoney):
+    def __init__(self, request, from_year, name=None):
+        LdoDjangoMoney.__init__(self, request, name)        
+        self.from_year=from_year
+        self._generate_listdict()
 
+    def _generate_listdict(self):
+        for year in range(self.from_year, date.today().year+1): 
+            iotm=InvestmentsOperationsTotalsManager_from_all_investments(self.request, dtaware_month_end(year, 12, self.request.local_zone))
+            d={}
+            d['year']=str(year)
+            d['invested']=iotm.current_invested_user()
+            d['balance']=iotm.current_balance_futures_user()
+            d['diff']=d['balance']-d['invested']
+            d['percentage']=percentage_between(d['invested'], d['balance'])
+            d['net_gains_plus_dividends']=0
+            d['custody_commissions']=0
+            d['taxes']=0
+            d['investment_commissions']=0
+            self.append(d)
+            
+    def tabulator(self):
+        c=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.ld)
+        r.setFields("year", "invested","balance","diff", "percentage", "net_gains_plus_dividends", "custody_commissions", "taxes", "investment_commissions")
+        r.setHeaders(_("Year"), _("Invested"), _("Balance with futures"),  _("Difference"),  _("Percentage"), _("Net gains + Dividends"), _("Custody commissions"), _("Taxes"), _("Investment commissions"))
+        r.setTypes("str", c, c, c, "percentage", c, c, c, c)
+        r.showLastRecord(False)
+        return r
+
+        
 #GOOD JOB
 ## Currency used to compare is product worse currency
 class LdoProductsPairsMonthHistoricalEvolution(LdoDjangoMoney):

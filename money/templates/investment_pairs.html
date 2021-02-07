@@ -9,6 +9,7 @@
 
 <p>Worse: {{product_worse.fullName}}</p>
 <p>Better: {{product_better.fullName}}</p>
+<p><input type="submit" value="Pair historical evolution" onclick="openInNewTab('{% url 'products_pairs' product_worse.id product_better.id %}')" /></p>
 
 <h2>{% trans "Current investment operations in investment currency" %}</h2>
 
@@ -73,11 +74,6 @@ $(document).ready(function() {
 {{ldo_products_evolution.tabulator|safe}}
 <p>{% trans "Ponderated average price ratio: " %}{{ ldo_products_evolution.price_ratio_ponderated_average}}</p>
 
-
-<h2>{% trans "Pair historical evolution" %}</h2>
-<ajax-button id="ajax_button_evolution" url="{% url 'ajax_investment_pairs_evolution' product_worse.id product_better.id %}" buttontext="{% trans 'Press to see pair historical evolution' %}" csrf_token="{{csrf_token}}"></ajax-button>
-
-<p><a href="{% url 'chart_investments_pairs_evolution' product_worse.id product_better.id %}" target="_blank">{% trans "Pair historical evolution chart"%}</a></p>
 
 <h2>{% trans "Loses of next reinvestment" %}</h2>
 <p><strong>{% trans "Gains" %}: </strong>{{ gains }}</p>

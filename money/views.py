@@ -13,7 +13,6 @@ from django.shortcuts import render,  get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
 
 from math import floor
@@ -61,6 +60,8 @@ from money.listdict import (
     LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount, 
     LdoProductsPairsMonthHistoricalEvolution, 
     LdoInvestmentsRanking, 
+    LdoAssetsEvolution, 
+    LdoAssetsEvolutionInvested, 
     listdict_accounts, 
     listdict_banks, 
     listdict_chart_total_async, 
@@ -566,14 +567,14 @@ def investment_pairs(request, worse, better, accounts_id):
     return render(request, 'investment_pairs.html', locals())
 
 @login_required
-def chart_investments_pairs_evolution(request, worse, better):
+def products_pairs(request, worse, better):
     product_better=get_object_or_404(Products, pk=better)
     product_worse=get_object_or_404(Products, pk=worse)
     
     fromyear=date.today().year-3 if request.GET.get("fromyear", None) is None else request.GET["fromyear"]
     ldo=LdoProductsPairsMonthHistoricalEvolution(request, product_worse, product_better)
         
-    return render(request, 'chart_investments_pairs_evolution.html', locals())
+    return render(request, 'products_pairs.html', locals())
 
 
 @login_required
@@ -623,18 +624,7 @@ def ajax_investment_pairs_invest(request, worse, better, accounts_id, amount ):
       })
     table_calculator=TabulatorInvestmentsPairsInvestCalculator("table_calculator", None, listdict, request.local_currency, request.local_zone).render()
     return HttpResponse(table_calculator)
-    
-@timeit
-@ensure_csrf_cookie ##For ajax-button
-@login_required
-def ajax_investment_pairs_evolution(request, worse, better ):
-    product_better=Products.objects.all().filter(id=better)[0]
-    product_worse=Products.objects.all().filter(id=worse)[0]
-    
-    ldo=LdoProductsPairsMonthHistoricalEvolution(request, product_worse, product_better)
-    
 
-    return HttpResponse(ldo.tabulator().render())
 
 @login_required
 def investment_view(request, pk):
@@ -801,6 +791,16 @@ def report_total(request, year=date.today().year):
     print("Loading list report took {}".format(timezone.now()-start))
     
     return render(request, 'report_total.html', locals())
+    
+@timeit
+@login_required
+def report_evolution(request):
+    from_year=date.today().year-3 if request.GET.get("from_year", None) is None else request.GET["from_year"]
+
+    ldo_assets=LdoAssetsEvolution(request,  from_year)
+    ldo_invested=LdoAssetsEvolutionInvested(request, from_year)
+    
+    return render(request, 'report_evolution.html', locals())
 
 
 

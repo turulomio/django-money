@@ -7,7 +7,13 @@ from money.tables import TabulatorFromListDict
 from datetime import date
 from decimal import Decimal
 Decimal
-from money.connection_dj import cursor_one_row
+from money.connection_dj import cursor_one_row, cursor_rows_as_dict
+
+## TRAS MUCHAS VUELTAS LO MEJOR ES INVESTMENTS_OPERATIONS COMPLETO EN BASE DE DATOS POR MULTICURRENCY
+## PERO SE HACE NECESARIO EL TOTALS SI EL SERVIDOR WEB ESTA FUERA DE LA BD
+## ESTO ES ASÍ PORQUE TODO ESTO SE EJECUTA EN SERVIDOR
+## DENTRO DE INVESTMENTS_OPERATIONS SOLO DEBE HABER CALCULOS QUE NECESITEN CONSULTAS BD SINO METODOS Y NO RECARGO
+## LUEGO TODOS LOS CALCULOS SE PUEDEN HACER CON INVESTMENTS_OPERATIONS_MANAGER
 
 ## Converting dates to string in postgres functions return a string datetime instead of a dtaware. Here we convert it
 def postgres_datetime_string_2_dtaware(s):
@@ -51,14 +57,6 @@ class IOC:
             return Percentage()
         return Percentage(self.d['gains_gross_investment'], self.d["invested_investment"])
 
-
-class IoManager:
-    def __init__(self, request):
-        self.request=request
-        self.list=[]
-        
-    def append(self, o):
-        self.list.append(o)
 
 ## Manage output of  investment_operations
 class InvestmentsOperations:
@@ -238,10 +236,14 @@ def InvestmentsOperations_from_investment(request,  investment, dt, local_curren
     return r
 
 ## Set of InvestmentsOperations
-class InvestmentsOperationsManager(IoManager):
+class InvestmentsOperationsManager:
     def __init__(self, request):
-        IoManager.__init__(self, request)
-
+        self.request=request
+        self.list=[]
+        
+    def append(self, o):
+        self.list.append(o)
+        
     def current_gains_gross_user(self):
         r=0
         for o in self.list:
@@ -286,11 +288,21 @@ class InvestmentsOperationsManager(IoManager):
 
 ## Generate object from and ids list
 def InvestmentsOperationsManager_from_investment_queryset(qs_investments, dt, request):
+    print("OPTIMIZAR InvestmentsOperationsManager_from_investment_queryset")
     r=InvestmentsOperationsManager(request)
     for investment in qs_investments:
         r.append(InvestmentsOperations_from_investment(request, investment, dt, request.local_currency))
     return r
         
+        
+##                        io                |                                                       io_current                                                        |                                           io_historical                                            
+## ----------------------------------+-------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------
+##{'price': Decimal('142.083451')} | {'balance_user': 0, 'gains_gross_user': 0, 'gains_net_user': 0, 'shares': 0, 'price_investment': 0, 'invested_user': 0} | {'commissions_account': Decimal('0.00'), 'gains_net_user': Decimal('-649.1696967043800000000000')}
+##select * from investment_operations_totals(1,now(),'EUR' );
+## para sacar varios con información de la inversión
+## select * from investments, investment_operations_totals(investments.id,now(),'EUR' ) as investment_operations_totals where investments.id in (1,2,3);
+## para sacar varios sin informacion de la inversion
+## select investment_operations_totals.* from investments, investment_operations_totals(investments.id,now(),'EUR' ) as investment_operations_totals where investments.id in (1,2,3);
 ## Manage output of  investment_operation_totals on one row
 class InvestmentsOperationsTotals:
     def __init__(self, investment, str_d_io_total, str_d_io_current_total, str_d_io_historical_total):
@@ -305,10 +317,31 @@ def InvestmentsOperationsTotals_from_investment( investment, dt, local_currency)
     return r
         
 ## Manage several rows of investment_operation_totals in several rows (list)
-class InvestmentsOperationsTotalsManager(IoManager):
+class InvestmentsOperationsTotalsManager:
     def __init__(self, request):
-        IoManager.__init__(self, request)
+        self.request=request
+        self.list=[]
         
+    def append(self, o):
+        self.list.append(o)
+        
+    def current_invested_user(self):
+        r=0
+        for o in self.list:
+            r=r + o.io_total_current["invested_user"]
+        return r   
+
+    def current_balance_user(self):
+        r=0
+        for o in self.list:
+            r=r + o.io_total_current["balance_user"]
+        return r   
+
+    def current_balance_futures_user(self):
+        r=0
+        for o in self.list:
+            r=r + o.io_total_current["balance_futures_user"]
+        return r   
         
     def current_gains_gross_user(self):
         r=0
@@ -337,24 +370,44 @@ class InvestmentsOperationsTotalsManager(IoManager):
 
 ## Generate object from and ids list
 def InvestmentsOperationsTotalsManager_from_investment_queryset(qs_investments, dt, request):
+    ids=tuple(qs_investments.values_list('pk',flat=True))
     r=InvestmentsOperationsTotalsManager(request)
-    for investment in qs_investments:
-        r.append(InvestmentsOperationsTotals_from_investment(investment, dt, request.local_currency))
+    rows=cursor_rows_as_dict("id","select id, investment_operations_totals.* from investments, investment_operations_totals(investments.id, %s, %s ) as investment_operations_totals where investments.id in %s;", (dt, request.local_currency, ids))
+    for investment in qs_investments:  
+        row=rows[investment.id]
+        r.append(InvestmentsOperationsTotals(investment,  row["io"], row['io_current'],  row['io_historical']))
     return r
     
 def InvestmentsOperationsTotalsManager_from_all_investments(request, dt):
     from money.models import Investments
     qs=Investments.objects.all().select_related("products")
     return InvestmentsOperationsTotalsManager_from_investment_queryset(qs, dt, request)
-    
-## Manage output of  investment_operation_alltotals is one row
-class InvestmentsOperationsAllTotals:
-    def __init__(self, only_active):
-        pass
-        
-        
-        
-## Manage output of  total balance on one row accounts, and investment totals
-class TotalBalance:
-    def __init__(self, str_d_io_total, str_d_io_current_total, str_d_io_historical_total):
-        pass
+#    
+### Manage output of  investment_operation_alltotals is one row. current, historical, and o
+#class InvestmentsOperationsAllTotals:
+#    def __init__(self, request, dt,  currency, only_active=False):
+#        self.request=request
+#        self.dt=dt
+#        self.only_active=only_active
+#        self.currency=currency
+#        
+#        row=cursor_one_row("select * from investment_operations_alltotals(%s, %s, %s)", (self.dt, self.currency, self.only_active))
+#
+#        self.io=eval(row["io"])
+##        for o in self.io:
+##            o["datetime"]=postgres_datetime_string_2_dtaware(o["datetime"])
+#            
+#        self.io_current=eval(row["io_current"])
+##        for o in self.io_current:
+##            o["datetime"]=postgres_datetime_string_2_dtaware(o["datetime"])
+#           
+#        self.io_historical=eval(row["io_historical"])
+##        for o in self.io_historical:
+##            o["dt_start"]=postgres_datetime_string_2_dtaware(o["dt_start"])
+##            o["dt_end"]=postgres_datetime_string_2_dtaware(o["dt_end"])
+#        
+#        
+### Manage output of  total balance on one row accounts, and investment totals
+#class TotalBalance:
+#    def __init__(self, str_d_io_total, str_d_io_current_total, str_d_io_historical_total):
+#        pass
