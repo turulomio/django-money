@@ -54,13 +54,21 @@
 
   <div id="tabs-2">
     {{ operations.current_tabulator_homogeneus_investment.render | safe }}
-    {% if  investment.hasSameAccountCurrency is False%}
+    {% if  investment.hasSameAccountCurrency is False %}
         {{ operations.current_tabulator_homogeneus_user.render | safe }}
     {%endif %}
   </div>
 
   <div id="tabs-3">
     {{ operations.historical_tabulator_homogeneus_investment.render |safe}}
+    {% if  investment.hasSameAccountCurrency is False %}
+        {{ operations.historical_tabulator_homogeneus_user.render | safe }}
+    {%endif %}
+    
+    
+    
+    
+    
   </div>
   <div id="tabs-4">
     {{ qso_dividends.tabulator.render |safe}}

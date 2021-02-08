@@ -204,11 +204,24 @@ class InvestmentsOperations:
         r.showLastRecord(False)
         return r
 
-    def historical_tabulator_homogeneus_investment(self):
+    def historical_tabulator_homogeneus_user(self):
+        c=self.request.local_currency
         r=TabulatorFromListDict(f"{self.name}_historical_tabulator_homogeneus_investment")
         r.setDestinyUrl(None)
         r.setLocalZone(self.request.local_zone)
-        r.setListDict(self.historical_homogeneus_listdict_tabulator(self.request))
+        r.setListDict(self.historical_listdict_homogeneus(self.request))
+        r.setFields("id","dt_end", "years","operationstypes","shares", "gross_start_user", "gross_end_user", "gains_gross_user", "commissions_user", "taxes_user", "gains_net_user")
+        r.setHeaders("Id", _("Date and time"), _("Years"), _("Operation type"),  _("Shares"), _("Gross start"), _("Gross end"), _("Gross gains"), _("Commissions"), _("Taxes"), _("Net gains"))
+        r.setTypes("int","datetime", "int",  "str", "Decimal", c, c, c, c, c, c)
+        r.setBottomCalc(None, None, None,None, None, "sum", "sum", "sum", "sum", "sum", "sum")
+        r.showLastRecord(False)
+        return r
+        
+    def historical_tabulator_homogeneus_investment(self):
+        r=TabulatorFromListDict(f"{self.name}_historical_tabulator_homogeneus_user")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.historical_listdict_homogeneus(self.request))
         r.setFields("id","dt_end", "years","operationstypes","shares", "gross_start_investment", "gross_end_investment", "gains_gross_investment", "commissions_account", "taxes_account", "gains_net_investment")
         r.setHeaders("Id", _("Date and time"), _("Years"), _("Operation type"),  _("Shares"), _("Gross start"), _("Gross end"), _("Gross gains"), _("Commissions"), _("Taxes"), _("Net gains"))
         r.setTypes("int","datetime", "int",  "str", "Decimal", self.investment.products.currency, self.investment.products.currency, self.investment.products.currency, self.investment.products.currency, self.investment.products.currency, self.investment.products.currency)
@@ -216,13 +229,12 @@ class InvestmentsOperations:
         r.showLastRecord(False)
         return r
 
-    def historical_homogeneus_listdict_tabulator(self, request):
+    def historical_listdict_homogeneus(self, request):
         for ioh in self.io_historical:
             ioh["operationstypes"]=request.operationstypes[ioh["operationstypes_id"]]
             ioh["years"]=0
         return self.io_historical
-        
-        
+
     ## Gets and investment operation from its listdict_io using an id
     ## @param id integer with the id of the investment operation
     def o_find_by_id(self,  id):
