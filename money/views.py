@@ -1215,7 +1215,7 @@ class strategy_new(CreateView):
 
     def get_initial(self):
         return {
-            'dt_from': str(dtaware_changes_tz(self.object.datetime, self.request.local_zone)), 
+            'dt_from': str(dtaware_changes_tz(timezone.now(),  self.request.local_zone)), 
         }
 
     def form_valid(self, form):
