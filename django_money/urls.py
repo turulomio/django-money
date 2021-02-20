@@ -94,6 +94,7 @@ urlpatterns=i18n_patterns(
     path('products/pairs/<int:worse>/<int:better>/', money_views.products_pairs,  name='products_pairs'),
 
     path('quote/new/<int:products_id>/', money_views.quote_new.as_view(), name='quote_new'),
+    path('quote/delete_last/<int:products_id>/', money_views.quote_delete_last, name='quote_delete_last'),
     
     path('concept/list/', money_views.concept_list,  name='concept_list'),
     

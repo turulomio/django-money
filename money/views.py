@@ -919,6 +919,15 @@ class quote_new(CreateView):
     def form_valid(self, form):
         return super().form_valid(form)
 
+@login_required       
+@transaction.atomic
+def quote_delete_last(request, products_id): 
+    Quotes.objects.filter(products_id=products_id).latest('datetime').delete();
+    if request.GET.get("next", None) is None:
+        return HttpResponseRedirect( reverse_lazy('product_view', args=(products_id,)))
+    else:
+        return HttpResponseRedirect( request.GET.get("next"))
+
 @login_required
 def report_concepts(request, year=date.today().year, month=date.today().month):
     year_start=1970

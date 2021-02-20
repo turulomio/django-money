@@ -27,10 +27,11 @@
 <p><strong>{% trans 'Leverage' %}: </strong>{{ investment.products.leverages.multiplier }} (Real: {{investment.products.real_leveraged_multiplier}})</p>
 
 <p class="orders">
-  <a href="{% url 'investment_update' pk=investment.id %}">Update this investment</a> | 
+  <a href="{% url 'investment_update' pk=investment.id %}">{% trans "Update this investment" %}</a> | 
   <a href="{% url 'investment_change_active' pk=investment.id %}">{% trans "Change active status" %}</a> | 
-  <a href="{% url 'product_view' pk=investment.products.id %}">Show product</a> | 
-  <a href="{% url 'quote_new' products_id=investment.products.id %}">Add a quote to product</a>
+  <a href="{% url 'product_view' pk=investment.products.id %}">{% trans "Show product" %}</a> | 
+  <a href="{% url 'quote_new' products_id=investment.products.id %}">{% trans "Add a quote to product" %}</a> | 
+  <a href="{% url 'quote_delete_last' products_id=investment.products.id %}?next={% url 'investment_list_active' %}">{% trans "Delete last quote" %}</a> | 
 </p>
 <script>
   $( function() {
