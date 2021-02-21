@@ -508,8 +508,6 @@ class Investments(models.Model):
         queryset = Investments.objects.select_related('accounts').filter(pk__in=ids).order_by(preserved)
         return queryset
 
-            
-
 class Investmentsoperations(models.Model):
     operationstypes = models.ForeignKey('Operationstypes', models.DO_NOTHING, blank=False, null=False)
     investments = models.ForeignKey(Investments, models.DO_NOTHING, blank=False, null=False)

@@ -3,12 +3,16 @@ from django.contrib import admin
 from django.urls import path,  include
 from django.conf.urls.i18n import i18n_patterns, set_language 
 from django.contrib.auth.views import LoginView, logout_then_login
+from django.views.generic.base import RedirectView
 from django.views.i18n import JavaScriptCatalog
 import debug_toolbar
 
 from money import views as money_views
+urlpatterns=[
+    path('favicon.ico', RedirectView.as_view(url='/static/images/favicon.ico')),
+]
 
-urlpatterns=i18n_patterns(
+urlpatterns=urlpatterns+ i18n_patterns(
     path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
     path('__debug__/', include(debug_toolbar.urls)),
 
@@ -68,8 +72,6 @@ urlpatterns=i18n_patterns(
     
     path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/', money_views.investment_pairs, name='investment_pairs'),
     path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/<int:amount>/', money_views.ajax_investment_pairs_invest, name='ajax_investment_pairs_invest'),
-    #path('investment/pairs/evolution/<int:worse>/<int:better>/', money_views.ajax_investment_pairs_evolution, name='ajax_investment_pairs_evolution'),
-
     
     path('investmentoperation/new/<int:investments_id>/', money_views.investmentoperation_new.as_view(), name='investmentoperation_new'),
     path('investmentoperation/update/<int:pk>', money_views.investmentoperation_update.as_view(), name='investmentoperation_update'),

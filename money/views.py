@@ -693,7 +693,7 @@ class investmentoperation_new(CreateView):
 @method_decorator(login_required, name='dispatch')
 class investmentoperation_update(UpdateView):
     model = Investmentsoperations
-    fields = ( 'datetime', 'operationstypes',  'shares', 'price',  'taxes',  'commission', 'comment', 'currency_conversion')
+    fields = ( 'datetime', 'investments',  'operationstypes',  'shares', 'price',  'taxes',  'commission', 'comment', 'currency_conversion')
     template_name="investmentoperation_update.html"
         
     def get_success_url(self):
@@ -708,6 +708,8 @@ class investmentoperation_update(UpdateView):
         widget_datetime(self.request, form.fields['datetime'])
         widget_currency_conversion(self.request, form.fields['currency_conversion'], self.object.investments.accounts.currency, self.object.investments.products.currency)
         form.fields['operationstypes'].queryset=Operationstypes.objects.filter(pk__in=[4, 5, 6])
+        
+        form.fields['investments'].queryset=Investments.queryset_for_investments_products_combos_order_by_fullname()
         return form
 
     def get_initial(self):
@@ -717,7 +719,6 @@ class investmentoperation_update(UpdateView):
 
     @transaction.atomic
     def form_valid(self, form):
-        form.instance.investments= Investmentsoperations.objects.get(pk=self.kwargs['pk']).investments
         if (    form.instance.commission>=0 and 
                 form.instance.taxes>=0 and 
                 ((form.instance.shares>=0 and form.instance.operationstypes.id in (4, 6)) or (form.instance.shares<0 and form.instance.operationstypes.id==5) )) :
