@@ -31,6 +31,7 @@ from decimal import Decimal
 from money.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_dict
 from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo
 from django.conf import settings
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from xulpymoney.libxulpymoneytypes import eOperationType
@@ -52,7 +53,7 @@ from money.models import (
 )
 from money.reusing.casts import string2list_of_integers, valueORempty
 from money.reusing.currency import Currency
-from money.reusing.datetime_functions import dtaware_month_end, months, dtaware_day_end_from_date
+from money.reusing.datetime_functions import dtaware_month_end, months, dtaware_day_end_from_date, dtaware2string
 from money.reusing.decorators import timeit
 from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, IOC, InvestmentsOperations_from_investment, InvestmentsOperationsTotalsManager_from_all_investments, InvestmentsOperationsTotalsManager_from_investment_queryset
 from money.reusing.percentage import percentage_between, Percentage
@@ -597,6 +598,109 @@ class QsoInvestments(QsoCommon):
         r.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
         r.setFilterHeaders(None, "input", None, None, None, None, None, None, None, None, None)
             
+        return r
+
+class QsoQuotes(QsoCommon):
+    def __init__(self, request, qs,  name=None):
+        QsoCommon.__init__(self, request, qs, name)
+        
+
+    def listdict_quotes(self):
+        list_=[]
+        for o in self.qs:
+            list_.append({
+                    "id": o.id, 
+                    "datetime":o.datetime, 
+                    "quote": o.quote, 
+            })
+        return list_
+            
+    def tabulator(self):
+        if len(self.qs)>0:
+            c=self.qs[0].products.currency
+        else:
+            c=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}")
+        r.setDestinyUrl("quote_update")
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.listdict_quotes())
+        r.setFields("id","datetime", "quote")
+
+        r.setHeaders(_("Id"), _("Date and time"), _("Quote.") )
+        r.setTypes("int", "datetime", c)
+        r.setFilterHeaders(None, "input", "input")
+            
+        r.setJSCodeAfterObjectCreation(f"""
+        //Sorting
+        {r.name}.setSort([
+            {{column:"datetime", dir:"desc"}},
+        ]);
+    """)
+        return r
+
+
+
+    def mytable(self):        
+        def rows():
+            r=""
+            for o in self.qs:
+                r=r+ f"""
+<tr>
+    <td><input type="checkbox" name="checkboxes" id="{o.id}" ></input></td>
+    <td>{dtaware2string(o.datetime, "%Y-%m-%d %H:%M:%S")}</td>
+    <td>{Currency(o.quote, o.products.currency).string(o.products.decimals)}</td>
+    <td><a href="{reverse_lazy("quote_update", args=(o.id, ))}">{_("Update")}</a></td>
+</tr>"""
+            return r
+        #-------------------------------------------
+        r=f"""
+<script>
+    function toggleAll(){{
+        var checkboxes = document.getElementsByName("checkboxes");
+        var chkAll=document.getElementById("chkAll");
+        for (var i = 0; i < checkboxes.length; i++) {{
+            if (chkAll.checked){{
+                checkboxes[i].checked = true;
+            }} else {{
+                checkboxes[i].checked = false;
+            }}
+        }}
+    }}
+    
+    function deleteAll(){{
+        var selected=[];
+        var checkboxes = document.getElementsByName("checkboxes");
+        for (var i = 0; i < checkboxes.length; i++) {{
+            if (checkboxes[i].checked){{
+                selected.push(checkboxes[i].id);
+            }}
+        }}
+        
+        var r=confirm("{_("Are you sure you want to delete selected quotes?")}");
+        if (r==true){{
+            var url='{reverse_lazy("quote_delete")}'.concat('?ids=').concat(selected.toString());
+            window.location.href =url;
+        }}
+    }}
+</script>
+        
+        
+<table class="mytablescrollable">
+<tbody>
+<tr>
+    <th><input type="checkbox" id="chkAll" onclick="toggleAll();"/></th>
+    <th style="width:200px">{_("Datetime")}</th>
+    <th style="width:100px">{_("Quote")}</th>
+    <th>{_("Commands")}</th>
+</tr>
+{rows()}
+</tbody>
+</table>
+<br>
+<p class="normal">{_("{} records listed").format(len(self.qs))}</p>
+
+<a href="javascript:deleteAll();">{_("Delete selected quotes")}</a>
+"""
         return r
 
 ## Currency used to compare is product worse currency

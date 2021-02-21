@@ -81,6 +81,7 @@ from money.listdict import (
     QsoDividendsHomogeneus, 
     QsoDividendsHeterogeneus, 
     QsoInvestments, 
+    QsoQuotes, 
 )
 from money.models import (
     Operationstypes, 
@@ -919,14 +920,55 @@ class quote_new(CreateView):
     def form_valid(self, form):
         return super().form_valid(form)
 
-@login_required       
-@transaction.atomic
+@login_required
 def quote_delete_last(request, products_id): 
     Quotes.objects.filter(products_id=products_id).latest('datetime').delete();
     if request.GET.get("next", None) is None:
         return HttpResponseRedirect( reverse_lazy('product_view', args=(products_id,)))
     else:
         return HttpResponseRedirect( request.GET.get("next"))
+@login_required
+def quote_delete(request): 
+    try:
+        ids=string2list_of_integers(request.GET.get("ids"), separator=",")
+        qs=Quotes.objects.filter(pk__in=ids)
+        if len(qs)>0:
+            qs.delete()
+    except:
+        print("Error parsing",  request.GET.get("ids"))
+        pass
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+        
+@login_required
+def quote_list(request, products_id): 
+    product=get_object_or_404(Products, pk=products_id)
+    qs=Quotes.objects.select_related("products").filter(products=product).order_by("datetime")
+    qso=QsoQuotes(request, qs)  
+    return render(request, 'quote_list.html', locals())
+        
+@method_decorator(login_required, name='dispatch')
+class quote_update(SuccessMessageMixin, UpdateView):
+    model = Quotes
+    fields = ( 'datetime', 'quote',)
+    template_name="quote_update.html"
+
+    def get_success_message(self, cleaned_data):
+        return _("Quote was updated successfully")
+
+    def get_initial(self):
+        return {
+            'datetime': str(dtaware_changes_tz(self.object.datetime, self.request.local_zone)), 
+        }
+
+    def get_success_url(self):
+        return reverse_lazy('quote_list', args=(self.object.products.id, ))
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(quote_update, self).get_form(form_class)
+        widget_datetime(self.request, form.fields['datetime'])
+        return form
 
 @login_required
 def report_concepts(request, year=date.today().year, month=date.today().month):

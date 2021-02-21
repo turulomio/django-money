@@ -447,8 +447,44 @@ table.mytable td{
 }
 
 td.green{
-  border: 1px solid black;
-  padding:2px;
+    border: 1px solid black;
+    padding:2px;
     background-color: PaleGreen;
 }
     
+/*My table scrollable*/
+table.mytablescrollable{
+    border: 1px solid black;
+    padding:2px;
+}
+table.mytablescrollable thead {
+    position: sticky; 
+    top: 100px; 
+}
+
+table.mytablescrollable tbody {
+  max-height: 400px;
+  display: block;
+    overflow-y: auto;
+}
+
+
+table.mytablescrollable th{
+    position: sticky; 
+    top: 0; 
+    border: 1px solid black;
+    text-align:center;
+    padding:2px;
+    background-color: LightGrey;
+
+}
+table.mytablescrollable tr{
+  border: 1px solid black;
+  padding:2px;
+}
+
+table.mytablescrollable td{
+  border: 1px solid black;
+  padding:2px;
+}
+
