@@ -274,6 +274,18 @@ class InvestmentsOperationsManager:
                 r=r + o.historical_gains_net_user_between_dt(dt_from, dt_to)
         return r
         
+    def LdoInvestmentsOperationsHeterogeneus_between(self, dt_from, dt_to):
+        from money.listdict import LdoInvestmentsOperationsHeterogeneus
+        r=LdoInvestmentsOperationsHeterogeneus(self.request)
+        for io in self.list:
+            for o in io.io:
+                if dt_from<=o["datetime"] and o["datetime"]<=dt_to:
+                    o["name"]=io.investment.fullName()
+                    o["operationstypes"]=self.request.operationstypes[o["operationstypes_id"]]
+                    r.append(o)
+        r.order_by("datetime")
+        return r        
+
     def LdoInvestmentsOperationsCurrentHeterogeneus_between(self, dt_from, dt_to):
         from money.listdict import LdoInvestmentsOperationsCurrentHeterogeneus
         r=LdoInvestmentsOperationsCurrentHeterogeneus(self.request)

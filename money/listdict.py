@@ -199,6 +199,25 @@ def listdict_investmentsoperationshistorical(request, year, month, local_currenc
         
 
 ## IOC of several investments
+class LdoInvestmentsOperationsHeterogeneus(LdoDjangoMoney):
+    def __init__(self, request, name=None):
+        LdoDjangoMoney.__init__(self, request, name)
+
+        
+    def tabulator(self):
+        currency=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.ld)        
+        r.setFields("id","datetime", "operationstypes","shares", "price", "commission", "taxes",  "currency_conversion",  "comment")
+        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Commission"), _("Taxes"), _("Currency convertion"),  _("Comment"))
+        r.setTypes("int","datetime", "str","Decimal", currency, currency, currency, "Decimal6", "str")
+        r.setBottomCalc(None, None, None, "sum", None, "sum", "sum", None, None)
+        r.showLastRecord(False)
+        return r        
+
+## IOC of several investments
 class LdoInvestmentsOperationsCurrentHeterogeneus(LdoDjangoMoney):
     def __init__(self, request, name=None):
         LdoDjangoMoney.__init__(self, request, name)

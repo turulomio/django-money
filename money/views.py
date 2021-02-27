@@ -1239,6 +1239,8 @@ def strategy_view(request, pk):
         timezone.now(), 
         request
     )
+    
+    ops=iom.LdoInvestmentsOperationsHeterogeneus_between(strategy.dt_from, strategy.dt_to_for_comparations())
     current=iom.LdoInvestmentsOperationsCurrentHeterogeneus_between(strategy.dt_from, strategy.dt_to_for_comparations())
     historical=iom.LdoInvestmentsOperationsHistoricalHeterogeneus_between(strategy.dt_from, strategy.dt_to_for_comparations())
     
