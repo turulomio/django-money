@@ -44,8 +44,7 @@ from money.tables import (
     TabulatorInvestmentsOperationsHistoricalHeterogeneus,
     TabulatorProductQuotesMonthPercentages, 
     TabulatorProductQuotesMonthQuotes,  
-    TabulatorInvestmentsPairsInvestCalculator, 
-    TabulatorStrategies, 
+    TabulatorInvestmentsPairsInvestCalculator,
     table_InvestmentsOperationsCurrent_Homogeneus_UserCurrency
 )
 from money.reusing.casts import string2list_of_integers
@@ -75,13 +74,13 @@ from money.listdict import (
     listdict_orders, 
     listdict_product_quotes_month_comparation, 
     LdoProductsPairsEvolution, 
-    listdict_strategies, 
     QsoAccountsOperationsHeterogeneus, 
     QsoCreditcardsoperationsHomogeneus, 
     QsoDividendsHomogeneus, 
     QsoDividendsHeterogeneus, 
     QsoInvestments, 
     QsoQuotes, 
+    QsoStrategies, 
 )
 from money.models import (
     Operationstypes, 
@@ -1224,8 +1223,9 @@ class creditcardoperation_update(UpdateView):
     
 @login_required
 def strategy_list(request, active=True):
-    strategies=listdict_strategies(request, active)
-    table_strategies=TabulatorStrategies("table_strategies", "strategy_view", strategies, request.local_currency).render()
+    qs_strategies=Strategies.objects.all().filter(dt_to__isnull=active)
+    qso_strategies=QsoStrategies(request, qs_strategies)
+    #table_strategies=TabulatorStrategies("table_strategies", "strategy_view", strategies, request.local_currency).render()
     return render(request, 'strategy_list.html', locals())
         
 

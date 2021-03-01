@@ -43,8 +43,7 @@ from money.models import (
     Investments, 
     Operationstypes, 
     Products, 
-    Productstypes, 
-    Strategies, 
+    Productstypes,
     balance_user_by_operationstypes,
     percentage_to_selling_point, 
     total_balance, 
@@ -617,6 +616,54 @@ class QsoInvestments(QsoCommon):
         r.setBottomCalc(None, None, None, None,"sum", None, "sum", "sum", "sum", None, None)
         r.setFilterHeaders(None, "input", None, None, None, None, None, None, None, None, None)
             
+        return r
+
+class QsoStrategies(QsoCommon):
+    def __init__(self, request, qs,  name=None):
+        QsoCommon.__init__(self, request, qs, name)
+        
+    
+    
+        
+    def listdict_strategies(self):
+        l=[]
+        for strategy in self.qs:
+            investments_ids=string2list_of_integers(strategy.investments)
+            qs_investments_in_strategy=Investments.objects.filter(id__in=(investments_ids))
+            io_in_strategy=InvestmentsOperationsManager_from_investment_queryset(qs_investments_in_strategy, timezone.now(), self.request)
+            
+            gains_net_current=io_in_strategy.current_gains_net_user()        
+            dt_to=timezone.now() if strategy.dt_to is None else strategy.dt_to
+            gains_net_historical=io_in_strategy.historical_gains_net_user_between_dt(strategy.dt_from, dt_to)
+            dividends_net=Dividends.net_gains_baduser_between_datetimes_for_some_investments(investments_ids, strategy.dt_from, dt_to)
+            
+            l.append({
+                    "id": strategy.id, 
+                    "name": strategy.name, 
+                    "dt_from":strategy.dt_from, 
+                    "dt_to":strategy.dt_to, 
+                    "current_invested_user": io_in_strategy.current_invested_user(), 
+                    "gains_net_current": gains_net_current, 
+                    "gains_net_historical": gains_net_historical, 
+                    "dividends_net": dividends_net, 
+                    "total_net": gains_net_current+gains_net_historical+dividends_net
+                }
+            )
+        return l
+
+
+    def tabulator(self):
+        c=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}")
+        r.setDestinyUrl("strategy_view")
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.listdict_strategies())
+
+        r.setFields("id","name", "dt_from","dt_to", "current_invested_user","gains_net_current", "gains_net_historical","dividends_net", "total_net")
+        r.setHeaders("Id", _("Name"), _("From"), _("To"), _("Invested"), _("Current net gains"), _("Historical net gains"), _("Net dividends"), _("Net total"))
+        r.setTypes("int","str", "str", "str", c, c , c, c, c)
+        r.setBottomCalc(None, None, None,None, "sum","sum", "sum", "sum", "sum")
+
         return r
 
 class QsoQuotes(QsoCommon):
@@ -1194,34 +1241,6 @@ def listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_mon
         r= sorted(r,  key=lambda item: item['datetime'])
 #            r=r+money_convert(dtaware_month_end(year, month, local_zone), balance, currency, local_currency)
     return r
-    
-    
-    
-def listdict_strategies(request, active):
-    l=[]
-    qs_strategies=Strategies.objects.all().filter(dt_to__isnull=active)
-    for strategy in qs_strategies:
-        investments_ids=string2list_of_integers(strategy.investments)
-        qs_investments_in_strategy=Investments.objects.filter(id__in=(investments_ids))
-        io_in_strategy=InvestmentsOperationsManager_from_investment_queryset(qs_investments_in_strategy, timezone.now(), request)
-        
-        gains_net_current=io_in_strategy.current_gains_net_user()        
-        dt_to=timezone.now() if strategy.dt_to is None else strategy.dt_to
-        gains_net_historical=io_in_strategy.historical_gains_net_user_between_dt(strategy.dt_from, dt_to)
-        dividends_net=Dividends.net_gains_baduser_between_datetimes_for_some_investments(investments_ids, strategy.dt_from, dt_to)
-        
-        l.append({
-                "id": strategy.id, 
-                "name": strategy.name, 
-                "dt_from":strategy.dt_from, 
-                "dt_to":strategy.dt_to, 
-                "gains_net_current": gains_net_current, 
-                "gains_net_historical": gains_net_historical, 
-                "dividends_net": dividends_net, 
-                "total_net": gains_net_current+gains_net_historical+dividends_net
-            }
-        )
-    return l
 
 
     

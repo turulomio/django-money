@@ -183,15 +183,6 @@ class TabulatorReportIncomeTotal(TabulatorFromListDict):
         self.setBottomCalc(None, None, "sum", "sum", "sum", "sum", "sum")
         self.showLastRecord(False)
 
-class TabulatorStrategies(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, local_currency):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setListDict(listdict)
-        self.setFields("id","name", "dt_from","dt_to", "gains_net_current", "gains_net_historical","dividends_net", "total_net")
-        self.setHeaders("Id", _("Name"), _("From"), _("To"), _("Current net gains"), _("Historical net gains"), _("Net dividends"), _("Net total"))
-        self.setTypes("int","str", "str", "str","EUR", "EUR", "EUR","EUR")
-        self.setBottomCalc(None, None, None,None, "sum", "sum", "sum", "sum")
 
 class TabulatorInvestmentsGainsByProductType(TabulatorFromListDict):
     def __init__(self, name, destiny_url, listdict, local_currency):

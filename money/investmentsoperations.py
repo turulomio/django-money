@@ -267,6 +267,13 @@ class InvestmentsOperationsManager:
         for o in self.list:
             r=r + o.current_gains_net_user()
         return r   
+        
+    def current_invested_user(self):
+        r=0
+        for o in self.list:
+            r=r + o.current_invested_user()
+        return r   
+        
     
     def historical_gains_net_user_between_dt(self, dt_from, dt_to):
         r=0
