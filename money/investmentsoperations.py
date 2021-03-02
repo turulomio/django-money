@@ -22,6 +22,15 @@ def postgres_datetime_string_2_dtaware(s):
     dt_end=dtaware(dt_end_naive.date(), dt_end_naive.time(), 'UTC')
     return dt_end
 
+## Class to manage a single investment operation
+class IO:
+    def __init__(self, investment, d_io):
+        self.investment=investment
+        self.d=d_io
+        
+    def gross_product(self):
+        return self.d["price"]*self.d["shares"]*self.investment.products.real_leveraged_multiplier()
+
 ## Class to manage a single investment operation crrent
 class IOC:
     def __init__(self, investment, d_ioc):
@@ -146,7 +155,10 @@ class InvestmentsOperations:
 
     def o_listdict_tabulator_homogeneus(self, request):
         for o in self.io:
+            print(o.keys())
+            op=IO(self.investment, o)
             o["operationstypes"]=request.operationstypes[o["operationstypes_id"]]
+            o["gross_product"]=op.gross_product()
         return self.io        
 
     def current_listdict_tabulator_homogeneus_investment(self, request):
@@ -197,10 +209,10 @@ class InvestmentsOperations:
         r.setDestinyUrl("investmentoperation_update")
         r.setLocalZone(self.request.local_zone)
         r.setListDict(self.o_listdict_tabulator_homogeneus(self.request))
-        r.setFields("id","datetime", "operationstypes","shares", "price", "commission", "taxes",  "currency_conversion",  "comment")
-        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Commission"), _("Taxes"), _("Currency convertion"),  _("Comment"))
-        r.setTypes("int","datetime", "str","Decimal", self.investment.products.currency, self.investment.accounts.currency, self.investment.accounts.currency, "Decimal6", "str")
-        r.setBottomCalc(None, None, None, "sum", None, "sum", "sum", None, None)
+        r.setFields("id","datetime", "operationstypes","shares", "price", "gross_product","commission", "taxes" ,"currency_conversion",  "comment")
+        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Gross"), _("Commission"), _("Taxes"), _("Currency convertion"),  _("Comment"))
+        r.setTypes("int","datetime", "str","Decimal", self.investment.products.currency, self.investment.products.currency, self.investment.accounts.currency,self.investment.accounts.currency,"Decimal6", "str")
+        r.setBottomCalc(None, None, None, "sum", None, "sum","sum", "sum", None, None)
         r.showLastRecord(False)
         return r
 
