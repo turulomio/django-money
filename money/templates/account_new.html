@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block content %}
-    <h1>{% trans "Update a credit card" %}</h1>
+    <h1>{% trans "Add a new account" %}</h1>
     <form method="post">
         <table>
         {% csrf_token %}
@@ -10,9 +10,4 @@
         </table>
     <button type="submit">{% trans "Save" %}</button>
     </form>
-
-    <p>
-            <a href="{% url 'creditcard_delete' pk=object.id %}">{% trans "Delete this credit card" %}</a>
-    </p>
-
 {% endblock %}

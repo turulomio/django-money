@@ -39,7 +39,7 @@ RANGE_RECOMENDATION_CHOICES =(
 class Accounts(models.Model):
     name = models.TextField(blank=True, null=True)
     banks = models.ForeignKey('Banks', models.DO_NOTHING, blank=True, null=True)
-    active = models.BooleanField(blank=True, null=True)
+    active = models.BooleanField(blank=False, null=False)
     number = models.CharField(max_length=24, blank=True, null=True)
     currency = models.TextField()
 
@@ -54,6 +54,19 @@ class Accounts(models.Model):
     def fullName(self):
         return "{} ({})".format(self.name, self.banks.name)
         
+    def is_deletable(self):
+        """Función que devuelve un booleano si una cuenta es borrable, es decir, que no tenga registros dependientes."""
+        if self.id==4:#Cash
+            return False
+            
+        if (
+                Accountsoperations.objects.filter(accounts_id=self.id).exists() or
+                Creditcards.objects.filter(accounts_id=self.id).exists() or
+                Investments.objects.filter(accounts_id=self.id).exists()
+            ):
+            return False
+        return True
+
     ## @return Tuple (balance_account_currency | balance_user_currency)
     def balance(self, dt,  local_currency):
         r=cursor_one_row("select * from account_balance(%s,%s,%s)", (self.id, dt, local_currency))

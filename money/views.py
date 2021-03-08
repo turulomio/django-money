@@ -304,7 +304,47 @@ def account_list(request,  active=True):
     return render(request, 'account_list.html', locals())
         
         
+@method_decorator(login_required, name='dispatch')
+class account_new(SuccessMessageMixin, CreateView):
+    model = Accounts
+    fields = ( 'name', 'active', 'number',  'currency')
+    template_name="account_new.html"
+
+    def get_success_message(self, cleaned_data):
+        return _("Account created successfully")
+
+    def get_success_url(self):
+        return reverse_lazy('account_list_active')    
         
+    def form_valid(self, form):
+        form.instance.banks=Banks.objects.get(pk=self.kwargs['banks_id'])
+        form.instance.save()
+        return super().form_valid(form)
+
+@method_decorator(login_required, name='dispatch')
+class account_update(SuccessMessageMixin, UpdateView):
+    model = Accounts
+    fields = ( 'name', 'active', 'number',  'currency')
+    template_name="account_update.html"
+
+    def get_success_message(self, cleaned_data):
+        return _("Account updated successfully")
+
+    def get_success_url(self):
+        return reverse_lazy('account_list_active')
+
+@method_decorator(login_required, name='dispatch')
+class account_delete(DeleteView):
+    model = Accounts
+    template_name = 'account_delete.html'
+        
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, _("Account was successfully deleted"))
+        return super(DeleteView, self).delete(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('account_list_active')
+
 @login_required        
 def account_view(request, pk, year=date.today().year, month=date.today().month): 
     year_start=1970
@@ -1397,9 +1437,6 @@ class investment_update(SuccessMessageMixin, UpdateView):
         widget_date(self.request, form.fields['selling_expiration'])
         self.investments_operations=InvestmentsOperations_from_investment(self.request, self.object, timezone.now(), self.request.local_currency)
         return form
-    
-    def form_valid(self, form):
-        return super().form_valid(form)
 
 @method_decorator(login_required, name='dispatch')
 class investment_delete(DeleteView):

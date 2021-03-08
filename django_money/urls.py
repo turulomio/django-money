@@ -39,6 +39,9 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('account/view/<int:pk>/', money_views.account_view, name='account_view'),
     path('account/transfer/<int:origin>/', money_views.account_transfer, name='account_transfer'),
     path('account/transfer/delete/<str:comment>/', money_views.account_transfer_delete, name='account_transfer_delete'),
+    path('account/new/<int:banks_id>/', money_views.account_new.as_view(), name='account_new'),
+    path('account/update/<int:pk>/', money_views.account_update.as_view(), name='account_update'),    
+    path('account/delete/<int:pk>/', money_views.account_delete.as_view(), name='account_delete'),
     
     path('accountoperation/new/<int:accounts_id>/<int:dt>/<int:concepts_id>/', money_views.accountoperation_new.as_view(), name='accountoperation_new'),
     path('accountoperation/update/<int:pk>/', money_views.accountoperation_update.as_view(), name='accountoperation_update'),

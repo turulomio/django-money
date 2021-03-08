@@ -4,6 +4,11 @@
 
 {% block content %}
   <h1>{% trans "Bank details" %}</h1>
+  
+<p class="orders">
+  <a href="{% url 'account_new' banks_id=bank.id %}">{% trans 'Add a new account' %}</a> |
+</p>
+  
 
   <h2>{% trans "Accounts" %}</h2>
   {{ table_accounts|safe}}

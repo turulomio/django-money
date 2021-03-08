@@ -10,6 +10,12 @@
   <p><strong>{% trans 'Number' %}: </strong>{{ account.number }}</p>
   <p><strong>{% trans 'Currency' %}: </strong>{{ account.currency }}</p>
 
+<p class="orders">
+  <a href="{% url 'account_update' pk=account.id %}">{% trans 'Update this account' %}</a> |
+  <a href="{% url 'investment_new' accounts_id=account.id %}">{% trans 'Add a new investment' %}</a> |
+</p>
+  
+  
   <selector-yearmonth title="{% trans 'Select a year and a month' %}" year_start="{{ year_start }}" year_end="{{ year_end }}" year="{{ year }}" month="{{ month }}" url="{% url 'account_view' account.id %}"></selector-yearmonth>
 
   <p></p>
@@ -46,8 +52,5 @@
 
   
 
-<p class="orders">
-  <a href="{% url 'investment_new' accounts_id=account.id %}">{% trans 'Add a new investment' %}</a>
-</p>
   
 {% endblock %}
