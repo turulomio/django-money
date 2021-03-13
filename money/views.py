@@ -1640,42 +1640,23 @@ class dividend_delete(DeleteView):
         self.object.delete_associated_account_operation()
         return super(dividend_delete, self).delete(*args, **kwargs)
 
-
-
-
 ## Sets a datetime widget for django forms
 ## @param initial datetime or "now" or None or "". If None pass. If "" returns it empty field. If "now" returns current. If datetime resturns datetime
 def widget_datetime(request, field):
     field.widget.attrs['is'] ='input-datetime'
     field.widget.attrs['localzone'] =request.local_zone
     field.widget.attrs['locale'] =request.LANGUAGE_CODE
-#    if initial is not None:
-#        if initial == "now":
-#            field.initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
-#        elif initial == "":
-#            field.initial= ""
-#        else:
-#            field.initial=str(dtaware_changes_tz(initial, request.local_zone))
 
 ## Sets a datetime widget for django forms
 ## @param initial date or "today" or None or "". If None pass. If "" returns it empty field. If "today" returns current. If date resturns date
 def widget_date(request, field):
     field.widget.attrs['is'] ='input-date'
     field.widget.attrs['locale'] =request.LANGUAGE_CODE
-#        if initial is not None:
-#        if initial =="today":
-#            field.initial=str(date.today())
-#        elif initial == "":
-#            field.initial=""
-#        else:
-#            field.initial=str(initial)
     
 def widget_currency_conversion(request, field, from_currency, to_currency):
     field.widget.attrs['is']='input-currency-factor'
     field.widget.attrs['from'] = from_currency
     field.widget.attrs['to'] = to_currency
-        #del form.fields['currency_conversion'].widget.attrs['step']
-    #field.widget.attrs['type']="text"
 
 
 #Used with parameters with values 0 or 1
@@ -1688,4 +1669,5 @@ def get_parameter_to_boolean(request, parameter):
     except:
         return False
     
-    
+def widget_modal_window(request):
+    return render(request, 'widget_modal_window.html', locals())

@@ -9,101 +9,102 @@
 
 // IMPORTANT
 // TO ACCESS ModalWindow innerHTML 
-// var lblResult=dialog.shadowRoot.getElementById("sellingpriceResult");
+// var lblResult=dialog.ShadowRoot.getElementById("sellingpriceResult");
 
 
 class ModalWindow extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback(){
-
-    this.template=document.createElement("template");
-    this.template.innerHTML=`<style>
-body {font-family: Arial, Helvetica, sans-serif;}
-
-/* The Modal (background) */
-.modal {
-  display: none; /* Hidden none, Modal: block*/
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-}
-
-/* Modal Content */
-.modal-content {
-  background-color: #fefefe;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-}
-
-/* The Close Button */
-#close {
-  color: #aaaaaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-#close:hover,
-#close:focus {
-  color: #000;
-  text-decoration: none;
-  cursor: pointer;
-}
-</style>
-<!-- The Modal -->
-<div id="myModal" class="modal">
-
-  <!-- Modal content -->
-  <div class="modal-content">
-    <span id="close">&times;</span>
-    <div id="innermodal"></div>
-  </div>
-</div>
-`;
-        let shadowRoot = this.attachShadow({mode: 'open'});
-        shadowRoot.appendChild(this.template.content.cloneNode(true));
-        var innermodal=shadowRoot.querySelector('#innermodal');
-        innermodal.innerHTML=this.innerHTML;
-        this.span=shadowRoot.querySelector("#close");
-        this.modal=shadowRoot.querySelector("#myModal");
-        
-        if (this.hasAttribute("closed")==false){// Doesn't work in constructor and I don't know why.
-          this.modal.style.display = "block";
-        }
-        
-        
-        // When the user clicks on <span> (x), close the modal
-        var this_=this;
-        this.span.onclick = function() {
-            this_.close();
-        }
-  }
-  
-
-  show() {
-    this.modal.style.display="block";
-    if (this.hasAttribute("closed")){
-        this.removeAttribute("closed")
+    constructor() {
+        super();
+        this.shadow=this.attachShadow({mode: 'open'});
     }
-  }
+
+    connectedCallback(){
+        this.template=document.createElement("template");
+        this.template.innerHTML=`<style>
+    body {font-family: Arial, Helvetica, sans-serif;}
+
+    /* The Modal (background) */
+    .modal {
+    display: none; /* Hidden none, Modal: block*/
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content */
+    .modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    }
+
+    /* The Close Button */
+    #close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    }
+
+    #close:hover,
+    #close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+    }
+    </style>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span id="close">&times;</span>
+            <div id="innermodal"></div>
+        </div>
+    </div>
+    `;
+            this.shadow.appendChild(this.template.content.cloneNode(true));
+            var innermodal=this.shadow.querySelector('#innermodal');
+            setTimeout(() => {
+                innermodal.innerHTML=this.innerHTML;
+            });
+            this.span=this.shadow.querySelector("#close");
+            this.modal=this.shadow.querySelector("#myModal");
+            
+            
+            if (this.hasAttribute("closed")==false){// Doesn't work in constructor and I don't know why.
+            this.modal.style.display = "block";
+            }
+            
+            
+            // When the user clicks on <span> (x), close the modal
+            var this_=this;
+            this.span.onclick = function() {
+                this_.close();
+            }
+    }
+    
+
+    show() {
+        this.modal.style.display="block";
+        if (this.hasAttribute("closed")){
+            this.removeAttribute("closed");
+        }
+    }
   
-  close() {
+    close() {
         this.modal.style.display="none";
         if (this.hasAttribute("closed")==false){
-            this.setAttribute("closed","")
+            this.setAttribute("closed","");
         }
-  }
+    }
 }
 window.customElements.define('modal-window', ModalWindow);

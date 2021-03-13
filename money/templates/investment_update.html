@@ -13,6 +13,7 @@
     <button type="submit">{% trans "Save" %}</button>
     </form>
     
+    
     <modal-window id="sellingprice" closed>
         <h1>{% trans "Investment data" %}</h1>
         <label id="investmentData"></label>
@@ -42,8 +43,8 @@
          
          <hr>
          <label id="sellingpriceResult">{% trans "Select a method to calculate the investment selling price" %}</label>
-
     <script>
+
     var product_basic_last={{view.object.products.basic_results.last | unlocalize}};
     var investment_last_operation_price={{view.investments_operations.current_last_operation.price_investment |unlocalize}};
 
@@ -51,14 +52,14 @@
     var currency_user= '{{request.local_currency}}';
     var currency_investment= '{{view.object.products.currency}}';
     var decimals={{view.object.products.decimals}};
-    var dialog=document.getElementById("sellingprice");
+    var dialog=document.querySelector("#sellingprice");
     var cmbRangeMovement=dialog.shadowRoot.getElementById("cmbRangeMovement");
     var txtSellingPrice=document.getElementById("id_selling_price");
     var txtByPrice=dialog.shadowRoot.getElementById("byprice");
     var txtPercentageDownRange=dialog.shadowRoot.getElementById("txtPercentageDownRange");
     var txtPercentage=dialog.shadowRoot.getElementById("percentage");
     var txtPredefinedGains=dialog.shadowRoot.getElementById("predefinedGains");
-    var lblInvestmentData=dialog.shadowRoot.getElementById("investmentData");
+    var lblInvestmentData=dialog.querySelector("#investmentData")
     var lblRangePosition=dialog.shadowRoot.getElementById("lblRangePosition");
     var lblResult=dialog.shadowRoot.getElementById("sellingpriceResult");
     var invested_user=parseNumber({{view.investments_operations.current_invested_user|unlocalize}});

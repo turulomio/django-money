@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+    <h1>Widget modal window</h1>
+    <modal-window id="modal">
+        <label>HOLA</label>
+    </modal-window>
+
+    <p class="orders">
+        <a onclick='document.querySelector("#modal").show();' href="javascript:void(0);">{% trans "Show" %}</a> | 
+    </p>
+<!--
+    
+    <script>
+        alert(document.querySelector("#modal").innerHTML);
+    </script>-->
+{% endblock %}

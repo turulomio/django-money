@@ -127,6 +127,9 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('strategy/update/<int:pk>', money_views.strategy_update.as_view(), name='strategy_update'),
     path('strategy/delete/<int:pk>', money_views.strategy_delete.as_view(), name='strategy_delete'),
     
+    
+    path('widget/modal_window', money_views.widget_modal_window, name='widget_modal_window'),
+    
 )
 
 handler403 = 'money.views.error_403'
