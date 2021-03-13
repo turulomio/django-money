@@ -28,10 +28,10 @@ urlpatterns=urlpatterns+ i18n_patterns(
     
     path('bank/list/', money_views.bank_list,  {'active':True}, name='bank_list_active'),
     path('bank/list/inactive/', money_views.bank_list,  {'active':False}, name='bank_list_inactive'),
-    path('bank/view/<slug:pk>/', money_views.bank_view, name='bank_view'),
-    path('bank/new/', money_views.bank_new, name='bank_new'),
-    path('bank/update/<slug:pk>', money_views.bank_update.as_view(), name='bank_update'),
-    path('bank/delete/<slug:pk>', money_views.bank_delete, name='bank_delete'),
+    path('bank/view/<int:pk>/', money_views.bank_view, name='bank_view'),
+    path('bank/new/', money_views.bank_new.as_view(), name='bank_new'),
+    path('bank/update/<int:pk>', money_views.bank_update.as_view(), name='bank_update'),
+    path('bank/delete/<int:pk>', money_views.bank_delete.as_view(), name='bank_delete'),
 
     path('account/list/', money_views.account_list,   {'active':True}, name='account_list_active'),
     path('account/list/inactive/', money_views.account_list,   {'active':False}, name='account_list_inactive'),

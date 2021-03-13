@@ -80,6 +80,8 @@ class Accounts(models.Model):
     
     @staticmethod
     def accounts_balance_user_currency(qs, dt):
+        if len (qs)==0:
+            return 0
         return cursor_one_field("select sum((account_balance(accounts.id,%s,'EUR')).balance_user_currency) from  accounts where id in %s", (dt, qs_list_of_ids(qs)))
     
 
@@ -221,7 +223,7 @@ class Annualtargets(models.Model):
 
 class Banks(models.Model):
     name = models.TextField()
-    active = models.BooleanField()
+    active = models.BooleanField(default=True)
 
     class Meta:
         managed = False
@@ -242,7 +244,14 @@ class Banks(models.Model):
     def investments(self, active):
         investments= Investments.objects.all().select_related("products").select_related("products__productstypes").select_related("accounts").filter(accounts__banks__id=self.id, active=active)
         return investments
-        
+
+    def is_deletable(self):
+        if self.id==3:#Personal management
+            return False
+            
+        if Accounts.objects.filter(banks_id=self.id).exists() :
+            return False
+        return True
 
 class Concepts(models.Model):
     name = models.TextField(blank=True, null=True)

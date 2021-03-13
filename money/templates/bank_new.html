@@ -2,8 +2,7 @@
 {% load i18n %}
 
 {% block content %}
-{% if perms.books.add_valoration %}
-    <h1>{% trans "Add a Valoration" %}</h1>
+    <h1>{% trans "Add a new bank" %}</h1>
     <form method="post">
         <table>
         {% csrf_token %}
@@ -11,9 +10,4 @@
         </table>
     <button type="submit">{% trans "Save" %}</button>
     </form>
-{% else %}
-    <h1>{% trans "Error ading a new valoration" %}</h1>
-    <p>{% trans "You can't add valorations" %}</p>
-{% endif%}
-
 {% endblock %}

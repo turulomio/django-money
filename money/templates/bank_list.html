@@ -3,15 +3,16 @@
 {% load i18n %}
 
 {% block content %}
-<h1>{% trans "My banks" %}</h1>
+    <h1>{% trans "My banks" %}</h1>
+    {% trans "Check to show inactive banks" as mylabel %}
+    {% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
 
-{% url 'bank_list_active' as url_unchecked %}
-{% url 'bank_list_inactive' as url_checked %}
-{% trans "Check to show inactive banks" as mylabel %}
-{% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
+    <p></p>
+    {{ table_banks|safe}}
 
-<p></p>
-{{ table_banks|safe}}
 
+    <p class="orders">
+        <a href="{% url 'bank_new' %}">{% trans "Add a new bank"%}</a> | 
+    </p>
 {% endblock %}
 

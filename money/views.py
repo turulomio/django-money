@@ -288,7 +288,9 @@ def home(request):
     return render(request, 'home.html', locals())
 
 @login_required
-def bank_list(request,  active):
+def bank_list(request, active):
+    url_unchecked=reverse_lazy("bank_list_active")
+    url_checked=reverse_lazy("bank_list_inactive")
     banks= Banks.objects.all().filter(active=active).order_by('name')
     banks_list=listdict_banks(request, banks, timezone.now(), active)
     table_banks=TabulatorBanks("table_banks", 'bank_view', banks_list, request.local_currency).render()
@@ -787,16 +789,39 @@ class investmentoperation_delete(DeleteView):
         execute("delete from investmentsaccountsoperations where investmentsoperations_id=%s",(self.object.id, )) 
         return super(investmentoperation_delete, self).delete(*args, **kwargs)
 
+        
+@method_decorator(login_required, name='dispatch')
+class bank_new(SuccessMessageMixin, CreateView):
+    model = Banks
+    fields = ( 'name', 'active')
+    template_name="bank_new.html"
 
-@login_required
-def bank_new(request, pk):
-    return render(request, 'bank_new.html', locals())
+    def get_success_message(self, cleaned_data):
+        return _("Bank created successfully")
+
+    def get_success_url(self):
+        return reverse_lazy('bank_list_active')    
+        
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(bank_new, self).get_form(form_class)
+        form.fields['name'].widget = forms.TextInput()
+        return form
+
+    def get_initial(self):
+        return {
+            'active': True, 
+        }
   
 @method_decorator(login_required, name='dispatch')
-class bank_update(UpdateView):
+class bank_update(SuccessMessageMixin, UpdateView):
     model = Banks
     fields = ['name', 'active']
     template_name="bank_update.html"
+    
+    def get_success_message(self, cleaned_data):
+        return _("Bank updated successfully")
 
     def get_success_url(self):
         return reverse_lazy('bank_list_active')
@@ -812,12 +837,18 @@ def bank_view(request, pk):
     table_accounts=TabulatorAccounts("table_accounts", "account_view", list_accounts, request.local_currency).render()
     return render(request, 'bank_view.html', locals())
     
+@method_decorator(login_required, name='dispatch')
+class bank_delete(DeleteView):
+    model = Banks
+    template_name = 'bank_delete.html'
+        
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, _("Bank was successfully deleted"))
+        return super(DeleteView, self).delete(request, *args, **kwargs)
 
-@login_required
-def bank_delete(request, pk):
-    bank=get_object_or_404(Banks, pk=pk)
-    return render(request, 'bank_delete.html', locals())
-    
+    def get_success_url(self):
+        return reverse_lazy('bank_list_active')
+
 @timeit
 @login_required
 def report_total(request, year=date.today().year):
@@ -1645,3 +1676,16 @@ def widget_currency_conversion(request, field, from_currency, to_currency):
     field.widget.attrs['to'] = to_currency
         #del form.fields['currency_conversion'].widget.attrs['step']
     #field.widget.attrs['type']="text"
+
+
+#Used with parameters with values 0 or 1
+def get_parameter_to_boolean(request, parameter):
+    value=request.GET.get(parameter)
+    if value is None:
+        return False
+    try:
+        return bool(int(value))
+    except:
+        return False
+    
+    

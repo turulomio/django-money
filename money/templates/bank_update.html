@@ -11,4 +11,7 @@
         </table>
     <button type="submit">{% trans "Save" %}</button>
     </form>
+    <p class="orders">
+        <a href="{% url 'bank_delete' pk=object.id %}">{% trans "Delete this bank" %}</a> | 
+    </p>
 {% endblock %}

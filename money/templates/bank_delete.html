@@ -3,15 +3,14 @@
 {% load i18n %}
 
 {% block content %}
-{% if object.user == request.user %}
-    <h1>{% trans "Confirm delete" %}</h1>
+<h1>{% trans "Delete a bank" %}</h1>
+{% if object.is_deletable %}
     <form action="" method="post">
     {% csrf_token %}
-    <p>Are you sure you want to delete "{{ object }}"?</p>
+    <p>Are you sure you want to delete "{{ object.name }}"?</p>
     <input type="submit" value="Confirm" />
     </form>
 {% else %}
-    <h1>{% trans "Error deleting" %}</h1>
-    <p>{% trans "You can't delete other users valorations" %}</p>
+    <p>{% trans "You can't delete this bank due to it has dependent data" %}</p>
 {% endif%}
 {% endblock %}
