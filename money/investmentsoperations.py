@@ -89,7 +89,6 @@ class InvestmentsOperations:
     ## Returns the last operation of the io_current
     def  current_last_operation(self):
         r= self.io_current[len(self.io_current)-1]
-        print(r)
         return r
         
     def current_shares(self):
@@ -129,6 +128,9 @@ class InvestmentsOperations:
         
     def current_gains_net_user(self):
         return listdict_sum(self.io_current, "gains_net_user")
+        
+    def current_balance_futures_user(self):
+        return listdict_sum(self.io_current, "balance_futures_user")
 
     def current_gains_gross_user(self):
         return listdict_sum(self.io_current, "gains_gross_user")
@@ -141,7 +143,16 @@ class InvestmentsOperations:
         for o in self.io_historical:
             if dt_from<=o["dt_end"] and o["dt_end"]<=dt_to:
                 r=r + o["gains_net_user"]
+        return r   
+       
+    def historical_commissions_user_between_dt(self, dt_from, dt_to):
+        r=0
+        for o in self.io_historical:
+            if dt_from<=o["dt_end"] and o["dt_end"]<=dt_to:
+                r=r + o["commissions_user"]
         return r
+        
+        
         
     ## @param listdict_ioc
     def current_gains_gross_investment_at_selling_price(self):
@@ -155,7 +166,6 @@ class InvestmentsOperations:
 
     def o_listdict_tabulator_homogeneus(self, request):
         for o in self.io:
-            print(o.keys())
             op=IO(self.investment, o)
             o["operationstypes"]=request.operationstypes[o["operationstypes_id"]]
             o["gross_product"]=op.gross_product()
@@ -265,9 +275,21 @@ class InvestmentsOperationsManager:
         self.request=request
         self.list=[]
         
+    def list_of_investments_ids(self):
+        r=[]
+        for iot in self.list:
+            r.append(iot.investment.id)
+        return r
+
     def append(self, o):
         self.list.append(o)
         
+    def current_balance_futures_user(self):
+        r=0
+        for o in self.list:
+            r=r + o.current_balance_futures_user()
+        return r   
+
     def current_gains_gross_user(self):
         r=0
         for o in self.list:
@@ -292,7 +314,13 @@ class InvestmentsOperationsManager:
         for o in self.list:
                 r=r + o.historical_gains_net_user_between_dt(dt_from, dt_to)
         return r
-        
+
+    def historical_commissions_user_between_dt(self, dt_from, dt_to):
+        r=0
+        for o in self.list:
+                r=r + o.historical_commissions_user_between_dt(dt_from, dt_to)
+        return r
+
     def LdoInvestmentsOperationsHeterogeneus_between(self, dt_from, dt_to):
         from money.listdict import LdoInvestmentsOperationsHeterogeneus
         r=LdoInvestmentsOperationsHeterogeneus(self.request)
@@ -398,7 +426,11 @@ class InvestmentsOperationsTotalsManager:
             r=r + o.io_total_current["balance_futures_user"]
         return r   
 
-            
+    def list_of_investments_ids(self):
+        r=[]
+        for iot in self.list:
+            r.append(iot.investment.id)
+        return r
 
     def current_gains_gross_user(self):
         r=0

@@ -877,8 +877,6 @@ def report_evolution(request):
     
     return render(request, 'report_evolution.html', locals())
 
-
-
 @timeit
 @login_required
 def ajax_chart_total(request, year_from):

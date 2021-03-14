@@ -52,7 +52,7 @@ from money.models import (
 )
 from money.reusing.casts import string2list_of_integers, valueORempty
 from money.reusing.currency import Currency
-from money.reusing.datetime_functions import dtaware_month_end, months, dtaware_day_end_from_date, dtaware2string
+from money.reusing.datetime_functions import dtaware_month_end, months, dtaware_day_end_from_date, dtaware2string, dtaware_year_start, dtaware_year_end
 from money.reusing.decorators import timeit
 from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset, IOC, InvestmentsOperations_from_investment, InvestmentsOperationsTotalsManager_from_all_investments, InvestmentsOperationsTotalsManager_from_investment_queryset
 from money.reusing.percentage import percentage_between, Percentage
@@ -808,6 +808,7 @@ class LdoAssetsEvolution(LdoDjangoMoney):
         r.setTypes("str", c, c, c, c, c, c, c, c)
         r.showLastRecord(False)
         return r
+
 #GOOD JOB
 ## Currency used to compare is product worse currency
 class LdoAssetsEvolutionInvested(LdoDjangoMoney):
@@ -817,23 +818,26 @@ class LdoAssetsEvolutionInvested(LdoDjangoMoney):
         self._generate_listdict()
 
     def _generate_listdict(self):
+        qs=Investments.objects.all()
         for year in range(self.from_year, date.today().year+1): 
-            iotm=InvestmentsOperationsTotalsManager_from_all_investments(self.request, dtaware_month_end(year, 12, self.request.local_zone))
+            iom=InvestmentsOperationsManager_from_investment_queryset(qs, dtaware_month_end(year, 12, self.request.local_zone), self.request)
+            dt_from=dtaware_year_start(year, self.request.local_zone)
+            dt_to=dtaware_year_end(year, self.request.local_zone)
             d={}
             d['year']=str(year)
-            d['invested']=iotm.current_invested_user()
-            d['balance']=iotm.current_balance_futures_user()
+            d['invested']=iom.current_invested_user()
+            d['balance']=iom.current_balance_futures_user()
             d['diff']=d['balance']-d['invested']
             d['percentage']=percentage_between(d['invested'], d['balance'])
-            d['net_gains_plus_dividends']=0
+            d['net_gains_plus_dividends']=iom.historical_gains_net_user_between_dt(dt_from, dt_to)+Dividends.net_gains_baduser_between_datetimes_for_some_investments(iom.list_of_investments_ids(), dt_from, dt_to)
             d['custody_commissions']=0
             d['taxes']=0
-            d['investment_commissions']=0
+            d['investment_commissions']=iom.historical_commissions_user_between_dt(dt_from, dt_to)
             self.append(d)
             
     def tabulator(self):
         c=self.request.local_currency
-        r=TabulatorFromListDict(f"{self.name}_table")
+        r=TabulatorFromListDict(f"{self.name}_table2")
         r.setDestinyUrl(None)
         r.setLocalZone(self.request.local_zone)
         r.setListDict(self.ld)
