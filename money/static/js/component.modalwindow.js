@@ -9,13 +9,12 @@
 
 // IMPORTANT
 // TO ACCESS ModalWindow innerHTML 
-// var lblResult=dialog.ShadowRoot.getElementById("sellingpriceResult");
+// var lblResult=document.querySelector("#sellingpriceResult");
 
 
 class ModalWindow extends HTMLElement {
     constructor() {
         super();
-        this.shadow=this.attachShadow({mode: 'open'});
     }
 
     connectedCallback(){
@@ -67,29 +66,26 @@ class ModalWindow extends HTMLElement {
         <!-- Modal content -->
         <div class="modal-content">
             <span id="close">&times;</span>
-            <div id="innermodal"></div>
+            <div id="innermodal"><slot></slot></div>
         </div>
     </div>
     `;
-            this.shadow.appendChild(this.template.content.cloneNode(true));
-            var innermodal=this.shadow.querySelector('#innermodal');
-            setTimeout(() => {
-                innermodal.innerHTML=this.innerHTML;
-            });
-            this.span=this.shadow.querySelector("#close");
-            this.modal=this.shadow.querySelector("#myModal");
-            
-            
-            if (this.hasAttribute("closed")==false){// Doesn't work in constructor and I don't know why.
+        this.shadow=this.attachShadow({mode: 'closed'});
+        this.shadow.appendChild(this.template.content.cloneNode(true));
+        this.span=this.shadow.querySelector("#close");
+        this.modal=this.shadow.querySelector("#myModal");
+        
+        
+        if (this.hasAttribute("closed")==false){// Doesn't work in constructor and I don't know why.
             this.modal.style.display = "block";
-            }
-            
-            
-            // When the user clicks on <span> (x), close the modal
-            var this_=this;
-            this.span.onclick = function() {
-                this_.close();
-            }
+        }
+        
+        
+        // When the user clicks on <span> (x), close the modal
+        var this_=this;
+        this.span.onclick = function() {
+            this_.close();
+        }
     }
     
 
