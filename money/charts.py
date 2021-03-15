@@ -1,4 +1,5 @@
 from django.utils.translation import ugettext_lazy as _
+from money.reusing.listdict_functions import listdict2list
 def list_dt_to_jsarray(l):
     r="["
     for dt in l:
@@ -45,7 +46,7 @@ def listdict_with_ohcl_to_chartdata(listdict, key_date="date", key_open="open", 
     return r
 
 
-
+## CHART.JS
 def chart_lines_total(listdict, local_currency):
     return f"""
 <div style="width:75%;">
@@ -121,7 +122,7 @@ def chart_lines_total(listdict, local_currency):
                         var ctx = document.getElementById('canvas').getContext('2d');
                         window.myLine = new Chart(ctx, config);
         </script>"""
-
+## CHART.JS
 def chart_product_quotes_historical(listdict, product):
     ## OJO CHART.JS DEBE ESTAR EN MISMA VERSION QUE FINANCIAL
     return f"""
@@ -142,3 +143,133 @@ var chart = new Chart(ctx, {{
         }}
 }});
 </script>"""
+
+## ECHARTS
+def chart_product_ranges(prm, name="chart_product_ranges"):            
+    ld_ohcl=prm.product.ohclDailyBeforeSplits()    
+    
+    #Series for variable smas
+    sma_series=""
+    sma_series_legend=""
+    for sma in prm.recomendationMethod2ListSMA():                
+        sma_series=sma_series+f"""{{
+                    name: 'SMA{sma}',
+                    type: 'line',
+                    data: calculateMA({sma}, data),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {{
+                        width: 1
+                    }}
+                }},
+"""   
+        sma_series_legend=sma_series_legend+f"'SMA{sma}', "
+    sma_series_legend=sma_series_legend[:-2]
+    
+    #Series for product ranges
+    ranges_series=""
+    for range in prm:
+        print(range.recomendation_invest)
+        if range.recomendation_invest is True:
+            ranges_series=ranges_series+f"""
+                 {{
+                     type: 'line',
+                     data: {str([range.value]*len(ld_ohcl))},
+                     tooltip: {{
+                       show: false
+                     }}
+                 }},
+"""
+    print (ranges_series, "RANGES")
+
+    
+    
+    
+    #Chart
+    return f"""
+    <div id="{name}" style="width: 80%;height:400px;"></div>
+    <script type="text/javascript">
+        function calculateMA(dayCount, data) {{
+            var result = [];
+            for (var i = 0, len = data.length; i < len; i++) {{
+                if (i < dayCount) {{
+                    result.push('-');
+                    continue;
+                }}
+                var sum = 0;
+                for (var j = 0; j < dayCount; j++) {{
+                    sum += data[i - j];
+                }}
+                result.push(sum / dayCount);
+            }}
+            return result;
+        }}
+        
+        // based on prepared DOM, initialize echarts instance
+        var dates={str(listdict2list(ld_ohcl, "date", cast="str"))};
+        var data={str(listdict2list(ld_ohcl, "close", cast="float"))};
+        var myChart = echarts.init(document.getElementById('{name}'));
+
+        // specify chart configuration item and data
+        var option = {{
+            legend: {{
+                data: ['{prm.product.name}', {sma_series_legend}],
+                inactiveColor: '#777',
+            }},
+            tooltip: {{
+                trigger: 'axis',
+                axisPointer: {{
+                    animation: false,
+                    type: 'cross',
+                    lineStyle: {{
+                        color: '#376df4',
+                        width: 2,
+                        opacity: 1
+                    }}
+                }}
+            }},
+            xAxis: {{
+                type: 'category',
+                data: dates,
+                axisLine: {{ lineStyle: {{ color: '#8392A5' }} }}
+            }},
+            yAxis: {{
+                scale: true,
+                axisLine: {{ lineStyle: {{ color: '#8392A5' }} }},
+                splitLine: {{ show: false }}
+            }},
+            grid: {{
+                bottom: 80, 
+                left:80
+            }},
+            dataZoom: [{{
+                textStyle: {{
+                    color: '#8392A5'
+                }},
+                handleIcon: 'path://M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                dataBackground: {{
+                    areaStyle: {{
+                        color: '#8392A5'
+                    }},
+                    lineStyle: {{
+                        opacity: 0.8,
+                        color: '#8392A5'
+                    }}
+                }},
+                brushSelect: true
+            }}, {{
+                type: 'inside'
+            }}],
+            series: [
+                {{
+                    type: 'line',
+                    name: '{prm.product.name}',
+                    data: data,
+                }},
+                {ranges_series}, 
+                {sma_series}, 
+            ]
+        }};
+        // use configuration item and data specified to show chart
+        myChart.setOption(option);
+    </script>"""

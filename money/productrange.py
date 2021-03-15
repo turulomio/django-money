@@ -149,9 +149,23 @@ class ProductRangeManager(ObjectManager):
                 r.append(smas[i])
         return r
 
+
+    
+    def recomendationMethod2ListSMA(self):
+        print("AHORA", self.method)
+        if self.method in (0, 1):#ProductRangeInvestRecomendation. None_:
+            return []
+        elif self.method in (2, 4):#ProductRangeInvestRecomendation.ThreeSMA:      
+            return [10, 50, 200]
+        elif self.method in (3, 5): #ProductRangeInvestRecomendation.SMA100:           
+            return [100, ]
+        elif self.method==6:#ProductRangeInvestRecomendation.Strict SMA 10 , 100:      
+            return [10,  100]
+
     ## Set investment recomendations to all ProductRange objects in array 
     def setInvestRecomendation(self, method):
-        method=int(method)
+        self.method=int(method)
+        print(self.method, self.method.__class__)
         if method==0:#ProductRangeInvestRecomendation. None_:
             for o in self.arr:
                 o.recomendation_invest=False
@@ -235,6 +249,7 @@ class ProductRangeManager(ObjectManager):
                 number_sma_over_price=len(self.list_of_sma_over_price(date.today(), o.value, [10,  100], dvm_smas,  "close"))
                 if number_sma_over_price<2:
                     o.recomendation_invest=True
+
 
     def listdict(self):
         r=[]
