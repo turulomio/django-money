@@ -228,6 +228,11 @@ def product_ranges(request):
         if form.is_valid():
             prm=ProductRangeManager(request, form.cleaned_data['products'], form.cleaned_data['percentage_between_ranges'], form.cleaned_data['percentage_gains'], form.cleaned_data['only_first'], form.cleaned_data["accounts"])
             prm.setInvestRecomendation(form.cleaned_data['recomendation_methods'])
+            #Chart
+            dates, closes=[], []
+            for ohcl in prm.product.ohclDailyBeforeSplits():
+                dates.append(str(ohcl["date"]))
+                closes.append(float(ohcl["close"]))
             return render(request, 'product_ranges.html', locals())
     else:
         form = ProductsRangeForm()
