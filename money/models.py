@@ -747,9 +747,14 @@ class Products(models.Model):
         return cursor_one_row("select * from quote(%s,%s)", (self.id, dt ))
         
     def ohclMonthlyBeforeSplits(self):
-        return cursor_rows("select * from ohclmonthlybeforesplits(%s)", (self.id, ))
+        if hasattr(self, "_ohcl_monthly_before_splits") is False:
+            self._ohcl_monthly_before_splits=cursor_rows("select * from ohclmonthlybeforesplits(%s)", (self.id, ))
+        return self._ohcl_monthly_before_splits
+
     def ohclDailyBeforeSplits(self):
-        return cursor_rows("select * from ohcldailybeforesplits(%s)", (self.id, ))
+        if hasattr(self, "_ohcl_daily_before_splits") is False:
+            self._ohcl_daily_before_splits=cursor_rows("select * from ohcldailybeforesplits(%s)", (self.id, ))
+        return self._ohcl_daily_before_splits
         
     @staticmethod
     def qs_products_of_investments():

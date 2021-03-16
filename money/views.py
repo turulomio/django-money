@@ -26,7 +26,6 @@ from money.forms import (
 from money.charts import (
     chart_lines_total, 
     chart_product_quotes_historical, 
-    chart_product_ranges, 
 )
 from money.investmentsoperations import InvestmentsOperations_from_investment, InvestmentsOperationsManager_from_investment_queryset
 from money.productrange import ProductRangeManager
@@ -229,7 +228,6 @@ def product_ranges(request):
         if form.is_valid():
             prm=ProductRangeManager(request, form.cleaned_data['products'], form.cleaned_data['percentage_between_ranges'], form.cleaned_data['percentage_gains'], form.cleaned_data['only_first'], form.cleaned_data["accounts"])
             prm.setInvestRecomendation(form.cleaned_data['recomendation_methods'])
-            chart=chart_product_ranges(prm)
             return render(request, 'product_ranges.html', locals())
     else:
         form = ProductsRangeForm()

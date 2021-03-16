@@ -6,6 +6,7 @@ from django.utils import timezone
 from xulpymoney.libmanagers import ObjectManager, DatetimeValueManager
 from money.models import Investments, Orders
 from money.reusing.currency import Currency
+from money.reusing.listdict_functions import listdict2list
 from money.reusing.percentage import Percentage
 from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset
 
@@ -88,6 +89,7 @@ class ProductRangeManager(ObjectManager):
         self.percentage_down=Percentage(percentage_down, 100)
         self.percentage_up=Percentage(percentage_up, 100)
         self.decimals=decimals
+        self.method=0
         
         max_=self.product.highest_investment_operation_price()
         min_=self.product.lowest_investment_operation_price()
@@ -151,7 +153,7 @@ class ProductRangeManager(ObjectManager):
 
 
     
-    def recomendationMethod2ListSMA(self):
+    def list_of_sma_of_current_method(self):
         print("AHORA", self.method)
         if self.method in (0, 1):#ProductRangeInvestRecomendation. None_:
             return []
@@ -166,13 +168,13 @@ class ProductRangeManager(ObjectManager):
     def setInvestRecomendation(self, method):
         self.method=int(method)
         print(self.method, self.method.__class__)
-        if method==0:#ProductRangeInvestRecomendation. None_:
+        if self.method==0:#ProductRangeInvestRecomendation. None_:
             for o in self.arr:
                 o.recomendation_invest=False
-        elif method==1:#ProductRangeInvestRecomendation.All:
+        elif self.method==1:#ProductRangeInvestRecomendation.All:
             for o in self.arr:
                 o.recomendation_invest=True
-        elif method==2:#ProductRangeInvestRecomendation.ThreeSMA:      
+        elif self.method==2:#ProductRangeInvestRecomendation.ThreeSMA:      
             list_ohcl=self.product.ohclDailyBeforeSplits()
             dvm=DatetimeValueManager()
             for d in list_ohcl:
@@ -189,7 +191,7 @@ class ProductRangeManager(ObjectManager):
                     o.recomendation_invest=True
                 elif number_sma_over_price<=1:
                     o.recomendation_invest=True
-        elif method==3: #ProductRangeInvestRecomendation.SMA100:           
+        elif self.method==3: #ProductRangeInvestRecomendation.SMA100:           
             list_ohcl=self.product.ohclDailyBeforeSplits()
             dvm=DatetimeValueManager()
             for d in list_ohcl:
@@ -206,7 +208,7 @@ class ProductRangeManager(ObjectManager):
                     o.recomendation_invest=True
                 else: #number_sma_over_price=1 and o.id%4!=0
                     o.recomendation_invest=False
-        elif method==4:#ProductRangeInvestRecomendation.StrictThreeSMA:      
+        elif self.method==4:#ProductRangeInvestRecomendation.StrictThreeSMA:      
             list_ohcl=self.product.ohclDailyBeforeSplits()
             dvm=DatetimeValueManager()
             for d in list_ohcl:
@@ -221,7 +223,7 @@ class ProductRangeManager(ObjectManager):
                     o.recomendation_invest=True
                 elif number_sma_over_price<=1:
                     o.recomendation_invest=True
-        elif method==5: #ProductRangeInvestRecomendation.SMA100 STRICT:           
+        elif self.method==5: #ProductRangeInvestRecomendation.SMA100 STRICT:           
             list_ohcl=self.product.ohclDailyBeforeSplits()
             dvm=DatetimeValueManager()
             for d in list_ohcl:
@@ -236,7 +238,8 @@ class ProductRangeManager(ObjectManager):
                     o.recomendation_invest=True
                 else:
                     o.recomendation_invest=False
-        elif method==6:#ProductRangeInvestRecomendation.Strict SMA 10 , 100:      
+        elif self.method==6:#ProductRangeInvestRecomendation.Strict SMA 10 , 100:      
+            print("HOLA")
             list_ohcl=self.product.ohclDailyBeforeSplits()
             dvm=DatetimeValueManager()
             for d in list_ohcl:
@@ -261,16 +264,6 @@ class ProductRangeManager(ObjectManager):
                 "orders_inside": o.getOrdersInside(self.orders), 
             })
         return r
-                    
-#    def tabulator(self):
-#        r=TabulatorFromListDict("productrange_table")
-#        r.setDestinyUrl(None)
-#        r.setLocalZone(self.request.local_zone)
-#        r.setListDict(self.listdict())
-#        r.setFields("id","value","recomendation_invest", "investments_inside","orders_inside")
-#        r.setHeaders("Id", _("Value"), _("Recomendation"),  _("Investments"),  _("Orders"))
-#        r.setTypes("int","int", "bool", "str",  "str")
-#        return r.render()
 
     def mytable(self):        
         def rows():
@@ -310,3 +303,136 @@ class ProductRangeManager(ObjectManager):
 </table>
 """
         return r
+
+    ## ECHARTS
+    def eChart(self, name="chart_product_ranges"):            
+        ld_ohcl=self.product.ohclDailyBeforeSplits()    
+        
+        #Series for variable smas
+        sma_series=""
+        sma_series_legend=""
+        for sma in self.list_of_sma_of_current_method():                
+            sma_series=sma_series+f"""{{
+                        name: 'SMA{sma}',
+                        type: 'line',
+                        data: calculateMA({sma}, data),
+                        smooth: true,
+                        showSymbol: false,
+                        lineStyle: {{
+                            width: 1
+                        }}
+                    }},
+    """   
+            sma_series_legend=sma_series_legend+f"'SMA{sma}', "
+        sma_series_legend=sma_series_legend[:-2]
+        
+        #Series for product ranges
+        ranges_series=""
+        for range in self:
+            print(range.recomendation_invest)
+            if range.recomendation_invest is True:
+                ranges_series=ranges_series+f"""
+                    {{
+                        type: 'line',
+                        data: {str([float(range.value)]*len(ld_ohcl))},
+                        tooltip: {{
+                            show: false
+                        }}, 
+                        showSymbol: false,
+                        itemStyle: {{
+                            color: 'rgba(255, 173, 177, 0.4)'
+                        }}, 
+                    }},
+    """
+
+        
+        
+        
+        #Chart
+        return f"""
+        <div id="{name}" style="width: 80%;height:400px;"></div>
+        <script type="text/javascript">
+            function calculateMA(dayCount, data) {{
+                var result = [];
+                for (var i = 0, len = data.length; i < len; i++) {{
+                    if (i < dayCount) {{
+                        result.push('-');
+                        continue;
+                    }}
+                    var sum = 0;
+                    for (var j = 0; j < dayCount; j++) {{
+                        sum += data[i - j];
+                    }}
+                    result.push(sum / dayCount);
+                }}
+                return result;
+            }}
+            
+            // based on prepared DOM, initialize echarts instance
+            var dates={str(listdict2list(ld_ohcl, "date", cast="str"))};
+            var data={str(listdict2list(ld_ohcl, "close", cast="float"))};
+            var myChart = echarts.init(document.getElementById('{name}'));
+
+            // specify chart configuration item and data
+            var option = {{
+                legend: {{
+                    data: ['{self.product.name}', {sma_series_legend}],
+                    inactiveColor: '#777',
+                }},
+                tooltip: {{
+                    trigger: 'axis',
+                    axisPointer: {{
+                        animation: false,
+                        type: 'cross',
+                        lineStyle: {{
+                            color: '#376df4',
+                            width: 2,
+                            opacity: 1
+                        }}
+                    }}
+                }},
+                xAxis: {{
+                    type: 'category',
+                    data: dates,
+                    axisLine: {{ lineStyle: {{ color: '#8392A5' }} }}
+                }},
+                yAxis: {{
+                    scale: true,
+                    axisLine: {{ lineStyle: {{ color: '#8392A5' }} }},
+                    splitLine: {{ show: false }}
+                }},
+                grid: {{
+                    bottom: 80, 
+                    left:80
+                }},
+                dataZoom: [{{
+                    textStyle: {{
+                        color: '#8392A5'
+                    }},
+                    handleIcon: 'path://M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                    dataBackground: {{
+                        areaStyle: {{
+                            color: '#8392A5'
+                        }},
+                        lineStyle: {{
+                            opacity: 0.8,
+                            color: '#8392A5'
+                        }}
+                    }},
+                    brushSelect: true
+                }}, {{
+                    type: 'inside'
+                }}],
+                series: [
+                    {{
+                        type: 'line',
+                        name: '{self.product.name}',
+                        data: data,
+                    }},
+                    {ranges_series}, 
+                    {sma_series}, 
+                ]
+            }};
+            // use configuration item and data specified to show chart
+            myChart.setOption(option);
+        </script>"""
