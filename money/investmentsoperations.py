@@ -4,7 +4,7 @@ from money.reusing.datetime_functions import string2dtnaive, dtaware
 from money.reusing.listdict_functions import listdict_sum
 from money.reusing.percentage import Percentage
 from money.tables import TabulatorFromListDict
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 Decimal
 from money.connection_dj import cursor_one_row, cursor_rows_as_dict
@@ -138,6 +138,11 @@ class InvestmentsOperations:
     def current_gains_gross_investment(self):
         return listdict_sum(self.io_current, "gains_gross_investment")
 
+    def historical_gains_net_user(self):
+        r=0
+        for o in self.io_historical:
+            r=r + o["gains_net_user"]
+        return r   
     def historical_gains_net_user_between_dt(self, dt_from, dt_to):
         r=0
         for o in self.io_historical:
@@ -263,6 +268,139 @@ class InvestmentsOperations:
         for o in self.io:
             if o["id"]==id:
                 return o
+
+
+    ## ECHARTS
+    def eChart(self, name="investment_view_chart"):
+        if len(self.io)==0:
+            return _("Insuficient data")
+            
+        from money.listdict import QsoDividendsHomogeneus
+        from money.models import Dividends
+        from django.utils import timezone
+            
+        qso_dividends=QsoDividendsHomogeneus(self.request,  Dividends.objects.all().filter(investments_id=self.investment.id).order_by('datetime'),  self.investment)
+
+        #Gets investment important datetimes: operations, dividends, init and current time. For each datetime adds another at the beginning of the day, to get mountains in graph
+        datetimes=set()
+        datetimes.add(self.io[0]["datetime"]-timedelta(days=30))
+        for op in self.io:
+            datetimes.add(op["datetime"])
+            datetimes.add(op["datetime"]-timedelta(seconds=1))
+        for dividend in qso_dividends.qs:
+            datetimes.add(dividend.datetime)
+        datetimes.add(timezone.now())
+        datetimes_list=list(datetimes)
+        datetimes_list.sort()
+        
+        str_datetimes_list=[]
+                
+        invested=[]
+        gains_dividends=[]
+        balance=[]
+        dividends=[]
+        gains=[]
+        
+        for i, dt in enumerate(datetimes_list):
+            str_datetimes_list.append(str(dt.date()))
+            oper_dt=InvestmentsOperations_from_investment(self.request, self.investment, dt, self.request.local_currency)
+            #Calculate dividends in datetime
+            dividend_net=0
+            for dividend in qso_dividends.qs:
+                if dividend.datetime<=dt:
+                    dividend_net=dividend_net+dividend.net
+    
+            #Append data of that datetime
+            invested.append(float(oper_dt.current_invested_user()))
+            balance.append(float(oper_dt.current_balance_futures_user()))
+            gains_dividends.append(float(oper_dt.historical_gains_net_user()+dividend_net))
+            dividends.append(float(dividend_net))
+            gains.append(float(oper_dt.historical_gains_net_user()))
+       
+        #Chart
+        return f"""
+        <div id="{name}" style="width: 80%;height:80%;"></div>
+        <script type="text/javascript">
+
+            // based on prepared DOM, initialize echarts instance
+            var myChart = echarts.init(document.getElementById('{name}'));
+
+            // specify chart configuration item and data
+            var option = {{
+                legend: {{
+                    data: ['{self.investment.name}', "{_("Invested")}", "{_("Balance")}", "{_("Gains and dividends")}",  "{_("Gains")}",  "{_("Dividends")}"],
+                    inactiveColor: '#777',
+                }},
+                tooltip: {{
+                    trigger: 'axis',
+                    axisPointer: {{
+                        animation: false,
+                        type: 'cross',
+                    }}
+                }},
+                xAxis: {{
+                    type: 'category',
+                    data: {str(str_datetimes_list)},
+                    axisLine: {{ lineStyle: {{ color: '#8392A5' }} }}
+                }},
+                yAxis: {{
+                    scale: true,
+                    axisLine: {{ lineStyle: {{ color: '#8392A5' }} }},
+                    splitLine: {{ show: false }}
+                }},
+                grid: {{
+                    bottom: 80, 
+                    left:80
+                }},
+                dataZoom: [{{
+                    textStyle: {{
+                        color: '#8392A5'
+                    }},
+                    handleIcon: 'path://M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                    dataBackground: {{
+                        areaStyle: {{
+                            color: '#8392A5'
+                        }},
+                        lineStyle: {{
+                            opacity: 0.8,
+                            color: '#8392A5'
+                        }}
+                    }},
+                    brushSelect: true
+                }}, {{
+                    type: 'inside'
+                }}],
+                series: [
+                    {{
+                        type: 'line',
+                        name: '{_("Invested")}',
+                        data: {str(invested)},
+                    }},                
+                    {{
+                        type: 'line',
+                        name: '{_("Balance")}',
+                        data: {str(balance)},
+                    }},             
+                    {{
+                        type: 'line',
+                        name: '{_("Gains and dividends")}',
+                        data: {str(gains_dividends)},
+                    }},             
+                    {{
+                        type: 'line',
+                        name: '{_("Gains")}',
+                        data: {str(gains)},
+                    }},             
+                    {{
+                        type: 'line',
+                        name: '{_("Dividends")}',
+                        data: {str(dividends)},
+                    }},                
+                ]
+            }};
+            // use configuration item and data specified to show chart
+            myChart.setOption(option);
+        </script>"""
 
 def InvestmentsOperations_from_investment(request,  investment, dt, local_currency):
     row_io= cursor_one_row("select * from investment_operations(%s,%s,%s)", (investment.pk, dt, local_currency))

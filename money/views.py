@@ -678,6 +678,12 @@ def investment_view(request, pk):
     
     qso_dividends=QsoDividendsHomogeneus(request,  Dividends.objects.all().filter(investments_id=pk).order_by('datetime'),  investment)
     return render(request, 'investment_view.html', locals())
+    
+@login_required
+def investment_view_chart(request, pk):
+    investment=get_object_or_404(Investments.objects.select_related("accounts").select_related("products").select_related("products__productstypes"), id=pk)
+    operations=investment.operations(request, request.local_currency)
+    return render(request, 'investment_view_chart.html', locals())
 
 @method_decorator(login_required, name='dispatch')
 class investmentoperation_new(CreateView):
