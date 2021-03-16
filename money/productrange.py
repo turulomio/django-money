@@ -154,7 +154,6 @@ class ProductRangeManager(ObjectManager):
 
     
     def list_of_sma_of_current_method(self):
-        print("AHORA", self.method)
         if self.method in (0, 1):#ProductRangeInvestRecomendation. None_:
             return []
         elif self.method in (2, 4):#ProductRangeInvestRecomendation.ThreeSMA:      
@@ -167,7 +166,6 @@ class ProductRangeManager(ObjectManager):
     ## Set investment recomendations to all ProductRange objects in array 
     def setInvestRecomendation(self, method):
         self.method=int(method)
-        print(self.method, self.method.__class__)
         if self.method==0:#ProductRangeInvestRecomendation. None_:
             for o in self.arr:
                 o.recomendation_invest=False
@@ -239,7 +237,6 @@ class ProductRangeManager(ObjectManager):
                 else:
                     o.recomendation_invest=False
         elif self.method==6:#ProductRangeInvestRecomendation.Strict SMA 10 , 100:      
-            print("HOLA")
             list_ohcl=self.product.ohclDailyBeforeSplits()
             dvm=DatetimeValueManager()
             for d in list_ohcl:
@@ -329,7 +326,6 @@ class ProductRangeManager(ObjectManager):
         #Series for product ranges
         ranges_series=""
         for range in self:
-            print(range.recomendation_invest)
             if range.recomendation_invest is True:
                 ranges_series=ranges_series+f"""
                     {{

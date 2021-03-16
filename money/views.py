@@ -209,7 +209,6 @@ where
 def product_benchmark(request):
     return product_view(request, request.globals["mem__benchmarkid"])
 
-@timeit
 @login_required
 def product_view(request, pk):
     product=get_object_or_404(Products, id=pk)
@@ -219,8 +218,7 @@ def product_view(request, pk):
     table_quotes_month_quotes=TabulatorProductQuotesMonthQuotes("table_quotes_month_quotes", None, quotes, product.currency).render()
 
     return render(request, 'product_view.html', locals())
-    
-@timeit
+
 @login_required
 def product_ranges(request):
     if request.method == 'POST':
