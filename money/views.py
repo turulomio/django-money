@@ -17,7 +17,7 @@ from django.views.generic.edit import UpdateView, CreateView, DeleteView
 
 from math import floor
 
-from money.connection_dj import cursor_rows, cursor_one_column, execute
+from money.connection_dj import cursor_rows, cursor_one_column, execute, cursor_one_field
 from money.forms import (
     AccountsTransferForm, 
     CreditCardPayForm, 
@@ -60,6 +60,8 @@ from money.listdict import (
     LdoInvestmentsRanking, 
     LdoAssetsEvolution, 
     LdoAssetsEvolutionInvested, 
+    LdoDerivatives, 
+    LdoProductsPairsEvolution, 
     listdict_accounts, 
     listdict_banks, 
     listdict_chart_total_async, 
@@ -73,7 +75,6 @@ from money.listdict import (
     listdict_investmentsoperationshistorical, 
     listdict_orders, 
     listdict_product_quotes_month_comparation, 
-    LdoProductsPairsEvolution, 
     QsoAccountsOperationsHeterogeneus, 
     QsoCreditcardsoperationsHomogeneus, 
     QsoDividendsHomogeneus, 
@@ -881,7 +882,26 @@ def report_evolution(request):
     
     return render(request, 'report_evolution.html', locals())
 
-@timeit
+
+@login_required
+def report_derivatives(request):
+    year=date.today().year if request.GET.get("year", None) is None else int(request.GET["year"])
+    ldo_derivatives=LdoDerivatives(request, year)
+    
+    adjustments=cursor_one_field("select sum(amount) from accountsoperations where concepts_id in (%s)", (eConcept.DerivativesAdjustment, ))
+    c_adjustments=Currency(adjustments, request.local_currency)
+    guarantees=cursor_one_field("select sum(amount) from accountsoperations where concepts_id in (%s)", (eConcept.DerivativesGuarantee, ))
+    c_guarantees=Currency(guarantees, request.local_currency)
+    commissions=cursor_one_field("select sum(amount) from accountsoperations where concepts_id in (%s)", (eConcept.DerivativesCommission, ))
+    c_commissions=Currency(commissions, request.local_currency)
+#    rollover=AccountOperationManagerHeterogeneus_from_sql(self.mem, "select * from accountsoperations where concepts_id in (%s)", (eConcept.RolloverPaid, ))
+#    iohhm=self.InvestmentOperationHistoricalHeterogeneusManager_derivatives()
+#    iochm=self.InvestmentOperationCurrentHeterogeneusManager_derivatives()
+
+    
+    
+    return render(request, 'report_derivatives.html', locals())
+
 @login_required
 def ajax_chart_total(request, year_from):
     year_start=1970

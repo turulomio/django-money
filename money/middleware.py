@@ -11,7 +11,6 @@ class MoneyMiddleware:
         self.get_response = get_response
         # One-time configuration and initialization.
 
-#        start=time.time()
         self.menu=Menu(_("Django Money"))
         self.menu.append(Action(_("Banks"), None,  "bank_list_active",  True))
         self.menu.append(Action(_("Accounts"), None,  "account_list_active",  True))
@@ -25,13 +24,12 @@ class MoneyMiddleware:
         grReport=Group(1, _("Reports"), "10",  True)
         grReport.append(Action(_("Concepts"), None, "report_concepts", True))
         grReport.append(Action(_("Total"), None, "report_total", True))
+        grReport.append(Action(_("Derivatives"), None, "report_derivatives", True))
         grReport.append(Action(_("Evolution"), None, "report_evolution", True))
         grReport.append(Action(_("Ranges"), None, "product_ranges", True))
         grReport.append(Action(_("Investments ranking"), None, "investment_ranking", True))
         grReport.append(grCharts)
-        
-        
-        
+
         grAdministration=Group(1, _("Management"), "20",  True)
         grAdministration.append(Action(_("Concepts"), None, "concept_list", True))
         
@@ -55,9 +53,7 @@ class MoneyMiddleware:
         
         
         self.dict_operationstypes=Operationstypes.dictionary()
-        
-        
-        #print(_("Middleware start time took {} seconds".format(time.time()-start)))
+
 
     def __call__(self, request):
         # Code to be executed for each request before

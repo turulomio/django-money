@@ -29,7 +29,7 @@ from asgiref.sync import sync_to_async
 from datetime import date, timedelta
 from decimal import Decimal
 from money.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_dict
-from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo
+from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo, listdict_sum
 from django.conf import settings
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -234,7 +234,36 @@ class LdoInvestmentsOperationsCurrentHeterogeneus(LdoDjangoMoney):
         r.setBottomCalc(None, None, None, None, "sum", None,  "sum", "sum", "sum", None, None, None)
         r.showLastRecord(False)
         return r
+
+## List dictionary Object to show derivatives evolution by month (only one year)
+class LdoDerivatives(LdoDjangoMoney):
+    def __init__(self, request, year, name=None):
+        LdoDjangoMoney.__init__(self, request, name)
+        self.year=year
+        self.listdict()
         
+    def listdict(self):
+        months=cursor_rows("select sum(amount) as amount, extract(month from datetime)::text as month from accountsoperations where concepts_id=68 and  extract(year from datetime)=%s group by 2", (self.year, ))
+        d={str(i): 0 for i in range(1, 13)} #Initializate dict to 0
+        d["concept"]= "Adjustments"
+        for row in months:
+            d[row["month"]]=row["amount"]
+        d["total"]=listdict_sum(months, "amount")
+        self.ld.append(d)
+
+    def tabulator(self):
+        currency=self.request.local_currency
+        r=TabulatorFromListDict(f"{self.name}_table")
+        r.setDestinyUrl(None)
+        r.setLocalZone(self.request.local_zone)
+        r.setListDict(self.ld)
+        r.setFields("concept", "1","2","3", "4","5","6", "7","8","9", "10","11","12","total" )
+        r.setHeaders(_("Concept"), _("January"),  _("February"), _("March"), _("April"), _("May"), _("June"), _("July"), _("August"), _("September"), _("October"), _("November"), _("December"), _("Total"))
+        r.setTypes("str", *[currency]*13)
+        #r.setBottomCalc(None, None, None, None, "sum", None,  "sum", "sum", "sum", None, None, None)
+        #r.showLastRecord(False)
+        return r
+
 ## IOC of several investments
 class LdoInvestmentsRanking(LdoDjangoMoney):
     def __init__(self, request, name=None):

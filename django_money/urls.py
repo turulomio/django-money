@@ -113,6 +113,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
 
     path('report/concepts/',  money_views.report_concepts,  name='report_concepts'), 
     path('report/concepts/<int:year>/<int:month>/',  money_views.report_concepts,  name='report_concepts'), 
+    path('report/derivatives/',  money_views.report_derivatives,  name='report_derivatives'), 
     path('report/evolution/', money_views.report_evolution,  name='report_evolution'),
     path('report/total/', money_views.report_total,  name='report_total'),
     path('report/total/<int:year>/', money_views.report_total,  name='report_total'),
