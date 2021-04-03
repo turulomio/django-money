@@ -163,6 +163,8 @@ SESSION_SAVE_EVERY_REQUEST = True
 ## Expires session if browser is closed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-if os.path.exists("django_money/mysettings.py"):
-    from django_money.mysettings import *
+if os.path.exists("/etc/django_money/mysettings.py"):
+    import sys
+    sys.path.append("/etc/django_money/")
+    from mysettings import *
     print("Personal settings overided from mysettings.py")
