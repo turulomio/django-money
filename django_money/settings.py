@@ -76,34 +76,32 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'django_money.wsgi.application'
 
-from settings_file import MyConfigParser
-myconfigparser=MyConfigParser("/etc/django_money/settings.conf")
 ## Database connection definitions
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': myconfigparser.get("db", "db", "mylibrary"),
-        'USER': myconfigparser.cget("db", "user", "postgres"),
-        'PASSWORD': myconfigparser.cget("db", "password", "mypass"),
-        'HOST': myconfigparser.get("db", "server", "127.0.0.1"),
-        'PORT': myconfigparser.getInteger("db", "port", 5432),
+        'NAME': 'xulpymoney',
+        'USER': 'postgres',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1'
+        'PORT': 5432,
     }
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = myconfigparser.get("smtp", "server", "127.0.0.1")
-EMAIL_PORT = myconfigparser.getInteger("smtp", "port", 25)
-EMAIL_HOST_USER = myconfigparser.cget("smtp", "user",  "user")
-EMAIL_HOST_PASSWORD =myconfigparser.cget("smtp", "password",  "mypass")
-EMAIL_USE_TLS = myconfigparser.getBoolean("smtp", "tls",  False)
+EMAIL_HOST = "127.0.0.1"
+EMAIL_PORT = 25
+EMAIL_HOST_USER = "user"
+EMAIL_HOST_PASSWORD ="mypass"
+EMAIL_USE_TLS = False
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 
 #print(f"Smtp server: smtp://{EMAIL_HOST_USER}@{EMAIL_HOST}:{EMAIL_PORT} (Tls: {EMAIL_USE_TLS})")
 
 
-CONCURRENCY_DB_CONNECTIONS_BY_USER=myconfigparser.getInteger("concurrency", "dbconnectionsbyuser", 4)
+CONCURRENCY_DB_CONNECTIONS_BY_USER=4
 
 ## Locale paths in source distribution
 LOCALE_PATHS = (
