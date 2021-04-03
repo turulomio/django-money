@@ -894,7 +894,10 @@ def report_derivatives(request):
     c_guarantees=Currency(guarantees, request.local_currency)
     commissions=cursor_one_field("select sum(amount) from accountsoperations where concepts_id in (%s)", (eConcept.DerivativesCommission, ))
     c_commissions=Currency(commissions, request.local_currency)
-#    rollover=AccountOperationManagerHeterogeneus_from_sql(self.mem, "select * from accountsoperations where concepts_id in (%s)", (eConcept.RolloverPaid, ))
+    rollover_paid=cursor_one_field("select sum(amount) from accountsoperations where concepts_id in (%s)", (eConcept.RolloverPaid, ))
+    c_rollover_paid=Currency(rollover_paid, request.local_currency)
+    rollover_received=cursor_one_field("select sum(amount) from accountsoperations where concepts_id in (%s)", (eConcept.RolloverReceived, ))
+    c_rollover_received=Currency(rollover_received, request.local_currency)
 #    iohhm=self.InvestmentOperationHistoricalHeterogeneusManager_derivatives()
 #    iochm=self.InvestmentOperationCurrentHeterogeneusManager_derivatives()
 
