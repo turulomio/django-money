@@ -83,7 +83,7 @@ DATABASES = {
         'NAME': 'xulpymoney',
         'USER': 'postgres',
         'PASSWORD': '',
-        'HOST': '127.0.0.1'
+        'HOST': '127.0.0.1',
         'PORT': 5432,
     }
 }
@@ -163,3 +163,6 @@ SESSION_SAVE_EVERY_REQUEST = True
 ## Expires session if browser is closed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
+if os.path.exists("django_money/mysettings.py"):
+    from django_money.mysettings import *
+    print("Personal settings overided from mysettings.py")

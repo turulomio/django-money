@@ -3,8 +3,8 @@
 
 from decimal import Decimal
 from logging import warning
-from currency import Currency
-from percentage import Percentage
+from .currency import Currency
+from .percentage import Percentage
 
 def valueORempty(v):
     return "" if v is None else v
