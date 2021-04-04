@@ -88,19 +88,6 @@ DATABASES = {
     }
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-EMAIL_HOST = "127.0.0.1"
-EMAIL_PORT = 25
-EMAIL_HOST_USER = "user"
-EMAIL_HOST_PASSWORD ="mypass"
-EMAIL_USE_TLS = False
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-SERVER_EMAIL = EMAIL_HOST_USER
-
-#print(f"Smtp server: smtp://{EMAIL_HOST_USER}@{EMAIL_HOST}:{EMAIL_PORT} (Tls: {EMAIL_USE_TLS})")
-
-
 CONCURRENCY_DB_CONNECTIONS_BY_USER=4
 
 ## Locale paths in source distribution
@@ -162,9 +149,3 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 ## Expires session if browser is closed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
-if os.path.exists("/etc/django_money/mysettings.py"):
-    import sys
-    sys.path.append("/etc/django_money/")
-    from mysettings import *
-    print("Personal settings overided from mysettings.py")
