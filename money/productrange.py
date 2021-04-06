@@ -65,7 +65,7 @@ class ProductRange():
                         continue
                 if self.isInside(op["price_investment"])==True:
                     r=r+ f"<a href='{reverse_lazy('investment_view', args=(io.investment.id,))}'>{io.investment.fullName()}</a>. Invested: {Currency(op[ 'invested_user'], io.investment.products.currency)}<br>"
-        return r[:-1]
+        return r
         
     ## Search for orders in self.mem.data and 
     def getOrdersInside(self, orders): 
@@ -282,6 +282,7 @@ class ProductRangeManager(ObjectManager):
     <td><input type="checkbox" onclick="return false;" {checked}/></td>
     <td>{o.getInvestmentsOperationsInside(self.iom)}</td>
     <td>{o.getOrdersInside(self.orders)}</td>
+    
     <td>{neworder}</td>
 </tr>"""
             return r
@@ -432,3 +433,46 @@ class ProductRangeManager(ObjectManager):
             // use configuration item and data specified to show chart
             myChart.setOption(option);
         </script>"""
+
+    ## ECHARTS FOR VUE
+    def eChartOnlyJs(self, name="chart_product_ranges"):            
+        ld_ohcl=self.product.ohclDailyBeforeSplits()    
+        
+        #Series for variable smas
+        sma_series=""
+        sma_series_legend=""
+        for sma in self.list_of_sma_of_current_method():                
+            sma_series=sma_series+f"""{{
+                        name: 'SMA{sma}',
+                        type: 'line',
+                        data: calculateMA({sma}, data),
+                        smooth: true,
+                        showSymbol: false,
+                        lineStyle: {{
+                            width: 1
+                        }}
+                    }},
+    """   
+            sma_series_legend=sma_series_legend+f"'SMA{sma}', "
+        sma_series_legend=sma_series_legend[:-2]
+        
+        #Series for product ranges
+        ranges_series=""
+        for range in self:
+            if range.recomendation_invest is True:
+                ranges_series=ranges_series+f"""
+                    {{
+                        type: 'line',
+                        data: {str([float(range.value)]*len(ld_ohcl))},
+                        tooltip: {{
+                            show: false
+                        }}, 
+                        showSymbol: false,
+                        itemStyle: {{
+                            color: 'rgba(255, 173, 177, 0.4)'
+                        }}, 
+                    }},
+    """
+
+        
+        

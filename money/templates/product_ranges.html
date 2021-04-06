@@ -1,9 +1,14 @@
-{% extends 'base.html' %}
+{% extends 'base_vue.html' %}
 
 {% load i18n %}
 
 {% block content %}
+<div id="app">
+
+<div>
+
     <h1>{% trans 'Product ranges' %}</h1>
+    <h2>{{ message}}</h2>
     <form method="post" class="form_table">
         <table>
         {% csrf_token %}
@@ -11,18 +16,50 @@
         </table>
         <button type="submit" name="button">{% trans "Show ranges" %}</button>
     </form>
-<p>
+
+
 {% if prm.product.basic_results.last %}
-    <h2>{% trans 'Product ranges table' %}</h2>
 
-    <p>{% trans "Current price: " %}{{prm.product.basic_results.last}}</p>
+                <v-tabs v-model="tab">
+                    <v-tab key="0">{% trans 'Product ranges table' %}</v-tab>
+                    <v-tab key="1">{% trans 'Product ranges chart' %}</v-tab>
+                </v-tabs>
+                <v-tabs-items v-model="tab">
+                <v-tab-item key="0">
+                    <v-card flat>
+                        <p>{% trans "Current price: " %}{{prm.product.basic_results.last}}</p>
     
-    {{prm.mytable| safe}} 
-    <br>
-  
-
-    <h2>{% trans 'Product ranges chart' %}</h2>
-    {{ prm.eChart | safe }}
-  
+                        {{prm.mytable| safe}} 
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item key="1">
+                    <v-card flat>
+                        Poner componente ECHART-VUE
+                    </v-card>
+                </v-tab-item>
+            </v-tabs-items>
 {% endif %}
+
+</div>
+</div>
+<script>
+
+
+
+        new Vue({
+            el: '#app',
+            vuetify: new Vuetify(),
+            data:{
+                message: "Message bueno",
+                timestamp: "Hola",
+                tab: null,
+                chart: '',
+            }
+        })
+        
+        
+</script>
+
+
+            <div id="chart_product_ranges"></div>
 {% endblock %}
