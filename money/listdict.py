@@ -32,6 +32,7 @@ from money.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_
 from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo, listdict_sum
 from django.conf import settings
 from django.urls import reverse_lazy
+from django.templatetags.static import static
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from xulpymoney.libxulpymoneytypes import eOperationType
@@ -617,7 +618,7 @@ class QsoInvestments(QsoCommon):
                 cell=row.getCell("percentage_sellingpoint");
                 cell.getElement().style.backgroundRepeat= 'no-repeat';
                 cell.getElement().style.backgroundPosition= '3px 3px';
-                cell.getElement().style.backgroundImage="url('./static/images/alarm_clock.png')";
+                cell.getElement().style.backgroundImage="{static('images/alarm_clock.png')}";
                 cell.getElement().style.backgroundSize = "16px 16px";
             }}
         }}
