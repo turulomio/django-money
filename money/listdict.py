@@ -617,7 +617,7 @@ class QsoInvestments(QsoCommon):
                 cell=row.getCell("percentage_sellingpoint");
                 cell.getElement().style.backgroundRepeat= 'no-repeat';
                 cell.getElement().style.backgroundPosition= '3px 3px';
-                cell.getElement().style.backgroundImage="url('/static/images/alarm_clock.png')";
+                cell.getElement().style.backgroundImage="url('./static/images/alarm_clock.png')";
                 cell.getElement().style.backgroundSize = "16px 16px";
             }}
         }}
