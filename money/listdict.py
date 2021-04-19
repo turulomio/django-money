@@ -439,7 +439,7 @@ class QsoCreditcardsoperationsHomogeneus(QsoCommon):
         r.setInitialOptions(f"""
             rowClick:function(e, row){{
                 var operations_id=document.getElementById("id_operations_id");
-                selected=table_{self.name}_table.getSelectedData();
+                selected={self.name}_table.getSelectedData();
                 var text="";
                 var amount=0;
                 for (i = 0; i < selected.length; i++) {{

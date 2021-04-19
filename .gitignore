@@ -131,3 +131,5 @@ dmypy.json
 
 django_money.epj
 node_modules/
+django_money/presettings.py
+django-money.epj
