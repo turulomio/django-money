@@ -14,7 +14,6 @@
             <button type="submit" name="button"  style="all:revert">{% trans "Show ranges" %}</button>
         </form>
 
-                <v-chart autoresize :option="option"/>
 
         {% if prm.product.basic_results.last %}
             <v-tabs v-model="tab">
@@ -44,7 +43,10 @@
                     </v-data-table>   
                 </v-card>
             </v-tab-item>
-            <v-tab-item key="1">
+            <v-tab-item key="1" >
+    <div style="height: 400px;">
+        <v-chart autoresize :option="option"/>
+    </div>
             </v-tab-item>
         </v-tabs-items>
         {% endif %}
@@ -52,13 +54,12 @@
 </div>
 <script>
 
-     Vue.use(VueCompositionAPI)
     Vue.component("v-chart", VueECharts);  
     
     new Vue({
         el: '#app',
         delimiters: ['[[', ']]'],
-        vuetify: new Vuetify(),
+         vuetify: new Vuetify(),
         
         data:{
             tab: null,
@@ -146,9 +147,6 @@
         font-weight: 900;
     }
 
-    #app {
-    height: 400px;
-    }
 </style>
 
 {% endblock %}

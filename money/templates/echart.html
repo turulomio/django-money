@@ -4,7 +4,9 @@
 
 {% block content %}
 <div id="app">
-  <v-chart autoresize :option="option"/>
+    <div style="height: 400px;">
+        <v-chart autoresize :option="option"/>
+    </div>
 </div>
 <!--<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
 <script src="https://cdn.jsdelivr.net/npm/@vue/composition-api@1.0.0-rc.3"></script>
@@ -82,10 +84,6 @@ new Vue({
     .green{
         color:red;
         font-weight: 900;
-    }
-
-    #app {
-    height: 400px;
     }
 </style>
 
