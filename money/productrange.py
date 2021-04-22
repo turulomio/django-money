@@ -273,58 +273,24 @@ class ProductRangeManager(ObjectManager):
             })
         return dumps(r,  indent=4, sort_keys=True)
 
-    def mytable(self):        
-        def rows():
-            r=""
-            for o in self:
-                if o.recomendation_invest is True:
-                    neworder=f"<a href='{reverse_lazy('order_new')}?price={round(o.value, self.product.decimals)}'>{_('Order')}</a>"
-                    checked="checked"
-                else:
-                    neworder=""
-                    checked=""
-                    
-                
-              
-                classcurrent=' class="green"'  if o.isInside(self.product.basic_results()["last"]) is True else ""
-                r=r+ f"""
-<tr>
-    <td{classcurrent}><a href="javascript:alert('{o}');">{round(o.value, self.product.decimals)}</a></td>
-    <td><input type="checkbox" onclick="return false;" {checked}/></td>
-    <td>{o.getInvestmentsOperationsInside(self.iom)}</td>
-    <td>{o.getOrdersInside(self.orders)}</td>
-    
-    <td>{neworder}</td>
-</tr>"""
-            return r
-        #-------------------------------------------
-        r=f"""
-<table class="mytable">
-<tr>
-    <th>{_("Value")}</th>
-    <th>{_("Must invert")}</th>
-    <th>{_("Investments")}</th>
-    <th>{_("Orders")}</th>
-    <th>{_("Commands")}</th>
-    
-</tr>
-{rows()}
-</table>
-"""
-        return r
-
     ## ECHARTS
-    def eChart(self, name="chart_product_ranges"):            
-        ld_ohcl=self.product.ohclDailyBeforeSplits()    
+    def eChartVUE(self, name="chart_product_ranges"):            
+        ld_ohcl=self.product.ohclDailyBeforeSplits()         
+        dvm=DatetimeValueManager()
+        for d in ld_ohcl:
+            dvm.appendDV(d["date"], d["close"])
         
         #Series for variable smas
         sma_series=""
         sma_series_legend=""
-        for sma in self.list_of_sma_of_current_method():                
+        for sma in self.list_of_sma_of_current_method():   
+            l=["None"]*sma
+            for o in dvm.sma(sma):
+                l.append(float(o.value))
             sma_series=sma_series+f"""{{
                         name: 'SMA{sma}',
                         type: 'line',
-                        data: calculateMA({sma}, data),
+                        data: {str(l)},
                         smooth: true,
                         showSymbol: false,
                         lineStyle: {{
@@ -335,14 +301,14 @@ class ProductRangeManager(ObjectManager):
             sma_series_legend=sma_series_legend+f"'SMA{sma}', "
         sma_series_legend=sma_series_legend[:-2]
         
-        #Series for product ranges
+        #Series for product ranges horizontal lines
         ranges_series=""
-        for range in self:
-            if range.recomendation_invest is True:
+        for range_ in self:
+            if range_.recomendation_invest is True:
                 ranges_series=ranges_series+f"""
                     {{
                         type: 'line',
-                        data: {str([float(range.value)]*len(ld_ohcl))},
+                        data: {str([float(range_.value)]*len(ld_ohcl))},
                         tooltip: {{
                             show: false
                         }}, 
@@ -352,37 +318,9 @@ class ProductRangeManager(ObjectManager):
                         }}, 
                     }},
     """
-
-        
-        
-        
-        #Chart
+       
         return f"""
-        <div id="{name}" style="width: 80%;height:400px;"></div>
-        <script type="text/javascript">
-            function calculateMA(dayCount, data) {{
-                var result = [];
-                for (var i = 0, len = data.length; i < len; i++) {{
-                    if (i < dayCount) {{
-                        result.push('-');
-                        continue;
-                    }}
-                    var sum = 0;
-                    for (var j = 0; j < dayCount; j++) {{
-                        sum += data[i - j];
-                    }}
-                    result.push(sum / dayCount);
-                }}
-                return result;
-            }}
-            
-            // based on prepared DOM, initialize echarts instance
-            var dates={str(listdict2list(ld_ohcl, "date", cast="str"))};
-            var data={str(listdict2list(ld_ohcl, "close", cast="float"))};
-            var myChart = echarts.init(document.getElementById('{name}'));
-
-            // specify chart configuration item and data
-            var option = {{
+        {{
                 legend: {{
                     data: ['{self.product.name}', {sma_series_legend}],
                     inactiveColor: '#777',
@@ -401,7 +339,7 @@ class ProductRangeManager(ObjectManager):
                 }},
                 xAxis: {{
                     type: 'category',
-                    data: dates,
+                    data: {str(listdict2list(ld_ohcl, "date", cast="str"))},
                     axisLine: {{ lineStyle: {{ color: '#8392A5' }} }}
                 }},
                 yAxis: {{
@@ -435,55 +373,10 @@ class ProductRangeManager(ObjectManager):
                     {{
                         type: 'line',
                         name: '{self.product.name}',
-                        data: data,
+                        data: {str(listdict2list(ld_ohcl, "close", cast="float"))},
                     }},
                     {ranges_series}, 
                     {sma_series}, 
                 ]
-            }};
-            // use configuration item and data specified to show chart
-            myChart.setOption(option);
-        </script>"""
-
-    ## ECHARTS FOR VUE
-    def eChartOnlyJs(self, name="chart_product_ranges"):            
-        ld_ohcl=self.product.ohclDailyBeforeSplits()    
-        
-        #Series for variable smas
-        sma_series=""
-        sma_series_legend=""
-        for sma in self.list_of_sma_of_current_method():                
-            sma_series=sma_series+f"""{{
-                        name: 'SMA{sma}',
-                        type: 'line',
-                        data: calculateMA({sma}, data),
-                        smooth: true,
-                        showSymbol: false,
-                        lineStyle: {{
-                            width: 1
-                        }}
-                    }},
-    """   
-            sma_series_legend=sma_series_legend+f"'SMA{sma}', "
-        sma_series_legend=sma_series_legend[:-2]
-        
-        #Series for product ranges
-        ranges_series=""
-        for range in self:
-            if range.recomendation_invest is True:
-                ranges_series=ranges_series+f"""
-                    {{
-                        type: 'line',
-                        data: {str([float(range.value)]*len(ld_ohcl))},
-                        tooltip: {{
-                            show: false
-                        }}, 
-                        showSymbol: false,
-                        itemStyle: {{
-                            color: 'rgba(255, 173, 177, 0.4)'
-                        }}, 
-                    }},
-    """
-
-        
-        
+            }}
+        """
