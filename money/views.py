@@ -225,8 +225,9 @@ def product_ranges(request):
     if request.method == 'POST':
         form = ProductsRangeForm(request.POST)
         if form.is_valid():
-            prm=ProductRangeManager(request, form.cleaned_data['products'], form.cleaned_data['percentage_between_ranges'], form.cleaned_data['percentage_gains'], form.cleaned_data['only_first'], form.cleaned_data["accounts"])
+            prm=ProductRangeManager(request, form.cleaned_data['products'], form.cleaned_data['percentage_between_ranges'], form.cleaned_data['percentage_gains'], form.cleaned_data['only_first'], form.cleaned_data["accounts"], decimals=form.cleaned_data["products"].decimals)
             prm.setInvestRecomendation(form.cleaned_data['recomendation_methods'])
+            url_order_add=reverse_lazy('order_new')
             return render(request, 'product_ranges.html', locals())
     else:
         form = ProductsRangeForm()

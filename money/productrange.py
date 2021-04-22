@@ -1,11 +1,11 @@
 from datetime import date
 from decimal import Decimal
-from django.urls import reverse_lazy
+from json import dumps
+from django.urls import reverse_lazy,  reverse
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from xulpymoney.libmanagers import ObjectManager, DatetimeValueManager
 from money.models import Investments, Orders
-from money.reusing.currency import Currency
 from money.reusing.listdict_functions import listdict2list
 from money.reusing.percentage import Percentage
 from money.investmentsoperations import InvestmentsOperationsManager_from_investment_queryset
@@ -51,9 +51,10 @@ class ProductRange():
         else:
             return False
 
+        
     ## Search for investments in self.mem.data and 
-    def getInvestmentsOperationsInside(self, iom):
-        r=""
+    def getInvestmentsOperationsInsideJson(self, iom):
+        r=[]
         for io in iom.list:
             if self.only_account is not None:#If different account continues
                 if io.investment.accounts.id != self.only_account.id:
@@ -64,18 +65,27 @@ class ProductRange():
                     if io.io_current.index(op)!=0:
                         continue
                 if self.isInside(op["price_investment"])==True:
-                    r=r+ f"<a href='{reverse_lazy('investment_view', args=(io.investment.id,))}'>{io.investment.fullName()}</a>. Invested: {Currency(op[ 'invested_user'], io.investment.products.currency)}<br>"
+                    r.append({
+                        "url": reverse('investment_view', args=(io.investment.id,)), 
+                        "name": io.investment.fullName(), 
+                        "invested": float(op[ 'invested_user']), 
+                    })
+
         return r
         
     ## Search for orders in self.mem.data and 
-    def getOrdersInside(self, orders): 
-        r=""
+    def getOrdersInsideJson(self, orders): 
+        r=[]
         for o in orders:
             if self.only_account is not None:#If different account continues
                 if o.investments.accounts.id != self.only_account.id:
                     continue
             if o.investments.products.id==self.product.id and self.isInside(o.price)==True:
-                r=r+f"<a href='{reverse_lazy('order_update',  args=(o.id, ))}'>{o.investments.fullName()}</a>. Amount: {o.currency_amount()}<br>"
+                r.append({
+                    "url": reverse('order_update',  args=(o.id, )), 
+                    "name": o.investments.fullName(), 
+                    "amount": float(o.currency_amount().amount), 
+                })
         return r
       
 
@@ -250,17 +260,18 @@ class ProductRangeManager(ObjectManager):
                 if number_sma_over_price<2:
                     o.recomendation_invest=True
 
-
-    def listdict(self):
+    def listdict_json(self):
         r=[]
         for i, o in enumerate(self.arr):
             r.append({
-                "value": int(o.value), 
+                "value": round(float(o.value),  self.decimals), 
                 "recomendation_invest": o.recomendation_invest, 
-                "investments_inside": o.getInvestmentsOperationsInside(self.iom), 
-                "orders_inside": o.getOrdersInside(self.orders), 
+                "investments_inside": o.getInvestmentsOperationsInsideJson(self.iom), 
+                "orders_inside": o.getOrdersInsideJson(self.orders), 
+                "current_in_range": o.isInside(self.product.basic_results()["last"]), 
+                "limits": str(o)
             })
-        return r
+        return dumps(r,  indent=4, sort_keys=True)
 
     def mytable(self):        
         def rows():

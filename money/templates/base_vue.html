@@ -28,17 +28,18 @@
 
     {% block head_js %}
         {% block head_js_site %}
-        
-
-            <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+            <script src="https://cdn.jsdelivr.net/npm/@vue/composition-api@1.0.0-rc.3"></script>
+            <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.2"></script>
+            <script src="https://cdn.jsdelivr.net/npm/vue-echarts@6.0.0-rc.4"></script>
             <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
             <script src="{% url 'javascript-catalog' %}"></script>
-            <script type="text/javascript" src='{% static "js/jquery.js" %}'></script>
+<!--             <script type="text/javascript" src='{% static "js/jquery.js" %}'></script> -->
 <!--             <script type="text/javascript" src='{% static "js/jquery-ui.js" %}'></script> -->
-            <script type="text/javascript" src='{% static "js/bootstrap.js" %}'></script>            
-            <script type="text/javascript" src='{% static "js/echarts.min.js" %}'></script>       
-            <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
-            <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script>
+<!--             <script type="text/javascript" src='{% static "js/bootstrap.js" %}'></script>             -->
+<!--             <script type="text/javascript" src='{% static "js/echarts.min.js" %}'></script>        -->
+<!--             <script type="text/javascript" src='{% static "js/moment.js" %}'></script> -->
+<!--             <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script> -->
 <!--             <script type="text/javascript" src='{% static "js/Chart.min.js" %}'></script> -->
 <!--             <script type="text/javascript" src='{% static "js/chartjs-chart-financial.js" %}'></script> -->
 <!--             <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script> -->
@@ -61,15 +62,15 @@
         {% block head_css %}
         {% block head_css_site %}
 
-  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href='{% static "css/jquery-ui.css" %}'>
-        <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap.css" %}'>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
 <!--         <link rel="stylesheet" type="text/css" href='{% static "css/Chart.css" %}'> -->
 <!--         <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'> -->
 <!--         <link rel="stylesheet" type="text/css" href='{% static "css/jquery.datetimepicker.min.css" %}'> -->
-        <link rel="stylesheet" type="text/css" href='{% static "css/mystyles.css" %}?dev={% random_integer 0 10000 %}'>
+        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+<!--         <link rel="stylesheet" type="text/css" href='{% static "css/jquery-ui.css" %}'> -->
+        <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap.css" %}'>
+        <link rel="stylesheet" type="text/css" href='{% static "css/mystylesvue.css" %}?dev={% random_integer 0 10000 %}'>
         {% endblock head_css_site %}
 
         {% block head_css_section %}
@@ -88,7 +89,7 @@
             <div class="languages" style="display:flex; flex-direction: row; justify-content: center;">
             <form class="languages" action="{% url 'set_language' %}" method="post">{% csrf_token %}
                 <input type="hidden" name="next" value="{{redirect_to}}">
-                    <select name="language" id="" onchange="this.form.submit()">
+                    <select name="language" onchange="this.form.submit()" style="all:revert" >
                         {% get_current_language as LANGUAGE_CODE %}
                         {% get_available_languages as LANGUAGES %}
                         {% get_language_info_list for LANGUAGES as languages %}
