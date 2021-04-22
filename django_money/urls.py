@@ -131,6 +131,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     
     
     path('widget/modal_window', money_views.widget_modal_window, name='widget_modal_window'),
+    path('widget/echart', money_views.echart, name='echart'),
     
 )
 

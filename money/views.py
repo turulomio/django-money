@@ -1697,3 +1697,5 @@ def get_parameter_to_boolean(request, parameter):
     
 def widget_modal_window(request):
     return render(request, 'widget_modal_window.html', locals())
+def echart(request):
+    return render(request, 'echart.html', locals())

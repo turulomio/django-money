@@ -14,6 +14,7 @@
             <button type="submit" name="button"  style="all:revert">{% trans "Show ranges" %}</button>
         </form>
 
+                <v-chart autoresize :option="option"/>
 
         {% if prm.product.basic_results.last %}
             <v-tabs v-model="tab">
@@ -44,7 +45,6 @@
                 </v-card>
             </v-tab-item>
             <v-tab-item key="1">
-<!--                 <v-chart autoresize :option="option"/> -->
             </v-tab-item>
         </v-tabs-items>
         {% endif %}
@@ -52,12 +52,14 @@
 </div>
 <script>
 
-//     Vue.component("v-chart", VueECharts);
+     Vue.use(VueCompositionAPI)
+    Vue.component("v-chart", VueECharts);  
     
     new Vue({
         el: '#app',
         delimiters: ['[[', ']]'],
         vuetify: new Vuetify(),
+        
         data:{
             tab: null,
             chart: '',                
@@ -70,6 +72,9 @@
             ],   
             tableData: {{prm.listdict_json | safe}},
             option: {
+                textStyle: {
+                    fontFamily: 'Inter, "Helvetica Neue", Arial, sans-serif'
+                },
                 title: {
                 text: "Traffic Sources",
                 left: "center"
@@ -115,7 +120,6 @@
         },
         methods:{
             addOrder(item){
-                console.log(item)
                 window.location.href = `{{ url_order_add }}?price=${item.value}`
             },
             showLimits(item){

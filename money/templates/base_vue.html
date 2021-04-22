@@ -28,7 +28,11 @@
 
     {% block head_js %}
         {% block head_js_site %}
-             <script type="text/javascript" src='{% static "js/vue-bundle.js" %}'></script>
+             <script type="text/javascript" src='{% static "js/vue.min.js" %}'></script>
+             <script type="text/javascript" src='{% static "js/vuetify.min.js" %}'></script>
+             <script type="text/javascript" src='{% static "js/echarts.min.js" %}'></script> 
+             <script type="text/javascript" src='{% static "js/vue-composition-api.prod.js" %}'></script>
+             <script type="text/javascript" src='{% static "js/index.umd.min.js" %}'></script>
 <!--            <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
             <script src="https://cdn.jsdelivr.net/npm/@vue/composition-api@1.0.0-rc.3"></script>
             <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.2"></script>
@@ -68,8 +72,9 @@
 <!--         <link rel="stylesheet" type="text/css" href='{% static "css/Chart.css" %}'> -->
 <!--         <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'> -->
 <!--         <link rel="stylesheet" type="text/css" href='{% static "css/jquery.datetimepicker.min.css" %}'> -->
-        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+<!--         <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet"> -->
 <!--         <link rel="stylesheet" type="text/css" href='{% static "css/jquery-ui.css" %}'> -->
+        <link rel="stylesheet" type="text/css" href='{% static "css/vuetify.min.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/mystylesvue.css" %}?dev={% random_integer 0 10000 %}'>
         {% endblock head_css_site %}
