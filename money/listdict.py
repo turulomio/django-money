@@ -444,10 +444,12 @@ class QsoCreditcardsoperationsHomogeneus(QsoCommon):
                 var text="";
                 var amount=0;
                 for (i = 0; i < selected.length; i++) {{
-                    text += selected[i].id + ",";
+                    text += selected[i].id + ", ";
                     amount += selected[i].amount;
                 }}
-                operations_id.value=text.slice(0, -1);
+                
+                operations_id.value=text.slice(0, -2);
+                alert(operations_id.value)
                 
                 var amount_id=document.getElementById("id_amount");
                 amount_id.value=amount;
