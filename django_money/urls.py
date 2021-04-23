@@ -50,7 +50,9 @@ urlpatterns=urlpatterns+ i18n_patterns(
     
     path('creditcard/view/<int:pk>/', money_views.creditcard_view, name='creditcard_view'),
     path('creditcard/pay/<int:pk>/', money_views.creditcard_pay, name='creditcard_pay'),
+    path('creditcard/pay/historical/<int:pk>/', money_views.creditcard_pay_historical, name='creditcard_pay_historical'),
     path('creditcard/pay/refund/<int:accountsoperations_id>/', money_views.creditcard_pay_refund, name='creditcard_pay_refund'),
+    
     path('creditcard/new/<int:accounts_id>/', money_views.creditcard_new.as_view(), name='creditcard_new'),
     path('creditcard/update/<slug:pk>/', money_views.creditcard_update.as_view(), name='creditcard_update'),
     path('creditcard/delete/<slug:pk>/', money_views.creditcard_delete.as_view(), name='creditcard_delete'),

@@ -3,6 +3,7 @@ from datetime import  date, datetime
 from decimal import Decimal
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.serializers import serialize
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
@@ -14,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
-
+from json import dumps
 from math import floor
 
 from money.connection_dj import cursor_rows, cursor_one_column, execute, cursor_one_field
@@ -1182,7 +1183,28 @@ def creditcard_pay(request, pk):
         form.fields["datetime"].initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
         widget_datetime(request, form.fields['datetime'])
         
-    return render(request, 'creditcard_pay.html', locals())
+    return render(request, 'creditcard_pay.html', locals())    
+
+@login_required
+@transaction.atomic
+def creditcard_pay_historical(request, pk):
+    creditcard=Creditcards.objects.get(pk=pk)
+    historical_ao=Creditcardsoperations.objects.select_related("accountsoperations").filter(creditcards=creditcard, paid_datetime__isnull=False).order_by("paid_datetime").distinct("paid_datetime")
+   
+    #First method
+    data = serialize('json', historical_ao,  indent= 4)    #    print(historical_ao.values())
+    print(data)
+    
+    ld=[]
+    for ao in historical_ao:
+        ld.append({"paid_datetime": ao.paid_datetime, "id":ao.accountsoperations.id})
+    
+    print(ld[3])
+    #Second method
+    historical_ao_json=dumps(ld, indent=4,  sort_keys=True)
+    print(historical_ao_json)
+    
+    return render(request, 'creditcard_pay_historical.html', locals())    
 
 @login_required
 @transaction.atomic

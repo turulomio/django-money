@@ -327,7 +327,7 @@ class Creditcardsoperations(models.Model):
     creditcards = models.ForeignKey(Creditcards, models.DO_NOTHING)
     paid = models.BooleanField()
     paid_datetime = models.DateTimeField(blank=True, null=True)
-    accountsoperations_id = models.BigIntegerField(blank=True, null=True)
+    accountsoperations= models.ForeignKey('Operationstypes', models.DO_NOTHING, null=True,  related_name="paid_accountsoperations")
     datetime = models.DateTimeField(blank=True, null=True)
 
     class Meta:

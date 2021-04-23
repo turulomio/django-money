@@ -21,6 +21,7 @@
   <p class="orders">
     <a href="{% url 'creditcardoperation_new' creditcards_id=creditcard.id %}">{% trans "Add a credit card operation"%}</a> | 
     <a href="{% url 'creditcard_pay' pk=creditcard.id %}">{% trans "Pay deferred credit card operations"%}</a> | 
+    <a href="{% url 'creditcard_pay_historical' pk=creditcard.id %}">{% trans "Historical deferred credit card operations payments"%}</a> | 
   </p>
 
   {% else %}
