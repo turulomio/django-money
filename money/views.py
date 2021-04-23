@@ -1187,13 +1187,34 @@ def creditcard_pay(request, pk):
 @login_required
 @transaction.atomic
 def creditcard_pay_historical(request, pk):
+    accountsoperations_id=request.GET.get("accountsoperations_id",   None) 
+    if accountsoperations_id is not None: #Gets cco of selected paid
+        qs_cco=Creditcardsoperations.objects.filter(accountsoperations_id=accountsoperations_id).select_related("concepts")
+        ld_cco=[]
+        for o in qs_cco:
+            ld_cco.append({"id": o.id, "datetime":o.datetime, "concept":o.concepts.name, "amount": o.amount, "comment":o.comment })
+        json_cco=listdict2json(ld_cco)
+        select=accountsoperations_id
+        
     creditcard=Creditcards.objects.get(pk=pk)
     json_payments=sql2json("""
-        select distinct(accountsoperations.id), accountsoperations.amount, accountsoperations.datetime from accountsoperations, creditcardsoperations 
+        select count(accountsoperations.id), accountsoperations.id, accountsoperations.amount, accountsoperations.datetime from accountsoperations, creditcardsoperations 
         where creditcardsoperations.accountsoperations_id=accountsoperations.id and 
-        creditcards_id=%s and accountsoperations.concepts_id=40 order by accountsoperations.datetime""", (creditcard.id, ))
-    print(json_payments)
+        creditcards_id=%s and accountsoperations.concepts_id=40 
+        group by accountsoperations.id, accountsoperations.amount, accountsoperations.datetime
+        order by accountsoperations.datetime""", (creditcard.id, ))
+
     return render(request, 'creditcard_pay_historical.html', locals())
+
+
+def listdict2json(listdict):    
+    r=[]
+    for o in listdict:
+        d={}
+        for field in o.keys():
+            d[field]=var2json(o[field])
+        r.append(d)
+    return r
 
 def sql2json(sql,  params=()):    
     r=[]

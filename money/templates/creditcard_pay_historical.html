@@ -4,26 +4,24 @@
 
 {% block content %}
 <div id="app">
-    <h1>{% blocktrans with name=creditcard.name %}Pay deferred historical operations of '{{ name}}' {% endblocktrans %}</h1>
-    <v-card flat width="60%">
-        <v-data-table :headers="tableHeaders" :items="tableData" sort-by="value" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['datetime']" fixed-header height="600" width="300">
-            <template v-slot:[`item.datetime`]="{ item }">
-                [[ localtime(item.datetime) ]]
-            </template>                        
-            <template v-slot:[`item.amount`]="{ item }">
-                [[ currency_string(item.amount, '{{ creditcard.accounts.currency }}')]]
-            </template>
-            <template v-slot:[`item.actions`]="{ item }">
-                <v-icon small class="mr-2" @click="gotoOperation(item)">mdi-pencil</v-icon>
-            </template>
-        </v-data-table>   
-    </v-card>
-
+    <v-app>
+        <h1>{% blocktrans with name=creditcard.name %}Pay deferred historical operations of '{{ name}}' {% endblocktrans %}</h1>
+        <v-container width="60%" >
+            <v-select dense label="Select a payment" v-model="select" :items="items" :item-text="select_text" item-value="id" @change="onChange"/></v-select>
+            <v-data-table dense :headers="tableHeaders" :items="tableData" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['datetime']" fixed-header height="400">
+                <template v-slot:[`item.datetime`]="{ item }">
+                    [[ localtime(item.datetime)  ]]
+                </template>                        
+                <template v-slot:[`item.amount`]="{ item }">
+                    [[ currency_string(item.amount, '{{ creditcard.accounts.currency }}')]]
+                </template>
+            </v-data-table>   
+            <br>
+            <v-btn color="primary" @click="gotoOperation()" :disabled="false">Goto payment</v-btn>
+        </v-container>
+    </v-app>
 </div>
-<script>
-    console.log(localtime("2018-08-01T06:46:29+00:00"))
-
-    
+<script>    
     new Vue({
         el: '#app',
         delimiters: ['[[', ']]'],
@@ -32,20 +30,23 @@
         data:{
             tableHeaders: [
                 { text: 'Moment', value: 'datetime',sortable: true },
-                { text: 'Amount', value: 'amount',sortable: false,
-    align: 'right',},
-                { text: 'Actions', value: 'actions', sortable: false },
+                { text: 'Concept', value: 'concept',sortable: true },
+                { text: 'Amount', value: 'amount',sortable: true, align: 'right',},
+                { text: 'Comment', value: 'comment',sortable: true},
             ],   
-            tableData: {{json_payments | safe}},
+            tableData: {{json_cco | safe}},
+            items: {{json_payments | safe}},
+            select: {{select}}
         },
         methods:{
-            addOrder(item){
+            select_text(item){
+                return `${localtime(item.datetime)} were paid ${item.count} credit card operations: ${currency_string(item.amount, '{{ creditcard.accounts.currency }}')}`
             },
-            showLimits(item){
-                alert(item.limits)
+            onChange(id){
+                window.location.href = `${window.location.pathname}?accountsoperations_id=${id}`
             },
-            gotoOperation(item){
-                window.location.href = "{% url 'accountoperation_update' pk=99999 %}".replace("99999", item.id)
+            gotoOperation(){
+                window.location.href = "{% url 'accountoperation_update' pk=99999 %}".replace("99999", this.select)
             }
 
         
@@ -69,6 +70,9 @@
         font-weight: 900;
     }*/
 
+h1 {
+    text-align: center
+}
 </style>
 
 {% endblock %}
