@@ -1410,3 +1410,6 @@ def listdict_chart_product_quotes_historical(dt_from, product,  local_currency, 
     rows=product.ohclDailyBeforeSplits()
     ld_print(rows)
     return rows[-50:]
+    
+
+        

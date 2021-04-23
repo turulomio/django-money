@@ -1,0 +1,83 @@
+{% extends 'base_vue.html' %}
+
+{% load i18n %}
+
+{% block content %}
+<div id="app">
+    <h1>{% blocktrans with name=creditcard.name %}Pay deferred historical operations of '{{ name}}' {% endblocktrans %}</h1>
+    <v-card flat>
+        <v-data-table :headers="tableHeaders" :items="tableData" sort-by="value" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="[true]" fixed-header height="400">
+            <template v-slot:[`item.datetime`]="{ item }">
+                [[ localtime(item.datetime) ]]
+            </template>                        
+            <template v-slot:[`item.amount`]="{ item }">
+                [[item.amount]]
+            </template>
+            <template v-slot:[`item.actions`]="{ item }">
+                <v-icon small class="mr-2" @click="gotoOperation(item)">mdi-pencil</v-icon>
+            </template>
+        </v-data-table>   
+    </v-card>
+
+</div>
+<script>
+    console.log(localtime("2018-08-01T06:46:29+00:00"))
+
+//     import {localtime} from '../static/js/django_money_vue.js'
+    
+    
+    new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        vuetify: new Vuetify(),
+        
+        data:{
+            tableHeaders: [
+                { text: 'Moment', value: 'datetime',sortable: true },
+                { text: 'Amount', value: 'amount',sortable: false},
+                { text: 'Actions', value: 'actions', sortable: false },
+            ],   
+            tableData: {{json_payments | safe}},
+        },
+        methods:{
+            addOrder(item){
+                window.location.href = `{{ url_order_add }}?price=${item.value}`
+            },
+            showLimits(item){
+                alert(item.limits)
+            },
+            localtime(value){
+                if (value){
+                    var dateFormat = 'YYYY-MM-DD HH:mm:ss';
+                    var testDateUtc = moment.utc(value);
+                    var localDate = testDateUtc.local();
+                    return (localDate.format(dateFormat)); // 2015-30-01 02:00:00
+                }
+                console.log("REALLY");
+                return value;
+            }   
+        
+        },
+    })
+</script>
+<style>
+/*    table.v-table tbody td,table.v-table tbody th,table.v-table tbody td.text-start {
+        height: 2px;
+        margin: 0px;
+    }
+    .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > td:last-child, .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > td:not(.v-data-table__mobile-row), .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > th:last-child, .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > th:not(.v-data-table__mobile-row), .theme--light.v-data-table > .v-data-table__wrapper > table > thead > tr:last-child > th {
+        border-bottom: thin solid rgba(0,0,0,.12);
+        height: 0px;
+    }
+    .noheight{
+        margin: 0px;
+    }
+    .green{
+        color:red;
+        font-weight: 900;
+    }*/
+
+</style>
+
+{% endblock %}
+

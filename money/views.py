@@ -3,7 +3,6 @@ from datetime import  date, datetime
 from decimal import Decimal
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.serializers import serialize
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
@@ -1189,22 +1188,40 @@ def creditcard_pay(request, pk):
 @transaction.atomic
 def creditcard_pay_historical(request, pk):
     creditcard=Creditcards.objects.get(pk=pk)
-    historical_ao=Creditcardsoperations.objects.select_related("accountsoperations").filter(creditcards=creditcard, paid_datetime__isnull=False).order_by("paid_datetime").distinct("paid_datetime")
-   
-    #First method
-    data = serialize('json', historical_ao,  indent= 4)    #    print(historical_ao.values())
-    print(data)
+    json_payments=sql2json("""
+        select distinct(accountsoperations.id), accountsoperations.amount, accountsoperations.datetime from accountsoperations, creditcardsoperations 
+        where creditcardsoperations.accountsoperations_id=accountsoperations.id and 
+        creditcards_id=%s and accountsoperations.concepts_id=40 order by accountsoperations.datetime""", (creditcard.id, ))
+    print(json_payments)
+    return render(request, 'creditcard_pay_historical.html', locals())
+
+def sql2json(sql,  params=()):    
+    r=[]
+    for o in cursor_rows(sql, params):
+        d={}
+        for field in o.keys():
+            d[field]=var2json(o[field])
+        r.append(d)
+    return r
+
+## @param fields Tuple of field names
+def queryset2json(qs, fields):
+    r=[]
+    for o in qs:
+        d={}
+        for field in fields:
+            d[field]=var2json(getattr(o, field))
+        r.append(d)
+    return r
     
-    ld=[]
-    for ao in historical_ao:
-        ld.append({"paid_datetime": ao.paid_datetime, "id":ao.accountsoperations.id})
-    
-    print(ld[3])
-    #Second method
-    historical_ao_json=dumps(ld, indent=4,  sort_keys=True)
-    print(historical_ao_json)
-    
-    return render(request, 'creditcard_pay_historical.html', locals())    
+def var2json(var):
+    if var.__class__.__name__=="Decimal":
+        return float(var)
+    elif var.__class__.__name__=="datetime":
+        return var.isoformat()[:-6]+"Z"
+    elif var.__class__.__name__=="bool":
+        return dumps(var)
+    return var
 
 @login_required
 @transaction.atomic
