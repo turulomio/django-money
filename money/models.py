@@ -16,7 +16,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.utils import timezone
 
-from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows, execute
+from money.reusing.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows, execute
 
 from money.investmentsoperations import InvestmentsOperations_from_investment
 from money.reusing.casts import string2list_of_integers

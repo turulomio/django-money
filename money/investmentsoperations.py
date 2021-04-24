@@ -1,13 +1,14 @@
 from django.utils.translation import ugettext_lazy as _
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import string2dtnaive, dtaware
-from money.reusing.listdict_functions import listdict_sum
+from money.reusing.listdict_functions import listdict_sum, listdict2json
 from money.reusing.percentage import Percentage
 from money.tables import TabulatorFromListDict
 from datetime import date, timedelta
 from decimal import Decimal
 Decimal
-from money.connection_dj import cursor_one_row, cursor_rows_as_dict
+from money.reusing.connection_dj import cursor_one_row, cursor_rows_as_dict
+from django.utils import timezone
 
 ## TRAS MUCHAS VUELTAS LO MEJOR ES INVESTMENTS_OPERATIONS COMPLETO EN BASE DE DATOS POR MULTICURRENCY
 ## PERO SE HACE NECESARIO EL TOTALS SI EL SERVIDOR WEB ESTA FUERA DE LA BD
@@ -594,6 +595,26 @@ class InvestmentsOperationsTotalsManager:
                 return o
         return None
         
+    ## Generates a list with all diferent products in array
+    def distinct_products(self):
+        r=set()
+        for iot in self.list:
+            r.add(iot.investment.products)
+        return list(r)
+        
+    def json_classes_by_product(self):
+        from money.models import Accounts
+        accounts_balance=Accounts.accounts_balance_user_currency(Accounts.objects.filter(active=True), timezone.now())
+        ld=[]
+        for product in self.distinct_products():
+            d={"name": product.fullName(), "balance": 0,  "invested": 0}
+            for iot in self.list:
+                if iot.investment.products==product:
+                    d["balance"]=d["balance"]+iot.io_total_current["balance_user"]
+                    d["invested"]=d["invested"]+iot.io_total_current["invested_user"]
+            ld.append(d)
+        ld.append({"name": "Accounts", "balance": accounts_balance,  "invested": accounts_balance})
+        return listdict2json(ld)
 
 ## Generate object from and ids list
 def InvestmentsOperationsTotalsManager_from_investment_queryset(qs_investments, dt, request):

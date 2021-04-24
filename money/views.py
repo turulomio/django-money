@@ -14,10 +14,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
-from json import dumps
 from math import floor
 
-from money.connection_dj import cursor_rows, cursor_one_column, execute, cursor_one_field
+from money.reusing.connection_dj import cursor_rows, cursor_one_column, execute, cursor_one_field
 from money.forms import (
     AccountsTransferForm, 
     CreditCardPayForm, 
@@ -27,7 +26,11 @@ from money.charts import (
     chart_lines_total, 
     chart_product_quotes_historical, 
 )
-from money.investmentsoperations import InvestmentsOperations_from_investment, InvestmentsOperationsManager_from_investment_queryset
+from money.investmentsoperations import (
+    InvestmentsOperations_from_investment, 
+    InvestmentsOperationsManager_from_investment_queryset, 
+    InvestmentsOperationsTotalsManager_from_investment_queryset, 
+)
 from money.productrange import ProductRangeManager
 from money.tables import (
     TabulatorReportConcepts, 
@@ -51,7 +54,7 @@ from money.reusing.casts import string2list_of_integers
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz, epochmicros2dtaware, dtaware2epochmicros
 from money.reusing.decorators import timeit
-from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key
+from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key, listdict2json
 from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict import (
@@ -1217,44 +1220,6 @@ def creditcard_pay_historical(request, pk):
     # Render page
     return render(request, 'creditcard_pay_historical.html', locals())
 
-
-def listdict2json(listdict):    
-    r=[]
-    for o in listdict:
-        d={}
-        for field in o.keys():
-            d[field]=var2json(o[field])
-        r.append(d)
-    return r
-
-def sql2json(sql,  params=()):    
-    r=[]
-    for o in cursor_rows(sql, params):
-        d={}
-        for field in o.keys():
-            d[field]=var2json(o[field])
-        r.append(d)
-    return r
-
-## @param fields Tuple of field names
-def queryset2json(qs, fields):
-    r=[]
-    for o in qs:
-        d={}
-        for field in fields:
-            d[field]=var2json(getattr(o, field))
-        r.append(d)
-    return r
-    
-def var2json(var):
-    if var.__class__.__name__=="Decimal":
-        return float(var)
-    elif var.__class__.__name__=="datetime":
-        return var.isoformat()[:-6]+"Z"
-    elif var.__class__.__name__=="bool":
-        return dumps(var)
-    return var
-
 @login_required
 @transaction.atomic
 def creditcard_pay_refund(request, accountsoperations_id):
@@ -1542,6 +1507,8 @@ def investment_ranking(request):
     
 @login_required
 def investment_classes(request):
+    qs_investments_active=Investments.objects.filter(active=True)
+    iotm=InvestmentsOperationsTotalsManager_from_investment_queryset(qs_investments_active, timezone.now(), request)
     return render(request, 'investment_classes.html', locals())
 
 @method_decorator(login_required, name='dispatch')

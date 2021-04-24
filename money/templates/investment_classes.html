@@ -5,50 +5,42 @@
 {% block content %}
 <div id="app">
     <v-app>
-        <h1>{% trans "Investment classes" %}</h1>            
+        <h1>{% trans "Investment classes" %}</h1>   
         <v-card>
+        <v-select label="Select a method to calculate charts" v-model="method" :items="method_products" @change="key=key+1"></v-select>
             <v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
-                <v-tab key="Alias"><v-icon small style="margin:6px">mdi-rename-box</v-icon>{% trans "Aliases" %}</v-tab>
-                <v-tab key="Mails"><v-icon small class="mr-2">mdi-mail</v-icon>{% trans "Mails" %}</v-tab>
-                <v-tab key="Phones"><v-icon small style="margin:6px">mdi-phone</v-icon>{% trans "Phones" %}</v-tab>
-                <v-tab key="Addresses"><v-icon small style="margin:6px">mdi-map-marker</v-icon>{% trans "Addresses" %}</v-tab>
-                <v-tab key="Jobs"><v-icon small style="margin:6px">mdi-briefcase</v-icon>{% trans "Jobs" %}</v-tab>
-                <v-tab key="Relations"><v-icon small style="margin:6px">mdi-family-tree</v-icon>{% trans "Relations" %}</v-tab>
-                <v-tab key="Groups"><v-icon small style="margin:6px">mdi-group</v-icon>{% trans "Groups" %}</v-tab>
-                <v-tab key="Logs"><v-icon small style="margin:6px">mdi-calendar-clock</v-icon>{% trans "Logs" %}</v-tab>
+                <v-tab key="product"><v-icon small style="margin:6px">mdi-family-tree</v-icon>{% trans "By investment product" %}</v-tab>
+                <v-tab key="percentage"><v-icon small style="margin:6px">mdi-rename-box</v-icon>{% trans "By variable percentage" %}</v-tab>
+                <v-tab key="pci"><v-icon small class="mr-2">mdi-mail</v-icon>{% trans "By Put / Call / Inline" %}</v-tab>
+                <v-tab key="type"><v-icon small style="margin:6px">mdi-phone</v-icon>{% trans "By investment type" %}</v-tab>
+                <v-tab key="leverage"><v-icon small style="margin:6px">mdi-map-marker</v-icon>{% trans "By leverage" %}</v-tab>
+                <v-tab key="country"><v-icon small style="margin:6px">mdi-briefcase</v-icon>{% trans "By country" %}</v-tab>
                 <v-tabs-slider color="yellow"></v-tabs-slider>
             </v-tabs>
             <v-tabs-items v-model="tab">
-                <v-tab-item key="Alias">
-                    <v-card flat>.
+                <v-tab-item key="percentage">
+                    <v-card flat style="height: 600px;">
+                        <v-chart autoresize :option="echart_products" :key="key"/>
                     </v-card>
                 </v-tab-item>
                 
-                <v-tab-item key="Mails">
+                <v-tab-item key="pci">
                     <v-card flat>.
                     </v-card>
                 </v-tab-item>
-                <v-tab-item key="Phones">
+                <v-tab-item key="type">
                     <v-card flat>.
                     </v-card>
                 </v-tab-item>
-                <v-tab-item key="Address">
+                <v-tab-item key="leverage">
                     <v-card flat>.
                     </v-card>
                 </v-tab-item>
-                <v-tab-item key="Jobs">
+                <v-tab-item key="country">
                     <v-card flat>.
                     </v-card>
                 </v-tab-item>
-                <v-tab-item key="Relations">
-                    <v-card flat>.
-                    </v-card>
-                </v-tab-item>
-                <v-tab-item key="Groups">
-                    <v-card flat>.
-                    </v-card>
-                </v-tab-item>
-                <v-tab-item key="Logs">
+                <v-tab-item key="product">
                     <v-card flat>.
                     </v-card>
                 </v-tab-item>
@@ -56,16 +48,48 @@
         </v-card>
     </v-app>
 </div>
-<script>    
+<script>   
+    Vue.component("v-chart", VueECharts); 
     new Vue({
-        el: '#app',
-        delimiters: ['[[', ']]'],
-        vuetify: new Vuetify(),
-        
+        ...common_vue_properties(),
         data:{
-            tab:null
+            tab:null,
+            key:0,
+            method: "Current",
+            method_products:["Invested", "Current"],
+            
         },
-        methods:{
+        computed:{
+            echart_products: function(){
+                var products= {{ iotm.json_classes_by_product | safe}}
+                if (this.method=="Current"){
+                    var adapted= products.map(el => ({name: el.name, value: my_round(el.balance, 2)}))
+                } else {//Invested
+                    var adapted= products.map(el => ({name: el.name, value: my_round(el.invested,2)}))
+                }
+                return  {
+                    tooltip: {
+                        trigger: "item",
+                        formatter: "{a} <br/>{b} : {c} ({d}%)"
+                    },
+                    series: [
+                        {
+                            name: '{% trans "Assets by product type" %}',
+                            type: "pie",
+                            radius: "80%",
+                            center: ["50%", "50%"],
+                            data: adapted,
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: "rgba(0, 0, 0, 0.5)"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
         },
     })
 </script>

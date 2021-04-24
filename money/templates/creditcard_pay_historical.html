@@ -31,10 +31,7 @@
 </div>
 <script>    
     new Vue({
-        el: '#app',
-        delimiters: ['[[', ']]'],
-        vuetify: new Vuetify(),
-        
+        ...common_vue_properties(),
         data:{
             tableHeaders: [
                 { text: 'Moment', value: 'datetime',sortable: false },
@@ -66,8 +63,6 @@
                 //Sum progresively
                 return this.tableData.slice(0, index+1).reduce((accum,item) => accum + item.amount, 0)
             }
-
-        
         },
     })
 </script>

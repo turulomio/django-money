@@ -215,3 +215,19 @@ function openInNewTab(href) {
   }).click();
 }
 
+function common_vue_properties(){
+    return {
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        vuetify: new Vuetify({
+            theme: {
+                themes: {
+                    light: {
+                        primary: '#3a3987',
+                    },
+                },
+            }
+        }),
+        
+    }
+}
