@@ -449,7 +449,6 @@ class QsoCreditcardsoperationsHomogeneus(QsoCommon):
                 }}
                 
                 operations_id.value=text.slice(0, -2);
-                alert(operations_id.value)
                 
                 var amount_id=document.getElementById("id_amount");
                 amount_id.value=amount;

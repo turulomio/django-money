@@ -3,7 +3,6 @@ from money.models import Globals, Operationstypes
 from money.reusing.currency import currency_symbol
 from money.templatetags.mymenu import Menu, Action,  Group
 from django.utils.translation import gettext_lazy as _
-import time
 
 ## FOR VIEWS AND TEMPLATES
 class MoneyMiddleware:
@@ -67,7 +66,6 @@ class MoneyMiddleware:
     
     
     def process_view(self, request, view_func, *view_args, **view_kwargs):
-        start=time.time()
         request.VERSION=__version__
         request.VERSIONDATE=__versiondate__
         request.menu=self.menu
@@ -79,4 +77,3 @@ class MoneyMiddleware:
         request.local_currency=request.globals["mem__localcurrency"]
         request.local_zone=request.globals["mem__localzone"]
         request.local_currency_symbol=currency_symbol(request.globals["mem__localcurrency"])
-        print(f"Loading middleware request took {time.time()-start}" )

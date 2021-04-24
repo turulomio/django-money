@@ -1176,7 +1176,7 @@ def creditcard_pay(request, pk):
                 o.paid=True
                 o.accountsoperations_id=c.id
                 o.save()
-            return render(request, 'creditcard_pay.html', locals())
+        return HttpResponseRedirect(f'{reverse("creditcard_pay_historical", args=(creditcard.id, ))}?accountsoperations_id={c.id}')
     else:
         form = CreditCardPayForm()
         form.fields["datetime"].initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
@@ -1187,23 +1187,34 @@ def creditcard_pay(request, pk):
 @login_required
 @transaction.atomic
 def creditcard_pay_historical(request, pk):
-    accountsoperations_id=request.GET.get("accountsoperations_id",   None) 
-    if accountsoperations_id is not None: #Gets cco of selected paid
-        qs_cco=Creditcardsoperations.objects.filter(accountsoperations_id=accountsoperations_id).select_related("concepts")
-        ld_cco=[]
-        for o in qs_cco:
-            ld_cco.append({"id": o.id, "datetime":o.datetime, "concept":o.concepts.name, "amount": o.amount, "comment":o.comment })
-        json_cco=listdict2json(ld_cco)
-        select=accountsoperations_id
-        
+    # Get combobox payments info
     creditcard=Creditcards.objects.get(pk=pk)
-    json_payments=sql2json("""
+    ld_payments=cursor_rows("""
         select count(accountsoperations.id), accountsoperations.id, accountsoperations.amount, accountsoperations.datetime from accountsoperations, creditcardsoperations 
         where creditcardsoperations.accountsoperations_id=accountsoperations.id and 
         creditcards_id=%s and accountsoperations.concepts_id=40 
         group by accountsoperations.id, accountsoperations.amount, accountsoperations.datetime
         order by accountsoperations.datetime""", (creditcard.id, ))
+    json_payments=listdict2json(ld_payments)
 
+    #Combo default selection
+    accountsoperations_id=request.GET.get("accountsoperations_id",  None) 
+    if accountsoperations_id is None: #select last
+        if len(ld_payments)>0:
+            select=ld_payments[len(ld_payments)-1]["id"]
+        else:
+            select=-1
+    else:
+        select=accountsoperations_id
+    
+    # Get table information
+    ld_cco=[]
+    qs_cco=Creditcardsoperations.objects.filter(accountsoperations_id=select).select_related("concepts").order_by("datetime")
+    for o in qs_cco:
+        ld_cco.append({"id": o.id, "datetime":o.datetime, "concept":o.concepts.name, "amount": o.amount, "comment":o.comment })
+    json_cco=listdict2json(ld_cco)
+
+    # Render page
     return render(request, 'creditcard_pay_historical.html', locals())
 
 
