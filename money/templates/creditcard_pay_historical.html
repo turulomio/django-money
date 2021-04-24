@@ -15,7 +15,6 @@
             <v-data-table dense :headers="tableHeaders" :items="tableData" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['datetime']" fixed-header height="400">
                 <template v-slot:[`item.datetime`]="{ item, index}">
                     [[ localtime(item.datetime)  ]] 
-<!--                     [[ index  ]]  -->
                 </template>                        
                 <template v-slot:[`item.amount`]="{ item }">
                     [[ currency_string(item.amount, '{{ creditcard.accounts.currency }}')]]
@@ -73,22 +72,6 @@
     })
 </script>
 <style>
-/*    table.v-table tbody td,table.v-table tbody th,table.v-table tbody td.text-start {
-        height: 2px;
-        margin: 0px;
-    }
-    .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > td:last-child, .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > td:not(.v-data-table__mobile-row), .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > th:last-child, .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > th:not(.v-data-table__mobile-row), .theme--light.v-data-table > .v-data-table__wrapper > table > thead > tr:last-child > th {
-        border-bottom: thin solid rgba(0,0,0,.12);
-        height: 0px;
-    }
-    .noheight{
-        margin: 0px;
-    }
-    .green{
-        color:red;
-        font-weight: 900;
-    }*/
-
 h1 {
     text-align: center
 }
