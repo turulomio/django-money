@@ -1,17 +1,20 @@
 {% extends 'base_vue.html' %}
 
 {% load i18n %}
+{% load static %}
+
 
 {% block content %}
 <div id="app">
     <v-app>
+                        <chart-pie :items="[]"></chart-pie>
         <h1>{% trans "Investment classes" %}</h1>   
         <v-card>
         <v-select label="Select a method to calculate charts" v-model="method" :items="method_products" @change="key=key+1"></v-select>
             <v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
+                <v-tab key="pci"><v-icon small class="mr-2">mdi-mail</v-icon>{% trans "By Put / Call / Inline" %}</v-tab>
                 <v-tab key="product"><v-icon small style="margin:6px">mdi-family-tree</v-icon>{% trans "By investment product" %}</v-tab>
                 <v-tab key="percentage"><v-icon small style="margin:6px">mdi-rename-box</v-icon>{% trans "By variable percentage" %}</v-tab>
-                <v-tab key="pci"><v-icon small class="mr-2">mdi-mail</v-icon>{% trans "By Put / Call / Inline" %}</v-tab>
                 <v-tab key="type"><v-icon small style="margin:6px">mdi-phone</v-icon>{% trans "By investment type" %}</v-tab>
                 <v-tab key="leverage"><v-icon small style="margin:6px">mdi-map-marker</v-icon>{% trans "By leverage" %}</v-tab>
                 <v-tab key="country"><v-icon small style="margin:6px">mdi-briefcase</v-icon>{% trans "By country" %}</v-tab>
@@ -25,7 +28,7 @@
                 </v-tab-item>
                 
                 <v-tab-item key="pci">
-                    <v-card flat>.
+                    <v-card flat>
                     </v-card>
                 </v-tab-item>
                 <v-tab-item key="type">
@@ -48,8 +51,10 @@
         </v-card>
     </v-app>
 </div>
+<script type="text/javascript" src='{% static "js/chart-pie.min.js" %}'></script>
 <script>   
     Vue.component("v-chart", VueECharts); 
+//      Vue.component('ChartPie',ChartPie)
     new Vue({
         ...common_vue_properties(),
         data:{
