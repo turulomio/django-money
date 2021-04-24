@@ -1,0 +1,78 @@
+{% extends 'base_vue.html' %}
+
+{% load i18n %}
+
+{% block content %}
+<div id="app">
+    <v-app>
+        <h1>{% trans "Investment classes" %}</h1>            
+        <v-card>
+            <v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
+                <v-tab key="Alias"><v-icon small style="margin:6px">mdi-rename-box</v-icon>{% trans "Aliases" %}</v-tab>
+                <v-tab key="Mails"><v-icon small class="mr-2">mdi-mail</v-icon>{% trans "Mails" %}</v-tab>
+                <v-tab key="Phones"><v-icon small style="margin:6px">mdi-phone</v-icon>{% trans "Phones" %}</v-tab>
+                <v-tab key="Addresses"><v-icon small style="margin:6px">mdi-map-marker</v-icon>{% trans "Addresses" %}</v-tab>
+                <v-tab key="Jobs"><v-icon small style="margin:6px">mdi-briefcase</v-icon>{% trans "Jobs" %}</v-tab>
+                <v-tab key="Relations"><v-icon small style="margin:6px">mdi-family-tree</v-icon>{% trans "Relations" %}</v-tab>
+                <v-tab key="Groups"><v-icon small style="margin:6px">mdi-group</v-icon>{% trans "Groups" %}</v-tab>
+                <v-tab key="Logs"><v-icon small style="margin:6px">mdi-calendar-clock</v-icon>{% trans "Logs" %}</v-tab>
+                <v-tabs-slider color="yellow"></v-tabs-slider>
+            </v-tabs>
+            <v-tabs-items v-model="tab">
+                <v-tab-item key="Alias">
+                    <v-card flat>.
+                    </v-card>
+                </v-tab-item>
+                
+                <v-tab-item key="Mails">
+                    <v-card flat>.
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item key="Phones">
+                    <v-card flat>.
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item key="Address">
+                    <v-card flat>.
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item key="Jobs">
+                    <v-card flat>.
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item key="Relations">
+                    <v-card flat>.
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item key="Groups">
+                    <v-card flat>.
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item key="Logs">
+                    <v-card flat>.
+                    </v-card>
+                </v-tab-item>
+            </v-tabs-items>
+        </v-card>
+    </v-app>
+</div>
+<script>    
+    new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        vuetify: new Vuetify(),
+        
+        data:{
+            tab:null
+        },
+        methods:{
+        },
+    })
+</script>
+<style>
+h1 {
+    text-align: center
+}
+</style>
+
+{% endblock %}

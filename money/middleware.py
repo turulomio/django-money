@@ -17,8 +17,8 @@ class MoneyMiddleware:
         self.menu.append(Action(_("Orders"), None,  "order_list_active",  True))
         
         grCharts=Group(2,  _("Charts"), "11", True)
-        grCharts.append(Action(_("Total with threadpool"), None, "ajax_chart_total", True))
-        grCharts.append(Action(_("Total with async"), None, "ajax_chart_total_async", True))
+        grCharts.append(Action(_("Total"), None, "ajax_chart_total", True))
+        grCharts.append(Action(_("Investments classes"), None, "investment_classes", True))
         
         grReport=Group(1, _("Reports"), "10",  True)
         grReport.append(Action(_("Concepts"), None, "report_concepts", True))

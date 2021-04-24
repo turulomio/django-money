@@ -1539,6 +1539,10 @@ def investment_change_active(request, pk):
 def investment_ranking(request):
     ldo=LdoInvestmentsRanking(request)
     return render(request, 'investment_ranking.html', locals())
+    
+@login_required
+def investment_classes(request):
+    return render(request, 'investment_classes.html', locals())
 
 @method_decorator(login_required, name='dispatch')
 class investment_update(SuccessMessageMixin, UpdateView):
