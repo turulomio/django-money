@@ -12,6 +12,21 @@ Vue.component('chart-pie', {
                         <v-data-table dense :headers="tableHeaders"  :items="items" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="['value']">
                             <template v-slot:[\`item.percentage\`]="{ item, index }">
                                 {{ getPercentage(item) }}
+                            </template>    
+                            <template v-slot:body.append="{headers}">
+                                <tr style="background-color: lightgrey">
+                                    <td v-for="(header,i) in headers" :key="i">
+                                        <div v-if="header.value == 'name'">
+                                            Total
+                                        </div>
+                                        <div v-if="header.value == 'value'" align="right">
+                                            {{total}}
+                                        </div>
+                                        <div v-if="header.value == 'percentage'" align="right">
+                                            100 %
+                                        </div>
+                                    </td>
+                                </tr>
                             </template>
                         </v-data-table>
                     </v-col>

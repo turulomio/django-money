@@ -18,7 +18,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 ## SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'dr@0-#9nj4=loa8)j_5(s&m7s=fbmlo=55yeac01q#kiij$cev'
+SECRET_KEY = 'CHANGEME-CHANGEME-CHANGEME-CHANGEME-CHANGEME-CHANGEME'
 
 ## @note SECURITY WARNING: don't run with debug turned on in production!
 ## Defines is a Debug environment
