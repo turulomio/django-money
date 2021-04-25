@@ -7,43 +7,32 @@
 {% block content %}
 <div id="app">
     <v-app>
-        <todo-item></todo-item>
         <h1>{% trans "Investment classes" %}</h1>   
         <v-card>
         <v-select label="Select a method to calculate charts" v-model="method" :items="method_products" @change="key=key+1"></v-select>
             <v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
-                <v-tab key="pci"><v-icon small class="mr-2">mdi-mail</v-icon>{% trans "By Put / Call / Inline" %}</v-tab>
-                <v-tab key="product"><v-icon small style="margin:6px">mdi-family-tree</v-icon>{% trans "By investment product" %}</v-tab>
-                <v-tab key="percentage"><v-icon small style="margin:6px">mdi-rename-box</v-icon>{% trans "By variable percentage" %}</v-tab>
-                <v-tab key="type"><v-icon small style="margin:6px">mdi-phone</v-icon>{% trans "By investment type" %}</v-tab>
-                <v-tab key="leverage"><v-icon small style="margin:6px">mdi-map-marker</v-icon>{% trans "By leverage" %}</v-tab>
-                <v-tab key="country"><v-icon small style="margin:6px">mdi-briefcase</v-icon>{% trans "By country" %}</v-tab>
+                <v-tab key="product">{% trans "By investment product" %}</v-tab>
+                <v-tab key="pci">{% trans "By Put / Call / Inline" %}</v-tab>
+                <v-tab key="percentage">{% trans "By variable percentage" %}</v-tab>
+                <v-tab key="type">{% trans "By investment type" %}</v-tab>
+                <v-tab key="leverage">{% trans "By leverage" %}</v-tab>
                 <v-tabs-slider color="yellow"></v-tabs-slider>
             </v-tabs>
             <v-tabs-items v-model="tab">
-                
-                <v-tab-item key="pci">
-                    <v-card flat>.
-                    </v-card>
-                </v-tab-item>
                 <v-tab-item key="product">
-                    <chart-pie :items="echart_products_items" height="600px" :key="key"></chart-pie>
+                    <chart-pie name="Investments by product" :items="echart_products_items" height="600px" :key="key+1"></chart-pie>
+                </v-tab-item>
+                <v-tab-item key="pci">
+                    <chart-pie name="Investments by pci" :items="echart_pci_items" height="600px" :key="key"></chart-pie>
                 </v-tab-item>
                 <v-tab-item key="percentage">
-                    <v-card flat>.
-                    </v-card>
+                    <chart-pie name="Investments by variable percentage" :items="echart_percentage_items" height="600px" :key="key"></chart-pie>
                 </v-tab-item>
                 <v-tab-item key="type">
-                    <v-card flat>.
-                    </v-card>
+                    <chart-pie name="Investments by product type" :items="echart_producttype_items" height="600px" :key="key"></chart-pie>
                 </v-tab-item>
                 <v-tab-item key="leverage">
-                    <v-card flat>.
-                    </v-card>
-                </v-tab-item>
-                <v-tab-item key="country">
-                    <v-card flat>.
-                    </v-card>
+                    <chart-pie name="Investments by leverage" :items="echart_leverage_items" height="600px" :key="key"></chart-pie>
                 </v-tab-item>
             </v-tabs-items>
         </v-card>
@@ -63,6 +52,42 @@
         computed:{
             echart_products_items: function(){
                 var products= {{ iotm.json_classes_by_product | safe}}
+                if (this.method=="Current"){
+                    var adapted= products.map(el => ({name: el.name, value: my_round(el.balance, 2)}))
+                } else {//Invested
+                    var adapted= products.map(el => ({name: el.name, value: my_round(el.invested,2)}))
+                }
+                return adapted
+            },
+            echart_pci_items: function(){
+                var products= {{ iotm.json_classes_by_pci | safe}}
+                if (this.method=="Current"){
+                    var adapted= products.map(el => ({name: el.name, value: my_round(el.balance, 2)}))
+                } else {//Invested
+                    var adapted= products.map(el => ({name: el.name, value: my_round(el.invested,2)}))
+                }
+                return adapted
+            },
+            echart_percentage_items: function(){
+                var products= {{ iotm.json_classes_by_percentage | safe}}
+                if (this.method=="Current"){
+                    var adapted= products.map(el => ({name: el.name, value: my_round(el.balance, 2)}))
+                } else {//Invested
+                    var adapted= products.map(el => ({name: el.name, value: my_round(el.invested,2)}))
+                }
+                return adapted
+            },
+            echart_producttype_items: function(){
+                var products= {{ iotm.json_classes_by_producttype | safe}}
+                if (this.method=="Current"){
+                    var adapted= products.map(el => ({name: el.name, value: my_round(el.balance, 2)}))
+                } else {//Invested
+                    var adapted= products.map(el => ({name: el.name, value: my_round(el.invested,2)}))
+                }
+                return adapted
+            },
+            echart_leverage_items: function(){
+                var products= {{ iotm.json_classes_by_leverage | safe}}
                 if (this.method=="Current"){
                     var adapted= products.map(el => ({name: el.name, value: my_round(el.balance, 2)}))
                 } else {//Invested

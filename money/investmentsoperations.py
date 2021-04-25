@@ -1,14 +1,16 @@
+from datetime import date, timedelta
+from decimal import Decimal
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from math import ceil
+from money.reusing.connection_dj import cursor_one_row, cursor_rows_as_dict
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import string2dtnaive, dtaware
 from money.reusing.listdict_functions import listdict_sum, listdict2json
 from money.reusing.percentage import Percentage
 from money.tables import TabulatorFromListDict
-from datetime import date, timedelta
-from decimal import Decimal
+
 Decimal
-from money.reusing.connection_dj import cursor_one_row, cursor_rows_as_dict
-from django.utils import timezone
 
 ## TRAS MUCHAS VUELTAS LO MEJOR ES INVESTMENTS_OPERATIONS COMPLETO EN BASE DE DATOS POR MULTICURRENCY
 ## PERO SE HACE NECESARIO EL TOTALS SI EL SERVIDOR WEB ESTA FUERA DE LA BD
@@ -602,6 +604,23 @@ class InvestmentsOperationsTotalsManager:
             r.add(iot.investment.products)
         return list(r)
         
+    def json_classes_by_pci(self):
+        from money.models import Accounts
+        accounts_balance=Accounts.accounts_balance_user_currency(Accounts.objects.filter(active=True), timezone.now())
+        ld=[]
+        for mode, name in (('p', 'Put'), ('c', 'Call'), ('i', 'Inline')):
+            d={"name": name, "balance": 0,  "invested": 0}
+            for iot in self.list:
+                if iot.investment.products.pci==mode:
+                    d["balance"]=d["balance"]+iot.io_total_current["balance_user"]
+                    d["invested"]=d["invested"]+iot.io_total_current["invested_user"]
+            if mode=="c":
+                d["balance"]=d["balance"]+accounts_balance
+                d["invested"]=d["invested"]+accounts_balance
+            ld.append(d)
+        
+        return listdict2json(ld)
+
     def json_classes_by_product(self):
         from money.models import Accounts
         accounts_balance=Accounts.accounts_balance_user_currency(Accounts.objects.filter(active=True), timezone.now())
@@ -614,6 +633,54 @@ class InvestmentsOperationsTotalsManager:
                     d["invested"]=d["invested"]+iot.io_total_current["invested_user"]
             ld.append(d)
         ld.append({"name": "Accounts", "balance": accounts_balance,  "invested": accounts_balance})
+        return listdict2json(ld)
+
+    def json_classes_by_percentage(self):
+        from money.models import Accounts
+        accounts_balance=Accounts.accounts_balance_user_currency(Accounts.objects.filter(active=True), timezone.now())
+        ld=[]
+        for percentage in range(0, 11):
+            d={"name": f"{percentage*10}% variable", "balance": 0,  "invested": 0}
+            for iot in self.list:
+                if ceil(iot.investment.products.percentage/10.0)==percentage:
+                    d["balance"]=d["balance"]+iot.io_total_current["balance_user"]
+                    d["invested"]=d["invested"]+iot.io_total_current["invested_user"]
+            if percentage==0:
+                d["balance"]=d["balance"]+accounts_balance
+                d["invested"]=d["invested"]+accounts_balance
+            ld.append(d)
+        return listdict2json(ld)
+
+    def json_classes_by_producttype(self):
+        from money.models import Accounts, Productstypes
+        accounts_balance=Accounts.accounts_balance_user_currency(Accounts.objects.filter(active=True), timezone.now())
+        ld=[]
+        for producttype in Productstypes.objects.all():
+            d={"name": producttype.name, "balance": 0,  "invested": 0}
+            for iot in self.list:
+                if iot.investment.products.productstypes==producttype:
+                    d["balance"]=d["balance"]+iot.io_total_current["balance_user"]
+                    d["invested"]=d["invested"]+iot.io_total_current["invested_user"]
+            if producttype.id==11:#Accounts
+                d["balance"]=d["balance"]+accounts_balance
+                d["invested"]=d["invested"]+accounts_balance
+            ld.append(d)
+        return listdict2json(ld)
+        
+    def json_classes_by_leverage(self):
+        from money.models import Accounts, Leverages
+        accounts_balance=Accounts.accounts_balance_user_currency(Accounts.objects.filter(active=True), timezone.now())
+        ld=[]
+        for leverage in Leverages.objects.all():
+            d={"name": leverage.name, "balance": 0,  "invested": 0}
+            for iot in self.list:
+                if iot.investment.products.leverages==leverage:
+                    d["balance"]=d["balance"]+iot.io_total_current["balance_user"]
+                    d["invested"]=d["invested"]+iot.io_total_current["invested_user"]
+            if leverage.id==1:#Accounts
+                d["balance"]=d["balance"]+accounts_balance
+                d["invested"]=d["invested"]+accounts_balance
+            ld.append(d)
         return listdict2json(ld)
 
 ## Generate object from and ids list

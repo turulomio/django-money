@@ -1,17 +1,39 @@
-Vue.component('todo-item', {
-  template: '<li>This is a todo</li>'
-})
-
 Vue.component('chart-pie', {
     props: ['items', 'name', 'height','key'],
     template: `
-        <v-card flat :style="styleheight">
-            <v-chart autoresize :option="options" :key="key"/>
-        </v-card>
+        <div>
+            <p v-if="items.length==0">No data to show</p>
+            <v-card flat  v-if="items.length>0">
+                <v-row no-gutters :style="styleheight">
+                    <v-col>
+                        <v-chart autoresize :option="options" :key="key"/>
+                    </v-col>
+                    <v-col v-show="showtable" >
+                        <v-data-table dense :headers="tableHeaders"  :items="items" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="['value']">
+                            <template v-slot:[\`item.percentage\`]="{ item, index }">
+                                {{ getPercentage(item) }}
+                            </template>
+                        </v-data-table>
+                    </v-col>
+                </v-row>       
+            </v-card>  
+            <v-row>
+                <v-col align="center">
+                    <v-btn color="primary" @click="buttonClick">{{buttontext}}</v-btn>
+                </v-col>
+            </v-row>
+        </div>
     `,
     data: function () {
         return {
-
+            showtable: false,
+            total: 0,
+            tableHeaders: [
+                { text: 'Name', value: 'name',sortable: true },
+                { text: 'Value', value: 'value',sortable: true, align: 'right'},
+                { text: 'Percentage', value: 'percentage',sortable: false, align: 'right'},
+            ],   
+            
         }
     },
     computed:{
@@ -41,10 +63,27 @@ Vue.component('chart-pie', {
         },
         styleheight: function(){
             return `height: ${this.height};`
+        },
+        buttontext: function(){
+            if (this.showtable){
+                return "Hide table data"
+            } else {
+                return "Show table data"
+            }
         }
+    },
+    methods: {
+        buttonClick(){
+            this.showtable=!this.showtable
+            this.key=this.key+1
+        },
+        getPercentage(item){
+            return `${my_round(item.value/this.total*100,2)} %`
+            
+        }
+    },
+    mounted(){
+        this.total=this.items.reduce((accum,item) => accum + item.value, 0)
     }
-//     created(){
-//         
-//     }
 })
 

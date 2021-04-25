@@ -702,7 +702,7 @@ class Products(models.Model):
     address = models.TextField(blank=True, null=True)
     phone = models.TextField(blank=True, null=True)
     mail = models.TextField(blank=True, null=True)
-    percentage = models.IntegerField()
+    percentage = models.IntegerField(blank=False, null=False)
     pci = models.CharField(max_length=1)
     leverages = models.ForeignKey(Leverages, models.DO_NOTHING)
     stockmarkets = models.ForeignKey(Stockmarkets, models.DO_NOTHING)
