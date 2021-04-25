@@ -487,6 +487,5 @@ table.mytablescrollable td{
   border: 1px solid black;
   padding:2px;
 }
- input, select, label{
-     all:revert;
-}
+
+

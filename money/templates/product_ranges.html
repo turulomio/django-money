@@ -24,7 +24,7 @@
             <v-tab-item key="0">
                 <v-card flat>
                     <v-container>{% trans "Current price: " %}{{prm.product.basic_results.last}}</v-container>
-                    <v-data-table :headers="tableHeaders" :items="tableData" sort-by="value" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="[true]" fixed-header height="400">      
+                    <v-data-table dense :headers="tableHeaders" :items="tableData" sort-by="value" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="[true]" fixed-header height="400">      
                         <template v-slot:[`item.value`]="{ item }">
                             <p class="noheight"  @click="showLimits(item)" :class="item.current_in_range ? 'green' : ''">[[item.value]]</p>
                         </template>    
@@ -86,22 +86,16 @@
     })
 </script>
 <style>
-    table.v-table tbody td,table.v-table tbody th,table.v-table tbody td.text-start {
-        height: 2px;
-        margin: 0px;
-    }
-    .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > td:last-child, .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > td:not(.v-data-table__mobile-row), .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > th:last-child, .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > th:not(.v-data-table__mobile-row), .theme--light.v-data-table > .v-data-table__wrapper > table > thead > tr:last-child > th {
-        border-bottom: thin solid rgba(0,0,0,.12);
-        height: 0px;
-    }
     .noheight{
         margin: 0px;
     }
     .green{
         color:red;
         font-weight: 900;
+    } 
+    input, select, label{
+        all:revert;
     }
-
 </style>
 
 {% endblock %}
