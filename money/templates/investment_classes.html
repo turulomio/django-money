@@ -7,7 +7,7 @@
 {% block content %}
 <div id="app">
     <v-app>
-                        <chart-pie :items="[]"></chart-pie>
+        <todo-item></todo-item>
         <h1>{% trans "Investment classes" %}</h1>   
         <v-card>
         <v-select label="Select a method to calculate charts" v-model="method" :items="method_products" @change="key=key+1"></v-select>
@@ -21,14 +21,16 @@
                 <v-tabs-slider color="yellow"></v-tabs-slider>
             </v-tabs>
             <v-tabs-items v-model="tab">
-                <v-tab-item key="percentage">
-                    <v-card flat style="height: 600px;">
-                        <v-chart autoresize :option="echart_products" :key="key"/>
-                    </v-card>
-                </v-tab-item>
                 
                 <v-tab-item key="pci">
-                    <v-card flat>
+                    <v-card flat>.
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item key="product">
+                    <chart-pie :items="echart_products_items" height="600px" :key="key"></chart-pie>
+                </v-tab-item>
+                <v-tab-item key="percentage">
+                    <v-card flat>.
                     </v-card>
                 </v-tab-item>
                 <v-tab-item key="type">
@@ -43,18 +45,12 @@
                     <v-card flat>.
                     </v-card>
                 </v-tab-item>
-                <v-tab-item key="product">
-                    <v-card flat>.
-                    </v-card>
-                </v-tab-item>
             </v-tabs-items>
         </v-card>
     </v-app>
 </div>
-<script type="text/javascript" src='{% static "js/chart-pie.min.js" %}'></script>
 <script>   
-    Vue.component("v-chart", VueECharts); 
-//      Vue.component('ChartPie',ChartPie)
+    Vue.component("v-chart", VueECharts)
     new Vue({
         ...common_vue_properties(),
         data:{
@@ -65,35 +61,14 @@
             
         },
         computed:{
-            echart_products: function(){
+            echart_products_items: function(){
                 var products= {{ iotm.json_classes_by_product | safe}}
                 if (this.method=="Current"){
                     var adapted= products.map(el => ({name: el.name, value: my_round(el.balance, 2)}))
                 } else {//Invested
                     var adapted= products.map(el => ({name: el.name, value: my_round(el.invested,2)}))
                 }
-                return  {
-                    tooltip: {
-                        trigger: "item",
-                        formatter: "{a} <br/>{b} : {c} ({d}%)"
-                    },
-                    series: [
-                        {
-                            name: '{% trans "Assets by product type" %}',
-                            type: "pie",
-                            radius: "80%",
-                            center: ["50%", "50%"],
-                            data: adapted,
-                            emphasis: {
-                                itemStyle: {
-                                    shadowBlur: 10,
-                                    shadowOffsetX: 0,
-                                    shadowColor: "rgba(0, 0, 0, 0.5)"
-                                }
-                            }
-                        }
-                    ]
-                }
+                return adapted
             }
         },
     })
