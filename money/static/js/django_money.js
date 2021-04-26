@@ -231,3 +231,22 @@ function common_vue_properties(){
         
     }
 }
+
+function if_null_script(value){
+    if (value == null){
+        return "-"
+    }
+    return value
+}
+function if_null_zero(value){
+    if (value == null){
+        return 0
+    }
+    return value
+}
+function if_null_empty(value){
+    if (value == null){
+        return ""
+    }
+    return value
+}

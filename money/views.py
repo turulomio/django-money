@@ -96,7 +96,6 @@ from money.models import (
     Comment, 
     Creditcards,  
     Creditcardsoperations, 
-    EstimationsDps, 
     Investments, 
     Investmentsoperations, 
     Dividends, 
@@ -150,7 +149,7 @@ select
     last, 
     percentage(penultimate, last) as percentage_day, 
     percentage(t.lastyear, last) as percentage_year, 
-    (select estimation from estimations_dps where year=extract(year from now()) and id=products.id)/last*100 as percentage_dps
+    (select estimation from estimations_dps where year=extract(year from now()) and products_id=products.id)/last*100 as percentage_dps
 from 
     products, 
     last_penultimate_lastyear(products.id,now()) as t
@@ -911,7 +910,7 @@ def report_derivatives(request):
     
     
 def report_dividends(request):
-    qs_investments=Investments.objects.filter(active=True).select_related("products")
+    qs_investments=Investments.objects.filter(active=True).select_related("products").select_related("accounts").select_related("products__leverages").select_related("products__productstypes")
     shares=cursor_rows_as_dict("investments_id", """
         select 
             investments.id as investments_id ,
@@ -923,7 +922,7 @@ def report_dividends(request):
             estimation, 
             date_estimation,
             (last_penultimate_lastyear(products.id, now())).last 
-        from products, estimations_dps where products.id=estimations_dps.id and year=%s""", (date.today().year, ))
+        from products, estimations_dps where products.id=estimations_dps.products_id and year=%s""", (date.today().year, ))
     quotes=cursor_rows_as_dict("products_id",  """
         select 
             products_id, 
@@ -931,11 +930,11 @@ def report_dividends(request):
             from products, investments where investments.products_id=products.id and investments.active=true""")
     ld_report=[]
     for inv in qs_investments:        
-        
         if inv.products_id in estimations:
             dps=estimations[inv.products_id]["estimation"]
             date_estimation=estimations[inv.products_id]["date_estimation"]
-            percentage=Percentage(dps, quotes[inv.products_id]["last"]), 
+            percentage=Percentage(dps, quotes[inv.products_id]["last"]).value
+            estimated=shares[inv.id]["shares"]*dps*inv.products.real_leveraged_multiplier()
         else:
             dps= None
             date_estimation=None
@@ -949,7 +948,8 @@ def report_dividends(request):
             "dps": dps, 
             "shares": shares[inv.id]["shares"], 
             "date_estimation": date_estimation, 
-            "percentage": percentage, 
+            "estimated": estimated, 
+            "percentage": percentage,  
         }
         ld_report.append(d)
     json_report=listdict2json(ld_report)
@@ -1505,17 +1505,17 @@ class strategy_delete(DeleteView):
     def get_success_url(self):
         return reverse_lazy('strategy_list_active')
         
-
+@transaction.atomic
 @login_required
 def estimation_dps_new(request):
     if request.method == 'POST':
         form = EstimationDpsForm(request.POST)
-        print(form)
         if form.is_valid():
-#            s=EstimationsDps(form.cleaned_data)
-#            s.save()
-            return HttpResponseRedirect( reverse_lazy('report_dividends'))
-    return render(request, 'report_dividends.html', locals())
+            execute("""delete from estimations_dps where year=%s and products_id=%s""", (form.cleaned_data["year"], form.cleaned_data["products_id"]))
+            execute("""insert into estimations_dps ( year , estimation , date_estimation ,  source  , manual , products_id ) values (%s,%s,%s,%s,%s,%s)""", 
+            (form.cleaned_data["year"], form.cleaned_data["estimation"], date.today(), "Internet",  True, form.cleaned_data["products_id"]))
+            return HttpResponse(True)
+        return HttpResponse(False)
 
 @method_decorator(login_required, name='dispatch')
 class investment_new(CreateView):

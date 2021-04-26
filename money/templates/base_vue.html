@@ -30,6 +30,7 @@
         {% block head_js_site %}
              <script type="text/javascript" src='{% static "js/vue.min.js" %}'></script>
              <script type="text/javascript" src='{% static "js/vuetify.min.js" %}'></script>
+             <script type="text/javascript" src='{% static "js/axios.min.js" %}'></script> 
              <script type="text/javascript" src='{% static "js/echarts.min.js" %}'></script> 
              <script type="text/javascript" src='{% static "js/vue-composition-api.prod.js" %}'></script>
              <script type="text/javascript" src='{% static "js/index.umd.min.js" %}'></script>
@@ -50,11 +51,6 @@
 
         <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
-<!--         <link rel="stylesheet" type="text/css" href='{% static "css/Chart.css" %}'> -->
-<!--         <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'> -->
-<!--         <link rel="stylesheet" type="text/css" href='{% static "css/jquery.datetimepicker.min.css" %}'> -->
-<!--         <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet"> -->
-<!--         <link rel="stylesheet" type="text/css" href='{% static "css/jquery-ui.css" %}'> -->
         <link rel="stylesheet" type="text/css" href='{% static "css/vuetify.min.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/mystylesvue.css" %}?dev={% random_integer 0 10000 %}'>

@@ -30,5 +30,5 @@ class ProductsRangeForm(forms.Form):
 class EstimationDpsForm(forms.Form):
     year = forms.IntegerField(required=True)
     estimation=forms.DecimalField(min_value=0, decimal_places=6, required=True)
-    id=forms.IntegerField(required=True)
+    products_id=forms.IntegerField(required=True)
     
