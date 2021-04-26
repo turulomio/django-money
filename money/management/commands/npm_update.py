@@ -35,3 +35,5 @@ class Command(BaseCommand):
         copy("node_modules/tabulator-tables/dist/css/tabulator.min.css", "money/static/css/")
         copy("node_modules/tabulator-tables/dist/css/tabulator.min.css.map", "money/static/css/")
         copy("node_modules/vuetify/dist/vuetify.min.css", "money/static/css/")
+        copy("node_modules/@mdi/font/css/materialdesignicons.min.css", "money/static/css/")
+        copy("node_modules/@mdi/font/fonts//materialdesignicons-webfont.woff2", "money/static/fonts/")
