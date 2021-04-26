@@ -65,6 +65,11 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('dividend/new/<int:investments_id>', money_views.dividend_new.as_view(), name='dividend_new'),
     path('dividend/update/<int:pk>', money_views.dividend_update.as_view(), name='dividend_update'),
     path('dividend/delete/<int:pk>', money_views.dividend_delete.as_view(), name='dividend_delete'),
+    
+    
+    
+    path('estimations/post/', money_views.estimation_dps_new, name='estimation_dps_new'),
+    
 
     path('investment/list/', money_views.investment_list, {'active':True}, name='investment_list_active'),
     path('investment/list/inactive/', money_views.investment_list, {'active': False}, name='investment_list_inactive'),
@@ -116,6 +121,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
 
     path('report/concepts/',  money_views.report_concepts,  name='report_concepts'), 
     path('report/concepts/<int:year>/<int:month>/',  money_views.report_concepts,  name='report_concepts'), 
+    path('report/dividends/',  money_views.report_dividends,  name='report_dividends'), 
     path('report/derivatives/',  money_views.report_derivatives,  name='report_derivatives'), 
     path('report/evolution/', money_views.report_evolution,  name='report_evolution'),
     path('report/total/', money_views.report_total,  name='report_total'),

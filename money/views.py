@@ -21,6 +21,7 @@ from money.forms import (
     AccountsTransferForm, 
     CreditCardPayForm, 
     ProductsRangeForm, 
+    EstimationDpsForm, 
 )
 from money.charts import (
     chart_lines_total, 
@@ -52,6 +53,7 @@ from money.tables import (
 )
 from money.reusing.casts import string2list_of_integers
 from money.reusing.currency import Currency
+from money.reusing.connection_dj import cursor_rows_as_dict
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz, epochmicros2dtaware, dtaware2epochmicros
 from money.reusing.decorators import timeit
 from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key, listdict2json
@@ -94,6 +96,7 @@ from money.models import (
     Comment, 
     Creditcards,  
     Creditcardsoperations, 
+    EstimationsDps, 
     Investments, 
     Investmentsoperations, 
     Dividends, 
@@ -904,10 +907,53 @@ def report_derivatives(request):
     c_rollover_received=Currency(rollover_received, request.local_currency)
 #    iohhm=self.InvestmentOperationHistoricalHeterogeneusManager_derivatives()
 #    iochm=self.InvestmentOperationCurrentHeterogeneusManager_derivatives()
-
+    return render(request, 'report_derivatives.html', locals())@login_required
     
     
-    return render(request, 'report_derivatives.html', locals())
+def report_dividends(request):
+    qs_investments=Investments.objects.filter(active=True).select_related("products")
+    shares=cursor_rows_as_dict("investments_id", """
+        select 
+            investments.id as investments_id ,
+            sum(shares) as shares
+            from investments, investmentsoperations where active=true and investments.id=investmentsoperations.investments_id group by investments.id""")
+    estimations=cursor_rows_as_dict("products_id",  """
+        select 
+            distinct(products.id) as products_id, 
+            estimation, 
+            date_estimation,
+            (last_penultimate_lastyear(products.id, now())).last 
+        from products, estimations_dps where products.id=estimations_dps.id and year=%s""", (date.today().year, ))
+    quotes=cursor_rows_as_dict("products_id",  """
+        select 
+            products_id, 
+            (last_penultimate_lastyear(products.id, now())).last 
+            from products, investments where investments.products_id=products.id and investments.active=true""")
+    ld_report=[]
+    for inv in qs_investments:        
+        
+        if inv.products_id in estimations:
+            dps=estimations[inv.products_id]["estimation"]
+            date_estimation=estimations[inv.products_id]["date_estimation"]
+            percentage=Percentage(dps, quotes[inv.products_id]["last"]), 
+        else:
+            dps= None
+            date_estimation=None
+            percentage=None
+        
+        
+        d={
+            "products_id": inv.products_id, 
+            "name":  inv.fullName(), 
+            "current_price": quotes[inv.products_id]["last"], 
+            "dps": dps, 
+            "shares": shares[inv.id]["shares"], 
+            "date_estimation": date_estimation, 
+            "percentage": percentage, 
+        }
+        ld_report.append(d)
+    json_report=listdict2json(ld_report)
+    return render(request, 'report_dividends.html', locals())
 
 @login_required
 def ajax_chart_total(request, year_from):
@@ -1459,6 +1505,17 @@ class strategy_delete(DeleteView):
     def get_success_url(self):
         return reverse_lazy('strategy_list_active')
         
+
+@login_required
+def estimation_dps_new(request):
+    if request.method == 'POST':
+        form = EstimationDpsForm(request.POST)
+        print(form)
+        if form.is_valid():
+#            s=EstimationsDps(form.cleaned_data)
+#            s.save()
+            return HttpResponseRedirect( reverse_lazy('report_dividends'))
+    return render(request, 'report_dividends.html', locals())
 
 @method_decorator(login_required, name='dispatch')
 class investment_new(CreateView):

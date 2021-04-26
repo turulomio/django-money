@@ -26,7 +26,7 @@
                     <v-container>{% trans "Current price: " %}{{prm.product.basic_results.last}}</v-container>
                     <v-data-table dense :headers="tableHeaders" :items="tableData" sort-by="value" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="[true]" fixed-header height="400">      
                         <template v-slot:[`item.value`]="{ item }">
-                            <p class="noheight"  @click="showLimits(item)" :class="item.current_in_range ? 'green' : ''">[[item.value]]</p>
+                            <p class="noheight"  @click="showLimits(item)" :class="item.current_in_range ? 'green' : ''">[[item.value ]]</p>
                         </template>    
                         <template v-slot:[`item.recomendation_invest`]="{ item }">
                             <v-icon small v-if="item.recomendation_invest" >mdi-check-outline</v-icon>

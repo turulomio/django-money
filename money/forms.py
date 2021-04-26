@@ -26,3 +26,9 @@ class ProductsRangeForm(forms.Form):
     only_first=forms.BooleanField(required=False)
     accounts = forms.ModelChoiceField(queryset=Accounts.queryset_active_order_by_fullname(), required=False)
     
+
+class EstimationDpsForm(forms.Form):
+    year = forms.IntegerField(required=True)
+    estimation=forms.DecimalField(min_value=0, decimal_places=6, required=True)
+    id=forms.IntegerField(required=True)
+    

@@ -23,6 +23,7 @@ class MoneyMiddleware:
         grReport=Group(1, _("Reports"), "10",  True)
         grReport.append(Action(_("Concepts"), None, "report_concepts", True))
         grReport.append(Action(_("Total"), None, "report_total", True))
+        grReport.append(Action(_("Dividends"), None, "report_dividends", True))
         grReport.append(Action(_("Derivatives"), None, "report_derivatives", True))
         grReport.append(Action(_("Evolution"), None, "report_evolution", True))
         grReport.append(Action(_("Ranges"), None, "product_ranges", True))
