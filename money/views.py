@@ -1564,7 +1564,7 @@ def investment_ranking(request):
     
 @login_required
 def investment_classes(request):
-    qs_investments_active=Investments.objects.filter(active=True)
+    qs_investments_active=Investments.objects.filter(active=True).select_related("products").select_related("products__productstypes").select_related("accounts").select_related("products__leverages")
     iotm=InvestmentsOperationsTotalsManager_from_investment_queryset(qs_investments_active, timezone.now(), request)
     return render(request, 'investment_classes.html', locals())
 
