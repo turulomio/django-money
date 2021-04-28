@@ -4,27 +4,12 @@
 {% load static %}
 
 {% block content %}
-    <h1> </h1>
-    <center><img src='{% static "images/xulpymoney.png" %}' height="150px" width="150px"/>
-        <h1> </h1>
-    <p>{% trans "Wellcome to Django-Money, your personal accounting and financial system." %}</p></center>
-
-
-
-<ajax-button id="ajax_button_evolution" url="{% url 'ajax_modal_button'  %}" showbuttonafter buttontext="{% trans 'Modal ajax button' %}" csrf_token="{{csrf_token}}"></ajax-button>
-  <select id = "selLanguage"
-    multiple = "multiple"
-    size = "10">
-   <option value = "HTML">HTML</option>
-   <option value = "CSS">CSS</option>
-   <option value = "JavaScript">JavaScript</option>
-   <option value = "PHP">PHP</option>
-   <option value = "MySQL">MySQL</option>
-   <option value = "Java">Java</option>
-   <option value = "VB.NET">VB.NET</option>
-   <option value = "Python">Python</option>
-   <option value = "Flash">Flash</option>
-   <option value = "Perl">perl</option> 
-  </select>
+    <div style="text-align:center;">
+        <h1 style="text-align:center;">Django Money</h1>
+        <br>
+        <img src='{% static "images/xulpymoney.png" %}' height="150px" width="150px"/>
+        <br>
+        <p style="margin:40px;">{% trans "Wellcome to Django-Money, your personal accounting and financial system." %}</p>
+    </div>
 
 {% endblock %}

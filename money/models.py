@@ -399,7 +399,8 @@ class Dividends(models.Model):
             c.concepts=self.concepts
             c.operationstypes=self.concepts.operationstypes
             c.amount=self.net
-            c.comment="Transaction not finished"
+            #c.comment="Transaction not finished"
+            c.comment=Comment().encode(eComment.Dividend, self)
             c.accounts=self.investments.accounts
             c.save()
             return c
