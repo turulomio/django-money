@@ -906,9 +906,9 @@ def report_derivatives(request):
     c_rollover_received=Currency(rollover_received, request.local_currency)
 #    iohhm=self.InvestmentOperationHistoricalHeterogeneusManager_derivatives()
 #    iochm=self.InvestmentOperationCurrentHeterogeneusManager_derivatives()
-    return render(request, 'report_derivatives.html', locals())@login_required
+    return render(request, 'report_derivatives.html', locals())
     
-    
+@login_required
 def report_dividends(request):
     qs_investments=Investments.objects.filter(active=True).select_related("products").select_related("accounts").select_related("products__leverages").select_related("products__productstypes")
     shares=cursor_rows_as_dict("investments_id", """
