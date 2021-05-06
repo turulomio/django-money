@@ -32,7 +32,7 @@
                             <v-icon small v-if="item.recomendation_invest" >mdi-check-outline</v-icon>
                         </template>                        
                         <template v-slot:[`item.investments_inside`]="{ item }">
-                            <a :href="o.url" v-for="o in item.investments_inside" :key="o.name">[[ o.name ]]. Invested: [[ o.invested ]]</a>
+                            <a :href="o.url" v-for="o in item.investments_inside" :key="o.name">[[ o.name ]]. Invested: [[ o.invested ]]</a><br>
                         </template>                      
                         <template v-slot:[`item.orders_inside`]="{ item }">
                             <a :href="o.url" v-for="o in item.orders_inside" :key="o.name">[[ o.name ]]. Amount: [[ o.amount]]</a>
