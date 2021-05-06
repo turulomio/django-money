@@ -30,35 +30,17 @@
         {% block head_js_site %}
              <script type="text/javascript" src='{% static "js/vue.min.js" %}'></script>
              <script type="text/javascript" src='{% static "js/vuetify.min.js" %}'></script>
+             <script type="text/javascript" src='{% static "js/axios.min.js" %}'></script> 
              <script type="text/javascript" src='{% static "js/echarts.min.js" %}'></script> 
              <script type="text/javascript" src='{% static "js/vue-composition-api.prod.js" %}'></script>
              <script type="text/javascript" src='{% static "js/index.umd.min.js" %}'></script>
-<!--            <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
-            <script src="https://cdn.jsdelivr.net/npm/@vue/composition-api@1.0.0-rc.3"></script>
-            <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.2"></script>
-            <script src="https://cdn.jsdelivr.net/npm/vue-echarts@6.0.0-rc.4"></script>
-            <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>-->
-            <script src="{% url 'javascript-catalog' %}"></script>
-<!--             <script type="text/javascript" src='{% static "js/jquery.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/jquery-ui.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/bootstrap.js" %}'></script>             -->
-<!--             <script type="text/javascript" src='{% static "js/echarts.min.js" %}'></script>        -->
-<!--             <script type="text/javascript" src='{% static "js/moment.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/Chart.min.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/chartjs-chart-financial.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/xlsx.full.min.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/jquery.datetimepicker.full.min.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/component.ajaxbutton.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/component.currencyfactor.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/component.datepicker.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/component.dtawarepicker.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/component.modalwindow.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/component.yearpicker.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/component.yearmonthpicker.js" %}'></script> -->
-            <script type="text/javascript" src='{% static "js/django_money.js" %}'></script>
-
+             <script type="text/javascript" src='{% static "js/jquery.js" %}'></script>
+             <script type="text/javascript" src='{% static "js/bootstrap.js" %}'></script>            
+             <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
+             <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script>
+             <script type="text/javascript" src='{% static "js/myvuecomponents.js" %}'></script>
+             <script type="text/javascript" src='{% static "js/django_money.js" %}'></script>
+             <script src="{% url 'javascript-catalog' %}"></script>
         {% endblock head_js_site %}
         {% block head_js_section %}
         {% endblock head_js_section %}
@@ -68,12 +50,7 @@
         {% block head_css_site %}
 
         <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
-<!--         <link rel="stylesheet" type="text/css" href='{% static "css/Chart.css" %}'> -->
-<!--         <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'> -->
-<!--         <link rel="stylesheet" type="text/css" href='{% static "css/jquery.datetimepicker.min.css" %}'> -->
-<!--         <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet"> -->
-<!--         <link rel="stylesheet" type="text/css" href='{% static "css/jquery-ui.css" %}'> -->
+        <link rel="stylesheet" type="text/css" href='{% static "css/materialdesignicons.min.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/vuetify.min.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/mystylesvue.css" %}?dev={% random_integer 0 10000 %}'>

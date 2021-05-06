@@ -28,7 +28,7 @@ import asyncio
 from asgiref.sync import sync_to_async
 from datetime import date, timedelta
 from decimal import Decimal
-from money.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_dict
+from money.reusing.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_dict
 from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo, listdict_sum
 from django.conf import settings
 from django.urls import reverse_lazy
@@ -51,7 +51,7 @@ from money.models import (
     currencies_in_accounts, 
     money_convert, 
 )
-from money.reusing.casts import string2list_of_integers, valueORempty
+from money.reusing.casts import string2list_of_integers, valueORempty, var2json
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import dtaware_month_end, months, dtaware_day_end_from_date, dtaware2string, dtaware_year_start, dtaware_year_end
 from money.reusing.decorators import timeit
@@ -444,10 +444,11 @@ class QsoCreditcardsoperationsHomogeneus(QsoCommon):
                 var text="";
                 var amount=0;
                 for (i = 0; i < selected.length; i++) {{
-                    text += selected[i].id + ",";
+                    text += selected[i].id + ", ";
                     amount += selected[i].amount;
                 }}
-                operations_id.value=text.slice(0, -1);
+                
+                operations_id.value=text.slice(0, -2);
                 
                 var amount_id=document.getElementById("id_amount");
                 amount_id.value=amount;
@@ -1410,3 +1411,21 @@ def listdict_chart_product_quotes_historical(dt_from, product,  local_currency, 
     rows=product.ohclDailyBeforeSplits()
     ld_print(rows)
     return rows[-50:]
+    
+
+        
+
+
+
+
+
+## @param fields Tuple of field names
+def queryset2json(qs, fields):
+    r=[]
+    for o in qs:
+        d={}
+        for field in fields:
+            d[field]=var2json(getattr(o, field))
+        r.append(d)
+    return r
+

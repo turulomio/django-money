@@ -3,7 +3,6 @@ from money.models import Globals, Operationstypes
 from money.reusing.currency import currency_symbol
 from money.templatetags.mymenu import Menu, Action,  Group
 from django.utils.translation import gettext_lazy as _
-import time
 
 ## FOR VIEWS AND TEMPLATES
 class MoneyMiddleware:
@@ -18,12 +17,13 @@ class MoneyMiddleware:
         self.menu.append(Action(_("Orders"), None,  "order_list_active",  True))
         
         grCharts=Group(2,  _("Charts"), "11", True)
-        grCharts.append(Action(_("Total with threadpool"), None, "ajax_chart_total", True))
-        grCharts.append(Action(_("Total with async"), None, "ajax_chart_total_async", True))
+        grCharts.append(Action(_("Total"), None, "ajax_chart_total", True))
+        grCharts.append(Action(_("Investments classes"), None, "investment_classes", True))
         
         grReport=Group(1, _("Reports"), "10",  True)
         grReport.append(Action(_("Concepts"), None, "report_concepts", True))
         grReport.append(Action(_("Total"), None, "report_total", True))
+        grReport.append(Action(_("Dividends"), None, "report_dividends", True))
         grReport.append(Action(_("Derivatives"), None, "report_derivatives", True))
         grReport.append(Action(_("Evolution"), None, "report_evolution", True))
         grReport.append(Action(_("Ranges"), None, "product_ranges", True))
@@ -67,7 +67,6 @@ class MoneyMiddleware:
     
     
     def process_view(self, request, view_func, *view_args, **view_kwargs):
-        start=time.time()
         request.VERSION=__version__
         request.VERSIONDATE=__versiondate__
         request.menu=self.menu
@@ -79,4 +78,3 @@ class MoneyMiddleware:
         request.local_currency=request.globals["mem__localcurrency"]
         request.local_zone=request.globals["mem__localzone"]
         request.local_currency_symbol=currency_symbol(request.globals["mem__localcurrency"])
-        print(f"Loading middleware request took {time.time()-start}" )

@@ -3,7 +3,6 @@ from datetime import  date, datetime
 from decimal import Decimal
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.serializers import serialize
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
@@ -15,20 +14,24 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
-from json import dumps
 from math import floor
 
-from money.connection_dj import cursor_rows, cursor_one_column, execute, cursor_one_field
+from money.reusing.connection_dj import cursor_rows, cursor_one_column, execute, cursor_one_field
 from money.forms import (
     AccountsTransferForm, 
     CreditCardPayForm, 
     ProductsRangeForm, 
+    EstimationDpsForm, 
 )
 from money.charts import (
     chart_lines_total, 
     chart_product_quotes_historical, 
 )
-from money.investmentsoperations import InvestmentsOperations_from_investment, InvestmentsOperationsManager_from_investment_queryset
+from money.investmentsoperations import (
+    InvestmentsOperations_from_investment, 
+    InvestmentsOperationsManager_from_investment_queryset, 
+    InvestmentsOperationsTotalsManager_from_investment_queryset, 
+)
 from money.productrange import ProductRangeManager
 from money.tables import (
     TabulatorReportConcepts, 
@@ -50,9 +53,10 @@ from money.tables import (
 )
 from money.reusing.casts import string2list_of_integers
 from money.reusing.currency import Currency
+from money.reusing.connection_dj import cursor_rows_as_dict
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz, epochmicros2dtaware, dtaware2epochmicros
 from money.reusing.decorators import timeit
-from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key
+from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key, listdict2json
 from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict import (
@@ -145,7 +149,7 @@ select
     last, 
     percentage(penultimate, last) as percentage_day, 
     percentage(t.lastyear, last) as percentage_year, 
-    (select estimation from estimations_dps where year=extract(year from now()) and id=products.id)/last*100 as percentage_dps
+    (select estimation from estimations_dps where year=extract(year from now()) and products_id=products.id)/last*100 as percentage_dps
 from 
     products, 
     last_penultimate_lastyear(products.id,now()) as t
@@ -902,10 +906,54 @@ def report_derivatives(request):
     c_rollover_received=Currency(rollover_received, request.local_currency)
 #    iohhm=self.InvestmentOperationHistoricalHeterogeneusManager_derivatives()
 #    iochm=self.InvestmentOperationCurrentHeterogeneusManager_derivatives()
-
-    
-    
     return render(request, 'report_derivatives.html', locals())
+    
+@login_required
+def report_dividends(request):
+    qs_investments=Investments.objects.filter(active=True).select_related("products").select_related("accounts").select_related("products__leverages").select_related("products__productstypes")
+    shares=cursor_rows_as_dict("investments_id", """
+        select 
+            investments.id as investments_id ,
+            sum(shares) as shares
+            from investments, investmentsoperations where active=true and investments.id=investmentsoperations.investments_id group by investments.id""")
+    estimations=cursor_rows_as_dict("products_id",  """
+        select 
+            distinct(products.id) as products_id, 
+            estimation, 
+            date_estimation,
+            (last_penultimate_lastyear(products.id, now())).last 
+        from products, estimations_dps where products.id=estimations_dps.products_id and year=%s""", (date.today().year, ))
+    quotes=cursor_rows_as_dict("products_id",  """
+        select 
+            products_id, 
+            (last_penultimate_lastyear(products.id, now())).last 
+            from products, investments where investments.products_id=products.id and investments.active=true""")
+    ld_report=[]
+    for inv in qs_investments:        
+        if inv.products_id in estimations:
+            dps=estimations[inv.products_id]["estimation"]
+            date_estimation=estimations[inv.products_id]["date_estimation"]
+            percentage=Percentage(dps, quotes[inv.products_id]["last"]).value
+            estimated=shares[inv.id]["shares"]*dps*inv.products.real_leveraged_multiplier()
+        else:
+            dps= None
+            date_estimation=None
+            percentage=None
+        
+        
+        d={
+            "products_id": inv.products_id, 
+            "name":  inv.fullName(), 
+            "current_price": quotes[inv.products_id]["last"], 
+            "dps": dps, 
+            "shares": shares[inv.id]["shares"], 
+            "date_estimation": date_estimation, 
+            "estimated": estimated, 
+            "percentage": percentage,  
+        }
+        ld_report.append(d)
+    json_report=listdict2json(ld_report)
+    return render(request, 'report_dividends.html', locals())
 
 @login_required
 def ajax_chart_total(request, year_from):
@@ -1177,7 +1225,7 @@ def creditcard_pay(request, pk):
                 o.paid=True
                 o.accountsoperations_id=c.id
                 o.save()
-            return render(request, 'creditcard_pay.html', locals())
+        return HttpResponseRedirect(f'{reverse("creditcard_pay_historical", args=(creditcard.id, ))}?accountsoperations_id={c.id}')
     else:
         form = CreditCardPayForm()
         form.fields["datetime"].initial= str(dtaware_changes_tz(timezone.now(), request.local_zone))
@@ -1188,23 +1236,35 @@ def creditcard_pay(request, pk):
 @login_required
 @transaction.atomic
 def creditcard_pay_historical(request, pk):
+    # Get combobox payments info
     creditcard=Creditcards.objects.get(pk=pk)
-    historical_ao=Creditcardsoperations.objects.select_related("accountsoperations").filter(creditcards=creditcard, paid_datetime__isnull=False).order_by("paid_datetime").distinct("paid_datetime")
-   
-    #First method
-    data = serialize('json', historical_ao,  indent= 4)    #    print(historical_ao.values())
-    print(data)
+    ld_payments=cursor_rows("""
+        select count(accountsoperations.id), accountsoperations.id, accountsoperations.amount, accountsoperations.datetime from accountsoperations, creditcardsoperations 
+        where creditcardsoperations.accountsoperations_id=accountsoperations.id and 
+        creditcards_id=%s and accountsoperations.concepts_id=40 
+        group by accountsoperations.id, accountsoperations.amount, accountsoperations.datetime
+        order by accountsoperations.datetime""", (creditcard.id, ))
+    json_payments=listdict2json(ld_payments)
+
+    #Combo default selection
+    accountsoperations_id=request.GET.get("accountsoperations_id",  None) 
+    if accountsoperations_id is None: #select last
+        if len(ld_payments)>0:
+            select=ld_payments[len(ld_payments)-1]["id"]
+        else:
+            select=-1
+    else:
+        select=accountsoperations_id
     
-    ld=[]
-    for ao in historical_ao:
-        ld.append({"paid_datetime": ao.paid_datetime, "id":ao.accountsoperations.id})
-    
-    print(ld[3])
-    #Second method
-    historical_ao_json=dumps(ld, indent=4,  sort_keys=True)
-    print(historical_ao_json)
-    
-    return render(request, 'creditcard_pay_historical.html', locals())    
+    # Get table information
+    ld_cco=[]
+    qs_cco=Creditcardsoperations.objects.filter(accountsoperations_id=select).select_related("concepts").order_by("datetime")
+    for o in qs_cco:
+        ld_cco.append({"id": o.id, "datetime":o.datetime, "concept":o.concepts.name, "amount": o.amount, "comment":o.comment })
+    json_cco=listdict2json(ld_cco)
+
+    # Render page
+    return render(request, 'creditcard_pay_historical.html', locals())
 
 @login_required
 @transaction.atomic
@@ -1445,6 +1505,17 @@ class strategy_delete(DeleteView):
     def get_success_url(self):
         return reverse_lazy('strategy_list_active')
         
+@transaction.atomic
+@login_required
+def estimation_dps_new(request):
+    if request.method == 'POST':
+        form = EstimationDpsForm(request.POST)
+        if form.is_valid():
+            execute("""delete from estimations_dps where year=%s and products_id=%s""", (form.cleaned_data["year"], form.cleaned_data["products_id"]))
+            execute("""insert into estimations_dps ( year , estimation , date_estimation ,  source  , manual , products_id ) values (%s,%s,%s,%s,%s,%s)""", 
+            (form.cleaned_data["year"], form.cleaned_data["estimation"], date.today(), "Internet",  True, form.cleaned_data["products_id"]))
+            return HttpResponse(True)
+        return HttpResponse(False)
 
 @method_decorator(login_required, name='dispatch')
 class investment_new(CreateView):
@@ -1490,6 +1561,12 @@ def investment_change_active(request, pk):
 def investment_ranking(request):
     ldo=LdoInvestmentsRanking(request)
     return render(request, 'investment_ranking.html', locals())
+    
+@login_required
+def investment_classes(request):
+    qs_investments_active=Investments.objects.filter(active=True).select_related("products").select_related("products__productstypes").select_related("accounts").select_related("products__leverages")
+    iotm=InvestmentsOperationsTotalsManager_from_investment_queryset(qs_investments_active, timezone.now(), request)
+    return render(request, 'investment_classes.html', locals())
 
 @method_decorator(login_required, name='dispatch')
 class investment_update(SuccessMessageMixin, UpdateView):

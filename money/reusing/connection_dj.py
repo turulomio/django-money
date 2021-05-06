@@ -1,5 +1,7 @@
 
 from django.db import connection
+from .casts import var2json
+
 
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
@@ -43,3 +45,12 @@ def cursor_one_field(sql, params=[]):
 def execute(sql, params=[]):
     with connection.cursor() as cursor:
         cursor.execute(sql, params)
+
+def sql2json(sql,  params=()):    
+    r=[]
+    for o in cursor_rows(sql, params):
+        d={}
+        for field in o.keys():
+            d[field]=var2json(o[field])
+        r.append(d)
+    return r

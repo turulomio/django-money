@@ -16,7 +16,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.utils import timezone
 
-from money.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows, execute
+from money.reusing.connection_dj import cursor_one_field, cursor_one_column, cursor_one_row, cursor_rows, execute
 
 from money.investmentsoperations import InvestmentsOperations_from_investment
 from money.reusing.casts import string2list_of_integers
@@ -399,7 +399,8 @@ class Dividends(models.Model):
             c.concepts=self.concepts
             c.operationstypes=self.concepts.operationstypes
             c.amount=self.net
-            c.comment="Transaction not finished"
+            #c.comment="Transaction not finished"
+            c.comment=Comment().encode(eComment.Dividend, self)
             c.accounts=self.investments.accounts
             c.save()
             return c
@@ -423,19 +424,19 @@ class Dps(models.Model):
         managed = False
         db_table = 'dps'
 
-
+## django no funciona con 2 primary keys, así que hago los inserts manuales
 class EstimationsDps(models.Model):
     year = models.IntegerField(primary_key=True)
     estimation = models.DecimalField(max_digits=18, decimal_places=6)
     date_estimation = models.DateField(blank=True, null=True)
     source = models.TextField(blank=True, null=True)
     manual = models.BooleanField(blank=True, null=True)
-    id = models.ForeignKey('Products', models.DO_NOTHING, db_column='id')
+    products= models.ForeignKey('Products', models.DO_NOTHING)
 
     class Meta:
         managed = False
         db_table = 'estimations_dps'
-        unique_together = (('year', 'id'),)
+        unique_together = (('year', 'products'),)
 
 
 class EstimationsEps(models.Model):
@@ -444,12 +445,12 @@ class EstimationsEps(models.Model):
     date_estimation = models.DateField(blank=True, null=True)
     source = models.TextField(blank=True, null=True)
     manual = models.BooleanField(blank=True, null=True)
-    id = models.ForeignKey('Products', models.DO_NOTHING, db_column='id')
+    products= models.ForeignKey('Products', models.DO_NOTHING)
 
     class Meta:
         managed = False
         db_table = 'estimations_eps'
-        unique_together = (('year', 'id'),)
+        unique_together = (('year', 'products'),)
 
 
 class Globals(models.Model):
@@ -702,7 +703,7 @@ class Products(models.Model):
     address = models.TextField(blank=True, null=True)
     phone = models.TextField(blank=True, null=True)
     mail = models.TextField(blank=True, null=True)
-    percentage = models.IntegerField()
+    percentage = models.IntegerField(blank=False, null=False)
     pci = models.CharField(max_length=1)
     leverages = models.ForeignKey(Leverages, models.DO_NOTHING)
     stockmarkets = models.ForeignKey(Stockmarkets, models.DO_NOTHING)

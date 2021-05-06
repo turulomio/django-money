@@ -17,6 +17,7 @@ h1 {
     text-align: left;
     font-weight: bold;
     color:#333333;
+    text-align: center
 }
 
 
@@ -123,13 +124,7 @@ form.search{
 }
 
 form{
-    background: linear-gradient(rgb(185, 175, 231), white);
-    border-radius: 14px;
-    border: 1px solid #BBBBBB;
     padding: 8px;	
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
 }
 
 form.checkbox_selection, form.normal, ajax-button > form{
@@ -487,6 +482,5 @@ table.mytablescrollable td{
   border: 1px solid black;
   padding:2px;
 }
- input, select, label{
-     all:revert;
-}
+
+

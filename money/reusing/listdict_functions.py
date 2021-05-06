@@ -1,7 +1,7 @@
 ## THIS IS FILE IS FROM https://github.com/turulomio/reusingcode IF YOU NEED TO UPDATE IT PLEASE MAKE A PULL REQUEST IN THAT PROJECT
 ## DO NOT UPDATE IT IN YOUR CODE IT WILL BE REPLACED USING FUNCTION IN README
 
-
+from .casts import var2json
 
 
 
@@ -91,6 +91,9 @@ class Ldo:
     
     def order_by(self, key, reverse=False):
         self.ld=sorted(self.ld,  key=lambda item: item[key], reverse=reverse)
+        
+    def json(self):
+        return listdict2json(self.ld)
 
 def listdict_has_key(listdict, key):
     if len(listdict)==0:
@@ -164,3 +167,28 @@ def listdict2list(listdict, key, sorted=False, cast=None):
         r.sort()
     return r
 
+def listdict2json(listdict):
+    r="["
+    for o in listdict:
+        d={}
+        for field in o.keys():
+            d[field]=var2json(o[field])
+        r=r+str(d).replace("': 'null'", "': null") +","
+    r=r[:-1]+"]"
+    return r
+
+
+
+
+if __name__ == "__main__":
+    from datetime import datetime, date
+    from decimal import Decimal
+    ld=[]
+    ld.append({"a": datetime.now(), "b": date.today(), "c": Decimal(12.32), "d": None, "e": int(12), "f":None})
+    print(listdict2json(ld))
+
+
+    def print_lor(lor):
+        print("")
+        for row in lor:
+            print(row)

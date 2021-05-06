@@ -1,3 +1,15 @@
+
+function localtime(value){
+    if (value){
+        var dateFormat = 'YYYY-MM-DD HH:mm:ss';
+        var testDateUtc = moment.utc(value);
+        var localDate = testDateUtc.local();
+        return (localDate.format(dateFormat)); // 2015-30-01 02:00:00
+    }
+    console.log("REALLY");
+    return null;
+}   
+
 const Range= class{
     constructor(value,percentage_down_decimal){
         this.value=value;
@@ -201,4 +213,40 @@ function openInNewTab(href) {
     target: '_blank',
     href: href,
   }).click();
+}
+
+function common_vue_properties(){
+    return {
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        vuetify: new Vuetify({
+            theme: {
+                themes: {
+                    light: {
+                        primary: '#3a3987',
+                    },
+                },
+            }
+        }),
+        
+    }
+}
+
+function if_null_script(value){
+    if (value == null){
+        return "-"
+    }
+    return value
+}
+function if_null_zero(value){
+    if (value == null){
+        return 0
+    }
+    return value
+}
+function if_null_empty(value){
+    if (value == null){
+        return ""
+    }
+    return value
 }
