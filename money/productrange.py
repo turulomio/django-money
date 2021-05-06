@@ -1,8 +1,7 @@
 from datetime import date
 from decimal import Decimal
 from json import dumps
-from django.urls import reverse_lazy,  reverse
-from django.utils.translation import ugettext_lazy as _
+from django.urls import reverse
 from django.utils import timezone
 from xulpymoney.libmanagers import ObjectManager, DatetimeValueManager
 from money.models import Investments, Orders

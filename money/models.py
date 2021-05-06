@@ -680,11 +680,24 @@ class Orders(models.Model):
     def currency_amount(self):
         return Currency(self.price*self.shares*self.investments.products.real_leveraged_multiplier(), self.investments.products.currency)
         
+    def needs_stop_loss_warning(self):
+        if self.shares>0 and self.price>self.investments.products.basic_results()["last"]:
+            return True
+        elif  self.shares<0 and self.price<self.investments.products.basic_results()["last"]:
+            return True
+        return False
+
     ## Used to display bank order execution alert using form cleaned_data
     @staticmethod
-    def bank_alert(cleaned_data):
+    def bank_alert(cleaned_data, warning=False):
+        if warning==True:
+            stw='<p><span class="red">' + _("Remember that is a stop loss order")+'</span></p>'
+        else:
+            stw=""
+        
         return _(f"""<p>Order was created sucessfully.</p>
         <p>Don't forget to set this order in your bank:</p>
+        {stw}
         <ul>
             <li>Expiration: {cleaned_data['expiration']}</li>
             <li>Investment: {cleaned_data['investments'].fullName()}</li>

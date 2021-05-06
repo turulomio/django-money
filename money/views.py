@@ -1609,7 +1609,8 @@ class order_new(SuccessMessageMixin, CreateView):
     fields = ( 'date', 'expiration', 'investments',  'shares',  'price')
 
     def get_success_message(self, cleaned_data):
-        return Orders.bank_alert(cleaned_data)
+        o=Orders(**cleaned_data)
+        return Orders.bank_alert(cleaned_data,  o.needs_stop_loss_warning())
 
     def get_form(self, form_class=None): 
         if form_class is None: 
@@ -1637,7 +1638,8 @@ class order_update(SuccessMessageMixin, UpdateView):
     template_name="order_update.html"
 
     def get_success_message(self, cleaned_data):
-        return Orders.bank_alert(cleaned_data)
+        o=Orders(**cleaned_data)
+        return Orders.bank_alert(cleaned_data,  o.needs_stop_loss_warning())
 
     def get_initial(self):
         return {
