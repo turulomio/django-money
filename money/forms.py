@@ -32,3 +32,6 @@ class EstimationDpsForm(forms.Form):
     estimation=forms.DecimalField(min_value=0, decimal_places=6, required=True)
     products_id=forms.IntegerField(required=True)
     
+class SettingsForm(forms.Form):
+    DefaultAmountToInvest= forms.IntegerField(required=True)
+    

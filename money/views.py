@@ -22,6 +22,7 @@ from money.forms import (
     CreditCardPayForm, 
     ProductsRangeForm, 
     EstimationDpsForm, 
+    SettingsForm, 
 )
 from money.charts import (
     chart_lines_total, 
@@ -1615,6 +1616,7 @@ class order_new(SuccessMessageMixin, CreateView):
     def get_form(self, form_class=None): 
         if form_class is None: 
             form_class = self.get_form_class()
+        self.default_amount=getGlobal("DefaultAmountToInvest", 7500,  "int")
         form = super(order_new, self).get_form(form_class)
         widget_date(self.request, form.fields['date'])
         widget_date(self.request, form.fields['expiration'])
@@ -1798,5 +1800,38 @@ def get_parameter_to_boolean(request, parameter):
     
 def widget_modal_window(request):
     return render(request, 'widget_modal_window.html', locals())
+
 def echart(request):
     return render(request, 'echart.html', locals())
+
+def settings(request):
+    if request.method == 'POST':
+        form = SettingsForm(request.POST)
+        if form.is_valid():
+            setGlobal("DefaultAmountToInvest", form.cleaned_data["DefaultAmountToInvest"])
+            messages.success(request, _("Settings saved successfully"))
+        else:
+            messages.warning(request, _("Something wrong"))
+    DefaultAmountToInvest=getGlobal("DefaultAmountToInvest", 1000)
+    return render(request, 'settings.html', locals())
+
+def setGlobal(key, value):
+    number=cursor_one_field("select count(*) from globals where global=%s", (key, ))
+    print(number)
+    if number==0:
+        execute("insert into globals (global, value) values (%s,%s)", (key, value))
+    else:
+        execute("update globals set value=%s where global=%s", (value,  key))
+    
+## @param type Type to cast str, int, float,...
+def getGlobal(key, default, type="str"):
+    try:
+        r=cursor_one_field("select value from globals where global=%s", (key, ))
+        if type=="int":
+            return int(r)
+        else:
+            return r
+    except:
+        return default
+    
+    

@@ -14,7 +14,7 @@
     <p id="pOrderBalance"></p>
     
     <p>{% trans "To calculate order shares use next options:" %}</p>
-    <label>{% trans "Wished amount to invest" %}</label>&nbsp;<input id="txtToInvest" value="7500"></input>
+    <label>{% trans "Wished amount to invest" %}</label>&nbsp;<input id="txtToInvest" value="{{ view.default_amount }}"></input>
 &nbsp;
     <label>{% trans "Selected investment leverage" %}</label>&nbsp;<input id="txtLeverage" value="1" readonly></input>
 &nbsp;

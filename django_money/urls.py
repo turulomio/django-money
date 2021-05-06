@@ -131,6 +131,8 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('report/total/income/details/<int:year>/<int:month>/', money_views.report_total_income_details,  name='report_total_income_details'),
     path('report/total/gainsbyproducttype/<int:year>/', money_views.ajax_report_gains_by_product_type,  name='ajax_report_gains_by_product_type'),
     
+    path('settings/', money_views.settings, name='settings'),
+    
     path('strategy/list/', money_views.strategy_list, {'active':True}, name='strategy_list_active'),
     path('strategy/list/inactive/', money_views.strategy_list, {'active': False}, name='strategy_list_inactive'),
     path('strategy/view/<slug:pk>/', money_views.strategy_view, name='strategy_view'),
