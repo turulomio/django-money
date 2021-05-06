@@ -210,9 +210,9 @@ class LdoInvestmentsOperationsHeterogeneus(LdoDjangoMoney):
         r.setDestinyUrl(None)
         r.setLocalZone(self.request.local_zone)
         r.setListDict(self.ld)        
-        r.setFields("id","datetime", "operationstypes","shares", "price", "commission", "taxes",  "currency_conversion",  "comment")
-        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Commission"), _("Taxes"), _("Currency convertion"),  _("Comment"))
-        r.setTypes("int","datetime", "str","Decimal", currency, currency, currency, "Decimal6", "str")
+        r.setFields("id","datetime", "operationstypes","shares", "price", "gross_account",  "commission", "taxes",  "currency_conversion",  "comment")
+        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Gross"),  _("Commission"), _("Taxes"), _("Currency convertion"),  _("Comment"))
+        r.setTypes("int","datetime", "str","Decimal", currency, currency, currency, currency, "Decimal6", "str")
         r.setBottomCalc(None, None, None, "sum", None, "sum", "sum", None, None)
         r.showLastRecord(False)
         return r        

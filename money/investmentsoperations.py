@@ -470,6 +470,7 @@ class InvestmentsOperationsManager:
                 if dt_from<=o["datetime"] and o["datetime"]<=dt_to:
                     o["name"]=io.investment.fullName()
                     o["operationstypes"]=self.request.operationstypes[o["operationstypes_id"]]
+                    print(o)
                     r.append(o)
         r.order_by("datetime")
         return r        
