@@ -620,6 +620,18 @@ def investment_pairs(request, worse, better, accounts_id):
     return render(request, 'investment_pairs.html', locals())
 
 @login_required
+def products_comparation(request):
+    a=request.GET.get("a", None)
+    b=request.GET.get("b", None)
+    
+    if a is not None:
+        product_a=get_object_or_404(Products, pk=int(a))
+    if b is not None:
+        product_b=get_object_or_404(Products, pk=int(b))
+
+    return render(request, 'products_comparation.html', locals())
+
+@login_required
 def products_pairs(request, worse, better):
     product_better=get_object_or_404(Products, pk=better)
     product_worse=get_object_or_404(Products, pk=worse)

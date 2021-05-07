@@ -1,0 +1,22 @@
+{% extends 'base_vue.html' %}
+{% load i18n %}
+
+{% block content %}
+<div id="app">
+    <v-app>
+        <h1>{% trans "Products comparation" %}</h1>
+        <autocompleteapi-idname> dfassa </autocompleteapi-idname>
+        MAL
+    </v-app>
+</div>
+<script>
+    new Vue({
+        ...common_vue_properties(),
+        data:{
+            
+        },
+        computed:{
+        },
+    })
+</script>
+{% endblock %}

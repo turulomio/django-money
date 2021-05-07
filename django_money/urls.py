@@ -97,6 +97,8 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('order/execute/<int:pk>', money_views.order_execute, name='order_execute'),
     
     path('product/benchmark/', money_views.product_benchmark, name='product_benchmark'),
+    path('product/comparation/', money_views.products_comparation, name='product_comparation'),
+    path('product/comparation/', money_views.products_comparation, name='product_comparation'),
     path('product/view/<slug:pk>/', money_views.product_view, name='product_view'),
     path('product/list/search/', money_views.product_list_search,  name='product_list_search'),
     path('product/list/favorites/', money_views.product_list_favorites,  name='product_list_favorites'),
