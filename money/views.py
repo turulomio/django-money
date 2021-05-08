@@ -217,6 +217,29 @@ def product_benchmark(request):
     return product_view(request, request.globals["mem__benchmarkid"])
 
 @login_required
+def product_search(request):
+    search=request.GET.get("search", "__none__")
+    id=request.GET.get("id", None)
+    if id is not None:
+        product=get_object_or_404(Products, pk=id)
+        return JsonResponse({"id":product.id, "name":product.name}, safe=False)
+        
+        
+    
+    if search=="__none__":
+        qs=Products.objects.none()
+    elif search=="__all__":
+        qs=Products.objects.all()
+    else:
+        qs=Products.objects.all().filter(name__icontains=search)
+        
+    ld=[]
+    for p in qs:
+        ld.append({"id":p.id, "name":p.name})
+
+    return JsonResponse(ld, safe=False)
+
+@login_required
 def product_view(request, pk):
     product=get_object_or_404(Products, id=pk)
     quotes, percentages=listdict_product_quotes_month_comparation(2000, product)

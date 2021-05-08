@@ -106,6 +106,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('product/list/cfds/', money_views.product_list_cfds,  name='product_list_cfds'),
     path('product/product_update/', money_views.product_update,  name='product_update'),
     path('product/ranges/', money_views.product_ranges,  name='product_ranges'),
+    path('product/search/', money_views.product_search,  name='product_search'),
     path('product/chart/historical/<int:pk>/', money_views.ajax_chart_product_quotes_historical,  name='ajax_chart_product_quotes_historical'),
     path('products/pairs/<int:worse>/<int:better>/', money_views.products_pairs,  name='products_pairs'),
 

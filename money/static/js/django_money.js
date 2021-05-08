@@ -232,6 +232,14 @@ function common_vue_properties(){
     }
 }
 
+function myheaders(){
+    return {
+        headers:{
+//             'Accept-Language': `${this.$i18n.locale}-${this.$i18n.locale}`,
+            'Content-Type':'application/json'
+        }
+    }
+}
 function if_null_script(value){
     if (value == null){
         return "-"
