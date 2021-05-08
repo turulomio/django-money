@@ -1,34 +1,34 @@
 {% extends 'base_vue_all.html' %}
 
 {% load i18n %}
+{% load static %}
 
+{% block head_js_section %}
+    <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
+{% endblock head_js_section %}
 {% block content %}
-<div id="app">
-    <v-app>
-        <h1>{% blocktrans with name=creditcard.name %}Pay deferred historical operations of '{{ name}}' {% endblocktrans %}</h1>
-        <v-container width="60%" >
-            <v-row>
-                <v-select dense label="Select a payment" v-model="select" :items="items" :item-text="select_text" item-value="id" @change="onChange"/>
-                </v-select>
-                <v-spacer></v-spacer>
-            </v-row>
-            <v-data-table dense :headers="tableHeaders" :items="tableData" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['datetime']" fixed-header height="400">
-                <template v-slot:[`item.datetime`]="{ item, index}">
-                    [[ localtime(item.datetime)  ]] 
-                </template>                        
-                <template v-slot:[`item.amount`]="{ item }">
-                    [[ currency_string(item.amount, '{{ creditcard.accounts.currency }}')]]
-                </template>                   
-                <template v-slot:[`item.balance`]="{ item, index }">
-                    [[ currency_string(getBalance(item ,index), '{{ creditcard.accounts.currency }}')]]
-                </template>
-            </v-data-table>   
-            <br>
-            <v-btn color="primary" @click="gotoOperationsPage()" :disabled="false">{% trans "Goto operations page" %}</v-btn>
-            <v-btn color="error" @click="refundPayment()" :disabled="false">{% trans "Refund payment"%}</v-btn>
-        </v-container>
-    </v-app>
-</div>
+<h1>{% blocktrans with name=creditcard.name %}Pay deferred historical operations of '{{ name}}' {% endblocktrans %}</h1>
+<v-container width="60%" >
+    <v-row>
+        <v-select dense label="Select a payment" v-model="select" :items="items" :item-text="select_text" item-value="id" @change="onChange"/>
+        </v-select>
+        <v-spacer></v-spacer>
+    </v-row>
+    <v-data-table dense :headers="tableHeaders" :items="tableData" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['datetime']" fixed-header height="400">
+        <template v-slot:[`item.datetime`]="{ item, index}">
+            [[ localtime(item.datetime)  ]] 
+        </template>                        
+        <template v-slot:[`item.amount`]="{ item }">
+            [[ currency_string(item.amount, '{{ creditcard.accounts.currency }}')]]
+        </template>                   
+        <template v-slot:[`item.balance`]="{ item, index }">
+            [[ currency_string(getBalance(item ,index), '{{ creditcard.accounts.currency }}')]]
+        </template>
+    </v-data-table>   
+    <br>
+    <v-btn color="primary" @click="gotoOperationsPage()" :disabled="false">{% trans "Goto operations page" %}</v-btn>
+    <v-btn color="error" @click="refundPayment()" :disabled="false">{% trans "Refund payment"%}</v-btn>
+</v-container>
 <script>    
     new Vue({
         ...common_vue_properties(),

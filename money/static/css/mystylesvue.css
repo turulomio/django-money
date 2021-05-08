@@ -255,6 +255,7 @@ td.green{
     position: relative;
     min-height: 20px;
     color: white;
+    opacity: unset;
 }
 
 .theme--light.v-treeview .v-treeview-node__root.v-treeview-node--active::before, .theme--light.v-treeview .v-treeview-node__root.v-treeview-node--active:hover::before {

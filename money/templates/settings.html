@@ -5,22 +5,18 @@
 
 
 {% block content %}
-<div id="app">
-    <v-app>
-        <h1>{% trans "Settings" %}</h1>   
-        <v-card>
-            <v-card-title class="headline">{% trans "Personal preferences" %}</v-card-title>
-            <v-form ref="form" v-model="form_valid" lazy-validation action="{% url 'settings' %}" method="POST">
-                <v-col>
-                    <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
-                    <v-text-field name="DefaultAmountToInvest" v-model="DefaultAmountToInvest" type="text" :counter="10" label="{% trans 'Default amount to invest' %}" placeholder="{% trans 'Enter an amount' %}" :rules="RulesIntegerRequired10"></v-text-field>
-                </v-col>
-            </v-form>
-        </v-card>
-        <p></p>
-        <v-btn color="error" @click="submit()" :disabled="form_valid==false">{% trans "Save settings" %}</v-btn>
-    </v-app>
-</div>
+    <h1>{% trans "Settings" %}</h1>   
+    <v-card>
+        <v-card-title class="headline">{% trans "Personal preferences" %}</v-card-title>
+        <v-form ref="form" v-model="form_valid" lazy-validation action="{% url 'settings' %}" method="POST">
+            <v-col>
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+                <v-text-field name="DefaultAmountToInvest" v-model="DefaultAmountToInvest" type="text" :counter="10" label="{% trans 'Default amount to invest' %}" placeholder="{% trans 'Enter an amount' %}" :rules="RulesIntegerRequired10"></v-text-field>
+            </v-col>
+        </v-form>
+    </v-card>
+    <p></p>
+    <v-btn color="error" @click="submit()" :disabled="form_valid==false">{% trans "Save settings" %}</v-btn>
 <script>
     new Vue({
         ...common_vue_properties(),

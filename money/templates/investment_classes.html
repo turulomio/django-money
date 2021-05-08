@@ -13,39 +13,35 @@
 {% endblock head_js_section %}
 
 {% block content %}
-<div id="app">
-    <v-app>
-        <h1>{% trans "Investment classes" %}</h1>   
-        <v-card>
-        <v-select label="Select a method to calculate charts" v-model="method" :items="method_products" @change="key=key+1"></v-select>
-            <v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
-                <v-tab key="product">{% trans "By investment product" %}</v-tab>
-                <v-tab key="pci">{% trans "By Put / Call / Inline" %}</v-tab>
-                <v-tab key="percentage">{% trans "By variable percentage" %}</v-tab>
-                <v-tab key="type">{% trans "By investment type" %}</v-tab>
-                <v-tab key="leverage">{% trans "By leverage" %}</v-tab>
-                <v-tabs-slider color="yellow"></v-tabs-slider>
-            </v-tabs>
-            <v-tabs-items v-model="tab">
-                <v-tab-item key="product">
-                    <chart-pie name="Investments by product" :items="echart_products_items" height="600px" :key="key+1"></chart-pie>
-                </v-tab-item>
-                <v-tab-item key="pci">
-                    <chart-pie name="Investments by pci" :items="echart_pci_items" height="600px" :key="key"></chart-pie>
-                </v-tab-item>
-                <v-tab-item key="percentage">
-                    <chart-pie name="Investments by variable percentage" :items="echart_percentage_items" height="600px" :key="key"></chart-pie>
-                </v-tab-item>
-                <v-tab-item key="type">
-                    <chart-pie name="Investments by product type" :items="echart_producttype_items" height="600px" :key="key"></chart-pie>
-                </v-tab-item>
-                <v-tab-item key="leverage">
-                    <chart-pie name="Investments by leverage" :items="echart_leverage_items" height="600px" :key="key"></chart-pie>
-                </v-tab-item>
-            </v-tabs-items>
-        </v-card>
-    </v-app>
-</div>
+    <h1>{% trans "Investment classes" %}</h1>   
+    <v-card>
+    <v-select label="Select a method to calculate charts" v-model="method" :items="method_products" @change="key=key+1"></v-select>
+        <v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
+            <v-tab key="product">{% trans "By investment product" %}</v-tab>
+            <v-tab key="pci">{% trans "By Put / Call / Inline" %}</v-tab>
+            <v-tab key="percentage">{% trans "By variable percentage" %}</v-tab>
+            <v-tab key="type">{% trans "By investment type" %}</v-tab>
+            <v-tab key="leverage">{% trans "By leverage" %}</v-tab>
+            <v-tabs-slider color="yellow"></v-tabs-slider>
+        </v-tabs>
+        <v-tabs-items v-model="tab">
+            <v-tab-item key="product">
+                <chart-pie name="Investments by product" :items="echart_products_items" height="600px" :key="key+1"></chart-pie>
+            </v-tab-item>
+            <v-tab-item key="pci">
+                <chart-pie name="Investments by pci" :items="echart_pci_items" height="600px" :key="key"></chart-pie>
+            </v-tab-item>
+            <v-tab-item key="percentage">
+                <chart-pie name="Investments by variable percentage" :items="echart_percentage_items" height="600px" :key="key"></chart-pie>
+            </v-tab-item>
+            <v-tab-item key="type">
+                <chart-pie name="Investments by product type" :items="echart_producttype_items" height="600px" :key="key"></chart-pie>
+            </v-tab-item>
+            <v-tab-item key="leverage">
+                <chart-pie name="Investments by leverage" :items="echart_leverage_items" height="600px" :key="key"></chart-pie>
+            </v-tab-item>
+        </v-tabs-items>
+    </v-card>
 <script>   
     Vue.component("v-chart", VueECharts)
     new Vue({

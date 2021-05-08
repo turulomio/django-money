@@ -9,47 +9,43 @@
 
 
 {% block content %}
-<div id="app">
-    <v-app>
-        <h1>{% trans "Dividends report" %}</h1>   
-        <v-container  style="width:40%" elevation="1">
-            <v-card>
-                <v-col  justify="space-around">
-                    <v-text-field v-model="alertdays" type="number" label="{% trans 'Max days to update dividends alert' %}" placeholder="Enter an integer number"></v-text-field>
+    <h1>{% trans "Dividends report" %}</h1>   
+    <v-container  style="width:40%" elevation="1">
+        <v-card>
+            <v-col  justify="space-around">
+                <v-text-field v-model="alertdays" type="number" label="{% trans 'Max days to update dividends alert' %}" placeholder="Enter an integer number"></v-text-field>
+            </v-col>
+        </v-card>
+    </v-container>
+    <v-data-table dense :headers="tableHeaders"  :items="items" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['percentage']" :sort-desc="['percentage']">
+        <template v-slot:[`item.dps`]="{item}"  class="text-nowrap">
+            <v-icon small @click="addEstimation(item)" v-if="showAlarm(item)">mdi-alarm</v-icon> [[ if_null_script(item.dps)]]
+        </template>    
+        <template v-slot:[`item.actions`]="{ item }">
+            <v-icon small class="mr-2" @click="addEstimation(item)">mdi-pencil</v-icon>
+        </template> 
+        <template v-slot:[`item.percentage`]="{ item }">
+            [[ `${my_round(item.percentage*100, 2)} %`]]
+        </template>
+    </v-data-table>
+    <v-container>[[ total() ]]</v-container>
+    
+    <v-dialog v-model="dialog" max-width="450">
+        <v-card>
+            <v-card-title class="headline">{% trans "Post an estimation" %}</v-card-title>
+            <v-form ref="form" v-model="form_valid" lazy-validation>
+                <v-col>
+                    <v-text-field v-model="year" type="text" :counter="4" label="{% trans 'Year' %}" required placeholder="{% trans 'Enter a year' %}" :rules="RulesIntegerRequired4"></v-text-field>
+                    <v-text-field v-model="estimation" type="text" label="{% trans 'Estimation' %}" :counter="10" placeholder="{% trans 'Enter a estimation' %})" autofocus @focus="$event.target.select()" :rules="RulesNumberRequired10"></v-text-field>
                 </v-col>
-            </v-card>
-        </v-container>
-        <v-data-table dense :headers="tableHeaders"  :items="items" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['percentage']" :sort-desc="['percentage']">
-            <template v-slot:[`item.dps`]="{item}"  class="text-nowrap">
-                <v-icon small @click="addEstimation(item)" v-if="showAlarm(item)">mdi-alarm</v-icon> [[ if_null_script(item.dps)]]
-            </template>    
-            <template v-slot:[`item.actions`]="{ item }">
-                <v-icon small class="mr-2" @click="addEstimation(item)">mdi-pencil</v-icon>
-            </template> 
-            <template v-slot:[`item.percentage`]="{ item }">
-                [[ `${my_round(item.percentage*100, 2)} %`]]
-            </template>
-        </v-data-table>
-        <v-container>[[ total() ]]</v-container>
-        
-        <v-dialog v-model="dialog" max-width="450">
-            <v-card>
-                <v-card-title class="headline">{% trans "Post an estimation" %}</v-card-title>
-                <v-form ref="form" v-model="form_valid" lazy-validation>
-                    <v-col>
-                        <v-text-field v-model="year" type="text" :counter="4" label="{% trans 'Year' %}" required placeholder="{% trans 'Enter a year' %}" :rules="RulesIntegerRequired4"></v-text-field>
-                        <v-text-field v-model="estimation" type="text" label="{% trans 'Estimation' %}" :counter="10" placeholder="{% trans 'Enter a estimation' %})" autofocus @focus="$event.target.select()" :rules="RulesNumberRequired10"></v-text-field>
-                    </v-col>
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="primary" @click="submit()" :disabled="!form_valid">{% trans "Post an estimation" %}</v-btn>
-                        <v-btn color="error" @click.native="dialog = false">{% trans "Cancel" %}</v-btn>
-                    </v-card-actions>
-                </v-form>
-            </v-card>
-        </v-dialog>
-    </v-app>
-</div>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" @click="submit()" :disabled="!form_valid">{% trans "Post an estimation" %}</v-btn>
+                    <v-btn color="error" @click.native="dialog = false">{% trans "Cancel" %}</v-btn>
+                </v-card-actions>
+            </v-form>
+        </v-card>
+    </v-dialog>
 <script>
     new Vue({
         ...common_vue_properties(),
