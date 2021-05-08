@@ -29,12 +29,14 @@ class Action:
                 return """<li><a href="{}">{}</a></li>\n""".format(reverse_lazy(self.url),self.name)
         else:
             return ""
+
     def rendervue(self, userpers, user, current_url_name):
         if self.__has_all_user_permissions(user, userpers):
-            if self.is_selected(current_url_name):
-                return """<li class="Selected"><a class="Selected" href="{}">{}</a></li>\n""".format(reverse_lazy(self.url),self.name)
-            else:
-                return """<li><a href="{}">{}</a></li>\n""".format(reverse_lazy(self.url),self.name)
+            return f"""
+        {{
+            name: '{self.name}',
+            url: '{reverse_lazy(self.url)}', 
+        }},"""
         else:
             return ""
 
@@ -130,19 +132,21 @@ class Group:
             r=r+"""</li>\n"""
         return r
 
-    def rendevuer(self, userpers, user, current_url_name):
-        r=""
+    def rendervue(self, userpers, user, current_url_name):
+
+        r=f"""
+        {{
+            name: '{self.name}',
+            children:["""
         if (self.__user_has_some_children_permissions(userpers) and user.is_authenticated==self.authenticated) or user.is_superuser:
-            collapsing="" if self.has_selected_actions(current_url_name) is True else "collapse"
-            r=r+"""<li><a href="#" class="toggle-custom" id="btn-{0}" data-toggle="collapse" data-target="#submenu{0}" aria-expanded="false">{1} ...</a>\n""".format(self.id,self.name)
-            r=r+"""<ul class="nav """+collapsing+""" nav_level_{0}" id="submenu{1}" role="menu" aria-labelledby="btn-{1}">\n""".format(self.level+1,self.id)
             for item in self.arr:
                 if item.__class__==Group:
-                    r=r+item.render(userpers, user,current_url_name)
+                    r=r+item.rendervue(userpers, user,current_url_name)
                 else:#Action
-                    r=r+item.render(userpers, user, current_url_name)
-            r=r+"""</ul>\n"""
-            r=r+"""</li>\n"""
+                    r=r+item.rendervue(userpers, user, current_url_name)
+        r=r + """
+            ],
+        },"""
         return r
 
     def append(self,o):
@@ -208,8 +212,7 @@ class Menu:
     ## Renders an HTML menu
     ## @todo Leave selected current action
     def render_menuvuetree(self, user, current_url_name):
-        r="""
-      initiallyOpen: ['public'],
+        r="""       initiallyOpen: ['public'],
       files: {{
         html: 'mdi-language-html5',
         js: 'mdi-nodejs',
@@ -221,39 +224,12 @@ class Menu:
         xls: 'mdi-file-excel',
       }},
       tree: [],
-      items: [
-        {{
-          name: '.git',
-        }},
-        {{
-          name: 'node_modules',
-        }},
-        {{
-          name: 'public',
-          children: [
-            {{
-              name: 'static',
-              children: [{{
-                name: 'logo.png',
-                file: 'png',
-              }}],
-            }},
-            {{
-              name: 'favicon.ico',
-              file: 'png',
-            }},
-            {{
-              name: 'index.html',
-              file: 'html',
-            }},
-          ],
-        }},
-        {{
-          name: '.gitignore',
-          file: 'txt',
-        }},
-      ],
-"""
+      items: ["""
+
+        for item in self.arr:
+            r=r+item.rendervue(user.get_all_permissions(), user, current_url_name)#Inherited from group and from user)
+        r=r+"""
+      ],"""
         return r
 
     ## Renders an HTML menu
@@ -297,7 +273,9 @@ def mymenuvue(context):
 def mymenuvuetree(context):
     user=context['user']
     url_name=context['request'].resolver_match.url_name
-    return format_html(context['request'].menu.render_menuvuetree(user,url_name))
+    s=context['request'].menu.render_menuvuetree(user,url_name).replace("\n", "")
+    print(s)
+    return format_html(s)
 
 
 @register.simple_tag(takes_context=True)
