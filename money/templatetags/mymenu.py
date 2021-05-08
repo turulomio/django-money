@@ -230,21 +230,20 @@ class Menu:
 
     def get_parents_by_url_name(self, url_name):
         action=self.find_action_by_url(url_name)
-        print ("EMPARENTANDO",url_name, action)
+        if action is None: #It's not in menu
+            return []
         r=[]
         r.append(action.url)
         tmp=action
         print(tmp, tmp.parent)
         while tmp.parent!=None:
             if tmp is None:
-                print("NONE")
                 continue
             if tmp.parent.__class__.__name__=="Action":
                 r.insert(0, tmp.parent.url)
             else:
                 r.insert(0, tmp.parent.name)
             tmp=tmp.parent
-        print("EMPARENTADOS", r)
         return r
 
     ## Renders an HTML menu
@@ -304,7 +303,6 @@ def mymenuvuetree(context):
     user=context['user']
     url_name=context['request'].resolver_match.url_name
     s=context['request'].menu.render_menuvuetree(user,url_name)
-    print(s)
     return s
 
 
