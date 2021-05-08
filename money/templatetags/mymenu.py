@@ -32,11 +32,7 @@ class Action:
 
     def rendervue(self, userpers, user, current_url_name):
         if self.__has_all_user_permissions(user, userpers):
-            return f"""
-        {{
-            name: '{self.name}',
-            url: '{reverse_lazy(self.url)}', 
-        }},"""
+            return "{{ name : '{0}', url: '{1}', }},".format(self.name, reverse_lazy(self.url))
         else:
             return ""
 
@@ -134,19 +130,14 @@ class Group:
 
     def rendervue(self, userpers, user, current_url_name):
 
-        r=f"""
-        {{
-            name: '{self.name}',
-            children:["""
         if (self.__user_has_some_children_permissions(userpers) and user.is_authenticated==self.authenticated) or user.is_superuser:
+            s=""
             for item in self.arr:
                 if item.__class__==Group:
-                    r=r+item.rendervue(userpers, user,current_url_name)
+                    s=s+item.rendervue(userpers, user,current_url_name)
                 else:#Action
-                    r=r+item.rendervue(userpers, user, current_url_name)
-        r=r + """
-            ],
-        },"""
+                    s=s+item.rendervue(userpers, user, current_url_name)
+        r="{{ name: '{0}',children:[ {1} ], }},".format(self.name, s)
         return r
 
     def append(self,o):
@@ -194,42 +185,17 @@ class Menu:
     ## Renders an HTML menu
     ## @todo Leave selected current action
     def render_menuvue(self, user, current_url_name):
-        r="""
-    <v-treeview v-model="tree" :open="initiallyOpen" :items="items" activatable item-key="name" open-on-click>
-        <template v-slot:[`prepend`]="{{ item, open }}">
-            <v-icon v-if="!item.file">
-                [[ open ? 'mdi-folder-open' : 'mdi-folder' ]]
-            </v-icon>
-            <v-icon v-else>
-                [[ files[item.file] ]]
-            </v-icon>
-        </template>
-    </v-treeview>        
-"""
+        r="""<v-treeview v-model="tree" :open="initiallyOpen" :items="items" activatable item-key="name" open-on-click></v-treeview>"""
         return r
         
 
     ## Renders an HTML menu
     ## @todo Leave selected current action
     def render_menuvuetree(self, user, current_url_name):
-        r="""       initiallyOpen: ['public'],
-      files: {{
-        html: 'mdi-language-html5',
-        js: 'mdi-nodejs',
-        json: 'mdi-code-json',
-        md: 'mdi-language-markdown',
-        pdf: 'mdi-file-pdf',
-        png: 'mdi-file-image',
-        txt: 'mdi-file-document-outline',
-        xls: 'mdi-file-excel',
-      }},
-      tree: [],
-      items: ["""
-
+        s=""
         for item in self.arr:
-            r=r+item.rendervue(user.get_all_permissions(), user, current_url_name)#Inherited from group and from user)
-        r=r+"""
-      ],"""
+            s=s+item.rendervue(user.get_all_permissions(), user, current_url_name)#Inherited from group and from user)
+        r="initiallyOpen: ['public'],   tree: [], items: [ {0} ],".format(s)
         return r
 
     ## Renders an HTML menu
@@ -273,9 +239,8 @@ def mymenuvue(context):
 def mymenuvuetree(context):
     user=context['user']
     url_name=context['request'].resolver_match.url_name
-    s=context['request'].menu.render_menuvuetree(user,url_name).replace("\n", "")
-    print(s)
-    return format_html(s)
+    s=context['request'].menu.render_menuvuetree(user,url_name)
+    return s
 
 
 @register.simple_tag(takes_context=True)

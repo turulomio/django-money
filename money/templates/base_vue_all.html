@@ -126,7 +126,9 @@
     var mixin = {
         data: function () {
             return {
+                {% autoescape off %}
                 {% mymenuvuetree %}
+                {% endautoescape%}
             }
         }
     }
