@@ -8,8 +8,8 @@
         <v-card class="padding">
             <v-card-title>{% trans "Select two products" %}</v-card-title>
             <v-card-subtitle>{% trans "Put in first place the one with better behaviour" %}</v-card-subtitle>
-            <autocompleteapi-idname label="{% trans 'Select product A' %}"  url="{% url 'product_search' %}" v-model="product_a"></autocompleteapi-idname>
-            <autocompleteapi-idname label="{% trans 'Select product B' %}"  url="{% url 'product_search' %}" v-model="product_b"></autocompleteapi-idname>
+            <autocompleteapi-idname ref="a" label="{% trans 'Select product A' %}"  url="{% url 'product_search' %}" v-model="product_a"></autocompleteapi-idname>
+            <autocompleteapi-idname ref="b" label="{% trans 'Select product B' %}"  url="{% url 'product_search' %}" v-model="product_b"></autocompleteapi-idname>
             <v-card-actions>
                 <v-btn color="primary" @click="change" :disabled="(product_a==null || product_b==null)">{% trans 'Switch' %}</v-btn>
                 <v-btn color="primary" @click="pairReport" :disabled="(product_a==null || product_b==null)">{% trans 'Pair report' %}</v-btn>
@@ -36,6 +36,8 @@
                 var tmp=this.product_a
                 this.product_a=this.product_b
                 this.product_b=tmp
+                this.$refs.a.forceValue(this.product_a)
+                this.$refs.b.forceValue(this.product_b)
             }
         },
         computed:{
