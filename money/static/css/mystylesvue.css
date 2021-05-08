@@ -260,5 +260,8 @@ td.green{
 
 .theme--light.v-treeview .v-treeview-node__root.v-treeview-node--active::before, .theme--light.v-treeview .v-treeview-node__root.v-treeview-node--active:hover::before {
     background-color:unset;
-    opacity: unset;
+    opacity: 0;
+}
+.theme--light.v-treeview--hoverable .v-treeview-node__root:hover::before, .theme--light.v-treeview .v-treeview-node--click > .v-treeview-node__root:hover::before {
+    opacity: 0;
 }
