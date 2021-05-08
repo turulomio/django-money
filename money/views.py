@@ -217,15 +217,14 @@ def product_benchmark(request):
     return product_view(request, request.globals["mem__benchmarkid"])
 
 @login_required
+## Developed to be used with
 def product_search(request):
     search=request.GET.get("search", "__none__")
     id=request.GET.get("id", None)
     if id is not None:
         product=get_object_or_404(Products, pk=id)
         return JsonResponse({"id":product.id, "name":product.name}, safe=False)
-        
-        
-    
+
     if search=="__none__":
         qs=Products.objects.none()
     elif search=="__all__":
@@ -1849,6 +1848,32 @@ def settings(request):
             messages.warning(request, _("Something wrong"))
     DefaultAmountToInvest=getGlobal("DefaultAmountToInvest", 1000)
     return render(request, 'settings.html', locals())
+
+
+def investments_same_product_change_selling_price(request, products_id):
+    ## Adds all active investments to iom of the same product_benchmark
+    product=get_object_or_404(Products, pk=products_id)
+    qs_investments=Investments.objects.filter(products_id=products_id, active=True)
+    iom=InvestmentsOperationsManager_from_investment_queryset(qs_investments, datetime.now(), request)
+    data=[]
+    for io in iom.list:
+        data.append({
+            "id": io.investment.id, 
+            "name":io.investment.fullName(), 
+            "shares":io.current_shares(), 
+            "average_price":io.current_average_price_investment().amount, 
+            "balance_investment": io.current_balance_investment(), 
+            "invested": io.current_invested_user(), 
+        })
+    json_data=listdict2json(data)
+    if request.method == 'POST':
+        form = SettingsForm(request.POST)
+        if form.is_valid():
+            setGlobal("DefaultAmountToInvest", form.cleaned_data["DefaultAmountToInvest"])
+            messages.success(request, _("Settings saved successfully"))
+        else:
+            messages.warning(request, _("Something wrong"))
+    return render(request, 'investments_same_product_change_selling_price.html', locals())
 
 def setGlobal(key, value):
     number=cursor_one_field("select count(*) from globals where global=%s", (key, ))

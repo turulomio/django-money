@@ -33,6 +33,7 @@
   <a href="{% url 'quote_new' products_id=investment.products.id %}">{% trans "Add a quote to product" %}</a> | 
   <a href="{% url 'quote_delete_last' products_id=investment.products.id %}?next={% url 'investment_list_active' %}">{% trans "Delete last quote" %}</a> | 
   <a href="{% url 'investment_view_chart' pk=investment.id %}">{% trans "Show evolution chart" %}</a> | 
+  <a href="{% url 'investments_same_product_change_selling_price' products_id=investment.products.id %}">{% trans "Change selling price of investments with the same product" %}</a> | 
 </p>
 <script>
   $( function() {

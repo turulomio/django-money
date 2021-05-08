@@ -1,0 +1,123 @@
+{% extends 'base_vue.html' %}
+
+{% load i18n %}
+{% load l10n %}
+{% load static %}
+
+
+{% block content %}
+<div id="app">
+    <v-app>
+    <v-container>
+        <h1>{% trans "Change selling price of investments with the same product" %}</h1>
+
+        <v-data-table ref="table" v-model="selected" :headers="tableHeaders" :items="data" :single-select="false" item-key="id" show-select class="elevation-1" :disable-pagination="true" dense ></v-data-table>
+        
+        <v-card>
+            <v-card-title class="headline">{% trans "Selected investments information" %}</v-card-title>
+            <p>Number of shares: [[selected_shares]]</p>
+            <p>Average price: [[selected_average_price]]</p>
+            <p>Leverage: [[leverage]]</p>
+            <p>Current price: [[current_price]]</p>
+            <p>Invested: [[selected_invested]]</p>
+        </v-card>
+        <v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
+            <v-tab key="percentage">{% trans "Set a gains percentage" %}</v-tab>
+            <v-tab key="gain">{% trans "Set a gain" %}</v-tab>
+            <v-tabs-slider color="yellow"></v-tabs-slider>
+        </v-tabs>
+        <v-tabs-items v-model="tab">
+            <v-tab-item key="percentage">      
+                <div>
+                    <v-text-field name="{% trans 'Set a gains percentage' %}" v-model.number="percentage" :counter="10" label="{% trans 'Set a gains percentage' %}" placeholder="{% trans 'Enter an amount' %}" :rules="RulesFloatRequired(10)" autofocus></v-text-field>
+                </div>
+            </v-tab-item>
+            <v-tab-item key="product">      
+                <div>
+                    <v-text-field name="{% trans 'Set a gain' %}" v-model.number="gains" :counter="10" label="{% trans 'Set a gain' %}" placeholder="{% trans 'Enter an amount' %}" :rules="RulesFloatRequired(10)"></v-text-field>
+                </div>
+            </v-tab-item>
+        </v-tabs-items>
+        <v-btn color="error" @click="submit()" :disabled="isNaN(selected_selling_price)">[[button_text]]</v-btn>
+    </v-container>
+    </v-app>
+</div>
+<script>
+    new Vue({
+        ...common_vue_properties(),
+        data:{    
+            tab:null,
+            form_valid:false,
+            data:{{json_data |safe}},
+            selected:[],
+            tableHeaders: [
+                { text: "{% trans 'Id' %}", value: 'id', sortable: true },
+                { text: "{% trans 'Name' %}", value: 'name', sortable: true},
+                { text: "{% trans 'Shares' %}", value: 'shares', sortable: true, align: 'right'},
+                { text: "{% trans 'Average price' %}", value: 'average_price', sortable: true, align: 'right'},
+                { text: "{% trans 'Invested' %}", value: 'invested', sortable: true, align: 'right'},
+                { text: "{% trans 'Balance' %}", value: 'balance_investment', sortable: true, align: 'right'},
+            ],
+            selected_invested:0,
+            selected_selling_price: NaN,
+            selected_average_price:0,
+            selected_shares:0,
+            leverage: {{product.real_leveraged_multiplier }},
+            button_text:"Calculate your selling price",
+            gains:500,
+            current_price: {{product.basic_results.last | unlocalize}},
+            percentage: null,
+            
+        },
+        watch:{
+            selected: function() {
+                this.selected_shares=this.selected.reduce((accum,item) => accum + item.shares, 0)
+                this.selected_invested=this.selected.reduce((accum,item) => accum + item.invested, 0)
+                if (this.selected_shares!=0){
+                    var selected_sharesbyaverage=this.selected.reduce((accum,item) => accum + item.shares*item.average_price, 0)
+                    this.selected_average_price=selected_sharesbyaverage/this.selected_shares
+                }
+            },
+            gains: function(value) {
+                this.selected_selling_price=this.selling_price_to_gain_money(value)
+                this.setButton(this.selected_selling_price)
+            },
+            percentage: function(value) {
+                this.selected_selling_price=this.selling_price_to_gain_percentage_of_invested(value)
+                this.setButton(this.selected_selling_price)
+            }
+        },
+        methods:{
+            setButton(price){
+                var gai=(this.selected_selling_price-this.selected_average_price)*this.selected_shares*this.leverage
+                this.button_text=`Set selected investments selling price to ${this.selected_selling_price} to gain ${gai}`
+//                 this.$refs.form.$el.submit()
+            },
+            selling_price_to_gain_money(money){
+                var PF=0
+                if (this.selected_shares>0){
+                    PF=(money+this.selected_average_price*this.selected_shares*this.leverage)/(this.selected_shares*this.leverage)        
+                } 
+                else if (this.selected_shares<0){
+                    PF=(-money+this.selected_average_price*this.selected_shares*this.leverage)/(this.selected_shares*this.leverage)        
+                }
+                
+                console.log(PF)
+                return PF
+            },    
+            selling_price_to_gain_percentage_of_invested(percentage){
+                var gains=this.selected_invested*percentage/100
+                return this.selling_price_to_gain_money(gains)
+            },
+            
+            submit(){
+                alert(this.selected_selling_price)
+            }
+        },
+        mounted(){
+            this.$refs.table.selection=this.data
+        }
+    })
+</script>
+
+{% endblock %}

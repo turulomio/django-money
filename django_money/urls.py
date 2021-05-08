@@ -81,6 +81,10 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('investment/change_active/<int:pk>', money_views.investment_change_active, name='investment_change_active'),
     path('investment/classes/', money_views.investment_classes, name='investment_classes'),
     path('investment/ranking/', money_views.investment_ranking, name='investment_ranking'),
+    path('investment/sameproduct/changesp/<int:products_id>', money_views.investments_same_product_change_selling_price, name='investments_same_product_change_selling_price'),
+    
+    
+    
     
     path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/', money_views.investment_pairs, name='investment_pairs'),
     path('investment/pairs/<int:worse>/<int:better>/<int:accounts_id>/<int:amount>/', money_views.ajax_investment_pairs_invest, name='ajax_investment_pairs_invest'),

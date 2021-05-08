@@ -73,7 +73,7 @@ class Ldo:
     def is_set(self):
         if hasattr(self, "ld"):
             return True
-        print(f"You must set your listdict in {name}")
+        print(f"You must set your listdict in {self.name}")
         return False
 
     def append(self,o):
@@ -105,9 +105,14 @@ def listdict_print(listdict):
         print(row)
 
 def listdict_print_first(listdict):
+    if len(listdict)==0:
+        print("No rows in listdict")
+        return
     print("Printing first dict in a listdict")
-    for key, value in listdict[0].items():
-        print(f"    - {key}: {value}")
+    keys=list(listdict[0].keys())
+    keys.sort()
+    for key in keys:
+        print(f"    - {key}: {listdict[0][key]}")
 
 def listdict_sum(listdict, key, ignore_nones=True):
     r=0

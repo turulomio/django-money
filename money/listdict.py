@@ -195,25 +195,21 @@ def listdict_investmentsoperationshistorical(request, year, month, local_currenc
     list_ioh= sorted(list_ioh,  key=lambda item: item['dt_end'])
     return list_ioh
 
-
-        
-
 ## IOC of several investments
 class LdoInvestmentsOperationsHeterogeneus(LdoDjangoMoney):
     def __init__(self, request, name=None):
         LdoDjangoMoney.__init__(self, request, name)
 
-        
     def tabulator(self):
         currency=self.request.local_currency
         r=TabulatorFromListDict(f"{self.name}_table")
         r.setDestinyUrl(None)
         r.setLocalZone(self.request.local_zone)
         r.setListDict(self.ld)        
-        r.setFields("id","datetime", "operationstypes","shares", "price", "gross_account",  "commission", "taxes",  "currency_conversion",  "comment")
-        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Gross"),  _("Commission"), _("Taxes"), _("Currency convertion"),  _("Comment"))
-        r.setTypes("int","datetime", "str","Decimal", currency, currency, currency, currency, "Decimal6", "str")
-        r.setBottomCalc(None, None, None, "sum", None, "sum", "sum", None, None)
+        r.setFields("id","datetime", "operationstypes","shares", "price", "gross_user",  "commission", "taxes",  "net_user",  "currency_conversion",  "comment")
+        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Gross"),  _("Commission"), _("Taxes"), _("Net"),   _("Currency convertion"),  _("Comment"))
+        r.setTypes("int","datetime", "str","Decimal", currency, currency, currency, currency,  currency, "Decimal6", "str")
+        r.setBottomCalc(None, None, None, "sum", None, "sum", "sum", "sum", "sum", None, None)
         r.showLastRecord(False)
         return r        
 
@@ -222,7 +218,6 @@ class LdoInvestmentsOperationsCurrentHeterogeneus(LdoDjangoMoney):
     def __init__(self, request, name=None):
         LdoDjangoMoney.__init__(self, request, name)
 
-        
     def tabulator(self):
         currency=self.request.local_currency
         r=TabulatorFromListDict(f"{self.name}_table")

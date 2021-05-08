@@ -258,3 +258,20 @@ function if_null_empty(value){
     }
     return value
 }
+
+
+function RulesIntegerRequired(maxdigits=10){
+    return [
+        v => !!v || gettext('Number is required'),
+        v => (v && v.toString().length <=maxdigits) || gettext(`Number must be at most ${maxdigits} characters`),
+        v => (v && !isNaN(parseInt(v))) || gettext('Must be a integer number')
+    ]
+}
+
+function RulesFloatRequired(maxdigits=10){
+    return [
+        v => !!v || gettext('Number is required'),
+        v => (v && v.toString().length <=maxdigits) || gettext(`Number must be at most ${maxdigits} characters`),
+        v => (v && !isNaN(parseFloat(v))) || gettext('Must be a number')
+    ]
+}

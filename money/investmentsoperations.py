@@ -6,7 +6,7 @@ from math import ceil
 from money.reusing.connection_dj import cursor_one_row, cursor_rows_as_dict
 from money.reusing.currency import Currency
 from money.reusing.datetime_functions import string2dtnaive, dtaware
-from money.reusing.listdict_functions import listdict_sum, listdict2json
+from money.reusing.listdict_functions import listdict_sum, listdict2json, listdict_print_first
 from money.reusing.percentage import Percentage
 from money.tables import TabulatorFromListDict
 
@@ -31,9 +31,6 @@ class IO:
         self.investment=investment
         self.d=d_io
         
-    def gross_product(self):
-        return self.d["price"]*self.d["shares"]*self.investment.products.real_leveraged_multiplier()
-
 ## Class to manage a single investment operation crrent
 class IOC:
     def __init__(self, investment, d_ioc):
@@ -134,6 +131,9 @@ class InvestmentsOperations:
         
     def current_balance_futures_user(self):
         return listdict_sum(self.io_current, "balance_futures_user")
+        
+    def current_balance_investment(self):
+        return listdict_sum(self.io_current, "balance_investment")
 
     def current_gains_gross_user(self):
         return listdict_sum(self.io_current, "gains_gross_user")
@@ -174,9 +174,7 @@ class InvestmentsOperations:
 
     def o_listdict_tabulator_homogeneus(self, request):
         for o in self.io:
-            op=IO(self.investment, o)
             o["operationstypes"]=request.operationstypes[o["operationstypes_id"]]
-            o["gross_product"]=op.gross_product()
         return self.io        
 
     def current_listdict_tabulator_homogeneus_investment(self, request):
@@ -227,10 +225,10 @@ class InvestmentsOperations:
         r.setDestinyUrl("investmentoperation_update")
         r.setLocalZone(self.request.local_zone)
         r.setListDict(self.o_listdict_tabulator_homogeneus(self.request))
-        r.setFields("id","datetime", "operationstypes","shares", "price", "gross_product","commission", "taxes" ,"currency_conversion",  "comment")
-        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Gross"), _("Commission"), _("Taxes"), _("Currency convertion"),  _("Comment"))
-        r.setTypes("int","datetime", "str","Decimal", self.investment.products.currency, self.investment.products.currency, self.investment.accounts.currency,self.investment.accounts.currency,"Decimal6", "str")
-        r.setBottomCalc(None, None, None, "sum", None, "sum","sum", "sum", None, None)
+        r.setFields("id","datetime", "operationstypes","shares", "price", "gross_investment","commission", "taxes" , "net_investment","currency_conversion",  "comment")
+        r.setHeaders("Id", _("Date and time"), _("Operation types"),  _("Shares"), _("Price"), _("Gross"), _("Commission"), _("Taxes"), _("Net"), _("Currency convertion"),  _("Comment"))
+        r.setTypes("int","datetime", "str","Decimal", self.investment.products.currency, self.investment.products.currency, self.investment.products.currency, self.investment.accounts.currency,self.investment.accounts.currency,"Decimal6", "str")
+        r.setBottomCalc(None, None, None, "sum", None, "sum","sum", "sum", "sum", None, None)
         r.showLastRecord(False)
         return r
 
@@ -466,11 +464,11 @@ class InvestmentsOperationsManager:
         from money.listdict import LdoInvestmentsOperationsHeterogeneus
         r=LdoInvestmentsOperationsHeterogeneus(self.request)
         for io in self.list:
+            listdict_print_first(io.io)
             for o in io.io:
                 if dt_from<=o["datetime"] and o["datetime"]<=dt_to:
                     o["name"]=io.investment.fullName()
                     o["operationstypes"]=self.request.operationstypes[o["operationstypes_id"]]
-                    print(o)
                     r.append(o)
         r.order_by("datetime")
         return r        
