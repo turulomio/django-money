@@ -252,26 +252,6 @@ class Menu:
           name: '.gitignore',
           file: 'txt',
         }},
-        {{
-          name: 'babel.config.js',
-          file: 'js',
-        }},
-        {{
-          name: 'package.json',
-          file: 'json',
-        }},
-        {{
-          name: 'README.md',
-          file: 'md',
-        }},
-        {{
-          name: 'vue.config.js',
-          file: 'js',
-        }},
-        {{
-          name: 'yarn.lock',
-          file: 'txt',
-        }},
       ],
 """
         return r
