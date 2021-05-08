@@ -8,7 +8,7 @@
 {% block content %}
 <div id="app">
     <v-app>
-    <v-container>
+    <v-card flat>
         <h1>{% trans "Change selling price of investments with the same product" %}</h1>
         <v-data-table ref="table" v-model="selected" :headers="tableHeaders" :items="data" :single-select="false" item-key="id" show-select class="elevation-1" :disable-pagination="true" dense ></v-data-table>
         <p></p>
@@ -54,7 +54,7 @@
             <v-btn color="error" @click="submit()" :disabled="form_valid==false">[[button_text]]</v-btn>
         <v-form>
         </v-container>
-    </v-container>
+    </v-card>
     </v-app>
 </div>
 <script>
