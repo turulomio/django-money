@@ -1,8 +1,16 @@
-{% extends 'base_vue.html' %}
-
+{% extends 'base_vue_all.html' %}
 {% load i18n %}
 {% load static %}
 
+
+
+{% block head_js_section %}
+<!--     FOR CHARTS -->
+    <script type="text/javascript" src='{% static "js/echarts.min.js" %}'></script>  
+    <script type="text/javascript" src='{% static "js/vue-composition-api.prod.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/index.umd.min.js" %}'></script> 
+    <script type="text/javascript" src='{% static "js/vuecomponents/ChartPie.js" %}'></script>
+{% endblock head_js_section %}
 
 {% block content %}
 <div id="app">
@@ -98,10 +106,5 @@
         },
     })
 </script>
-<style>
-h1 {
-    text-align: center
-}
-</style>
 
 {% endblock %}

@@ -20,6 +20,7 @@ class Action:
         self.permissions=permissions
         self.url=url
         self.authenticated=authenticated
+        self.parent=None
 
     def render(self, userpers, user, current_url_name):
         if self.__has_all_user_permissions(user, userpers):
@@ -32,7 +33,12 @@ class Action:
 
     def rendervue(self, userpers, user, current_url_name):
         if self.__has_all_user_permissions(user, userpers):
-            return "{{ name : '{0}', url: '{1}', }},".format(self.name, reverse_lazy(self.url))
+            return f"""
+        {{
+            name: '{self.name}',
+            url: '{reverse_lazy(self.url)}', 
+            named_url: '{self.url}'
+        }},"""
         else:
             return ""
 
@@ -89,6 +95,7 @@ class Group:
         self.name=name
         self.id=id
         self.authenticated=authenticated
+        self.parent=None
 
     ## Search for some permissions, not all
     def __user_has_some_children_permissions(self, userpers):
@@ -130,17 +137,24 @@ class Group:
 
     def rendervue(self, userpers, user, current_url_name):
 
+        r=f"""
+        {{
+            name: '{self.name}',
+            named_url: '{self.name}', 
+            children:["""
         if (self.__user_has_some_children_permissions(userpers) and user.is_authenticated==self.authenticated) or user.is_superuser:
-            s=""
             for item in self.arr:
                 if item.__class__==Group:
-                    s=s+item.rendervue(userpers, user,current_url_name)
+                    r=r+item.rendervue(userpers, user,current_url_name)
                 else:#Action
-                    s=s+item.rendervue(userpers, user, current_url_name)
-        r="{{ name: '{0}',children:[ {1} ], }},".format(self.name, s)
+                    r=r+item.rendervue(userpers, user, current_url_name)
+        r=r + """
+            ],
+        },"""
         return r
 
     def append(self,o):
+        o.parent=self
         self.arr.append(o)
 
     def has_selected_actions(self,current_url_name):
@@ -185,17 +199,50 @@ class Menu:
     ## Renders an HTML menu
     ## @todo Leave selected current action
     def render_menuvue(self, user, current_url_name):
-        r="""<v-treeview v-model="tree" :open="initiallyOpen" :items="items" activatable item-key="name" open-on-click></v-treeview>"""
+        r="""
+    <v-treeview 
+        v-model="treemenu" 
+        :open="initiallyOpen" 
+        :active="initiallyOpen" 
+        :items="itemsmenu" 
+        activatable 
+        item-key="named_url" 
+        open-on-click 
+        color="orange">
+        <template slot="label" slot-scope="{{ item }}">
+            <div style=" min-height:25px;" @click="if (item.url) window.location.replace(item.url)">[[ item.name ]]</div>
+        </template>
+    </v-treeview>        
+"""
         return r
         
+
+    def get_parents_by_url_name(self, url_name):
+        action=self.find_action_by_url(url_name)
+        r=[]
+        r.append(action.url)
+        tmp=action
+        while tmp.parent!=None:
+            print(tmp.__class__.__name__)
+            if tmp.__class__=="Action":
+                r.insert(0, tmp.parent.url)
+            else:
+                r.insert(0, tmp.parent.name)
+            tmp=tmp.parent
+        print(r)
+        return r
 
     ## Renders an HTML menu
     ## @todo Leave selected current action
     def render_menuvuetree(self, user, current_url_name):
-        s=""
+        r=f"""       initiallyOpen: {str(self.get_parents_by_url_name(current_url_name))},
+      treemenu: [],
+      itemsmenu: ["""
+
         for item in self.arr:
-            s=s+item.rendervue(user.get_all_permissions(), user, current_url_name)#Inherited from group and from user)
-        r="initiallyOpen: ['public'],   tree: [], items: [ {0} ],".format(s)
+            r=r+item.rendervue(user.get_all_permissions(), user, current_url_name)#Inherited from group and from user)
+        r=r+"""
+      ],"""
         return r
 
     ## Renders an HTML menu
@@ -240,6 +287,7 @@ def mymenuvuetree(context):
     user=context['user']
     url_name=context['request'].resolver_match.url_name
     s=context['request'].menu.render_menuvuetree(user,url_name)
+    print(s)
     return s
 
 

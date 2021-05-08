@@ -1,7 +1,11 @@
-{% extends 'base_vue.html' %}
+{% extends 'base_vue_all.html' %}
 
 {% load i18n %}
 {% load static %}
+{% block head_js_section %}
+<!--     FOR MOMENT -->
+    <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
+{% endblock head_js_section %}
 
 
 {% block content %}

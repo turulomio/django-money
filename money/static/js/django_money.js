@@ -218,6 +218,7 @@ function openInNewTab(href) {
 function common_vue_properties(){
     return {
         el: '#app',
+        mixins: [mixin],
         delimiters: ['[[', ']]'],
         vuetify: new Vuetify({
             theme: {

@@ -51,9 +51,8 @@
         {% block head_css_site %}
 
         <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-<!--         <link rel="stylesheet" type="text/css" href='{% static "css/materialdesignicons.min.css" %}'> -->
+        <link rel="stylesheet" type="text/css" href='{% static "css/materialdesignicons.min.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/vuetify.min.css" %}'>
-<!--         <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap.css" %}'> -->
         <link rel="stylesheet" type="text/css" href='{% static "css/mystylesvue.css" %}?dev={% random_integer 0 10000 %}'>
         {% endblock head_css_site %}
 
@@ -84,6 +83,7 @@
                     </select>
                 </form>
             </div><!--Language-->
+            <p></p>
             {% mymenuvue %}
 
             <p class="github"><a href="https://github.com/turulomio/" target="_blank">{% trans "Developed by Turulomio" %}</a></p>
@@ -111,46 +111,25 @@
                         {% endfor%}
                     {% endif %}
                 </div>{# messages #}
-                {% block vuecomponent %}
-                {% endblock vuecomponent %}
-
-
+                <script>
+                    var mixin = {
+                        data: function () {
+                            return {
+                                {% autoescape off %}
+                                {% mymenuvuetree %}
+                                {% endautoescape%}
+                            }
+                        }
+                    }
+                </script>
+                {% block content %}
+                {% endblock content %}
             </div> {# content #}
-            
         </div> {# layVertical #}
     </div> {# layHorizontal #}
     </v-app>
 </div>
-<script>
 
-    var mixin = {
-        data: function () {
-            return {
-                {% autoescape off %}
-                {% mymenuvuetree %}
-                {% endautoescape%}
-            }
-        }
-    }
-
-
-    new Vue({
-        el: '#app',
-        mixins: [mixin],
-        delimiters: ['[[', ']]'],
-        vuetify: new Vuetify({
-            theme: {
-                themes: {
-                    light: {
-                        primary: '#3a3987',
-                    },
-                },
-            }
-        }),
-        {% block vue %}
-        {% endblock vue %}
-     })
-</script>
 
 </body>
 </html>
