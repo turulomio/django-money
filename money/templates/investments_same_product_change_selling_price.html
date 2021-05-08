@@ -1,13 +1,11 @@
-{% extends 'base_vue.html' %}
+{% extends 'base_vue_all.html' %}
 
 {% load i18n %}
 {% load l10n %}
 {% load static %}
 
 
-{% block content %}
-<div id="app">
-    <v-app>
+{% block vuecomponent %}
     <v-card flat>
         <h1>{% trans "Change selling price of investments with the same product" %}</h1>
         <v-data-table ref="table" v-model="selected" :headers="tableHeaders" :items="data" :single-select="false" item-key="id" show-select class="elevation-1" :disable-pagination="true" dense ></v-data-table>
@@ -53,106 +51,100 @@
             <input type="hidden" name="selling_price" :value="[[my_round(selected_selling_price, decimals)]]">
             <v-btn color="error" @click="submit()" :disabled="form_valid==false">[[button_text]]</v-btn>
         <v-form>
-        </v-container>
     </v-card>
-    </v-app>
-</div>
-<script>
-    new Vue({
-        ...common_vue_properties(),
-        data:{    
-            tab:0,
-            form_valid:false,
-            data:{{json_data |safe}},
-            selected:[],
-            tableHeaders: [
-                { text: "{% trans 'Id' %}", value: 'id', sortable: true },
-                { text: "{% trans 'Name' %}", value: 'name', sortable: true},
-                { text: "{% trans 'Shares' %}", value: 'shares', sortable: true, align: 'right'},
-                { text: "{% trans 'Selling price' %}", value: 'selling_price', sortable: true, align: 'right'},
-                { text: "{% trans 'Selling expiration' %}", value: 'selling_expiration', sortable: true, align: 'right'},
-                { text: "{% trans 'Average price' %}", value: 'average_price', sortable: true, align: 'right'},
-                { text: "{% trans 'Invested' %}", value: 'invested', sortable: true, align: 'right'},
-                { text: "{% trans 'Balance' %}", value: 'balance_investment', sortable: true, align: 'right'},
-            ],
-            selected_invested:0,
-            selling_expiration: new Date().toISOString().substring(0, 10),
-            menu_selling_expiration: false,
-            selected_selling_price: NaN,
-            selected_average_price:0,
-            selected_shares:0,
-            leverage: {{product.real_leveraged_multiplier }},
-            button_text:"Calculate your selling price",
-            gains:500,
-            current_price: {{product.basic_results.last | unlocalize}},
-            percentage: 10,
-            currency: '{{product.currency}}',
-            decimals: {{product.decimals| unlocalize}},
-            investments_ids:""
-            
-        },
-        watch:{
-            selected: function() {
-                this.selected_shares=this.selected.reduce((accum,item) => accum + item.shares, 0)
-                this.selected_invested=this.selected.reduce((accum,item) => accum + item.invested, 0)
-                if (this.selected_shares!=0){
-                    var selected_sharesbyaverage=this.selected.reduce((accum,item) => accum + item.shares*item.average_price, 0)
-                    this.selected_average_price=selected_sharesbyaverage/this.selected_shares
-                } else {
-                    this.selected_average_price=0
-                }
-                this.calculate()
-            },
-            gains: function(value) {
-                this.calculate()
-            },
-            percentage: function(value) {
-                this.calculate()
-            },
-            tab: function(value){
-                this.calculate()
+{% endblock vuecomponent %}
+{% block vue %}
+    data:{    
+        tab:0,
+        form_valid:false,
+        data:{{json_data |safe}},
+        selected:[],
+        tableHeaders: [
+            { text: "{% trans 'Id' %}", value: 'id', sortable: true },
+            { text: "{% trans 'Name' %}", value: 'name', sortable: true},
+            { text: "{% trans 'Shares' %}", value: 'shares', sortable: true, align: 'right'},
+            { text: "{% trans 'Selling price' %}", value: 'selling_price', sortable: true, align: 'right'},
+            { text: "{% trans 'Selling expiration' %}", value: 'selling_expiration', sortable: true, align: 'right'},
+            { text: "{% trans 'Average price' %}", value: 'average_price', sortable: true, align: 'right'},
+            { text: "{% trans 'Invested' %}", value: 'invested', sortable: true, align: 'right'},
+            { text: "{% trans 'Balance' %}", value: 'balance_investment', sortable: true, align: 'right'},
+        ],
+        selected_invested:0,
+        selling_expiration: new Date().toISOString().substring(0, 10),
+        menu_selling_expiration: false,
+        selected_selling_price: NaN,
+        selected_average_price:0,
+        selected_shares:0,
+        leverage: {{product.real_leveraged_multiplier }},
+        button_text:"Calculate your selling price",
+        gains:500,
+        current_price: {{product.basic_results.last | unlocalize}},
+        percentage: 10,
+        currency: '{{product.currency}}',
+        decimals: {{product.decimals| unlocalize}},
+        investments_ids:""
+        
+    },
+    watch: {
+        selected: function() {
+            this.selected_shares=this.selected.reduce((accum,item) => accum + item.shares, 0)
+            this.selected_invested=this.selected.reduce((accum,item) => accum + item.invested, 0)
+            if (this.selected_shares!=0){
+                var selected_sharesbyaverage=this.selected.reduce((accum,item) => accum + item.shares*item.average_price, 0)
+                this.selected_average_price=selected_sharesbyaverage/this.selected_shares
+            } else {
+                this.selected_average_price=0
             }
+            this.calculate()
         },
-        methods:{
-            selling_price_to_gain_money(money){
-                var PF=0
-                if (this.selected_shares>0){
-                    PF=(money+this.selected_average_price*this.selected_shares*this.leverage)/(this.selected_shares*this.leverage)        
-                } 
-                else if (this.selected_shares<0){
-                    PF=(-money+this.selected_average_price*this.selected_shares*this.leverage)/(this.selected_shares*this.leverage)        
-                }
-                return PF
-            },    
-            selling_price_to_gain_percentage_of_invested(percentage){
-                var gains=this.selected_invested*percentage/100
-                return this.selling_price_to_gain_money(gains)
-            },
-            
-            submit(){               
-                if (this.$refs.form.validate()==false) return
-                this.$refs.form.$el.submit()
-            },
-            calculate(){
-                
-                if (this.tab==0){
-                    this.selected_selling_price=this.selling_price_to_gain_percentage_of_invested(this.percentage)
-                } else if (this.tab==1){
-                    this.selected_selling_price=this.selling_price_to_gain_money(this.gains)
-                }
-                    
-                var gai=(this.selected_selling_price-this.selected_average_price)*this.selected_shares*this.leverage
-                this.button_text=`Set selected investments selling price to ${currency_string(this.selected_selling_price, this.currency, this.decimals)} to gain ${currency_string(gai,this.currency, 2)}`
-                
-                var s=""
-                this.selected.forEach(v=> s=s+`${v.id}, `)
-                this.investments_ids=s.slice(0,-2)
-            }
+        gains: function(value) {
+            this.calculate()
         },
-        mounted(){
-            this.$refs.table.selection=this.data
+        percentage: function(value) {
+            this.calculate()
+        },
+        tab: function(value){
+            this.calculate()
         }
-    })
-</script>
+    },
+    methods:{
+        selling_price_to_gain_money(money){
+            var PF=0
+            if (this.selected_shares>0){
+                PF=(money+this.selected_average_price*this.selected_shares*this.leverage)/(this.selected_shares*this.leverage)        
+            } 
+            else if (this.selected_shares<0){
+                PF=(-money+this.selected_average_price*this.selected_shares*this.leverage)/(this.selected_shares*this.leverage)        
+            }
+            return PF
+        },    
+        selling_price_to_gain_percentage_of_invested(percentage){
+            var gains=this.selected_invested*percentage/100
+            return this.selling_price_to_gain_money(gains)
+        },
+        
+        submit(){               
+            if (this.$refs.form.validate()==false) return
+            this.$refs.form.$el.submit()
+        },
+        calculate(){
+            
+            if (this.tab==0){
+                this.selected_selling_price=this.selling_price_to_gain_percentage_of_invested(this.percentage)
+            } else if (this.tab==1){
+                this.selected_selling_price=this.selling_price_to_gain_money(this.gains)
+            }
+                
+            var gai=(this.selected_selling_price-this.selected_average_price)*this.selected_shares*this.leverage
+            this.button_text=`Set selected investments selling price to ${currency_string(this.selected_selling_price, this.currency, this.decimals)} to gain ${currency_string(gai,this.currency, 2)}`
+            
+            var s=""
+            this.selected.forEach(v=> s=s+`${v.id}, `)
+            this.investments_ids=s.slice(0,-2)
+        }
+    },
+    mounted(){
+        this.$refs.table.selection=this.data
+    }
 
-{% endblock %}
+{% endblock vue %}

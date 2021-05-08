@@ -29,6 +29,14 @@ class Action:
                 return """<li><a href="{}">{}</a></li>\n""".format(reverse_lazy(self.url),self.name)
         else:
             return ""
+    def rendervue(self, userpers, user, current_url_name):
+        if self.__has_all_user_permissions(user, userpers):
+            if self.is_selected(current_url_name):
+                return """<li class="Selected"><a class="Selected" href="{}">{}</a></li>\n""".format(reverse_lazy(self.url),self.name)
+            else:
+                return """<li><a href="{}">{}</a></li>\n""".format(reverse_lazy(self.url),self.name)
+        else:
+            return ""
 
     ## @return boolean if item is the selected one
     def is_selected(self, current_url_name):
@@ -122,6 +130,21 @@ class Group:
             r=r+"""</li>\n"""
         return r
 
+    def rendevuer(self, userpers, user, current_url_name):
+        r=""
+        if (self.__user_has_some_children_permissions(userpers) and user.is_authenticated==self.authenticated) or user.is_superuser:
+            collapsing="" if self.has_selected_actions(current_url_name) is True else "collapse"
+            r=r+"""<li><a href="#" class="toggle-custom" id="btn-{0}" data-toggle="collapse" data-target="#submenu{0}" aria-expanded="false">{1} ...</a>\n""".format(self.id,self.name)
+            r=r+"""<ul class="nav """+collapsing+""" nav_level_{0}" id="submenu{1}" role="menu" aria-labelledby="btn-{1}">\n""".format(self.level+1,self.id)
+            for item in self.arr:
+                if item.__class__==Group:
+                    r=r+item.render(userpers, user,current_url_name)
+                else:#Action
+                    r=r+item.render(userpers, user, current_url_name)
+            r=r+"""</ul>\n"""
+            r=r+"""</li>\n"""
+        return r
+
     def append(self,o):
         self.arr.append(o)
 
@@ -166,6 +189,95 @@ class Menu:
 
     ## Renders an HTML menu
     ## @todo Leave selected current action
+    def render_menuvue(self, user, current_url_name):
+        r="""
+    <v-treeview v-model="tree" :open="initiallyOpen" :items="items" activatable item-key="name" open-on-click>
+        <template v-slot:[`prepend`]="{{ item, open }}">
+            <v-icon v-if="!item.file">
+                [[ open ? 'mdi-folder-open' : 'mdi-folder' ]]
+            </v-icon>
+            <v-icon v-else>
+                [[ files[item.file] ]]
+            </v-icon>
+        </template>
+    </v-treeview>        
+"""
+        return r
+        
+
+    ## Renders an HTML menu
+    ## @todo Leave selected current action
+    def render_menuvuetree(self, user, current_url_name):
+        r="""
+      initiallyOpen: ['public'],
+      files: {{
+        html: 'mdi-language-html5',
+        js: 'mdi-nodejs',
+        json: 'mdi-code-json',
+        md: 'mdi-language-markdown',
+        pdf: 'mdi-file-pdf',
+        png: 'mdi-file-image',
+        txt: 'mdi-file-document-outline',
+        xls: 'mdi-file-excel',
+      }},
+      tree: [],
+      items: [
+        {{
+          name: '.git',
+        }},
+        {{
+          name: 'node_modules',
+        }},
+        {{
+          name: 'public',
+          children: [
+            {{
+              name: 'static',
+              children: [{{
+                name: 'logo.png',
+                file: 'png',
+              }}],
+            }},
+            {{
+              name: 'favicon.ico',
+              file: 'png',
+            }},
+            {{
+              name: 'index.html',
+              file: 'html',
+            }},
+          ],
+        }},
+        {{
+          name: '.gitignore',
+          file: 'txt',
+        }},
+        {{
+          name: 'babel.config.js',
+          file: 'js',
+        }},
+        {{
+          name: 'package.json',
+          file: 'json',
+        }},
+        {{
+          name: 'README.md',
+          file: 'md',
+        }},
+        {{
+          name: 'vue.config.js',
+          file: 'js',
+        }},
+        {{
+          name: 'yarn.lock',
+          file: 'txt',
+        }},
+      ],
+"""
+        return r
+
+    ## Renders an HTML menu
+    ## @todo Leave selected current action
     def render_pagetitle(self,current_url_name):
         action=self.find_action_by_url(current_url_name)
         if action is None:
@@ -194,6 +306,19 @@ def mymenu(context):
     user=context['user']
     url_name=context['request'].resolver_match.url_name
     return format_html(context['request'].menu.render_menu(user,url_name))
+
+@register.simple_tag(takes_context=True)
+def mymenuvue(context):
+    user=context['user']
+    url_name=context['request'].resolver_match.url_name
+    return format_html(context['request'].menu.render_menuvue(user,url_name))
+
+@register.simple_tag(takes_context=True)
+def mymenuvuetree(context):
+    user=context['user']
+    url_name=context['request'].resolver_match.url_name
+    return format_html(context['request'].menu.render_menuvuetree(user,url_name))
+
 
 @register.simple_tag(takes_context=True)
 def mypagetitle(context):
