@@ -23,6 +23,7 @@ from money.forms import (
     ProductsRangeForm, 
     EstimationDpsForm, 
     SettingsForm, 
+    ChangeSellingPriceSeveralInvestmentsForm, 
 )
 from money.charts import (
     chart_lines_total, 
@@ -1835,9 +1836,11 @@ def get_parameter_to_boolean(request, parameter):
 def widget_modal_window(request):
     return render(request, 'widget_modal_window.html', locals())
 
+@login_required
 def echart(request):
     return render(request, 'echart.html', locals())
 
+@login_required
 def settings(request):
     if request.method == 'POST':
         form = SettingsForm(request.POST)
@@ -1849,8 +1852,26 @@ def settings(request):
     DefaultAmountToInvest=getGlobal("DefaultAmountToInvest", 1000)
     return render(request, 'settings.html', locals())
 
-
+@transaction.atomic
+@login_required
 def investments_same_product_change_selling_price(request, products_id):
+
+    if request.method == 'POST':
+        form = ChangeSellingPriceSeveralInvestmentsForm(request.POST)
+        print(form)
+        if form.is_valid():
+            for investment_id in string2list_of_integers(form.cleaned_data['investments']):
+                inv=Investments.objects.get( pk=investment_id)
+                inv.selling_price=form.cleaned_data["selling_price"]
+                inv.selling_expiration=form.cleaned_data["selling_expiration"]
+                print(form.cleaned_data)
+                print(inv)
+                inv.save()
+            messages.success(request, _("Investments updated saved successfully"))
+        else:
+            messages.warning(request, _("Something is wrong"))
+            
+    ## DEBE HACERSE DESPUES DEL POST O SALEN MAS LSO DATOS
     ## Adds all active investments to iom of the same product_benchmark
     product=get_object_or_404(Products, pk=products_id)
     qs_investments=Investments.objects.filter(products_id=products_id, active=True)
@@ -1863,16 +1884,11 @@ def investments_same_product_change_selling_price(request, products_id):
             "shares":io.current_shares(), 
             "average_price":io.current_average_price_investment().amount, 
             "balance_investment": io.current_balance_investment(), 
-            "invested": io.current_invested_user(), 
+            "invested": io.current_invested_user(),  
+            "selling_price": io.investment.selling_price,
+            "selling_expiration":io.investment.selling_expiration,  
         })
     json_data=listdict2json(data)
-    if request.method == 'POST':
-        form = SettingsForm(request.POST)
-        if form.is_valid():
-            setGlobal("DefaultAmountToInvest", form.cleaned_data["DefaultAmountToInvest"])
-            messages.success(request, _("Settings saved successfully"))
-        else:
-            messages.warning(request, _("Something wrong"))
     return render(request, 'investments_same_product_change_selling_price.html', locals())
 
 def setGlobal(key, value):

@@ -35,3 +35,8 @@ class EstimationDpsForm(forms.Form):
 class SettingsForm(forms.Form):
     DefaultAmountToInvest= forms.IntegerField(required=True)
     
+class ChangeSellingPriceSeveralInvestmentsForm(forms.Form):
+    selling_price=forms.DecimalField(min_value=0, decimal_places=6, required=True)
+    selling_expiration=forms.DateField(required=False)
+    investments=forms.CharField(required=True)
+    

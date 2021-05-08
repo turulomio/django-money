@@ -105,11 +105,11 @@ function currency_symbol(currency){
 }
 
 function my_round(num, decimals = 2) {
-    return Math.round(num*Math.pow(10, decimals))/Math.pow(10, decimals);
+    return Math.round(num*Math.pow(10, decimals))/Math.pow(10, decimals)
 }
 
 function currency_string(num, currency, decimals=2){
-    return "{0} {1}".format(my_round(num,decimals).toString(), currency_symbol(currency));
+    return "{0} {1}".format(my_round(num,decimals).toFixed(decimals), currency_symbol(currency));
 }
 
 //Returns a float with . 
