@@ -1,100 +1,213 @@
+{% extends "base_vue_all.html" %}
 
-{% extends 'base.html' %}
 {% load i18n %}
 {% load l10n %}
+
+{% load static %}
+
+{% block head_js_section %}
+    <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script>
+{% endblock head_js_section %}
+{% block head_css_section %}
+    <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'>
+{% endblock head_css_section %}
 
 {% block content %}
 
 <h1>{% blocktrans with investment=investment.name %}Investment details of '{{ investment }}'{% endblocktrans %}</h1>
-<h2>{% trans "Investment operations" %}</h2>
-
-<p><strong>{% trans 'Id' %}: </strong>{{ investment.id }}</p>
-<p><strong>{% trans 'Name' %}: </strong>{{ investment.fullName }}</p>
-<p><strong>{% trans 'Product Id' %}: </strong>{{ investment.products.fullName }}</p>
-<p><strong>{% trans 'Active' %}: </strong>{{ investment.active }}</p>
-<p><strong>{% trans 'Selling point' %}: </strong>{{ investment.selling_price }}
-{% with gains_at_selling_price=operations.current_gains_gross_investment_at_selling_price %}  
-  {% if gains_at_selling_price %}
-      . {% blocktrans %} to gain {{ gains_at_selling_price }}.{% endblocktrans %}
-  {% endif %}</p>
-{% endwith %}
-<p><strong>{% trans 'Selling expiration' %}: </strong>{{ investment.selling_expiration }}
-  {% if investment.selling_expiration_alert %}
-      . <span class="red">{% trans 'You must set a new selling order.' %}</span>
-  {% endif %}</p>
-<p><strong>{% trans 'Daily adjustment' %}: </strong>{{ investment.daily_adjustment }}</p>
-<p><strong>{% trans 'Currency' %}: </strong>{{ investment.products.currency }} ({{ investment.products.currency_symbol }})</p>
-<p><strong>{% trans 'Leverage' %}: </strong>{{ investment.products.leverages.multiplier }} (Real: {{investment.products.real_leveraged_multiplier}})</p>
-
-<p class="orders">
-  <a href="{% url 'investment_update' pk=investment.id %}">{% trans "Update this investment" %}</a> | 
-  <a href="{% url 'investment_change_active' pk=investment.id %}">{% trans "Change active status" %}</a> | 
-  <a href="{% url 'product_view' pk=investment.products.id %}">{% trans "Show product" %}</a> | 
-  <a href="{% url 'quote_new' products_id=investment.products.id %}">{% trans "Add a quote to product" %}</a> | 
-  <a href="{% url 'quote_delete_last' products_id=investment.products.id %}?next={% url 'investment_list_active' %}">{% trans "Delete last quote" %}</a> | 
-  <a href="{% url 'investment_view_chart' pk=investment.id %}">{% trans "Show evolution chart" %}</a> | 
-  <a href="{% url 'investments_same_product_change_selling_price' products_id=investment.products.id %}">{% trans "Change selling price of investments with the same product" %}</a> | 
-</p>
-<script>
-  $( function() {
-    $( "#tabs" ).tabs();
-  } );
-</script>
+<v-layout style="justify-content: center;">
+    <v-card class="padding" style="width:50%;">
+        <p><strong>{% trans 'Id' %}: </strong>{{ investment.id }}</p>
+        <p><strong>{% trans 'Name' %}: </strong>{{ investment.fullName }}</p>
+        <p><strong>{% trans 'Product Id' %}: </strong>{{ investment.products.fullName }}</p>
+        <p><strong>{% trans 'Active' %}: </strong>{{ investment.active }}</p>
+        <p><strong>{% trans 'Selling point' %}: </strong>{{ investment.selling_price }}
+        {% with gains_at_selling_price=operations.current_gains_gross_investment_at_selling_price %}  
+        {% if gains_at_selling_price %}
+            . {% blocktrans %} to gain {{ gains_at_selling_price }}.{% endblocktrans %}
+        {% endif %}</p>
+        {% endwith %}
+        <p><strong>{% trans 'Selling expiration' %}: </strong>{{ investment.selling_expiration }}
+        {% if investment.selling_expiration_alert %}
+            . <span class="red">{% trans 'You must set a new selling order.' %}</span>
+        {% endif %}</p>
+        <p><strong>{% trans 'Daily adjustment' %}: </strong>{{ investment.daily_adjustment }}</p>
+        <p><strong>{% trans 'Currency' %}: </strong>{{ investment.products.currency }} ({{ investment.products.currency_symbol }})</p>
+        <p><strong>{% trans 'Leverage' %}: </strong>{{ investment.products.leverages.multiplier }} (Real: {{investment.products.real_leveraged_multiplier}})</p>
+    </v-card>
  
-<div id="tabs">
-  <ul>
-    <li><a href="#tabs-2">{% trans "Current investment operations" %}</a></li>
-    <li><a href="#tabs-1">{% trans "Investment operations" %}</a></li>
-    <li><a href="#tabs-3">{% trans "Historical investment operations" %}</a></li>
-    <li><a href="#tabs-4">{% trans "Dividends" %}</a></li>
-  </ul>
- 
-
-  <div id="tabs-1">
-      {{ operations.o_tabulator_homogeneus_investment.render | safe }}
-  </div>
-
-
-  <div id="tabs-2">
-    {{ operations.current_tabulator_homogeneus_investment.render | safe }}
-    {% if  investment.hasSameAccountCurrency is False %}
-        {{ operations.current_tabulator_homogeneus_user.render | safe }}
-    {%endif %}
-  </div>
-
-  <div id="tabs-3">
-    {{ operations.historical_tabulator_homogeneus_investment.render |safe}}
-    {% if  investment.hasSameAccountCurrency is False %}
-        {{ operations.historical_tabulator_homogeneus_user.render | safe }}
-    {%endif %}
-    
-    
-    
-    
-    
-  </div>
-  <div id="tabs-4">
-    {{ qso_dividends.tabulator.render |safe}}
-  </div>
-</div>
-  <script>
-    function newio_adjusting_cc(){
-        var selling_price_product_currency=parseNumber(prompt( "{% trans "Please add the operation close price in product currency" %}", 0 ));
-        var gains_account_currency=parseNumber(prompt( "{% trans "Please add the final gains in account currency" %}", 0 ));
-        var shares=parseNumber("{{ operations.current_shares|unlocalize}}");
-        var average_price_current_account=parseNumber("{{operations.current_average_price_account.amount|unlocalize}}");
-        var leverage=parseNumber("{{operations.investment.products.real_leveraged_multiplier}}")
-        
-        var currency_conversion=(gains_account_currency+shares*average_price_current_account*leverage)/(shares*selling_price_product_currency*leverage)
-        var url=`{% url 'investmentoperation_new' investments_id=investment.id %}?currency_conversion=${my_round(currency_conversion,10)}&price=${selling_price_product_currency}&shares=${-shares}`;
-        window.location.href=url;
-    };
-  </script>        
-  <p class="orders">
-      <a href="{% url 'investmentoperation_new' investments_id=investment.id %}">{% trans "Add an investment operation" %}</a> | 
-      <a onclick="newio_adjusting_cc()" href="#">{% trans "Add an investment operation adjusting currency conversion factor" %}</a> | 
-      <a href="{% url 'dividend_new' investments_id=investment.id %}">{% trans "Add a dividend" %}</a>
-  </p>
+<br>
+<v-menu offset-y>
+    <template v-slot:activator="{ on, attrs }">
+        <v-btn text dark v-bind="attrs" v-on="on" style="color:darkgrey;">
+            <v-icon>mdi-menu</v-icon>
+        </v-btn>
+    </template>
+    <v-list dense subheader >
+        <div v-for="(subheader,indexsubheader) in items" :key="indexsubheader" inset>
+            <v-subheader inset>[[ subheader.subheader ]]</v-subheader>
+            <v-list-item v-for="(item, index) in subheader.children" :key="index" @click="parseCommand(item)">
+            <v-list-item-icon>
+                <v-icon v-text="item.icon"></v-icon>
+            </v-list-item-icon>
+                [[ item.name ]]
+            </v-list-item>
+            <v-divider></v-divider>
+        </div>
+    </v-list>
+</v-menu>
+</v-layout>
+<p></p>
+<v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
+    <v-tab key="current">{% trans "Current investment operations" %}</v-tab>
+    <v-tab key="operations">{% trans "Investment operations" %}</v-tab>
+    <v-tab key="historical">{% trans "Historical investment operations" %}</v-tab>
+    <v-tab key="dividends">{% trans "Dividends" %}</v-tab>
+    <v-tabs-slider color="yellow"></v-tabs-slider>
+</v-tabs>
+<v-tabs-items v-model="tab">
+    <v-tab-item key="current">      
+        <v-card class="padding">
+            {{ operations.current_tabulator_homogeneus_investment.render | safe }}
+            {% if  investment.hasSameAccountCurrency is False %}
+                {{ operations.current_tabulator_homogeneus_user.render | safe }}
+            {%endif %}
+        </v-card>
+    </v-tab-item>
+    <v-tab-item key="operations">     
+        <v-card class="padding">
+            {{ operations.o_tabulator_homogeneus_investment.render | safe }}
+        </v-card>
+    </v-tab-item>
+    <v-tab-item key="historical">     
+        <v-card class="padding">
+            {{ operations.historical_tabulator_homogeneus_investment.render |safe}}
+            {% if  investment.hasSameAccountCurrency is False %}
+                {{ operations.historical_tabulator_homogeneus_user.render | safe }}
+            {%endif %}
+        </v-card>
+    </v-tab-item>
+    <v-tab-item key="dividends">     
+        <v-card class="padding">
+            {{ qso_dividends.tabulator.render |safe}}
+        </v-card>
+    </v-tab-item>
+</v-tabs-items>            
   
-
-{% endblock %}
+<script>
+new Vue({
+    ...common_vue_properties(),            
+    data () {
+        return {
+            tab:0,
+            items: [
+                {
+                    subheader:"{% trans 'Investment orders' %}",
+                    children: [
+                        {
+                            name:"{% trans 'Update this investment' %}",
+                            type: "redirection",
+                            command: function(){window.location.replace("{% url 'investment_update' pk=investment.id %}")},
+                            icon: "mdi-pencil",
+                        },
+                        {
+                            name:"{% trans 'Change active status' %}",
+                            type: "redirection",
+                            command:function(){window.location.replace("{% url 'investment_change_active' pk=investment.id %}")},
+                            icon: "mdi-pencil",
+                        },
+                        {
+                            name:"{% trans 'Show evolution chart' %}",
+                            type: "redirection",
+                            command:function(){window.location.replace("{% url 'investment_view_chart' pk=investment.id %}")},
+                            icon: "mdi-chart-areaspline",
+                        },
+                        {
+                            name:"{% trans 'Change selling price of investments with the same product' %}",
+                            type: "redirection",
+                            command:function(){window.location.replace("{% url 'investments_same_product_change_selling_price' products_id=investment.products.id %}")},
+                            icon: "mdi-pencil",
+                        },
+                    ]
+                },
+                {
+                    subheader:"{% trans 'Product orders' %}",
+                    children: [
+                        {
+                            name:"{% trans 'View product' %}",
+                            type: "redirection",
+                            command:function(){window.location.replace("{% url 'product_view' pk=investment.products.id %}")},
+                            icon: "mdi-magnify",
+                        },
+                        {
+                            name:"{% trans 'Add a quote to product' %}",
+                            type: "redirection",
+                            command:function(){window.location.replace("{% url 'quote_new' products_id=investment.products.id %}")},
+                            icon: "mdi-book-plus",
+                        },
+                        {
+                            name:"{% trans 'Delete last quote' %}",
+                            type: "redirection",
+                            command:function(){window.location.replace("{% url 'quote_delete_last' products_id=investment.products.id %}?next={% url 'investment_list_active' %}")},
+                            icon: "mdi-delete",
+                        },
+                    ]
+                },
+                {
+                    subheader:"{% trans 'Investment operation orders' %}",
+                    children: [
+                        {
+                            name:"{% trans 'Add an investment operation' %}",
+                            type: "redirection",
+                            command: function(){window.location.replace("{% url 'investmentoperation_new' investments_id=investment.id %}")},
+                            icon: "mdi-book-plus",
+                        },
+                        {
+                            name:"{% trans 'Add an investment operation adjusting currency conversion factor' %}",
+                            type: "function",
+                            command: "newio_adjusting_cc",
+                            icon: "mdi-book-plus",
+                        },
+                    ]
+                },
+                {
+                    subheader:"{% trans 'Dividend orders' %}",
+                    children: [
+                        {
+                            name:"{% trans 'Add a dividend' %}",
+                            type: "redirection",
+                            command: function(){window.location.replace("{% url 'dividend_new' investments_id=investment.id %}")},
+                            icon: "mdi-book-plus",
+                        },
+                    ]
+                },
+            ]
+        }  
+    },
+    methods: {
+        parseCommand(item){
+            if (item.type=="function") {
+                console.log(this)
+                console.log(item)
+                this[item.command](item)
+            } else {
+                item.command()
+            }
+        },
+        newio_adjusting_cc(item){
+            alert(item)
+            var selling_price_product_currency=parseNumber(prompt( "{% trans "Please add the operation close price in product currency" %}", 0 ));
+            var gains_account_currency=parseNumber(prompt( "{% trans "Please add the final gains in account currency" %}", 0 ));
+            var shares=parseNumber("{{ operations.current_shares|unlocalize}}");
+            var average_price_current_account=parseNumber("{{operations.current_average_price_account.amount|unlocalize}}");
+            var leverage=parseNumber("{{operations.investment.products.real_leveraged_multiplier}}")
+            
+            var currency_conversion=(gains_account_currency+shares*average_price_current_account*leverage)/(shares*selling_price_product_currency*leverage)
+            var url=`{% url 'investmentoperation_new' investments_id=investment.id %}?currency_conversion=${my_round(currency_conversion,10)}&price=${selling_price_product_currency}&shares=${-shares}`;
+            window.location.href=url;
+        },
+    },
+    
+})
+</script>
+{% endblock content %}

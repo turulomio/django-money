@@ -500,11 +500,13 @@ class InvestmentsOperationsManager:
 ## Generate object from and ids list
 def InvestmentsOperationsManager_from_investment_queryset(qs_investments, dt, request):
     ids=tuple(qs_investments.values_list('pk',flat=True))
+    
     r=InvestmentsOperationsManager(request)
-    rows=cursor_rows_as_dict("id","select id, t.* from investments, investment_operations(investments.id, %s, %s ) as t where investments.id in %s;", (dt, request.local_currency, ids))
-    for investment in qs_investments:  
-        row=rows[investment.id]
-        r.append(InvestmentsOperations(request, investment,  row["io"], row['io_current'],  row['io_historical']))
+    if len(ids)>0:
+        rows=cursor_rows_as_dict("id","select id, t.* from investments, investment_operations(investments.id, %s, %s ) as t where investments.id in %s;", (dt, request.local_currency, ids))
+        for investment in qs_investments:  
+            row=rows[investment.id]
+            r.append(InvestmentsOperations(request, investment,  row["io"], row['io_current'],  row['io_historical']))
     return r
         
         

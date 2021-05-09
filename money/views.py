@@ -1893,7 +1893,6 @@ def investments_same_product_change_selling_price(request, products_id):
 
 def setGlobal(key, value):
     number=cursor_one_field("select count(*) from globals where global=%s", (key, ))
-    print(number)
     if number==0:
         execute("insert into globals (global, value) values (%s,%s)", (key, value))
     else:
