@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_vue_all.html' %}
 
 {% load i18n %}
 {% load static %}
@@ -12,4 +12,9 @@
         <p style="margin:40px;">{% trans "Wellcome to Django-Money, your personal accounting and financial system." %}</p>
     </div>
 
-{% endblock %}
+<script>
+new Vue({
+    ...common_vue_properties(),
+})
+</script>
+{% endblock content %}

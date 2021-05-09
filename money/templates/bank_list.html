@@ -1,6 +1,14 @@
-{% extends "base.html" %}
+{% extends "base_vue_all.html" %}
 
 {% load i18n %}
+{% load static %}
+
+{% block head_js_section %}
+    <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script>
+{% endblock head_js_section %}
+{% block head_css_section %}
+    <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'>
+{% endblock head_css_section %}
 
 {% block content %}
     <h1>{% trans "My banks" %}</h1>
@@ -14,5 +22,9 @@
     <p class="orders">
         <a href="{% url 'bank_new' %}">{% trans "Add a new bank"%}</a> | 
     </p>
-{% endblock %}
-
+<script>
+new Vue({
+    ...common_vue_properties(),
+})
+</script>
+{% endblock content %}
