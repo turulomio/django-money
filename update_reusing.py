@@ -30,6 +30,7 @@ if args.local==False:
     download_from_github("turulomio", "reusingcode", "js/component.yearmonthpicker.js", "money/static/js")
     download_from_github("turulomio", "reusingcode", "js/component.yearpicker.js", "money/static/js")
     download_from_github("turulomio", "reusingcode", "vue/components/ChartPie.js", "money/static/js/vuecomponents/")
+    download_from_github("turulomio", "reusingcode", "vue/components/MyDatePicker.js", "money/static/js/vuecomponents/")
 
 replace_in_file("money/reusing/casts.py", "from currency", "from .currency")
 replace_in_file("money/reusing/casts.py", "from percentage", "from .percentage")

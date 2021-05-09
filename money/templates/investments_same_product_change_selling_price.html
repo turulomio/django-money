@@ -4,6 +4,10 @@
 {% load l10n %}
 {% load static %}
 
+{% block head_js_section %}
+    <script type="text/javascript" src='{% static "js/vuecomponents/MyDatePicker.js" %}'></script>
+{% endblock head_js_section %}
+
 
 {% block content %}
     <v-card flat>
@@ -36,16 +40,8 @@
                 </v-card>
             </v-tab-item>
         </v-tabs-items>         
-        <v-form ref="form"  v-model="form_valid" lazy-validation action="{% url 'investments_same_product_change_selling_price' products_id=product.id %}" method="POST">
-            <v-menu v-model="menu_selling_expiration" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="auto">
-                <template v-slot:activator="{ on, attrs }">
-                    <v-row>
-                    <v-text-field name="selling_expiration" v-model.date="selling_expiration" label="{% trans 'Selling expiration' %}" prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on"></v-text-field>
-                    <v-icon x-small  @click="selling_expiration=null">mdi-backspace</v-icon>  
-                    </v-row>
-                </template>
-                <v-date-picker v-model="selling_expiration" @input="menu_selling_expiration = false" ></v-date-picker>
-            </v-menu>      
+        <v-form ref="form" v-model="form_valid" lazy-validation action="{% url 'investments_same_product_change_selling_price' products_id=product.id %}" method="POST">
+            <my-datepicker name="selling_expiration" v-model="selling_expiration" label="{% trans 'Selling expiration' %}"></my-datepicker> 
             <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
             <input type="hidden" name="investments" :value="[[investments_ids]]">
             <input type="hidden" name="selling_price" :value="[[my_round(selected_selling_price, decimals)]]">
@@ -125,6 +121,7 @@ new Vue({
         },
         
         submit(){               
+            console.log(this.selling_expiration)
             if (this.$refs.form.validate()==false) return
             this.$refs.form.$el.submit()
         },
@@ -145,7 +142,7 @@ new Vue({
         }
     },
     mounted(){
-        this.$refs.table.selection=this.data
+         this.$refs.table.selection=this.data
     }
 })
 </script>

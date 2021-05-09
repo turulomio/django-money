@@ -1,6 +1,15 @@
 {% extends 'base_vue_all.html' %}
 {% load i18n %}
 
+{% load static %}
+
+{% block head_js_section %}
+    <script type="text/javascript" src='{% static "js/vuecomponents/AutoCompleteApiIdName.js" %}'></script>
+{% endblock head_js_section %}
+
+
+
+
 {% block content %}
 <h1>{% trans "Products comparation" %}</h1>
 <v-card class="padding">
