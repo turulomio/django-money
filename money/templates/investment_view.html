@@ -7,6 +7,7 @@
 
 {% block head_js_section %}
     <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/vuecomponents/MyMenuInline.js" %}'></script>
 {% endblock head_js_section %}
 {% block head_css_section %}
     <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'>
@@ -35,27 +36,7 @@
         <p><strong>{% trans 'Currency' %}: </strong>{{ investment.products.currency }} ({{ investment.products.currency_symbol }})</p>
         <p><strong>{% trans 'Leverage' %}: </strong>{{ investment.products.leverages.multiplier }} (Real: {{investment.products.real_leveraged_multiplier}})</p>
     </v-card>
- 
-<br>
-<v-menu offset-y>
-    <template v-slot:activator="{ on, attrs }">
-        <v-btn text dark v-bind="attrs" v-on="on" style="color:darkgrey;">
-            <v-icon>mdi-menu</v-icon>
-        </v-btn>
-    </template>
-    <v-list dense subheader >
-        <div v-for="(subheader,indexsubheader) in items" :key="indexsubheader" inset>
-            <v-subheader inset>[[ subheader.subheader ]]</v-subheader>
-            <v-list-item v-for="(item, index) in subheader.children" :key="index" @click="parseCommand(item)">
-            <v-list-item-icon>
-                <v-icon v-text="item.icon"></v-icon>
-            </v-list-item-icon>
-                [[ item.name ]]
-            </v-list-item>
-            <v-divider></v-divider>
-        </div>
-    </v-list>
-</v-menu>
+    <my-menuinline :items="items" @selected="items_selected"></my-menuinline>
 </v-layout>
 <p></p>
 <v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
@@ -107,25 +88,25 @@ new Vue({
                         {
                             name:"{% trans 'Update this investment' %}",
                             type: "redirection",
-                            command: function(){window.location.replace("{% url 'investment_update' pk=investment.id %}")},
+                            command: "{% url 'investment_update' pk=investment.id %}",
                             icon: "mdi-pencil",
                         },
                         {
                             name:"{% trans 'Change active status' %}",
                             type: "redirection",
-                            command:function(){window.location.replace("{% url 'investment_change_active' pk=investment.id %}")},
+                            command:"{% url 'investment_change_active' pk=investment.id %}",
                             icon: "mdi-pencil",
                         },
                         {
                             name:"{% trans 'Show evolution chart' %}",
                             type: "redirection",
-                            command:function(){window.location.replace("{% url 'investment_view_chart' pk=investment.id %}")},
+                            command:"{% url 'investment_view_chart' pk=investment.id %}",
                             icon: "mdi-chart-areaspline",
                         },
                         {
                             name:"{% trans 'Change selling price of investments with the same product' %}",
                             type: "redirection",
-                            command:function(){window.location.replace("{% url 'investments_same_product_change_selling_price' products_id=investment.products.id %}")},
+                            command:"{% url 'investments_same_product_change_selling_price' products_id=investment.products.id %}",
                             icon: "mdi-pencil",
                         },
                     ]
@@ -136,19 +117,19 @@ new Vue({
                         {
                             name:"{% trans 'View product' %}",
                             type: "redirection",
-                            command:function(){window.location.replace("{% url 'product_view' pk=investment.products.id %}")},
+                            command:"{% url 'product_view' pk=investment.products.id %}",
                             icon: "mdi-magnify",
                         },
                         {
                             name:"{% trans 'Add a quote to product' %}",
                             type: "redirection",
-                            command:function(){window.location.replace("{% url 'quote_new' products_id=investment.products.id %}")},
+                            command:"{% url 'quote_new' products_id=investment.products.id %}",
                             icon: "mdi-book-plus",
                         },
                         {
                             name:"{% trans 'Delete last quote' %}",
                             type: "redirection",
-                            command:function(){window.location.replace("{% url 'quote_delete_last' products_id=investment.products.id %}?next={% url 'investment_list_active' %}")},
+                            command:"{% url 'quote_delete_last' products_id=investment.products.id %}?next={% url 'investment_list_active' %}",
                             icon: "mdi-delete",
                         },
                     ]
@@ -159,7 +140,7 @@ new Vue({
                         {
                             name:"{% trans 'Add an investment operation' %}",
                             type: "redirection",
-                            command: function(){window.location.replace("{% url 'investmentoperation_new' investments_id=investment.id %}")},
+                            command: "{% url 'investmentoperation_new' investments_id=investment.id %}",
                             icon: "mdi-book-plus",
                         },
                         {
@@ -176,7 +157,7 @@ new Vue({
                         {
                             name:"{% trans 'Add a dividend' %}",
                             type: "redirection",
-                            command: function(){window.location.replace("{% url 'dividend_new' investments_id=investment.id %}")},
+                            command: "{% url 'dividend_new' investments_id=investment.id %}",
                             icon: "mdi-book-plus",
                         },
                     ]
@@ -185,27 +166,19 @@ new Vue({
         }  
     },
     methods: {
-        parseCommand(item){
-            if (item.type=="function") {
-                console.log(this)
-                console.log(item)
-                this[item.command](item)
-            } else {
-                item.command()
+        items_selected(item){
+            if (item.command=="newio_adjusting_cc"){
+                var selling_price_product_currency=parseNumber(prompt( "{% trans "Please add the operation close price in product currency" %}", 0 ));
+                var gains_account_currency=parseNumber(prompt( "{% trans "Please add the final gains in account currency" %}", 0 ));
+                var shares=parseNumber("{{ operations.current_shares|unlocalize}}");
+                var average_price_current_account=parseNumber("{{operations.current_average_price_account.amount|unlocalize}}");
+                var leverage=parseNumber("{{operations.investment.products.real_leveraged_multiplier}}")
+                
+                var currency_conversion=(gains_account_currency+shares*average_price_current_account*leverage)/(shares*selling_price_product_currency*leverage)
+                var url=`{% url 'investmentoperation_new' investments_id=investment.id %}?currency_conversion=${my_round(currency_conversion,10)}&price=${selling_price_product_currency}&shares=${-shares}`;
+                window.location.href=url;
             }
-        },
-        newio_adjusting_cc(item){
-            alert(item)
-            var selling_price_product_currency=parseNumber(prompt( "{% trans "Please add the operation close price in product currency" %}", 0 ));
-            var gains_account_currency=parseNumber(prompt( "{% trans "Please add the final gains in account currency" %}", 0 ));
-            var shares=parseNumber("{{ operations.current_shares|unlocalize}}");
-            var average_price_current_account=parseNumber("{{operations.current_average_price_account.amount|unlocalize}}");
-            var leverage=parseNumber("{{operations.investment.products.real_leveraged_multiplier}}")
-            
-            var currency_conversion=(gains_account_currency+shares*average_price_current_account*leverage)/(shares*selling_price_product_currency*leverage)
-            var url=`{% url 'investmentoperation_new' investments_id=investment.id %}?currency_conversion=${my_round(currency_conversion,10)}&price=${selling_price_product_currency}&shares=${-shares}`;
-            window.location.href=url;
-        },
+        }
     },
     
 })
