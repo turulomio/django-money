@@ -320,7 +320,7 @@ class InvestmentsOperations:
        
         #Chart
         return f"""
-        <div id="{name}" style="width: 80%;height:80%;"></div>
+        <div id="{name}" style="width: 100%;height:80%;"></div>
         <script type="text/javascript">
 
             // based on prepared DOM, initialize echarts instance
