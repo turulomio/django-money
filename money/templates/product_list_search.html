@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends 'base_vue_all.html' %}
 
 {% load i18n %}
 
@@ -10,9 +10,36 @@
       <button class="searchbutton" type="submit">{% trans "Search" %}</button>
     </form>
 {% if search %}
-<h2>{% trans "Results" %}</h2>
-
-    {{table_products|safe}}
+    <h2>{% trans "Results" %}</h2>
+    <v-card flat>
+        <v-data-table dense :headers="tableHeaders" :items="tableData" sort-by="value" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="[true]" fixed-header height="400">      
+            <template v-slot:[`item.actions`]="{ item }">
+                <v-icon small class="mr-2" @click="editProduct(item)">mdi-pencil</v-icon>
+            </template>
+        </v-data-table>   
+    </v-card>
 {% endif %}
+
+<script>
+    new Vue({
+        ...common_vue_properties(),
+        data:{
+            tableHeaders: [
+                { text: 'Id', value: 'id',sortable: true },
+                { text: 'Name', value: 'name',sortable: true},
+                { text: 'ISIN',  sortable: true, value: 'isin'},
+                { text: 'Last update',  sortable: true, value: 'last_datetime'},
+                { text: 'Last quote', value: 'last', sortable: true },
+                { text: 'Actions', value: 'actions', sortable: false },
+            ],   
+            tableData: {{table_products | safe}},
+        },
+        methods:{
+            editProduct(item){
+            }
+        },
+    })
+</script>
+
 {% endblock %}
 

@@ -140,6 +140,7 @@ def order_list(request,  active, year=date.today().year):
     
 @login_required
 def  table_product_list_from_ids(request, ids):
+        print("OBSOLETE")
         ids=tuple(ids)
         listproducts=cursor_rows("""
 select 
@@ -159,6 +160,28 @@ where
     t.id=products.id and
     products.id in %s""", (ids, ))
         return TabulatorProducts("table_products", 'product_view', listproducts, request.local_currency, request.local_zone )
+        
+
+def  json_product_list_from_ids(ids):
+        ids=tuple(ids)
+        listproducts=cursor_rows("""
+select 
+    products.id, 
+    products.id as code,
+    name, 
+    isin, 
+    last_datetime, 
+    last, 
+    percentage(penultimate, last) as percentage_day, 
+    percentage(t.lastyear, last) as percentage_year, 
+    (select estimation from estimations_dps where year=extract(year from now()) and products_id=products.id)/last*100 as percentage_dps
+from 
+    products, 
+    last_penultimate_lastyear(products.id,now()) as t
+where 
+    t.id=products.id and
+    products.id in %s""", (ids, ))
+        return listdict2json(listproducts)
 
 @login_required
 def product_list_search(request):
@@ -174,7 +197,7 @@ where
     (name ilike %s or 
      isin ilike %s or
     tickers::text ilike %s)""", [f"%%{search}%%"]*3) 
-        table_products=table_product_list_from_ids(request, ids).render()
+        table_products=json_product_list_from_ids(ids)
     return render(request, 'product_list_search.html', locals())
     
 @login_required
