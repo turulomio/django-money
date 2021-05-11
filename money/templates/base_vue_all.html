@@ -110,11 +110,25 @@
                             <div class="alert alert-{{ message.level_tag }}" role="alert" >{{message.message | safe}}</div>
                         {% endfor%}
                     {% endif %}
-                </div>{# messages #}
+                </div>
+                
+                {% if messages %}
+                    <v-snackbar v-model="snackbar" timeout="-1">
+                        <template v-slot:action="{ attrs }">
+                            <v-btn color="pink" text v-bind="attrs" @click="snackbar = false">{% trans 'Close' %}</v-btn>
+                        </template>
+                    
+                    {% for message in messages %}
+                        {{message.message | safe}}
+                    {% endfor%}
+                    </v-snackbar>
+                {% endif %}
+
                 <script>
                     var mixin = {
                         data: function () {
                             return {
+                                snackbar:true,
                                 {% autoescape off %}
                                 {% mymenuvuetree %}
                                 {% endautoescape%}
