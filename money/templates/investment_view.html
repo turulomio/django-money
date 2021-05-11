@@ -8,6 +8,9 @@
 {% block head_js_section %}
     <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script>
     <script type="text/javascript" src='{% static "js/vuecomponents/MyMenuInline.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHomogeneous.js" %}'></script>
 {% endblock head_js_section %}
 {% block head_css_section %}
     <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'>
@@ -57,7 +60,8 @@
     </v-tab-item>
     <v-tab-item key="operations">     
         <v-card class="padding">
-            {{ operations.o_tabulator_homogeneus_investment.render | safe }}
+            <table-investmentoperations-homegeneous :items="items_io" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" height="400" url_root="{% url 'home' %}"></table-investmentoperations-homegeneous>
+            
         </v-card>
     </v-tab-item>
     <v-tab-item key="historical">     
@@ -81,6 +85,7 @@ new Vue({
     data () {
         return {
             tab:0,
+            items_io: {{ json_table_operations | safe }},
             items: [
                 {
                     subheader:"{% trans 'Investment orders' %}",

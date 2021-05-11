@@ -162,7 +162,9 @@ where
         return TabulatorProducts("table_products", 'product_view', listproducts, request.local_currency, request.local_zone )
         
 
-def  json_product_list_from_ids(ids):
+def  json_product_list_from_ids(    ids):
+        if len(ids)==0:
+            return listdict2json([])
         ids=tuple(ids)
         listproducts=cursor_rows("""
 select 
@@ -185,8 +187,9 @@ where
 
 @login_required
 def product_list_search(request):
-    search = request.GET.get('search')
-    if search!=None:
+    search = request.GET.get('search', '')
+    table_products=[]
+    if search!='':
         searchtitle=_("Searching products that contain '{}' in database").format(search)
         ids=cursor_one_column("""
 select 
@@ -742,12 +745,15 @@ def investment_view(request, pk):
     investment=get_object_or_404(Investments.objects.select_related("accounts").select_related("products").select_related("products__productstypes"), id=pk)
     operations=investment.operations(request, request.local_currency)
     
+    json_table_operations=listdict2json(operations.o_listdict_tabulator_homogeneus(request))
+    print(json_table_operations)
     qso_dividends=QsoDividendsHomogeneus(request,  Dividends.objects.all().filter(investments_id=pk).order_by('datetime'),  investment)
     return render(request, 'investment_view.html', locals())
     
 @login_required
 def investment_view_chart(request, pk):
     investment=get_object_or_404(Investments.objects.select_related("accounts").select_related("products").select_related("products__productstypes"), id=pk)
+    
     operations=investment.operations(request, request.local_currency)
     return render(request, 'investment_view_chart.html', locals())
 

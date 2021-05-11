@@ -176,7 +176,7 @@ class InvestmentsOperations:
         for o in self.io:
             o["operationstypes"]=request.operationstypes[o["operationstypes_id"]]
         return self.io        
-
+        
     def current_listdict_tabulator_homogeneus_investment(self, request):
         for ioc in self.io_current:
             o=IOC(self.investment, ioc)
