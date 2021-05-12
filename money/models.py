@@ -35,6 +35,16 @@ RANGE_RECOMENDATION_CHOICES =(
     (5, _("Strict SMA 100")), 
     (6, _("Strict SMA 10, 100")), 
 )
+PCI_CHOICES =( 
+    ('c', _("Call")), 
+    ('p', _("Put")), 
+    ('i', _("Inline")), 
+)
+CURRENCY_CHOICES =( 
+    ('EUR', _("EURO")), 
+    ('USD', _("USA Dolar")), 
+    ('GBP', _("Inline")), 
+)
 
 class Accounts(models.Model):
     name = models.TextField(blank=True, null=True)
@@ -108,6 +118,12 @@ class Stockmarkets(models.Model):
         managed = True
         db_table = 'stockmarkets'
 
+    def __str__(self):
+        return self.fullName()
+        
+    def fullName(self):
+        return _(self.name)
+        
     ## Returns the close time of a given date
     def dtaware_closes(self, date):
         return dtaware(date, self.closes, self.zone)
@@ -629,6 +645,12 @@ class Leverages(models.Model):
         managed = False
         db_table = 'leverages'
 
+    def __str__(self):
+        return self.fullName()
+        
+    def fullName(self):
+        return _(self.name)
+
 class Operationstypes(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.TextField()
@@ -717,7 +739,7 @@ class Products(models.Model):
     phone = models.TextField(blank=True, null=True)
     mail = models.TextField(blank=True, null=True)
     percentage = models.IntegerField(blank=False, null=False)
-    pci = models.CharField(max_length=1)
+    pci = models.CharField(choices=PCI_CHOICES, max_length=1)
     leverages = models.ForeignKey(Leverages, models.DO_NOTHING)
     stockmarkets = models.ForeignKey(Stockmarkets, models.DO_NOTHING)
     comment = models.TextField(blank=True, null=True)
@@ -811,6 +833,12 @@ class Productstypes(models.Model):
     class Meta:
         managed = False
         db_table = 'productstypes'
+        
+    def __str__(self):
+        return self.fullName()
+        
+    def fullName(self):
+        return _(self.name)
 
 class Quotes(models.Model):
     id = models.AutoField(primary_key=True)

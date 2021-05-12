@@ -18,7 +18,7 @@
         {% csrf_token %}
         {{ form.as_table }}
         </table>
-        <button type="submit" name="button"  style="all:revert">{% trans "Show ranges" %}</button>
+        <button type="submit" name="button">{% trans "Show ranges" %}</button>
     </form>
 
 
@@ -33,7 +33,7 @@
                 <v-container>{% trans "Current price: " %}{{prm.product.basic_results.last}}</v-container>
                 <v-data-table dense :headers="tableHeaders" :items="tableData" sort-by="value" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="[true]" fixed-header height="400">      
                     <template v-slot:[`item.value`]="{ item }">
-                        <div  @click="showLimits(item)" :class="item.current_in_range ? 'green' : ''">[[item.value ]]</div>
+                        <div  @click="showLimits(item)" :class="item.current_in_range ? 'vuegreen' : ''">[[item.value ]]</div>
                     </template>    
                     <template v-slot:[`item.recomendation_invest`]="{ item }">
                         <v-icon small v-if="item.recomendation_invest" >mdi-check-outline</v-icon>
@@ -51,9 +51,9 @@
             </v-card>
         </v-tab-item>
         <v-tab-item key="1" >
-    <div style="height: 600px;">
-    <v-chart autoresize :option="option"/>
-    </div>
+            <div style="height: 600px;">
+                <v-chart autoresize :option="option"/>
+            </div>
         </v-tab-item>
     </v-tabs-items>
     {% endif %}
@@ -73,8 +73,15 @@
                 { text: 'Orders',  sortable: false, value: 'orders_inside'},
                 { text: 'Actions', value: 'actions', sortable: false },
             ],   
-            tableData: {{prm.listdict_json | safe}},
-            option: {{prm.eChartVUE |safe}},
+            
+
+            {% if prm.product.basic_results.last %}
+                tableData: {{prm.listdict_json | safe}},
+                option: {{prm.eChartVUE |safe}},
+            {% else %}
+                tableData: [],
+                option: {},
+            {% endif %}
         },
         methods:{
             addOrder(item){
@@ -87,15 +94,5 @@
         },
     })
 </script>
-<style>
-
-    .green{
-        color:red;
-        font-weight: 900;
-    } 
-    input, select, label{
-        all:revert;
-    }
-</style>
 
 {% endblock %}

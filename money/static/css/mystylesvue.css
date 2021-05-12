@@ -228,19 +228,17 @@ div.headeritem > a:hover {
 
 
 
-span.red{
-  background-color: black;
-    color:red;
-}
+
+
+
 span.vuered{
     color:red;
 }
 
 
-td.green{
-    border: 1px solid black;
-    padding:2px;
-    background-color: PaleGreen;
+.vuegreen{
+    color: Green;
+    font-weight: 900;
 }
 
 
@@ -286,4 +284,46 @@ td.green{
 }
 .theme--light.v-treeview--hoverable .v-treeview-node__root:hover::before, .theme--light.v-treeview .v-treeview-node--click > .v-treeview-node__root:hover::before {
     opacity: 0;
+}
+
+
+/*DJANGO AUTO FORMS*/
+
+.form_table{
+    background: linear-gradient(rgb(185, 175, 231), white);
+    border-radius: 14px;
+    border: 1px solid #BBBBBB;
+    padding: 8px;	
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+}
+
+.form_table > table > tbody > tr > th, 
+.form_table > table{
+    padding: 8px;
+}
+
+.form_table > button {
+    padding: 8px;
+    border-style: solid;
+    background-color: lavenderblush;
+}
+
+.form_table >table >tbody > tr > td > select{
+    padding: 8px;
+    border-style: solid;
+    background-color: lightgrey;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form_table >table >tbody > tr > td > input,
+.form_table >table >tbody > tr > td > textarea
+{
+    padding: 8px;
+    border-style: solid;
+    background-color: white;
+    width: 100%;
+    box-sizing: border-box;
 }

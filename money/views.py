@@ -58,7 +58,7 @@ from money.reusing.currency import Currency
 from money.reusing.connection_dj import cursor_rows_as_dict
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz, epochmicros2dtaware, dtaware2epochmicros
 from money.reusing.decorators import timeit
-from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key, listdict2json, listdict_print_first
+from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key, listdict2json
 from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict import (
@@ -287,17 +287,42 @@ def product_view(request, pk):
 class product_new(CreateView):
     model = Products
     template_name="product_new_update.html"
-    fields = ( 'name', 'isin')
+    fields = ( 'name', 'isin', 'currency', 'productstypes', 'agrupations', 'web', 'address',  'phone', 'mail', 'percentage', 'pci', 'leverages',  'stockmarkets', 'comment',  'obsolete', 'tickers', 'high_low',  'decimals')
 
     def get_form(self, form_class=None): 
         if form_class is None: 
             form_class = self.get_form_class()
         form = super(product_new, self).get_form(form_class)
+        form.fields['name'].widget = forms.TextInput()
+        form.fields['isin'].widget = forms.TextInput()
+        form.fields['currency'].widget = forms.TextInput()
+        form.fields['agrupations'].widget = forms.TextInput()
+        form.fields['web'].widget = forms.TextInput()
+        form.fields['address'].widget = forms.TextInput()
+        form.fields['phone'].widget = forms.TextInput()
+        form.fields['mail'].widget = forms.TextInput()
+        form.fields['tickers'].widget = forms.TextInput()
         return form
-
+        
+    def get_initial(self):
+        return {
+            'pci': 'c', 
+            'percentage': 100, 
+            'obsolete': False, 
+            'high_low': False, 
+            'decimals': 2, 
+            'leverages': 1, 
+        }
     def form_valid(self, form):
         form.instance.accounts =Accounts.objects.get(pk=self.kwargs['accounts_id'])
         return super().form_valid(form)
+#                form.instance.investments=Investments.objects.select_related("products").select_related("products__productstypes").select_related("products__leverages").get(pk=self.kwargs['investments_id']) #We can use in template with view.investments
+#        if (    form.instance.commission>=0 and 
+#                form.instance.taxes>=0 and 
+#                ((form.instance.shares>=0 and form.instance.operationstypes.id in (4, 6)) or (form.instance.shares<0 and form.instance.operationstypes.id==5) )) :
+#            form.instance.save()
+#            form.instance.update_associated_account_operation(self.request, self.request.local_currency)
+#            return super().form_valid(form)
 
     def get_success_url(self):
         return reverse_lazy('product_new_update',args=(self.object.id,))
