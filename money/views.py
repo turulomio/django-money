@@ -266,8 +266,15 @@ def product_search(request):
 
     return JsonResponse(ld, safe=False)
 
+## pk can be negative so I use argument GET negative 0 false 1 true
 @login_required
 def product_view(request, pk):
+    #    if request.GET.get('negative', None) is None:
+    #        pk=pk
+    #    else:
+    #        pk=-pk
+    pk=int(pk)
+        
     product=get_object_or_404(Products, id=pk)
     quotes, percentages=listdict_product_quotes_month_comparation(2000, product)
     table_quotes_month_percentages=TabulatorProductQuotesMonthPercentages("table_quotes_month_percentages", None, percentages).render()
@@ -276,6 +283,25 @@ def product_view(request, pk):
 
     return render(request, 'product_view.html', locals())
 
+@method_decorator(login_required, name='dispatch')
+class product_new(CreateView):
+    model = Products
+    template_name="product_new_update.html"
+    fields = ( 'name', 'isin')
+
+    def get_form(self, form_class=None): 
+        if form_class is None: 
+            form_class = self.get_form_class()
+        form = super(product_new, self).get_form(form_class)
+        return form
+
+    def form_valid(self, form):
+        form.instance.accounts =Accounts.objects.get(pk=self.kwargs['accounts_id'])
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('product_new_update',args=(self.object.id,))
+        
 @login_required
 def product_ranges(request):
     if request.method == 'POST':

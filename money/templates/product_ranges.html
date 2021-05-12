@@ -45,7 +45,7 @@
                         <a :href="o.url" v-for="o in item.orders_inside" :key="o.name">[[ o.name ]]. Amount: [[ o.amount]]<br></a>
                     </template>
                     <template v-slot:[`item.actions`]="{ item }">
-                        <v-icon small class="mr-2" @click="addOrder(item)">mdi-pencil</v-icon>
+                        <v-icon small class="mr-2" @click="addOrder(item)" v-if="item.recomendation_invest">mdi-pencil</v-icon>
                     </template>
                 </v-data-table>   
             </v-card>
