@@ -2,30 +2,39 @@
 
 {% load i18n %}
 
+{% load static %}
+
+{% block head_js_section %}
+    <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script>
+{% endblock head_js_section %}
+
 {% block content %}
     <h1>{% trans "Products search" %}</h1>
-    <v-form ref="form" v-model="form_valid" lazy-validation action="{% url 'product_list_search' %}" method="GET">
-<!--         <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}"> -->
-        <v-row>
-        <v-text-field  name="search" v-model="search" label="{% trans 'Search products' %}"  placeholder="{% trans 'Enter a string' %}" autofocus></v-text-field>
-        <v-btn color="error" @click="submit()" :disabled="form_valid==false">{% trans "Search" %}</v-btn>
-        </v-row>
-    <v-form>
-<!--    <form class="search" id="searchform" action="{# url 'blog_search_list_view' #}" method="get" accept-charset="utf-8">
-      <label>{% trans "Search a product:" %}</label>
-      <input class="searchfield" id="searchbox"  class="form-control" name="search" type="text" value="{{search}}"  placeholder="{% trans "Search" %}">
-      <button class="searchbutton" type="submit">{% trans "Search" %}</button>
-    </form>-->
-{% if search %}
-    <h2>{% trans "Results" %}</h2>
-    <v-card flat>
-        <v-data-table dense :headers="tableHeaders" :items="tableData" sort-by="value" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="[true]" fixed-header height="600">      
-            <template v-slot:[`item.actions`]="{ item }">
-                <v-icon small class="mr-2" @click="editProduct(item)">mdi-pencil</v-icon>
-            </template>
-        </v-data-table>   
+    <v-card width="45%" class="padding mx-lg-auto">
+        <v-form ref="form" v-model="form_valid" lazy-validation action="{% url 'product_list_search' %}" method="GET">
+            <v-row>
+                <v-text-field dense name="search" v-model="search" label="{% trans 'Search products' %}"  placeholder="{% trans 'Enter a string' %}" autofocus></v-text-field>
+                <v-btn dense class="ml-4" color="error" @click="submit()" :disabled="form_valid==false">{% trans "Search" %}</v-btn>
+            </v-row>
+        <v-form>
     </v-card>
-{% endif %}
+    {% if search %}
+        <h2>{% trans "Results" %}</h2>
+        <v-card flat>
+            <v-data-table dense :headers="tableHeaders" :items="tableData" sort-by="value" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="[true]" fixed-header height="600">      
+                <template v-slot:[`item.last`]="{ item }">
+                    [[ currency_string(item.last, item.currency)]]
+                </template>  
+                <template v-slot:[`item.last_datetime`]="{ item }">
+                    [[ localtime(item.last_datetime)]]
+                </template>  
+                <template v-slot:[`item.actions`]="{ item }">
+                    <v-icon small class="mr-2" @click="editProduct(item)">mdi-pencil</v-icon>
+                </template>
+            </v-data-table>   
+        </v-card>
+    {% endif %}
 
 <script>
     new Vue({
@@ -38,7 +47,7 @@
                 { text: 'Name', value: 'name',sortable: true},
                 { text: 'ISIN',  sortable: true, value: 'isin'},
                 { text: 'Last update',  sortable: true, value: 'last_datetime'},
-                { text: 'Last quote', value: 'last', sortable: true },
+                { text: 'Last quote', value: 'last', sortable: true, align: 'right' },
                 { text: 'Actions', value: 'actions', sortable: false },
             ],   
             tableData: {{table_products | safe}},

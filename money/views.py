@@ -172,6 +172,7 @@ select
     products.id as code,
     name, 
     isin, 
+    currency,
     last_datetime, 
     last, 
     percentage(penultimate, last) as percentage_day, 
