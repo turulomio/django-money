@@ -99,7 +99,11 @@ function currency_symbol(currency){
     } 
     else if (currency=='USD'){
         return'$';
-    } else {
+    }
+    else if (currency=='u'){
+        return'u';
+    }
+    else {
             return "???";
     }
 }
@@ -110,6 +114,14 @@ function my_round(num, decimals = 2) {
 
 function currency_string(num, currency, decimals=2){
     return "{0} {1}".format(my_round(num,decimals).toFixed(decimals), currency_symbol(currency));
+}
+
+function currency_html(num, currency, decimals=2){
+    if (num>=0){
+        return "{0} {1}".format(my_round(num,decimals).toFixed(decimals), currency_symbol(currency));
+    } else {
+        return "<span class='vuered'>{0} {1}</span>".format(my_round(num,decimals).toFixed(decimals), currency_symbol(currency));
+    }
 }
 
 //Returns a float with . 

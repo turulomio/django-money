@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from math import ceil
 from money.reusing.connection_dj import cursor_one_row, cursor_rows_as_dict
 from money.reusing.currency import Currency
+from money.reusing.decorators import deprecated
 from money.reusing.datetime_functions import string2dtnaive, dtaware
 from money.reusing.listdict_functions import listdict_sum, listdict2json, listdict_print_first
 from money.reusing.percentage import Percentage
@@ -245,6 +246,7 @@ class InvestmentsOperations:
         r.showLastRecord(False)
         return r
         
+    @deprecated
     def historical_tabulator_homogeneus_investment(self):
         r=TabulatorFromListDict(f"{self.name}_historical_tabulator_homogeneus_user")
         r.setDestinyUrl(None)

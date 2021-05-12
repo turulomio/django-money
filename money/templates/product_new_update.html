@@ -1,0 +1,46 @@
+{% extends 'base_vue_all.html' %}
+
+{% load i18n %}
+
+{% block content %}
+    <h1>{% blocktrans with account=account %}Add a new investment to '{{ account }}'{% endblocktrans %}</h1>
+
+    <form method="post">
+        <table>
+        {% csrf_token %}
+        {{ form.as_table }}
+        </table>
+    <button type="submit">{% trans "Save" %}</button>
+    </form>
+    
+    <v-form>
+        <v-text-field dense name="name" v-model="search" label="{% trans 'Search products' %}"  placeholder="{% trans 'Enter a string' %}" autofocus></v-text-field>
+    </v-form>
+
+<script>
+    new Vue({
+        ...common_vue_properties(),
+        data:{
+            form_valid: false,
+            person: {
+                id: null,
+                name: "",
+                isin: "",
+            }
+        },
+        methods:{
+            editProduct(item){
+            },
+            submit(){
+                if (this.$refs.form.validate()==false) return
+                if (this.search==""){
+                    alert("{% trans 'You must enter a search string' %}")
+                    return
+                }
+                this.$refs.form.$el.submit()
+            }
+        },
+    })
+</script>
+
+{% endblock %}

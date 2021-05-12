@@ -22,16 +22,16 @@ Vue.component('table-investmentoperations-homegeneous', {
             {{ currency_string(item.price, currency_investment)}}
             </template>
             <template v-slot:[\`item.gross_investment\`]="{ item }">
-            {{ currency_string(item.price, currency_investment)}}
+            {{ currency_string(item.gross_investment, currency_investment)}}
             </template>
             <template v-slot:[\`item.commission\`]="{ item }">
-            {{ currency_string(item.price, currency_investment)}}
+            {{ currency_string(item.commission, currency_investment)}}
             </template>
             <template v-slot:[\`item.taxes\`]="{ item }">
-            {{ currency_string(item.price, currency_investment)}}
+            {{ currency_string(item.taxes, currency_investment)}}
             </template>
             <template v-slot:[\`item.net_investment\`]="{ item }">
-            {{ currency_string(item.price, currency_investment)}}
+            {{ currency_string(item.net_investment, currency_investment)}}
             </template>
             <template v-slot:[\`item.actions\`]="{ item }">
                 <v-icon small class="mr-2" @click="editIO(item)">mdi-pencil</v-icon>

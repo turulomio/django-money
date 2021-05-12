@@ -58,7 +58,7 @@ from money.reusing.currency import Currency
 from money.reusing.connection_dj import cursor_rows_as_dict
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz, epochmicros2dtaware, dtaware2epochmicros
 from money.reusing.decorators import timeit
-from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key, listdict2json
+from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key, listdict2json, listdict_print_first
 from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict import (
@@ -773,7 +773,7 @@ def investment_view(request, pk):
     operations=investment.operations(request, request.local_currency)
     
     json_table_operations=listdict2json(operations.o_listdict_tabulator_homogeneus(request))
-    print(json_table_operations)
+    json_table_historical=listdict2json(operations.historical_listdict_homogeneus(request))
     qso_dividends=QsoDividendsHomogeneus(request,  Dividends.objects.all().filter(investments_id=pk).order_by('datetime'),  investment)
     return render(request, 'investment_view.html', locals())
     

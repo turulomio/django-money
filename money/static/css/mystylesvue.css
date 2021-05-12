@@ -229,6 +229,10 @@ div.headeritem > a:hover {
 
 
 span.red{
+  background-color: black;
+    color:red;
+}
+span.vuered{
     color:red;
 }
 
