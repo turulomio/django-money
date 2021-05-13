@@ -113,11 +113,12 @@ function my_round(num, decimals = 2) {
 }
 
 function percentage_string(num, decimals=2){
+    if (isNaN(num)) return "- - - %"
     return "{0} %".format(my_round(num*100,decimals).toFixed(decimals));
 }
 
 function percentage_html(num, decimals=2){
-    if (num>=0){
+    if (num>=0 || isNaN(num)){
         return percentage_string(num,decimals)
     } else {
         return "<span class='vuered'>{0}</span>".format(percentage_string(num, decimals));
