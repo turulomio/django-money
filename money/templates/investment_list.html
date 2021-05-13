@@ -1,6 +1,14 @@
-{% extends "base.html" %}
+{% extends 'base_vue_all.html' %}
 
 {% load i18n %}
+
+{% load static %}
+
+{% block head_js_section %}
+    <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script>
+{% endblock head_js_section %}
+
 
 {% block content %}
 <h1>{% trans "Investments list" %}</h1>
@@ -11,11 +19,61 @@
 {% trans "Check to show inactive investments" as mylabel %}
 {% include "objects/checkbox_selection.html" with label=mylabel url_checked=url_checked url_unchecked=url_unchecked %}    
 <p></p>
-{{table.render|safe}}
+        <v-data-table dense :headers="tableHeaders" :items="tableData" class="elevation-1" disable-pagination  hide-default-footer sort-by="['percentage_sellingpoint']" fixed-header height="800px">
+<!--            <template v-slot:[\`item.last_datetime\`]="{ item }">
+            [[ localtime(item.last_datetime)]]
+            </template>-->
+<!--            <template v-slot:[\`item.gross_start_user\`]="{ item }">
+                [[ currency_html(item.gross_start_user, currency_investment)]]
+            </template>
+            <template v-slot:[\`item.gross_end_user\`]="{ item }">
+                [[ currency_html(item.gross_end_user, currency_investment)]]
+            </template>
+            <template v-slot:[\`item.gains_gross_user\`]="{ item }">
+                <div v-html="currency_html(item.gains_gross_user, currency_investment)"></div>
+            </template>
+            <template v-slot:[\`item.commissions_user\`]="{ item }">
+                <div v-html="currency_html(item.commissions_user, currency_investment)"></div>
+            </template>
+            <template v-slot:[\`item.taxes_user\`]="{ item }">
+                <div v-html="currency_html(item.taxes_user, currency_investment)"></div>
+            </template>
+            <template v-slot:[\`item.gains_net_user\`]="{ item }">
+                <div v-html="currency_html(item.gains_net_user, currency_investment)"></div>
+            </template>-->
+        </v-data-table>   
 
 
 <p>{{foot}}</p>
 <p>{{balance_futures}}</p>
 
+<script>
+    new Vue({
+        ...common_vue_properties(),
+        data:function () {
+            return {
+                tableHeaders: [
+                    { text: gettext('Name'), value: 'name',sortable: true },
+                    { text: gettext('Last quote'), value: 'last_datetime',sortable: true },
+                    { text: gettext('Quote'), value: 'last_quote',sortable: false, align:"right"},
+                    { text: gettext('Daily difference'), value: 'daily_difference',sortable: false, align:"right"},
+                    { text: gettext('Daily percentage'), value: 'daily_percentage',sortable: false, align:"right"},
+                    { text: gettext('Invested'), value: 'invested_local',sortable: false, align:"right"},
+                    { text: gettext('Balance'), value: 'balance',sortable: false, align:"right"},
+                    { text: gettext('Gains'), value: 'gains',sortable: false, align:"right"},
+                    { text: gettext('Percentage invested'), value: 'percentage_invested',sortable: false, align:"right"},
+                    { text: gettext('Percentage selling point'), value: 'percentage_sellingpoint',sortable: false},
+                    { text: gettext('Actions'), value: 'actions', sortable: false },
+                ],   
+                tableData: {{json_table|safe}}
+            },
+        },
+        methods:{
+            editProduct(item){
+            },
+
+        },
+    })
+</script>
 {% endblock %}
 

@@ -673,10 +673,9 @@ def investment_list(request,  active):
 
     if active is True:
         listdict=qso.listdict_active()
-        table=qso.tabulator_active()
     else:
         listdict=qso.listdict_inactive()
-        table=qso.tabulator_inactive()
+    json_table=listdict2json(listdict)
     # Foot only for active investments
     if listdict_has_key(listdict, "gains") is True:
         positives=Currency(listdict_sum_positives(listdict, "gains"), request.local_currency)

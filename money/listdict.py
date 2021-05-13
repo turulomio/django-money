@@ -564,6 +564,7 @@ class QsoInvestments(QsoCommon):
                 }
             )
         return list_
+    
     def listdict_inactive(self):
         list_=[]
         for investment in self.qs:
