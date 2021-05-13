@@ -112,6 +112,17 @@ function my_round(num, decimals = 2) {
     return Math.round(num*Math.pow(10, decimals))/Math.pow(10, decimals)
 }
 
+function percentage_string(num, decimals=2){
+    return "{0} %".format(my_round(num*100,decimals).toFixed(decimals));
+}
+
+function percentage_html(num, decimals=2){
+    if (num>=0){
+        return percentage_string(num,decimals)
+    } else {
+        return "<span class='vuered'>{0}</span>".format(percentage_string(num, decimals));
+    }
+}
 function currency_string(num, currency, decimals=2){
     return "{0} {1}".format(my_round(num,decimals).toFixed(decimals), currency_symbol(currency));
 }

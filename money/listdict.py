@@ -561,6 +561,7 @@ class QsoInvestments(QsoCommon):
                     "percentage_invested": Percentage(iot.io_total_current["gains_gross_user"], iot.io_total_current["invested_user"]), 
                     "percentage_sellingpoint": percentage_to_selling_point(iot.io_total_current["shares"], iot.investment.selling_price, basic_quotes['last']), 
                     "selling_expiration": iot.investment.selling_expiration, 
+                    "currency": iot.investment.products.currency
                 }
             )
         return list_
