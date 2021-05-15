@@ -45,11 +45,13 @@
                 <div v-html="percentage_html(item.percentage_invested)"></div>
             </template>
             <template v-slot:[`item.percentage_sellingpoint`]="{ item }" >
+
                 <div  :class="item.percentage_sellingpoint<0.05 ? 'vuegreen' : ''" v-html="percentage_html(item.percentage_sellingpoint)"></div>
             </template>
 
             <template v-slot:[`item.actions`]="{ item }">
                 <v-icon small @click="viewItem(item)">mdi-pencil</v-icon>
+                <v-icon small v-if="(new Date()>new Date(item.selling_expiration)) && item.selling_expiration!=null" @click="editInvestment(item)">mdi-alarm</v-icon>          
             </template>
             <template v-slot:body.append="{headers}">
                 <tr style="background-color: GhostWhite">
@@ -94,7 +96,7 @@
                     { text: gettext('Gains'), value: 'gains',sortable: true, align:"right", width:"7%"},
                     { text: gettext('Percentage invested'), value: 'percentage_invested',sortable: true, align:"right", width:"7%"},
                     { text: gettext('Percentage selling point'), value: 'percentage_sellingpoint',sortable: true, align:"right", width:"7%"},
-                    { text: gettext('Actions'), value: 'actions', sortable: true, width:"4%" },
+                    { text: gettext('Actions'), value: 'actions', sortable: true, width:"6%", cellClass: "text-nowrap" },
                 ],   
                 tableData: {{json_table|safe}},
                 localCurrency: "{{request.local_currency}}",
@@ -103,6 +105,9 @@
         methods:{
             viewItem(item){
                 window.location.href="{%url 'investment_view' pk=9999%}".replace("9999", item.id)
+            },
+            editInvestment(item){
+                window.location.href="{%url 'investment_update' pk=9999%}".replace("9999", item.id)
             },
 
         },
