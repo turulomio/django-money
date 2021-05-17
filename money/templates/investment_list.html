@@ -60,13 +60,13 @@
                             Total
                         </div>
                         <div v-if="header.value == 'daily_difference'" align="right">
-                            [[ currency_html(tableData.reduce((accum,item) => accum + item.daily_difference, 0), localCurrency) ]]
+                            <div v-html="currency_html(tableData.reduce((accum,item) => accum + item.daily_difference, 0), localCurrency)"></div>
                         </div>
                         <div v-if="header.value == 'invested_local'" align="right">
-                            [[ currency_html(tableData.reduce((accum,item) => accum + item.invested_local, 0), localCurrency) ]]
+                            <div v-html="currency_html(tableData.reduce((accum,item) => accum + item.invested_local, 0), localCurrency)"></div>
                         </div>
                         <div v-if="header.value == 'balance'" align="right">
-                            [[ currency_html(tableData.reduce((accum,item) => accum + item.balance, 0), localCurrency) ]]
+                            <div v-html="currency_html(tableData.reduce((accum,item) => accum + item.balance, 0), localCurrency)"></div>
                         </div>
                         <div v-if="header.value == 'gains'" align="right">
                             <div v-html="currency_html(tableData.reduce((accum,item) => accum + item.gains, 0), localCurrency)"></div>
