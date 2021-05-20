@@ -13,6 +13,7 @@
     <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHomogeneous.js" %}'></script>
     <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHistoricalHomogeneousInvestment.js" %}'></script>
     <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHistoricalHomogeneousUser.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsCurrent.js" %}'></script>
 {% endblock head_js_section %}
 {% block head_css_section %}
     <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'>
@@ -53,12 +54,19 @@
 </v-tabs>
 <v-tabs-items v-model="tab">
     <v-tab-item key="current">      
-        <v-card class="padding">
-            {{ operations.current_tabulator_homogeneus_investment.render | safe }}
+        <div>
+            <v-card class="padding">
+                <v-card-title>{% trans "Current operations in investment currency" %}</v-card-title>
+                <table-investmentoperationscurrent :items="items_io_current" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" output="investment" height="400" url_root="{% url 'home' %}"></table-investmentoperationscurrent>
+            </v-card>
             {% if  investment.hasSameAccountCurrency is False %}
-                {{ operations.current_tabulator_homogeneus_user.render | safe }}
+                <p></p>
+                <v-card class="padding">
+                    <v-card-title>{% trans "Current operations in user currency" %}</v-card-title>
+                <table-investmentoperationscurrent :items="items_io_current" currency_account="{{investment.accounts.currency}}" currency_investment="{{request.local_currency}}" output="account" height="400" url_root="{% url 'home' %}"></table-investmentoperationscurrent>
+                </v-card>
             {%endif %}
-        </v-card>
+        </div>
     </v-tab-item>
     <v-tab-item key="operations">     
         <v-card class="padding">
@@ -94,6 +102,7 @@ new Vue({
         return {
             tab:0,
             items_io: {{ json_table_operations | safe }},
+            items_io_current: {{ json_table_current | safe }},
             items_io_historical: {{ json_table_historical | safe }},
             items: [
                 {
