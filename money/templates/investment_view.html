@@ -11,8 +11,7 @@
     <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
     <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script>
     <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHomogeneous.js" %}'></script>
-    <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHistoricalHomogeneousInvestment.js" %}'></script>
-    <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHistoricalHomogeneousUser.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHistorical.js" %}'></script>
     <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsCurrent.js" %}'></script>
 {% endblock head_js_section %}
 {% block head_css_section %}
@@ -77,13 +76,13 @@
         <div>
             <v-card class="padding">
                 <v-card-title>{% trans "Historical operations in investment currency" %}</v-card-title>
-                <table-investmentoperationshistorical-homegeneousinvestment :items="items_io_historical" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" height="400" url_root="{% url 'home' %}"></table-investmentoperationshistorical-homegeneousinvestment>
+                <table-investmentoperationshistorical :items="items_io_historical" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" height="400" url_root="{% url 'home' %}" output="investment"></table-investmentoperationshistorical>
             </v-card>
             {% if  investment.hasSameAccountCurrency is False %}
                 <p></p>
                 <v-card class="padding">
-                    <v-card-title>{% trans "Historical operations in user currency" %}</v-card-title>
-                    <table-investmentoperationshistorical-homegeneoususer :items="items_io_historical" currency_account="{{investment.accounts.currency}}" currency_investment="{{request.local_currency}}" height="400" url_root="{% url 'home' %}"></table-investmentoperationshistorical-homegeneoususer>
+                    <v-card-title>{% trans "Historical operations in account currency" %}</v-card-title>
+                    <table-investmentoperationshistorical :items="items_io_historical" currency_account="{{investment.accounts.currency}}" currency_investment="{{request.local_currency}}" height="400" url_root="{% url 'home' %}" output="account"></table-investmentoperationshistorical>
                 </v-card>
             {%endif %}
         </div>

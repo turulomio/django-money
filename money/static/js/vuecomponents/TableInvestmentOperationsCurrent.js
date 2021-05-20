@@ -72,15 +72,12 @@ Vue.component('table-investmentoperationscurrent', {
     computed:{
     },
     methods: {
-        editIO(item){
-            window.location.href=`${this.url_root}investmentoperation/update/${item.id}`
-        },
         currency(value){
             if (this.output=="account"){
                 return currency_html(value, this.currency_account)
             } else if (this.output=="investment"){
                 return currency_html(value, this.currency_investment)
-            }percentage_annual_investment
+            }
         },
         table_headers(){
             if (this.output=="account"){
