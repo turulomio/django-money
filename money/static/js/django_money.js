@@ -119,7 +119,7 @@ function percentage_string(num, decimals=2){
 
 function percentage_html(num, decimals=2){
     if (num>=0 || isNaN(num)){
-        return percentage_string(num,decimals)
+        return "<span>{0}</span>".format(percentage_string(num, decimals))
     } else {
         return "<span class='vuered'>{0}</span>".format(percentage_string(num, decimals));
     }

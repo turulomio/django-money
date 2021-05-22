@@ -229,7 +229,12 @@ div.headeritem > a:hover {
 
 
 
-
+.spanchildred > span {
+    background-color:lightpink;
+}
+.spanchildgreen > span {
+    background-color:lightgreen;
+}
 
 span.vuered{
     color:red;

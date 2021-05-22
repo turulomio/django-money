@@ -22,7 +22,7 @@
     {% if search %}
         <h2>{% trans "Results" %}</h2>
         <v-card flat>
-            <v-data-table dense :headers="tableHeaders" :items="tableData" sort-by="value" class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="[true]" fixed-header height="600">      
+            <v-data-table dense :headers="tableHeaders" :items="tableData"  class="elevation-1" disable-pagination  hide-default-footer :sort-by="['value']" :sort-desc="[true]" fixed-header height="600">      
                 <template v-slot:[`item.last`]="{ item }">
                     [[ currency_string(item.last, item.currency)]]
                 </template>  

@@ -72,6 +72,8 @@ urlpatterns=urlpatterns+ i18n_patterns(
     
 
     path('investment/list/', money_views.investment_list, {'active':True}, name='investment_list_active'),
+    path('investment/list/lastoperation/', money_views.investment_list_last_operation, name='investment_list_last_operation'),
+    path('investment/list/lastoperation/method/<int:method>/', money_views.investment_list_last_operation_method, name='investment_list_last_operation_method'),
     path('investment/list/inactive/', money_views.investment_list, {'active': False}, name='investment_list_inactive'),
     path('investment/view/<int:pk>/', money_views.investment_view, name='investment_view'),
     path('investment/view/chart/<int:pk>/', money_views.investment_view_chart, name='investment_view_chart'),

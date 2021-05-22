@@ -30,6 +30,7 @@ from money.charts import (
     chart_product_quotes_historical, 
 )
 from money.investmentsoperations import (
+    IOC, 
     InvestmentsOperations_from_investment, 
     InvestmentsOperationsManager_from_investment_queryset, 
     InvestmentsOperationsTotalsManager_from_investment_queryset, 
@@ -684,6 +685,36 @@ def investment_list(request,  active):
         balance_futures=_(f"Investments balance with futures is {Currency(qso.iotm.current_balance_futures_user(), request.local_currency)}")
 
     return render(request, 'investment_list.html', locals())
+    
+@login_required
+def investment_list_last_operation(request):
+    limit=getGlobal("wdgLastCurrent/spin", -40,  "int")
+    method=getGlobal("wdgLastCurrent/viewmode", 0,  "int")
+    return render(request, 'investment_list_last_operation.html', locals())
+
+@login_required
+## Developed to be used with
+def investment_list_last_operation_method(request, method):
+    ld=[]
+    if method==0:
+        investments=Investments.objects.filter(active=True).select_related("accounts").select_related("products")
+        iom=InvestmentsOperationsManager_from_investment_queryset(investments, datetime.now(), request)
+        
+        for io in iom:
+            ioc_last=IOC(io.investment, io.current_last_operation_excluding_additions())
+            ld.append({
+                "id": io.investment.id, 
+                "name": io.investment.fullName(), 
+                "datetime": ioc_last.d["datetime"], 
+                "last_shares": ioc_last.d['shares'], 
+                "shares": io.current_shares(),  
+                "balance": io.current_balance_futures_user(),  
+                "gains": io.current_gains_gross_user(),  
+                "percentage_last": ioc_last.percentage_total_investment().value, 
+                "percentage_invested": io.current_percentage_invested_user().value, 
+                "percentage_sellingpoint": ioc_last.percentage_sellingpoint().value,   
+            })
+    return JsonResponse(ld, safe=False)
     
 @timeit
 @login_required

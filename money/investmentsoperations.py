@@ -8,7 +8,7 @@ from money.reusing.currency import Currency
 from money.reusing.decorators import deprecated
 from money.reusing.datetime_functions import string2dtnaive, dtaware
 from money.reusing.listdict_functions import listdict_sum, listdict2json, listdict_print_first
-from money.reusing.percentage import Percentage
+from money.reusing.percentage import Percentage, percentage_between
 from money.tables import TabulatorFromListDict
 
 Decimal
@@ -66,7 +66,11 @@ class IOC:
         if self.d["invested_investment"] is None:#initiating xulpymoney
             return Percentage()
         return Percentage(self.d['gains_gross_investment'], self.d["invested_investment"])
-
+        
+    def percentage_sellingpoint(self):
+        if self.investment.selling_price is None or self.investment.selling_price==0:
+            return Percentage()
+        return percentage_between(self.investment.products.basic_results()["last"], self.investment.selling_price)
 
 ## Manage output of  investment_operations
 class InvestmentsOperations:
@@ -90,7 +94,13 @@ class InvestmentsOperations:
     ## Returns the last operation of the io_current
     def  current_last_operation(self):
         r= self.io_current[len(self.io_current)-1]
-        return r
+        return r    ## Returns the last operation of the io_current
+
+    def  current_last_operation_excluding_additions(self):
+        for o in reversed(self.io_current):
+            if o["operationstypes_id"]!=6:# Shares Additions
+                return o
+        return None
         
     def current_shares(self):
         return listdict_sum(self.io_current, "shares")
@@ -141,6 +151,14 @@ class InvestmentsOperations:
     
     def current_gains_gross_investment(self):
         return listdict_sum(self.io_current, "gains_gross_investment")
+
+    def percentage_sellingpoint(self):
+        if self.investment.selling_price is None or self.investment.selling_price==0:
+            return Percentage()
+        return percentage_between(self.investment.products.basic_results()["last"], self.investment.selling_price)
+
+    def current_percentage_invested_user(self):
+        return Percentage(self.current_gains_gross_user(), self.current_invested_user())
 
     def historical_gains_net_user(self):
         r=0
@@ -415,7 +433,10 @@ class InvestmentsOperationsManager:
     def __init__(self, request):
         self.request=request
         self.list=[]
-        
+
+    def __iter__(self):
+        return iter(self.list)
+
     def list_of_investments_ids(self):
         r=[]
         for iot in self.list:
