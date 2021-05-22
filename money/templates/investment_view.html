@@ -54,17 +54,22 @@
 <v-tabs-items v-model="tab">
     <v-tab-item key="current">      
         <div>
-            <v-card class="padding">
-                <v-card-title>{% trans "Current operations in investment currency" %}</v-card-title>
-                <table-investmentoperationscurrent :items="items_io_current" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" output="investment" height="400" url_root="{% url 'home' %}"></table-investmentoperationscurrent>
-            </v-card>
-            {% if  investment.hasSameAccountCurrency is False %}
-                <p></p>
-                <v-card class="padding">
-                    <v-card-title>{% trans "Current operations in user currency" %}</v-card-title>
-                <table-investmentoperationscurrent :items="items_io_current" currency_account="{{investment.accounts.currency}}" currency_investment="{{request.local_currency}}" output="account" height="400" url_root="{% url 'home' %}"></table-investmentoperationscurrent>
-                </v-card>
-            {%endif %}
+            <v-tabs vertical  v-model="tabcurrent">
+                <v-tab key="investment">{% trans "Investment currency" %}</v-tab>
+                <v-tab key="account">{% trans "Account currrency" %}</v-tab>
+                <v-tab-item key="investment">     
+                    <v-card class="padding">
+                        <table-investmentoperationscurrent :items="items_io_current" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" output="investment" height="400" url_root="{% url 'home' %}"></table-investmentoperationscurrent>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item key="account">
+                        <v-card class="padding">
+                            {% if  investment.hasSameAccountCurrency is False %}
+                                <table-investmentoperationscurrent :items="items_io_current" currency_account="{{investment.accounts.currency}}" currency_investment="{{request.local_currency}}" output="account" height="400" url_root="{% url 'home' %}"></table-investmentoperationscurrent>
+                            {%endif %}
+                        </v-card>
+                </v-tab-item>
+            </v-tabs>
         </div>
     </v-tab-item>
     <v-tab-item key="operations">     
@@ -73,18 +78,23 @@
         </v-card>
     </v-tab-item>
     <v-tab-item key="historical">     
-        <div>
-            <v-card class="padding">
-                <v-card-title>{% trans "Historical operations in investment currency" %}</v-card-title>
-                <table-investmentoperationshistorical :items="items_io_historical" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" height="400" url_root="{% url 'home' %}" output="investment"></table-investmentoperationshistorical>
-            </v-card>
-            {% if  investment.hasSameAccountCurrency is False %}
-                <p></p>
-                <v-card class="padding">
-                    <v-card-title>{% trans "Historical operations in account currency" %}</v-card-title>
+        <div>            
+            <v-tabs vertical  v-model="tabcurrent">
+                <v-tab key="investment">{% trans "Investment currency" %}</v-tab>
+                <v-tab key="account">{% trans "Account currrency" %}</v-tab>
+                <v-tab-item key="investment">     
+                    <v-card class="padding">
+                        <table-investmentoperationshistorical :items="items_io_historical" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" height="400" url_root="{% url 'home' %}" output="investment"></table-investmentoperationshistorical>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item key="account">
+                        <v-card class="padding">
+                            {% if  investment.hasSameAccountCurrency is False %}
                     <table-investmentoperationshistorical :items="items_io_historical" currency_account="{{investment.accounts.currency}}" currency_investment="{{request.local_currency}}" height="400" url_root="{% url 'home' %}" output="account"></table-investmentoperationshistorical>
-                </v-card>
-            {%endif %}
+                            {%endif %}
+                        </v-card>
+                </v-tab-item>
+            </v-tabs>
         </div>
     </v-tab-item>
     <v-tab-item key="dividends">     
@@ -100,6 +110,7 @@ new Vue({
     data () {
         return {
             tab:0,
+            tabcurrent:0,
             items_io: {{ json_table_operations | safe }},
             items_io_current: {{ json_table_current | safe }},
             items_io_historical: {{ json_table_historical | safe }},

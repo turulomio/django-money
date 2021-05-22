@@ -300,3 +300,18 @@ function RulesFloatRequired(maxdigits=10){
         v => (v && !isNaN(parseFloat(v))) || gettext('Must be a number')
     ]
 }
+
+function listobjects_sum(lo,key){
+    return lo.reduce((accum,item) => accum + item[key], 0)
+}
+
+function listobjects_average_ponderated(lo,key1, key2){
+    var prod=0;
+    var total=0;
+    var i;
+    for (i = 0; i < lo.length; i++) {
+        prod=prod+lo[i][key1]*lo[i][key2]
+        total=total+lo[i][key2]
+    } 
+    return prod/total
+}

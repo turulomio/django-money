@@ -22,8 +22,8 @@ Vue.component('table-investmentoperationscurrent', {
         },
     },
     template: `
-        <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="['datetime']" fixed-header :height="$attrs.height">
-            <template v-slot:[\`item.datetime\`]="{ item }">
+        <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="['datetime']" fixed-header :height="$attrs.height" ref="table">
+            <template v-slot:[\`item.datetime\`]="{ item }" >
             {{ localtime(item.datetime)}}
             </template>          
             <template v-slot:[\`item.gains_gross_account\`]="{ item }">
@@ -62,6 +62,48 @@ Vue.component('table-investmentoperationscurrent', {
             </template>
             <template v-slot:[\`item.percentage_total_investment\`]="{ item }">
                 <div v-html="percentage_html(item.percentage_total_investment)"></div>
+            </template>            
+            <template v-slot:body.append="{headers}">
+                <tr style="background-color: GhostWhite" ref="lr">
+                    <td v-for="(header,i) in headers" :key="i" >
+                        <div v-if="header.value == 'datetime'">
+                            Total
+                        </div>
+                        <div v-if="header.value == 'shares'" align="right">
+                            <div v-html="items.reduce((accum,item) => accum + item.shares, 0)"></div>
+                        </div>
+                        
+                        <div v-if="header.value == 'price_account'" align="right">
+                            <div v-html="currency(listobjects_average_ponderated(items,'price_account', 'shares'))"></div>
+                        </div>
+                        <div v-if="header.value == 'price_investment'" align="right">
+                            <div v-html="currency(listobjects_average_ponderated(items,'price_investment', 'shares'))"></div>
+                        </div>
+                        
+                        
+                        <div v-if="header.value == 'gains_gross_account'" align="right">
+                            <div v-html="currency(items.reduce((accum,item) => accum + item.gains_gross_account, 0))"></div>
+                        </div>
+                        <div v-if="header.value == 'gains_gross_investment'" align="right">
+                            <div v-html="currency(items.reduce((accum,item) => accum + item.gains_gross_investment, 0))"></div>
+                        </div>
+                        
+                        <div v-if="header.value == 'invested_account'" align="right">
+                            <div v-html="currency(items.reduce((accum,item) => accum + item.invested_account, 0))"></div>
+                        </div>
+                        <div v-if="header.value == 'invested_investment'" align="right">
+                            <div v-html="currency(items.reduce((accum,item) => accum + item.invested_investment, 0))"></div>
+                        </div>
+                        
+                        <div v-if="header.value == 'balance_account'" align="right">
+                            <div v-html="currency(items.reduce((accum,item) => accum + item.balance_account, 0))"></div>
+                        </div>
+                        <div v-if="header.value == 'balance_investment'" align="right">
+                            <div v-html="currency(items.reduce((accum,item) => accum + item.balance_investment, 0)/**/)"></div>
+                        </div>
+                    </td>
+                </tr>
+                
             </template>
         </v-data-table>   
     `,
@@ -109,5 +151,11 @@ Vue.component('table-investmentoperationscurrent', {
                 
             }
         },
+        gotoLastRow(){
+           this.$vuetify.goTo(this.$refs.lr, { container:  ".v-data-table__wrapper" }) 
+        },
     },
+    mounted(){
+        this.gotoLastRow()
+    }
 })
