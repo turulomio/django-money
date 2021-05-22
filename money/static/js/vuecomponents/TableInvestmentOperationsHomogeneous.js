@@ -14,9 +14,9 @@ Vue.component('table-investmentoperations-homegeneous', {
         }
     },
     template: `
-        <v-data-table dense :headers="tableHeaders" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="['datetime']" fixed-header :height="$attrs.height">
-            <template v-slot:[\`item.datetime\`]="{ item }">
-            {{ localtime(item.datetime)}}
+        <v-data-table dense v-model="selected" :headers="tableHeaders" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header :height="$attrs.height" ref="table_o">
+            <template v-slot:[\`item.datetime\`]="{ item,index }">
+            <div :ref="index">{{ localtime(item.datetime)}}</div>
             </template>
             <template v-slot:[\`item.price\`]="{ item }">
             {{ currency_string(item.price, currency_investment)}}
@@ -40,6 +40,7 @@ Vue.component('table-investmentoperations-homegeneous', {
     `,
     data: function(){
         return {
+            selected: [],
             tableHeaders: [
                 { text: gettext('Date and time'), value: 'datetime',sortable: true },
                 { text: gettext('Operation'), value: 'operationstypes',sortable: true },
@@ -60,13 +61,16 @@ Vue.component('table-investmentoperations-homegeneous', {
     methods: {
         editIO(item){
             window.location.href=`${this.url_root}investmentoperation/update/${item.id}`
-        }
+        },
+        gotoLastRow(){
+           console.log(this.$refs)
+           this.$vuetify.goTo(this.$refs[this.items.length-1], { container:  this.$refs.table_o.$el.childNodes[0] }) 
+        },
     },
     mounted(){
         if (this.currency_investment==this.currency_account){
-            return this.tableHeaders.splice(8,1)
-        } else {
-            return this.tableHeaders
+            this.tableHeaders.splice(8,1)
         }
+        this.gotoLastRow()
     }
 })

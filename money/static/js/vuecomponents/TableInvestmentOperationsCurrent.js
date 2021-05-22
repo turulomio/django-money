@@ -22,7 +22,7 @@ Vue.component('table-investmentoperationscurrent', {
         },
     },
     template: `
-        <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="['datetime']" fixed-header :height="$attrs.height" ref="table">
+        <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header :height="$attrs.height" :key="$attrs.key">
             <template v-slot:[\`item.datetime\`]="{ item }" >
             {{ localtime(item.datetime)}}
             </template>          
@@ -111,8 +111,6 @@ Vue.component('table-investmentoperationscurrent', {
         return {
         }
     },
-    computed:{
-    },
     methods: {
         currency(value){
             if (this.output=="account"){
@@ -152,6 +150,8 @@ Vue.component('table-investmentoperationscurrent', {
             }
         },
         gotoLastRow(){
+            console.log("GOING")
+            console.log(this.$refs)
            this.$vuetify.goTo(this.$refs.lr, { container:  ".v-data-table__wrapper" }) 
         },
     },

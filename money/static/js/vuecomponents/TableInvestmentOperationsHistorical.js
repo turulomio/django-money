@@ -28,7 +28,7 @@ Vue.component('table-investmentoperationshistorical', {
         },
     },
     template: `
-        <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="['datetime']" fixed-header :height="$attrs.height">
+        <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="dt_end" fixed-header :height="$attrs.height"  :key="$attrs.key" ref="table">
             <template v-slot:[\`item.dt_end\`]="{ item }">
             {{ localtime(item.dt_end)}}
             </template>
@@ -89,14 +89,24 @@ Vue.component('table-investmentoperationshistorical', {
             </template>
             <template v-slot:[\`item.gains_net_investment\`]="{ item }">
                 <div v-html="currency(item.gains_net_investment)"></div>
+            </template>           
+            <template v-slot:body.append="{headers}">
+                <tr style="background-color: GhostWhite" ref="lastrow">
+                    <td v-for="(header,i) in headers" :key="i" >
+                        <div v-if="header.value == 'dt_end'">
+                            Total
+                        </div>
+                        <div v-if="header.value == 'shares'" align="right">
+                            <div v-html="listobjects_sum(items,'shares')"></div>
+                        </div>
+                    </td>
+                </tr>
             </template>
         </v-data-table>   
     `,
     data: function(){
         return {
         }
-    },
-    computed:{
     },
     methods: {
         currency(value){
@@ -150,5 +160,11 @@ Vue.component('table-investmentoperationshistorical', {
                 ] 
             }
         },
+        gotoLastRow(){
+           this.$vuetify.goTo(this.$refs.lastrow, { container:  this.$refs.table.$el.childNodes[0] }) 
+        },
     },
+    mounted(){
+        this.gotoLastRow()
+    }
 })
