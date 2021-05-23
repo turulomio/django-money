@@ -256,6 +256,22 @@ function common_vue_properties(){
         
     }
 }
+function common_vue_properties_without_mixin(){
+    return {
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        vuetify: new Vuetify({
+            theme: {
+                themes: {
+                    light: {
+                        primary: '#3a3987',
+                    },
+                },
+            }
+        }),
+        
+    }
+}
 
 function myheaders(){
     return {

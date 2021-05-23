@@ -1,4 +1,4 @@
-Vue.component('table-investmentoperations-homegeneous', {
+Vue.component('table-investmentoperations', {
     props: {
         items: {
             required: true

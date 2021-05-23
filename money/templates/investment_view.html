@@ -10,7 +10,7 @@
     <script type="text/javascript" src='{% static "js/vuecomponents/MyMenuInline.js" %}'></script>
     <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
     <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script>
-    <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHomogeneous.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperations.js" %}'></script>
     <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHistorical.js" %}'></script>
     <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsCurrent.js" %}'></script>
 {% endblock head_js_section %}
@@ -76,7 +76,7 @@
     </v-tab-item>
     <v-tab-item key="operations">     
         <v-card class="padding">
-            <table-investmentoperations-homegeneous :items="items_io" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" height="400" url_root="{% url 'home' %}" :key="keyrefresh"></table-investmentoperations-homegeneous>
+            <table-investmentoperations :items="items_io" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" height="400" url_root="{% url 'home' %}" :key="keyrefresh"></table-investmentoperations>
         </v-card>
     </v-tab-item>
     <v-tab-item key="historical">     

@@ -27,6 +27,7 @@ Vue.component('table-accountoperations', {
             </template>   
             <template v-slot:[\`item.actions\`]="{ item }">
                 <v-icon small class="mr-2" @click="editAO(item)">mdi-pencil</v-icon>
+                <v-icon small class="mr-2" @click="deleteAO(item)">mdi-delete</v-icon>
             </template>
             <template v-slot:body.append="{headers}">
                 <tr style="background-color: GhostWhite">
@@ -52,6 +53,9 @@ Vue.component('table-accountoperations', {
         },
         editAO(item){
             window.location.href=`${this.url_root}accountoperation/update/${item.id}`
+        },
+        deleteAO(item){
+            window.location.href=`${this.url_root}accountoperation/delete/${item.id}`
         },
         table_headers(){
             return [
