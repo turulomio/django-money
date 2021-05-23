@@ -56,19 +56,21 @@
         <div>
             <v-tabs vertical  v-model="tabcurrent">
                 <v-tab key="investment">{% trans "Investment currency" %}</v-tab>
+                {% if  investment.hasSameAccountCurrency is False %}
                 <v-tab key="account">{% trans "Account currrency" %}</v-tab>
+                {%endif %}
                 <v-tab-item key="investment">     
                     <v-card class="padding">
                         <table-investmentoperationscurrent :items="items_io_current" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" output="investment" height="400" url_root="{% url 'home' %}" :key="keyrefresh"></table-investmentoperationscurrent>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item key="account">
-                        <v-card class="padding">
-                            {% if  investment.hasSameAccountCurrency is False %}
-                                <table-investmentoperationscurrent :items="items_io_current" currency_account="{{investment.accounts.currency}}" currency_investment="{{request.local_currency}}" output="account" height="400" url_root="{% url 'home' %}" :key="keyrefresh"></table-investmentoperationscurrent>
-                            {%endif %}
-                        </v-card>
-                </v-tab-item>
+                {% if  investment.hasSameAccountCurrency is False %}
+                    <v-tab-item key="account">
+                            <v-card class="padding">
+                                    <table-investmentoperationscurrent :items="items_io_current" currency_account="{{investment.accounts.currency}}" currency_investment="{{request.local_currency}}" output="account" height="400" url_root="{% url 'home' %}" :key="keyrefresh"></table-investmentoperationscurrent>
+                            </v-card>
+                    </v-tab-item>
+                {%endif %}
             </v-tabs>
         </div>
     </v-tab-item>
@@ -81,19 +83,21 @@
         <div>            
             <v-tabs vertical  v-model="tabcurrent">
                 <v-tab key="investmenth">{% trans "Investment currency" %}</v-tab>
-                <v-tab key="accounth">{% trans "Account currrency" %}</v-tab>
+                {% if  investment.hasSameAccountCurrency is False %}
+                    <v-tab key="accounth">{% trans "Account currrency" %}</v-tab>
+                {%endif %}
                 <v-tab-item key="investmenth">     
                     <v-card class="padding">
                         <table-investmentoperationshistorical :items="items_io_historical" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" height="400" url_root="{% url 'home' %}" output="investment" :key="keyrefresh"></table-investmentoperationshistorical>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item key="accounth">
+                {% if  investment.hasSameAccountCurrency is False %}
+                    <v-tab-item key="accounth">
                         <v-card class="padding">
-                            {% if  investment.hasSameAccountCurrency is False %}
-                    <table-investmentoperationshistorical :items="items_io_historical" currency_account="{{investment.accounts.currency}}" currency_investment="{{request.local_currency}}" height="400" url_root="{% url 'home' %}" output="account" :key="keyrefresh"></table-investmentoperationshistorical>
-                            {%endif %}
+                            <table-investmentoperationshistorical :items="items_io_historical" currency_account="{{investment.accounts.currency}}" currency_investment="{{request.local_currency}}" height="400" url_root="{% url 'home' %}" output="account" :key="keyrefresh"></table-investmentoperationshistorical>
                         </v-card>
-                </v-tab-item>
+                    </v-tab-item>
+                {%endif %}
             </v-tabs>
         </div>
     </v-tab-item>
@@ -109,7 +113,7 @@ new Vue({
     ...common_vue_properties(),            
     data () {
         return {
-            tab:1,
+            tab:0,
             tabcurrent:0,
             keyrefresh:0,
             items_io: {{ json_table_operations | safe }},

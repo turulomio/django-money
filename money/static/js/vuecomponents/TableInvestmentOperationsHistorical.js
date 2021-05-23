@@ -96,8 +96,35 @@ Vue.component('table-investmentoperationshistorical', {
                         <div v-if="header.value == 'dt_end'">
                             Total
                         </div>
-                        <div v-if="header.value == 'shares'" align="right">
-                            <div v-html="listobjects_sum(items,'shares')"></div>
+                        
+                        <div v-if="header.value == 'gains_gross_investment'" align="right">
+                            <div v-html="currency(listobjects_sum(items,'gains_gross_investment'))"></div>
+                        </div>
+                        <div v-if="header.value == 'gains_gross_account'" align="right">
+                            <div v-html="currency(listobjects_sum(items,'gains_gross_account'))"></div>
+                        </div>
+                        
+                        <div v-if="header.value == 'gains_net_investment'" align="right">
+                            <div v-html="currency(listobjects_sum(items,'gains_net_investment'))"></div>
+                        </div>
+                        <div v-if="header.value == 'gains_net_account'" align="right">
+                            <div v-html="currency(listobjects_sum(items,'gains_net_account'))"></div>
+                        </div>
+                        
+                        
+                        <div v-if="header.value == 'commissions_investment'" align="right">
+                            <div v-html="currency(listobjects_sum(items,'commissions_investment'))"></div>
+                        </div>
+                        <div v-if="header.value == 'commissions_account'" align="right">
+                            <div v-html="currency(listobjects_sum(items,'commissions_account'))"></div>
+                        </div>
+                        
+                        
+                        <div v-if="header.value == 'taxes_investment'" align="right">
+                            <div v-html="currency(listobjects_sum(items,'taxes_investment'))"></div>
+                        </div>
+                        <div v-if="header.value == 'taxes_account'" align="right">
+                            <div v-html="currency(listobjects_sum(items,'taxes_account'))"></div>
                         </div>
                     </td>
                 </tr>
