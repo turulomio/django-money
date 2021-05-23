@@ -6,4 +6,4 @@ class Command(BaseCommand):
     #option_list = MakeMessagesCommand.option_list
 
     def handle(self, *args, **options):
-        system("python manage.py makemessages -d djangojs --all -e html,js -i *node_modules*")
+        system("python manage.py makemessages -d djangojs --all -e html,js,vue -i *node_modules*")

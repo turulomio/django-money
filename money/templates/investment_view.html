@@ -116,6 +116,7 @@ new Vue({
             tab:0,
             tabcurrent:0,
             keyrefresh:0,
+//             name: this.$t("Hola"),
             items_io: {{ json_table_operations | safe }},
             items_io_current: {{ json_table_current | safe }},
             items_io_historical: {{ json_table_historical | safe }},
@@ -207,6 +208,7 @@ new Vue({
         tab: function (){
             this.keyrefresh=this.keyrefresh+1
             console.log(this.keyrefresh)
+//             alert(this.$t("Adios"))
         }
     },
     methods: {
