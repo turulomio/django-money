@@ -456,18 +456,8 @@ class account_delete(DeleteView):
         return reverse_lazy('account_list_active')
 
 @login_required        
-def account_view(request, pk, year=date.today().year, month=date.today().month): 
-    year_start=1970
-    year_end=date.today().year + 10
-    
+def account_view(request, pk): 
     account=get_object_or_404(Accounts, pk=pk)
-    
-    dt_initial=dtaware_month_start(year, month, request.local_zone)
-    initial_balance=float(account.balance( dt_initial, request.local_currency)[0].amount)
-    qsaccountoperations= Accountsoperations.objects.all().select_related("concepts").filter(accounts_id=pk, datetime__year=year, datetime__month=month).order_by('datetime')
-    listdic_accountsoperations=listdict_accountsoperations_from_queryset(qsaccountoperations, initial_balance)
-    table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", listdic_accountsoperations, account.currency, request.local_zone).render()
-    
     #Creditcards
     creditcards=cursor_rows("""
         select 
@@ -485,7 +475,16 @@ def account_view(request, pk, year=date.today().year, month=date.today().month):
     table_creditcards=TabulatorCreditCards("table_creditcards", "creditcard_view", creditcards, account).render()
   
     return render(request, 'account_view.html', locals())        
-        
+
+@login_required        
+def accountoperation_list(request, pk, year=date.today().year, month=date.today().month): 
+    account=get_object_or_404(Accounts, pk=pk)
+    dt_initial=dtaware_month_start(year, month, request.local_zone)
+    initial_balance=float(account.balance( dt_initial, request.local_currency)[0].amount)
+    qsaccountoperations= Accountsoperations.objects.all().select_related("concepts").filter(accounts=account, datetime__year=year, datetime__month=month).order_by('datetime')
+    ld_ao=listdict_accountsoperations_from_queryset(qsaccountoperations, initial_balance)
+    return JsonResponse(ld_ao, safe=False)
+
 @login_required       
 @transaction.atomic
 def account_transfer(request, origin): 
@@ -579,12 +578,7 @@ class accountoperation_new(CreateView):
         if self.kwargs['concepts_id']!=0:
             d["concepts"]=Concepts.objects.get(pk=self.kwargs['concepts_id'])
 
-        account=Accounts.objects.get(pk=self.kwargs['accounts_id'])
-        initial_balance=float(account.balance( dtaware_month_start(dt_.year, dt_.month, self.request.local_zone), self.request.local_currency)[0].amount)
-        qsaccountoperations= Accountsoperations.objects.all().select_related("concepts").filter(accounts_id=account.id, datetime__year=dt_.year,  datetime__month=dt_.month).order_by('datetime')
-        listdic_accountsoperations=listdict_accountsoperations_from_queryset(qsaccountoperations, initial_balance)
-        self.table_accountoperations=TabulatorAccountOperations("table_accountoperations", "accountoperation_update", listdic_accountsoperations, account.currency, self.request.local_zone).render()
-
+        self.account=Accounts.objects.get(pk=self.kwargs['accounts_id'])
         return d
     
     def get_success_url(self):

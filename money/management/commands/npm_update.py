@@ -23,6 +23,7 @@ class Command(BaseCommand):
         copy("node_modules/tabulator-tables/dist/js/tabulator.min.js", "money/static/js/")
         copy("node_modules/vue/dist/vue.min.js", "money/static/js/")
         copy("node_modules/vuetify/dist/vuetify.min.js", "money/static/js/")
+        copy("node_modules/vuetify-datetime-picker/dist/index.js", "money/static/js/vuetifydatetimepicker.js")
         copy("node_modules/xlsx/dist/xlsx.full.min.js", "money/static/js/")
         copy("node_modules/axios/dist/axios.min.js", "money/static/js/")
         copy("node_modules/axios/dist/axios.min.map", "money/static/js/")

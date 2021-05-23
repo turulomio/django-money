@@ -23,6 +23,7 @@
     "vue": "^2.6.12",
     "vue-echarts": "*",
     "vuetify": "^2.4.11",
+    "vuetify-datetime-picker": "^2.1.1",
     "xlsx": "^0.16.8"
   },
   "scripts": {

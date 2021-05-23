@@ -11,10 +11,15 @@ Vue.component('table-investmentoperations-homegeneous', {
         },
         url_root:{
             required:true
-        }
+        },
+        
+        homogeneous:{
+            required:true,
+            default:true
+        },
     },
     template: `
-        <v-data-table dense v-model="selected" :headers="tableHeaders" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header :height="$attrs.height" ref="table_o">
+        <v-data-table dense v-model="selected" :headers="tableHeaders" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header :height="$attrs.height" ref="table_o" :key="$attrs.key">
             <template v-slot:[\`item.datetime\`]="{ item,index }">
             <div :ref="index">{{ localtime(item.datetime)}}</div>
             </template>

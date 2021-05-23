@@ -27,7 +27,6 @@
 import asyncio
 from asgiref.sync import sync_to_async
 from datetime import date, timedelta
-from decimal import Decimal
 from money.reusing.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_dict
 from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo, listdict_sum
 from django.conf import settings
@@ -1226,10 +1225,10 @@ def listdict_report_total(year, last_year_balance, local_currency, local_zone):
     
 def listdict_accountsoperations_from_queryset(qs_accountsoperations, initial):
     r=[]
-    balance=Decimal(initial)
+    balance=float(initial)
     for op in qs_accountsoperations:
-        balance=balance+op.amount
-        r.append({"id":op.id, "datetime": op.datetime,"concepts": op.concepts.name,"amount":op.amount,"balance": balance,"comment": Comment().decode(op.comment)})
+        balance=balance+float(op.amount)
+        r.append({"id":op.id, "datetime": op.datetime,"concepts": op.concepts.name,"amount":float(op.amount),"balance": balance,"comment": Comment().decode(op.comment)})
     r= sorted(r,  key=lambda item: item['datetime'])
     return r
 

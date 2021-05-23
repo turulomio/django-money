@@ -332,3 +332,13 @@ span.vuered{
     width: 100%;
     box-sizing: border-box;
 }
+
+
+
+
+/* v-date-pcker month picker*/
+.mymonthpicker > div > div > div:nth-child(2) ,
+.mymonthpicker > div > div > div:nth-child(2) > table > tbody > tr > td
+{
+height: unset;
+}

@@ -35,7 +35,6 @@ urlpatterns=urlpatterns+ i18n_patterns(
 
     path('account/list/', money_views.account_list,   {'active':True}, name='account_list_active'),
     path('account/list/inactive/', money_views.account_list,   {'active':False}, name='account_list_inactive'),
-    path('account/view/<int:pk>/<int:year>/<int:month>/', money_views.account_view, name='account_view'),
     path('account/view/<int:pk>/', money_views.account_view, name='account_view'),
     path('account/transfer/<int:origin>/', money_views.account_transfer, name='account_transfer'),
     path('account/transfer/delete/<str:comment>/', money_views.account_transfer_delete, name='account_transfer_delete'),
@@ -47,6 +46,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('accountoperation/update/<int:pk>/', money_views.accountoperation_update.as_view(), name='accountoperation_update'),
     path('accountoperation/delete/<int:pk>', money_views.accountoperation_delete.as_view(), name='accountoperation_delete'),
     path('accountoperation/search/', money_views.accountoperation_search, name='accountoperation_search'),
+    path('accountoperation/list/<int:pk>/<int:year>/<int:month>/', money_views.accountoperation_list, name='accountoperation_list'),
     
     path('creditcard/view/<int:pk>/', money_views.creditcard_view, name='creditcard_view'),
     path('creditcard/pay/<int:pk>/', money_views.creditcard_pay, name='creditcard_pay'),
