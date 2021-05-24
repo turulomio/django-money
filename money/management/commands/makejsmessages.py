@@ -6,4 +6,5 @@ class Command(BaseCommand):
     #option_list = MakeMessagesCommand.option_list
 
     def handle(self, *args, **options):
-        system("python manage.py makemessages -d djangojs --all -i *node_modules*")
+        #Si en github se peridera el enlace enlazar con vuecomponents desde templates
+        system("python manage.py makemessages -d djangojs -all --symlinks --extension html,js -i *node_modules*")
