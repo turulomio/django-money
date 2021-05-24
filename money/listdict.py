@@ -27,6 +27,7 @@
 import asyncio
 from asgiref.sync import sync_to_async
 from datetime import date, timedelta
+from decimal import Decimal
 from money.reusing.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_dict
 from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo, listdict_sum
 from django.conf import settings
@@ -59,6 +60,7 @@ from money.reusing.percentage import percentage_between, Percentage
 from money.reusing.tabulator import TabulatorFromListDict, TabulatorFromQuerySet
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+Decimal ##Needed in eval
 ld_print=listdict_print
 
 ## Class that return a object to manage listdict
