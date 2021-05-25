@@ -18,9 +18,10 @@ Vue.component('table-investmentoperationshistorical', {
         url_root:{
             required:true
         },
-        homogeneous:{
+        heterogeneus:{
+            type: Boolean,
             required:true,
-            default:true
+            default:false
         },
         output:{
             required:true,
@@ -147,7 +148,7 @@ Vue.component('table-investmentoperationshistorical', {
         },
         table_headers(){
             if (this.output=="account"){
-                return [
+                var r= [
                     { text: gettext('Date and time'), value: 'dt_end',sortable: true },
                     { text: gettext('Years'), value: 'years',sortable: true },
                     { text: gettext('Operation'), value: 'operationstypes',sortable: true },
@@ -160,7 +161,7 @@ Vue.component('table-investmentoperationshistorical', {
                     { text: gettext('Gains'), value: 'gains_net_account',sortable: false, align:"right"},
                 ]
             } else if (this.output=="investment"){
-                return [
+                var r= [
                     { text: gettext('Date and time'), value: 'dt_end',sortable: true },
                     { text: gettext('Years'), value: 'years',sortable: true },
                     { text: gettext('Operation'), value: 'operationstypes',sortable: true },
@@ -173,7 +174,7 @@ Vue.component('table-investmentoperationshistorical', {
                     { text: gettext('Gains'), value: 'gains_net_investment',sortable: false, align:"right"},
                 ]
             } else if (this.output=="user"){
-                return [
+                var r= [
                     { text: gettext('Date and time'), value: 'dt_end',sortable: true },
                     { text: gettext('Years'), value: 'years',sortable: true },
                     { text: gettext('Operation'), value: 'operationstypes',sortable: true },
@@ -186,6 +187,10 @@ Vue.component('table-investmentoperationshistorical', {
                     { text: gettext('Gains'), value: 'gains_net_user',sortable: false, align:"right"},
                 ] 
             }
+            if (this.heterogeneus==true){
+                r.splice(1, 0, { text: gettext('Name'), value: 'name',sortable: true });
+            }
+            return r
         },
         gotoLastRow(){
            this.$vuetify.goTo(this.$refs.lastrow, { container:  this.$refs.table.$el.childNodes[0] }) 

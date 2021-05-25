@@ -487,7 +487,7 @@ class InvestmentsOperationsManager:
         from money.listdict import LdoInvestmentsOperationsHeterogeneus
         r=LdoInvestmentsOperationsHeterogeneus(self.request)
         for io in self.list:
-            listdict_print_first(io.io)
+#            listdict_print_first(io.io)
             for o in io.io:
                 if dt_from<=o["datetime"] and o["datetime"]<=dt_to:
                     o["name"]=io.investment.fullName()
@@ -500,6 +500,7 @@ class InvestmentsOperationsManager:
         from money.listdict import LdoInvestmentsOperationsCurrentHeterogeneus
         r=LdoInvestmentsOperationsCurrentHeterogeneus(self.request)
         for io in self.list:
+            listdict_print_first(io.io_current)
             for o in io.io_current:
                 if dt_from<=o["datetime"] and o["datetime"]<=dt_to:
                     o["name"]=io.investment.fullName()

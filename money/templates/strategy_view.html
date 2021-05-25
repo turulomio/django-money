@@ -1,6 +1,22 @@
+{% extends "base_vue_all.html" %}
 
-{% extends 'base.html' %}
 {% load i18n %}
+{% load l10n %}
+
+{% load static %}
+
+{% block head_js_section %}
+    <script type="text/javascript" src='{% static "js/tabulator.min.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/vuecomponents/MyMenuInline.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/moment.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperations.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsHistorical.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/vuecomponents/TableInvestmentOperationsCurrent.js" %}'></script>
+{% endblock head_js_section %}
+{% block head_css_section %}
+    <link rel="stylesheet" type="text/css" href='{% static "css/tabulator.min.css" %}'>
+{% endblock head_css_section %}
 
 {% block content %}
 
@@ -16,11 +32,40 @@
 <p><strong>{% trans 'Types' %}: </strong>{{ strategy.get_type_display }}</p>
 
 <p>
-<script>
-  $( function() {
-    $( "#tabs" ).tabs();
-  } );
-</script>
+
+
+<v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
+    <v-tab key="current">{% trans "Current investment operations" %}</v-tab>
+    <v-tab key="operations">{% trans "Investment operations" %}</v-tab>
+    <v-tab key="historical">{% trans "Historical investment operations" %}</v-tab>
+    <v-tab key="dividends">{% trans "Dividends" %}</v-tab>
+    <v-tabs-slider color="yellow"></v-tabs-slider>
+</v-tabs>
+<v-tabs-items v-model="tab">
+    <v-tab-item key="current">      
+        <div>
+            <v-card class="padding">
+                <table-investmentoperationscurrent :items="items_io_current" currency_user="{{request.local_currency}}" output="user" height="400" url_root="{% url 'home' %}" :key="keyrefresh" heterogeneus></table-investmentoperationscurrent>
+            </v-card>
+        </div>
+    </v-tab-item>
+    <v-tab-item key="operations">     
+        <v-card class="padding">
+            <table-investmentoperations :items="items_io" currency_user="{{request.local_currency}}" height="400" url_root="{% url 'home' %}" :key="keyrefresh" outputt="user" heterogeneus></table-investmentoperations>
+        </v-card>
+    </v-tab-item>
+    <v-tab-item key="historical">     
+        <v-card class="padding">
+            <table-investmentoperationshistorical :items="items_io_historical" currency_user="{{request.local_currency}}"  height="400" url_root="{% url 'home' %}" output="user" :key="keyrefresh" heterogeneus></table-investmentoperationshistorical>
+        </v-card>
+    </v-tab-item>
+    <v-tab-item key="dividends">     
+        <v-card class="padding">
+            {{ qso_dividends.tabulator.render |safe}}
+        </v-card>
+    </v-tab-item>
+</v-tabs-items>            
+
  
 <div id="tabs">
   <ul>
@@ -29,8 +74,6 @@
     <li><a href="#tabs-3">{% trans "Historical investment operations" %}</a></li>
     <li><a href="#tabs-4">{% trans "Dividends" %}</a></li>
   </ul>
-
-
 
   <div id="tabs-2">
   {{ current.tabulator.render| safe }}
@@ -53,4 +96,29 @@
          | <a href="{{ strategy.url_details }}">{% trans "Show detailed report" %}</a>
     {% endif %}</p>
 </p>
-{% endblock %}
+
+<script>
+new Vue({
+    ...common_vue_properties(),            
+    data () {
+        return {
+            tab:0,
+            keyrefresh:0,
+            items_io: {{ ops.json | safe }},
+            items_io_current: {{ current.json | safe }},
+            items_io_historical: {{ historical.json | safe }},
+        }  
+    },
+    watch:{
+        tab: function (){
+            this.keyrefresh=this.keyrefresh+1
+            console.log(this.keyrefresh)
+        }
+    },
+    methods: {
+    },
+    
+})
+</script>
+{% endblock content %}
+

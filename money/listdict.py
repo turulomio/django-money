@@ -29,7 +29,7 @@ from asgiref.sync import sync_to_async
 from datetime import date, timedelta
 from decimal import Decimal
 from money.reusing.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_dict
-from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo, listdict_sum
+from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo, listdict_sum,  listdict2json
 from django.conf import settings
 from django.urls import reverse_lazy
 from django.templatetags.static import static
@@ -214,6 +214,8 @@ class LdoInvestmentsOperationsHeterogeneus(LdoDjangoMoney):
         r.showLastRecord(False)
         return r        
 
+    def json(self):
+        return listdict2json(self.ld)
 ## IOC of several investments
 class LdoInvestmentsOperationsCurrentHeterogeneus(LdoDjangoMoney):
     def __init__(self, request, name=None):
@@ -231,6 +233,9 @@ class LdoInvestmentsOperationsCurrentHeterogeneus(LdoDjangoMoney):
         r.setBottomCalc(None, None, None, None, "sum", None,  "sum", "sum", "sum", None, None, None)
         r.showLastRecord(False)
         return r
+        
+    def json(self):
+        return listdict2json(self.ld)
 
 ## List dictionary Object to show derivatives evolution by month (only one year)
 class LdoDerivatives(LdoDjangoMoney):
@@ -326,6 +331,8 @@ class LdoInvestmentsOperationsHistoricalHeterogeneus(LdoDjangoMoney):
         r.setBottomCalc(None, None, None, None, None, None, "sum", "sum", "sum", "sum", "sum", "sum")
         return r
         
+    def json(self):
+        return listdict2json(self.ld)
 
 ## Different o Heterogeneus, due to sum shares...
 class LdoInvestmentsOperationsCurrentHeterogeneusSameProductInAccount(LdoDjangoMoney):

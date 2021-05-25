@@ -4,18 +4,25 @@ Vue.component('table-investmentoperations', {
             required: true
         },
         currency_account: {
-            required: true
+            required: true,
+            default:"EUR"
         },
         currency_investment: {
-            required: true
+            required: true,
+            default:"EUR"
+        },
+        currency_user: {
+            required: true,
+            default:"EUR"
         },
         url_root:{
             required:true
         },
         
-        homogeneous:{
+        heterogeneus:{
+            type: Boolean,
             required:true,
-            default:true
+            default:false
         },
     },
     template: `
