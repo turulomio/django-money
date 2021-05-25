@@ -112,6 +112,8 @@ from money.models import (
     money_convert, 
 )
 from xulpymoney.libxulpymoneytypes import eConcept, eComment, eProductType, eOperationType
+listdict_print_first
+
 
 @login_required
 @transaction.atomic
@@ -824,7 +826,6 @@ def investment_view(request, pk):
     json_table_operations=listdict2json(operations.o_listdict_tabulator_homogeneus(request))
     json_table_current=listdict2json(operations.current_listdict_tabulator_homogeneus_investment(request))
     json_table_historical=listdict2json(operations.historical_listdict_homogeneus(request))
-    listdict_print_first(operations.current_listdict_tabulator_homogeneus_investment(request))
     qso_dividends=QsoDividendsHomogeneus(request,  Dividends.objects.all().filter(investments_id=pk).order_by('datetime'),  investment)
     return render(request, 'investment_view.html', locals())
     

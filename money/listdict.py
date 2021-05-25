@@ -478,7 +478,7 @@ class QsoAccountsOperationsHeterogeneus(QsoCommon):
     def listdict(self):
         r=[]
         for op in self.qs:
-            r.append({"id":op.id, "datetime": op.datetime, "account": op.accounts.fullName(),"concepts": op.concepts.name,"amount": Currency(op.amount, op.accounts.currency).string(), "comment": Comment().decode(op.comment)})
+            r.append({"id":op.id, "datetime": op.datetime, "account": op.accounts.fullName(),"concepts": op.concepts.name,"amount": Currency(op.amount, op.accounts.currency).amount, "comment": Comment().decode(op.comment)})
         return r
 
     def tabulator(self):
@@ -503,6 +503,8 @@ class QsoDividendsHomogeneus(QsoCommon):
         for o in self.qs:
             r.append({"id":o.id, "datetime":o.datetime, "concepts":o.concepts.name, "gross":o.gross, "net":o.net, "taxes":o.taxes, "commission":o.commission})
         return r
+    def json(self):
+        return listdict2json(self.listdict_dividends_from_queryset())
             
     def tabulator(self):
         currency=self.investment.accounts.currency
@@ -529,6 +531,9 @@ class QsoDividendsHeterogeneus(QsoCommon):
             r.append({"id":o.id, "datetime":o.datetime, "concepts":o.concepts.name, "gross":o.gross, "net":o.net, "taxes":o.taxes, "commission":o.commission})
             print(o)
         return r
+        
+    def json(self):
+        return listdict2json(self.listdict_dividends_from_queryset())
             
     def tabulator(self):
         currency=self.request.local_currency
