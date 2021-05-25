@@ -76,7 +76,7 @@
     </v-tab-item>
     <v-tab-item key="operations">     
         <v-card class="padding">
-            <table-investmentoperations :items="items_io" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" height="400" url_root="{% url 'home' %}" :key="keyrefresh"></table-investmentoperations>
+            <table-investmentoperations :items="items_io" currency_account="{{investment.accounts.currency}}" currency_investment="{{investment.products.currency}}" height="400" url_root="{% url 'home' %}" :key="keyrefresh" output="investment"></table-investmentoperations>
         </v-card>
     </v-tab-item>
     <v-tab-item key="historical">     

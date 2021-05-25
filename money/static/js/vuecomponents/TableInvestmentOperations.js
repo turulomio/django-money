@@ -5,28 +5,31 @@ Vue.component('table-investmentoperations', {
         },
         currency_account: {
             required: true,
-            default:"EUR"
+            default:"EUR",
         },
         currency_investment: {
             required: true,
-            default:"EUR"
+            default:"EUR",
         },
         currency_user: {
             required: true,
-            default:"EUR"
+            default:"EUR",
         },
         url_root:{
             required:true
         },
-        
         heterogeneus:{
             type: Boolean,
             required:true,
             default:false
         },
+        output:{
+            required:true,
+            default: "investment",
+        }
     },
     template: `
-        <v-data-table dense v-model="selected" :headers="tableHeaders" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header :height="$attrs.height" ref="table_o" :key="$attrs.key">
+        <v-data-table dense v-model="selected" :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header :height="$attrs.height" ref="table_o" :key="$attrs.key">
             <template v-slot:[\`item.datetime\`]="{ item,index }">
             <div :ref="index">{{ localtime(item.datetime)}}</div>
             </template>
@@ -53,36 +56,72 @@ Vue.component('table-investmentoperations', {
     data: function(){
         return {
             selected: [],
-            tableHeaders: [
-                { text: gettext('Date and time'), value: 'datetime',sortable: true },
-                { text: gettext('Operation'), value: 'operationstypes',sortable: true },
-                { text: gettext('Shares'), value: 'shares',sortable: false, align:"right"},
-                { text: gettext('Price'), value: 'price',sortable: false, align:"right"},
-                { text: gettext('Gross'), value: 'gross_investment',sortable: false, align:"right"},
-                { text: gettext('Commission'), value: 'commission',sortable: false, align:"right"},
-                { text: gettext('Taxes'), value: 'taxes',sortable: false, align:"right"},
-                { text: gettext('Net'), value: 'net_investment',sortable: false, align:"right"},
-                { text: gettext('Currency factor'), value: 'currency_conversion',sortable: false, align:"right"},
-                { text: gettext('Comment'), value: 'comment',sortable: false},
-                { text: gettext('Actions'), value: 'actions', sortable: false },
-            ],   
         }
     },
     computed:{
     },
     methods: {
+        table_headers(){
+            if (this.output=="account"){
+                var r= [
+                    { text: gettext('Date and time'), value: 'datetime',sortable: true },
+                    { text: gettext('Operation'), value: 'operationstypes',sortable: true },
+                    { text: gettext('Shares'), value: 'shares',sortable: false, align:"right"},
+                    { text: gettext('Price'), value: 'price',sortable: false, align:"right"},
+                    { text: gettext('Gross'), value: 'gross_account',sortable: false, align:"right"},
+                    { text: gettext('Commission'), value: 'commission',sortable: false, align:"right"},
+                    { text: gettext('Taxes'), value: 'taxes',sortable: false, align:"right"},
+                    { text: gettext('Net'), value: 'net_account',sortable: false, align:"right"},
+                    { text: gettext('Currency factor'), value: 'currency_conversion',sortable: false, align:"right"},
+                    { text: gettext('Comment'), value: 'comment',sortable: false},
+                    { text: gettext('Actions'), value: 'actions', sortable: false },
+                ]
+            } else if (this.output=="investment"){                
+                var r= [
+                    { text: gettext('Date and time'), value: 'datetime',sortable: true },
+                    { text: gettext('Operation'), value: 'operationstypes',sortable: true },
+                    { text: gettext('Shares'), value: 'shares',sortable: false, align:"right"},
+                    { text: gettext('Price'), value: 'price',sortable: false, align:"right"},
+                    { text: gettext('Gross'), value: 'gross_investment',sortable: false, align:"right"},
+                    { text: gettext('Commission'), value: 'commission',sortable: false, align:"right"},
+                    { text: gettext('Taxes'), value: 'taxes',sortable: false, align:"right"},
+                    { text: gettext('Net'), value: 'net_investment',sortable: false, align:"right"},
+                    { text: gettext('Currency factor'), value: 'currency_conversion',sortable: false, align:"right"},
+                    { text: gettext('Comment'), value: 'comment',sortable: false},
+                    { text: gettext('Actions'), value: 'actions', sortable: false },
+                ]
+            } else if (this.output=="user"){
+                var r= [
+                    { text: gettext('Date and time'), value: 'datetime',sortable: true },
+                    { text: gettext('Operation'), value: 'operationstypes',sortable: true },
+                    { text: gettext('Shares'), value: 'shares',sortable: false, align:"right"},
+                    { text: gettext('Price'), value: 'price',sortable: false, align:"right"},
+                    { text: gettext('Gross'), value: 'gross_user',sortable: false, align:"right"},
+                    { text: gettext('Commission'), value: 'commission',sortable: false, align:"right"},
+                    { text: gettext('Taxes'), value: 'taxes',sortable: false, align:"right"},
+                    { text: gettext('Net'), value: 'net_user',sortable: false, align:"right"},
+                    { text: gettext('Currency factor'), value: 'currency_conversion',sortable: false, align:"right"},
+                    { text: gettext('Comment'), value: 'comment',sortable: false},
+                    { text: gettext('Actions'), value: 'actions', sortable: false },
+                ]
+            }
+            
+            if (this.currency_investment==this.currency_account){
+                r.splice(8,1)
+            }
+            if (this.heterogeneus==true){
+                r.splice(1, 0, { text: gettext('Name'), value: 'name',sortable: true });
+            }
+            return r
+        },
         editIO(item){
             window.location.href=`${this.url_root}investmentoperation/update/${item.id}`
         },
         gotoLastRow(){
-           console.log(this.$refs)
            this.$vuetify.goTo(this.$refs[this.items.length-1], { container:  this.$refs.table_o.$el.childNodes[0] }) 
         },
     },
     mounted(){
-        if (this.currency_investment==this.currency_account){
-            this.tableHeaders.splice(8,1)
-        }
         this.gotoLastRow()
     }
 })

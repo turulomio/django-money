@@ -104,12 +104,18 @@ Vue.component('table-investmentoperationshistorical', {
                         <div v-if="header.value == 'gains_gross_account'" align="right">
                             <div v-html="currency(listobjects_sum(items,'gains_gross_account'))"></div>
                         </div>
+                        <div v-if="header.value == 'gains_gross_user'" align="right">
+                            <div v-html="currency(listobjects_sum(items,'gains_gross_user'))"></div>
+                        </div>
                         
                         <div v-if="header.value == 'gains_net_investment'" align="right">
                             <div v-html="currency(listobjects_sum(items,'gains_net_investment'))"></div>
                         </div>
                         <div v-if="header.value == 'gains_net_account'" align="right">
                             <div v-html="currency(listobjects_sum(items,'gains_net_account'))"></div>
+                        </div>
+                        <div v-if="header.value == 'gains_net_user'" align="right">
+                            <div v-html="currency(listobjects_sum(items,'gains_net_user'))"></div>
                         </div>
                         
                         
