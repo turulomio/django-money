@@ -474,6 +474,7 @@ def account_view(request, pk):
         where 
             active is true and
             accounts_id=%s""", (account.id, ))
+    creditcards_json=listdict2json(creditcards)
     table_creditcards=TabulatorCreditCards("table_creditcards", "creditcard_view", creditcards, account).render()
   
     return render(request, 'account_view.html', locals())        
