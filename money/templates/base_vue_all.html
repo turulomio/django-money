@@ -29,19 +29,8 @@
     {% block head_js %}
         {% block head_js_site %}
              <script type="text/javascript" src='{% static "js/vue.min.js" %}'></script>
-<!--              <script type="text/javascript" src='{% static "js/vue-i18n.min.js" %}'></script> -->
              <script type="text/javascript" src='{% static "js/vuetify.min.js" %}'></script>
-<!--              <script type="text/javascript" src='{% static "js/axios.min.js" %}'></script>  -->
-<!--              <script type="text/javascript" src='{% static "js/echarts.min.js" %}'></script>  -->
-<!--              <script type="text/javascript" src='{% static "js/vue-composition-api.prod.js" %}'></script> -->
-<!--              <script type="text/javascript" src='{% static "js/index.umd.min.js" %}'></script> -->
-<!--              <script type="text/javascript" src='{% static "js/jquery.js" %}'></script> -->
-<!--             <script type="text/javascript" src='{% static "js/bootstrap.js" %}'></script>  -->          
-<!--              <script type="text/javascript" src='{% static "js/moment.js" %}'></script> -->
-<!--              <script type="text/javascript" src='{% static "js/moment-timezone-with-data.js" %}'></script> -->
              <script type="text/javascript" src='{% static "js/django_money.js" %}'></script>
-<!--              <script type="text/javascript" src='{% static "js/vuecomponents/ChartPie.js" %}'></script> -->
-<!--              <script type="text/javascript" src='{% static "js/vuecomponents/AutoCompleteApiIdName.js" %}'></script> -->
              <script src="{% url 'javascript-catalog' %}"></script>
         {% endblock head_js_site %}
         {% block head_js_section %}
@@ -50,11 +39,10 @@
 
         {% block head_css %}
         {% block head_css_site %}
-
-        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href='{% static "css/materialdesignicons.min.css" %}'>
-        <link rel="stylesheet" type="text/css" href='{% static "css/vuetify.min.css" %}'>
-        <link rel="stylesheet" type="text/css" href='{% static "css/mystylesvue.css" %}?dev={% random_integer 0 10000 %}'>
+            <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+            <link rel="stylesheet" type="text/css" href='{% static "css/materialdesignicons.min.css" %}'>
+            <link rel="stylesheet" type="text/css" href='{% static "css/vuetify.min.css" %}'>
+            <link rel="stylesheet" type="text/css" href='{% static "css/mystylesvue.css" %}?dev={% random_integer 0 10000 %}'>
         {% endblock head_css_site %}
 
         {% block head_css_section %}
@@ -126,6 +114,7 @@
                 {% endif %}
 
                 <script>
+                    Vue.config.devtools = true;
                     var mixin = {
                         data: function () {
                             return {

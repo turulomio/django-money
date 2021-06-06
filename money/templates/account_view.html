@@ -25,16 +25,29 @@
         <v-tab key="ao">{% trans "Account operations" %}</v-tab>
         <v-tab key="cc">{% trans "Credit cards" %}</v-tab>
         <v-tab-item key="ao">     
+<<<<<<< HEAD
             <v-card class="pa-4 d-flex justify-center" outlined
             style="min-width: 100px; max-width: 100%;">
                 <v-date-picker dense no-title class="mymonthpicker " ref="monthpicker" v-model="monthpicker" type="month"></v-date-picker>
                 <v-divider class="mx-2" vertical ></v-divider>
                 <table-accountoperations :items="items_ao" currency_account="{{account.currency}}" height="400" url_root="{% url 'home' %}" ref="table_ao" class=" flex-grow-1 flex-shrink-0"></table-accountoperations>
+=======
+            <v-card outlined class="">
+                <v-card class="pa-3 d-flex justify-center" >
+                    <v-card class="d-flex  rounded-lg  justify-center">
+                        <v-date-picker dense no-title class="mymonthpicker" ref="monthpicker" v-model="monthpicker" type="month"></v-date-picker>
+                    </v-card>
+                </v-card>
+                <table-accountoperations class="pa-4" :items="items_ao" currency_account="{{account.currency}}" height="300" url_root="{% url 'home' %}" ref="table_ao"></table-accountoperations>
+>>>>>>> f6f098f1aecc1d3674badee49eac8c48ff25b65c
             </v-card>
         </v-tab-item>
         <v-tab-item key="cc">
             <v-card class="padding" outlined>
-                <v-data-table dense :headers="table_cc_headers" :items="table_cc" class="elevation-1" disable-pagination  hide-default-footer sort-by="name" fixed-header height="400">     
+                <v-data-table dense :headers="table_cc_headers" :items="table_cc" class="elevation-1" disable-pagination  hide-default-footer sort-by="name" fixed-header max-height="400">         
+                    <template v-slot:item.deferred="{ item }">
+                        <v-simple-checkbox v-model="item.deferred" disabled></v-simple-checkbox>
+                    </template>  
                     <template v-slot:[`item.actions`]="{ item }">
                         <v-icon small class="mr-2" @click="editCC(item)">mdi-pencil</v-icon>
                         <v-icon small class="mr-2" @click="deleteCC(item)">mdi-delete</v-icon>
