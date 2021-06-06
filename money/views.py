@@ -573,19 +573,22 @@ class accountoperation_new(CreateView):
         
     def get_initial(self):
         d={}
-        if self.kwargs['dt']==0:
-            dt_=dtaware_changes_tz(timezone.now(), self.request.local_zone)
+        dt=int(self.request.GET.get('dt', 0))
+        if dt==0:
+            d["datetime"]=str(dtaware_changes_tz(timezone.now(), self.request.local_zone))
         else:
-            dt_=dtaware_changes_tz(epochmicros2dtaware(self.kwargs['dt']), self.request.local_zone)
-        d["datetime"]= str(dt_)
-        if self.kwargs['concepts_id']!=0:
-            d["concepts"]=Concepts.objects.get(pk=self.kwargs['concepts_id'])
+            d["datetime"]=str(dtaware_changes_tz(epochmicros2dtaware(dt), self.request.local_zone))
+        
+        concepts_id=int(self.request.GET.get('concepts_id', 0))
+        if concepts_id!=0:
+            d["concepts"]=Concepts.objects.get(pk=concepts_id)
 
         self.account=Accounts.objects.get(pk=self.kwargs['accounts_id'])
         return d
     
     def get_success_url(self):
-        return reverse_lazy('accountoperation_new',args=(self.object.accounts.id, dtaware2epochmicros(self.object.datetime)+1000000,  self.object.concepts.id))
+        url=reverse_lazy('accountoperation_new', args=(self.object.accounts.id,))
+        return f"{url}?dt={dtaware2epochmicros(self.object.datetime)+1000000}&concepts_id={self.object.concepts.id}"
   
     def form_valid(self, form):
         if  (

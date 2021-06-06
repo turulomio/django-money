@@ -17,7 +17,6 @@
 {% endblock head_js_section %}
 
 {% block head_css_section %}
-
         <link rel="stylesheet" type="text/css" href='{% static "css/materialdesignicons.min.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/vuetify.min.css" %}'>
         <link rel="stylesheet" type="text/css" href='{% static "css/mystylesvue.css" %}?dev={% random_integer 0 10000 %}'>
@@ -45,12 +44,12 @@
     <a href="{% url 'account_view' pk=view.kwargs.accounts_id %}">{% trans "Show account" %}</a>
   </p>
     <div id="app">
-    <v-card class="padding" outlined>
-        <v-layout style="justify-content: center;">
-            <v-date-picker dense no-title class="mymonthpicker" ref="monthpicker" v-model="monthpicker" type="month"></v-date-picker>
-        </v-layout>
-        <table-accountoperations :items="items_ao" currency_account="{{view.account.currency}}" height="300" url_root="{% url 'home' %}" ref="table_ao"></table-accountoperations>
-    </v-card>
+        <v-card class="pa-4 d-flex justify-center" outlined
+        style="min-width: 100px; max-width: 100%;">
+            <v-date-picker dense no-title class="mymonthpicker " ref="monthpicker" v-model="monthpicker" type="month"></v-date-picker>
+            <v-divider class="mx-2" vertical ></v-divider>
+            <table-accountoperations :items="items_ao" currency_account="{{view.account.currency}}" height="300" url_root="{% url 'home' %}" ref="table_ao" class=" flex-grow-1 flex-shrink-0"></table-accountoperations>
+        </v-card>
     </div>
 <script>
 new Vue({

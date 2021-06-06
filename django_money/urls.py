@@ -42,7 +42,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('account/update/<int:pk>/', money_views.account_update.as_view(), name='account_update'),    
     path('account/delete/<int:pk>/', money_views.account_delete.as_view(), name='account_delete'),
     
-    path('accountoperation/new/<int:accounts_id>/<int:dt>/<int:concepts_id>/', money_views.accountoperation_new.as_view(), name='accountoperation_new'),
+    path('accountoperation/new/<int:accounts_id>/', money_views.accountoperation_new.as_view(), name='accountoperation_new'),
     path('accountoperation/update/<int:pk>/', money_views.accountoperation_update.as_view(), name='accountoperation_update'),
     path('accountoperation/delete/<int:pk>', money_views.accountoperation_delete.as_view(), name='accountoperation_delete'),
     path('accountoperation/search/', money_views.accountoperation_search, name='accountoperation_search'),

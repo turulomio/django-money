@@ -15,7 +15,7 @@ Vue.component('table-accountoperations', {
         },
     },
     template: `
-        <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header :height="$attrs.height" :ref="$vnode.tag">
+        <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header v-bind="$attrs"  :ref="$vnode.tag">
             <template v-slot:[\`item.datetime\`]="{ item }" >
             {{ localtime(item.datetime)}}
             </template>      

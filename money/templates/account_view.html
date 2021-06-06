@@ -25,11 +25,11 @@
         <v-tab key="ao">{% trans "Account operations" %}</v-tab>
         <v-tab key="cc">{% trans "Credit cards" %}</v-tab>
         <v-tab-item key="ao">     
-            <v-card class="padding" outlined>
-                <v-layout style="justify-content: center;">
-                    <v-date-picker dense no-title class="mymonthpicker" ref="monthpicker" v-model="monthpicker" type="month"></v-date-picker>
-                </v-layout>
-                <table-accountoperations :items="items_ao" currency_account="{{account.currency}}" height="300" url_root="{% url 'home' %}" ref="table_ao"></table-accountoperations>
+            <v-card class="pa-4 d-flex justify-center" outlined
+            style="min-width: 100px; max-width: 100%;">
+                <v-date-picker dense no-title class="mymonthpicker " ref="monthpicker" v-model="monthpicker" type="month"></v-date-picker>
+                <v-divider class="mx-2" vertical ></v-divider>
+                <table-accountoperations :items="items_ao" currency_account="{{account.currency}}" height="400" url_root="{% url 'home' %}" ref="table_ao" class=" flex-grow-1 flex-shrink-0"></table-accountoperations>
             </v-card>
         </v-tab-item>
         <v-tab-item key="cc">
@@ -59,7 +59,7 @@ new Vue({
                     ]
                 },
                 { subheader:"{% trans 'Account operations orders' %}", children: [
-                        { name:"{% trans 'Add an account operation' %}", type: "redirection", command: "{% url 'accountoperation_new' accounts_id=account.id dt=0 concepts_id=0 %}", icon: "mdi-plus" },
+                        { name:"{% trans 'Add an account operation' %}", type: "redirection", command: "{% url 'accountoperation_new' accounts_id=account.id %}", icon: "mdi-plus" },
                     ]
                 },
                 { subheader:"{% trans 'Credit card orders' %}", children: [
