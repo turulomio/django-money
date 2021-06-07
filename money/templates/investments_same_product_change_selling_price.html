@@ -26,6 +26,7 @@
         <v-tabs  background-color="primary" dark v-model="tab" next-icon="mdi-arrow-right-bold-box-outline" prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
             <v-tab key="percentage">{% trans "Set a gains percentage" %}</v-tab>
             <v-tab key="gain">{% trans "Set a gain" %}</v-tab>
+            <v-tab key="price">{% trans "Set a price" %}</v-tab>
             <v-tabs-slider color="yellow"></v-tabs-slider>
         </v-tabs>
         <v-tabs-items v-model="tab">
@@ -34,9 +35,14 @@
                     <v-text-field name="{% trans 'Set a gains percentage' %}" v-model.number="percentage" :counter="10" label="{% trans 'Set a gains percentage' %}" placeholder="{% trans 'Enter an amount' %}" :rules="RulesFloatRequired(10)" autofocus></v-text-field>
                 </v-card>
             </v-tab-item>
-            <v-tab-item key="product">     
+            <v-tab-item key="gain">     
                 <v-card class="padding">
                     <v-text-field name="{% trans 'Set a gain' %}" v-model.number="gains" :counter="10" label="{% trans 'Set a gain' %}" placeholder="{% trans 'Enter an amount' %}" :rules="RulesFloatRequired(10)"></v-text-field>
+                </v-card>
+            </v-tab-item>
+            <v-tab-item key="price">     
+                <v-card class="padding">
+                    <v-text-field name="{% trans 'Set a price' %}" v-model.number="price" :counter="10" label="{% trans 'Set a price' %}" placeholder="{% trans 'Enter an amount' %}" :rules="RulesFloatRequired(10)"></v-text-field>
                 </v-card>
             </v-tab-item>
         </v-tabs-items>         
@@ -75,6 +81,7 @@ new Vue({
         leverage: {{product.real_leveraged_multiplier }},
         button_text:"Calculate your selling price",
         gains:500,
+        price: 0,
         current_price: {{product.basic_results.last | unlocalize}},
         percentage: 10,
         currency: '{{product.currency}}',
@@ -98,6 +105,9 @@ new Vue({
             this.calculate()
         },
         percentage: function(value) {
+            this.calculate()
+        },
+        price: function(value) {
             this.calculate()
         },
         tab: function(value){
@@ -129,8 +139,10 @@ new Vue({
             
             if (this.tab==0){
                 this.selected_selling_price=this.selling_price_to_gain_percentage_of_invested(this.percentage)
-            } else if (this.tab==1){
+            } else if (this.tab==1) {
                 this.selected_selling_price=this.selling_price_to_gain_money(this.gains)
+            } else if (this.tab==2) {
+                this.selected_selling_price=this.price
             }
                 
             var gai=(this.selected_selling_price-this.selected_average_price)*this.selected_shares*this.leverage
