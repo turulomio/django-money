@@ -377,9 +377,6 @@ def product_update(request):
     InvestingCom(request, csv_file, product=None)
     return HttpResponseRedirect(reverse("product_update"))
 
-
-
-
 @login_required
 def concept_list(request):
     concepts= Concepts.objects.all().select_related("operationstypes").order_by('name')
@@ -390,9 +387,6 @@ def error_403(request, exception):
         data = {}
         return render(request,'403.html', data)
 
-## @todo Add search to search field to repeat search
-## @todo Limit search minimum 3 and maximum 50
-## @todo Add a tab Widget, author, books, valorations with number in ttab
 @timeit
 def home(request):
     return render(request, 'home.html', locals())
@@ -1338,6 +1332,37 @@ group by
     table_report_concepts_negative=TabulatorReportConcepts("table_report_concepts_negative", None, list_report_concepts_negative, request.local_currency).render()
 
     return render(request, 'report_concepts.html', locals())
+    
+
+@login_required
+def report_concepts_historical(request, concepts_id):
+    concept=get_object_or_404(Concepts, pk=concepts_id)
+    
+    json_concepts_historical=[]
+    
+    rows=cursor_rows("""
+    select date_part('year',datetime)::int as year,  date_part('month',datetime)::int as month, sum(amount) as value 
+    from ( 
+                SELECT accountsoperations.datetime, accountsoperations.concepts_id,  accountsoperations.amount  FROM accountsoperations where concepts_id={0} 
+                    UNION ALL 
+                SELECT creditcardsoperations.datetime, creditcardsoperations.concepts_id, creditcardsoperations.amount FROM creditcardsoperations where concepts_id={0}
+            ) as uni 
+    group by date_part('year',datetime), date_part('month',datetime) order by 1,2 ;
+    """.format(concept.id))
+
+    firstyear=int(rows[0]['year'])
+    # Create all data spaces filling year
+    for year in range(firstyear, date.today().year+1):
+        json_concepts_historical.append({"year": year, "m1":0, "m2":0, "m3":0, "m4":0, "m5":0, "m6":0, "m7":0, "m8":0, "m9":0, "m10":0, "m11":0, "m12":0, "total":0})
+    # Fills spaces with values
+    for row in rows:
+        j_row=json_concepts_historical[row['year']-firstyear]
+        j_row[f"m{row['month']}"]=float(row['value'])
+    
+    for d in json_concepts_historical:
+        d["total"]=d["m1"]+d["m2"]+d["m3"]+d["m4"]+d["m5"]+d["m6"]+d["m7"]+d["m8"]+d["m9"]+d["m10"]+d["m11"]+d["m12"]
+
+    return render(request, 'report_concepts_historical.html', locals())
 
 @timeit
 @login_required

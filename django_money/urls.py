@@ -131,6 +131,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
 
     path('report/concepts/',  money_views.report_concepts,  name='report_concepts'), 
     path('report/concepts/<int:year>/<int:month>/',  money_views.report_concepts,  name='report_concepts'), 
+    path('report/concepts/historical/<int:concepts_id>/',  money_views.report_concepts_historical,  name='report_concepts_historical'), 
     path('report/dividends/',  money_views.report_dividends,  name='report_dividends'), 
     path('report/derivatives/',  money_views.report_derivatives,  name='report_derivatives'), 
     path('report/evolution/', money_views.report_evolution,  name='report_evolution'),
