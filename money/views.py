@@ -59,7 +59,7 @@ from money.reusing.currency import Currency
 from money.reusing.connection_dj import cursor_rows_as_dict
 from money.reusing.datetime_functions import dtaware_month_start, dtaware_month_end, dtaware_changes_tz, epochmicros2dtaware, dtaware2epochmicros
 from money.reusing.decorators import timeit
-from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key, listdict2json, listdict_print_first
+from money.reusing.listdict_functions import listdict_sum, listdict_sum_negatives, listdict_sum_positives, listdict_has_key, listdict2json, listdict_print_first, listdict_median,  listdict_average
 from money.reusing.percentage import Percentage
 from django.utils.translation import ugettext_lazy as _
 from money.listdict import (
@@ -1362,6 +1362,11 @@ def report_concepts_historical(request, concepts_id):
     for d in json_concepts_historical:
         d["total"]=d["m1"]+d["m2"]+d["m3"]+d["m4"]+d["m5"]+d["m6"]+d["m7"]+d["m8"]+d["m9"]+d["m10"]+d["m11"]+d["m12"]
 
+
+    total=listdict_sum(json_concepts_historical, "total")
+    median=listdict_median(rows, 'value')
+    average=listdict_average(rows, 'value')
+    
     return render(request, 'report_concepts_historical.html', locals())
 
 @timeit

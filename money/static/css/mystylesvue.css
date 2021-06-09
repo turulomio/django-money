@@ -30,6 +30,8 @@ h2 {
 p.normal {
     text-align: justify;
     padding: 2px;
+    font-size: 100%;
+    font-weight: unset;
 }
 
 p.title, p.title > a {
