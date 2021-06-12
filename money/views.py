@@ -178,6 +178,7 @@ select
     currency,
     last_datetime, 
     last, 
+    obsolete,
     percentage(penultimate, last) as percentage_day, 
     percentage(t.lastyear, last) as percentage_year, 
     (select estimation from estimations_dps where year=extract(year from now()) and products_id=products.id)/last*100 as percentage_dps

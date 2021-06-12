@@ -10,6 +10,7 @@
 <p><strong>{% trans "Product type" %}: </strong>{{ product.productstypes.name }}</p>
 <p><strong>{% trans "Leverage" %}: </strong>{{ product.leverages.name }}</p>
 <p><strong>{% trans "Tickers" %}: </strong>{{ product.tickers }}</p>
+<p><strong>{% trans "Obsolete" %}: </strong>{{ product.obsolete }}</p>
 
 <p class="orders">
   <a href="{% url 'quote_new' products_id=product.id %}">{% trans "Add a quote to product" %}</a> | 

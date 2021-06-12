@@ -93,6 +93,8 @@ class InvestmentsOperations:
         
     ## Returns the last operation of the io_current
     def  current_last_operation(self):
+        if len(self.io_current)==0:
+            return None
         r= self.io_current[len(self.io_current)-1]
         return r    ## Returns the last operation of the io_current
 

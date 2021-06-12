@@ -108,8 +108,8 @@ class ProductRangeManager(ObjectManager):
             range_highest=max_*Decimal(1+self.percentage_down.value*10)#5 times up value
             range_lowest=min_*Decimal(1-self.percentage_down.value*10)#5 times down value
         else: # No investment jet and shows ranges from product current price
-            range_highest=self.product.result.basic.last.quote*Decimal(1+self.percentage_down.value*10)#5 times up value
-            range_lowest=self.product.result.basic.last.quote*Decimal(1-self.percentage_down.value*10)#5 times down value
+            range_highest=self.product.basic_results()["last"]*Decimal(1+self.percentage_down.value*10)#5 times up value
+            range_lowest=self.product.basic_results()["last"]*Decimal(1-self.percentage_down.value*10)#5 times down value
 
         if range_lowest<Decimal(0.001):#To avoid infinity loop
             range_lowest=Decimal(0.001)
@@ -155,8 +155,8 @@ class ProductRangeManager(ObjectManager):
         # Compare dt sma with price and return a List with smas integers
         r=[]
         for i, dvm_sma in enumerate(dvm_smas):
-            sma_value=dvm_sma.find_le(dt).value
-            if price<sma_value:
+            sma_value=dvm_sma.find_le(dt)
+            if sma_value is not None and  price<sma_value.value:
                 r.append(smas[i])
         return r
 

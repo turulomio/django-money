@@ -29,6 +29,9 @@
                 <template v-slot:[`item.last_datetime`]="{ item }">
                     [[ localtime(item.last_datetime)]]
                 </template>  
+                <template v-slot:[`item.name`]="{ item }">
+                    <div :class="class_name(item)">[[item.name]]</div>
+                </template>  
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-icon small @click="viewProduct(item)">mdi-eye-outline</v-icon>
                     <v-icon small @click="editProduct(item)" v-if="item.id<0">mdi-pencil</v-icon>
@@ -58,10 +61,13 @@
             },
             viewProduct(item){
                 url="{% url 'product_view' pk=9999 %}".replace("9999", item.id)
-//                 if (item.id<0){
-//                     url=`${url}?negative=1`
-//                 }
                 window.location.href=url
+            },
+            class_name(item){
+                if (item.obsolete==false){
+                    return ""
+                }
+                return "text-decoration-line-through"
             },
             submit(){
                 if (this.$refs.form.validate()==false) return

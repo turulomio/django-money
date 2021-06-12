@@ -114,6 +114,10 @@ class InvestingCom:
                     products=[Products.objects.get(id=78094),]#DAX 30
                 elif row [1]=="DE30" and row[2]=="Eurex":
                     products=(Products.objects.get(id=81752),)#CFD DAX 30
+                elif row[1]=="US2000" and row[2]=="P":
+                    products=[Products.objects.get(id=81745),]#RUSELL 2000
+                elif row [1]=="US2000" and row[2]=="ICE":
+                    products=(Products.objects.get(id=81760),)#CFD RUSELL 2000
                 elif "EUR/USD" in row [1]:
                     products=(Products.objects.get(id=74747),)#EUR/USD
                 elif "Oro al " in row [1]:
