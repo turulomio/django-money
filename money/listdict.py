@@ -830,6 +830,7 @@ class LdoAssetsEvolution(LdoDjangoMoney):
                 "balance_start": tb[year-1]["total_user"], 
                 "balance_end": tb[year]["total_user"],  
                 "diff": tb[year]["total_user"]-tb[year-1]["total_user"], 
+                "percentage":0, 
                 "incomes":0, 
                 "gains_net":0, 
                 "dividends_net":0, 
@@ -876,7 +877,7 @@ class LdoAssetsEvolutionInvested(LdoDjangoMoney):
             d['net_gains_plus_dividends']=iom.historical_gains_net_user_between_dt(dt_from, dt_to)+Dividends.net_gains_baduser_between_datetimes_for_some_investments(iom.list_of_investments_ids(), dt_from, dt_to)
             d['custody_commissions']=0 if custody_commissions is None else custody_commissions
             d['taxes']=0 if taxes is None else taxes
-            d['investment_commissions']=iom.historical_commissions_user_between_dt(dt_from, dt_to)
+            d['investment_commissions']=iom.o_commissions_account_between_dt(dt_from, dt_to)
             self.append(d)
             
     def tabulator(self):

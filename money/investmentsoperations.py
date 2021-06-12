@@ -198,6 +198,15 @@ class InvestmentsOperations:
             o["operationstypes"]=request.operationstypes[o["operationstypes_id"]]
         return self.io        
         
+    def o_commissions_account_between_dt(self, dt_from, dt_to):
+        r=0
+        for o in self.io:
+            print(o)
+            if dt_from<=o["datetime"] and o["datetime"]<=dt_to:
+                r=r - o["commission_account"]
+        return r
+        
+        
     def current_listdict_tabulator_homogeneus_investment(self, request):
         for ioc in self.io_current:
             o=IOC(self.investment, ioc)
@@ -522,6 +531,12 @@ class InvestmentsOperationsManager:
                     r.append(o)
         r.order_by("dt_end")
         return r
+        
+    def o_commissions_account_between_dt(self, dt_from, dt_to):
+        r=0
+        for o in self.list:
+                r=r + o.o_commissions_account_between_dt(dt_from, dt_to)
+        return r
 
 ## Generate object from and ids list
 def InvestmentsOperationsManager_from_investment_queryset(qs_investments, dt, request):
@@ -535,7 +550,7 @@ def InvestmentsOperationsManager_from_investment_queryset(qs_investments, dt, re
             r.append(InvestmentsOperations(request, investment,  row["io"], row['io_current'],  row['io_historical']))
     return r
         
-        
+
 ##                        io                |                                                       io_current                                                        |                                           io_historical                                            
 ## ----------------------------------+-------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------
 ##{'price': Decimal('142.083451')} | {'balance_user': 0, 'gains_gross_user': 0, 'gains_net_user': 0, 'shares': 0, 'price_investment': 0, 'invested_user': 0} | {'commissions_account': Decimal('0.00'), 'gains_net_user': Decimal('-649.1696967043800000000000')}
