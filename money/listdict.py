@@ -28,14 +28,14 @@ import asyncio
 from asgiref.sync import sync_to_async
 from datetime import date, timedelta
 from decimal import Decimal
-from money.reusing.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_dict
+from money.reusing.connection_dj import  cursor_rows, cursor_one_column, cursor_rows_as_dict, cursor_one_field
 from money.reusing.listdict_functions import listdict2dict, listdict_print,  Ldo, listdict_sum,  listdict2json
 from django.conf import settings
 from django.urls import reverse_lazy
 from django.templatetags.static import static
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from xulpymoney.libxulpymoneytypes import eOperationType
+from xulpymoney.libxulpymoneytypes import eOperationType, eConcept
 from money.models import (
     Accounts, 
     Comment, 
@@ -864,6 +864,9 @@ class LdoAssetsEvolutionInvested(LdoDjangoMoney):
             iom=InvestmentsOperationsManager_from_investment_queryset(qs, dtaware_month_end(year, 12, self.request.local_zone), self.request)
             dt_from=dtaware_year_start(year, self.request.local_zone)
             dt_to=dtaware_year_end(year, self.request.local_zone)
+            
+            custody_commissions=cursor_one_field("select sum(amount) from accountsoperations where concepts_id = %s and datetime>%s and datetime<= %s", (eConcept.CommissionCustody, dt_from, dt_to))
+            taxes=cursor_one_field("select sum(amount) from accountsoperations where concepts_id in( %s,%s) and datetime>%s and datetime<= %s", (eConcept.TaxesReturn, eConcept.TaxesPayment, dt_from, dt_to))
             d={}
             d['year']=str(year)
             d['invested']=iom.current_invested_user()
@@ -871,8 +874,8 @@ class LdoAssetsEvolutionInvested(LdoDjangoMoney):
             d['diff']=d['balance']-d['invested']
             d['percentage']=percentage_between(d['invested'], d['balance'])
             d['net_gains_plus_dividends']=iom.historical_gains_net_user_between_dt(dt_from, dt_to)+Dividends.net_gains_baduser_between_datetimes_for_some_investments(iom.list_of_investments_ids(), dt_from, dt_to)
-            d['custody_commissions']=0
-            d['taxes']=0
+            d['custody_commissions']=0 if custody_commissions is None else custody_commissions
+            d['taxes']=0 if taxes is None else taxes
             d['investment_commissions']=iom.historical_commissions_user_between_dt(dt_from, dt_to)
             self.append(d)
             
