@@ -824,32 +824,24 @@ class LdoAssetsEvolution(LdoDjangoMoney):
         
         
         for year in range(self.from_year, date.today().year+1): 
-            #iotm=InvestmentsOperationsTotalsManager_from_all_investments(self.request, dtaware_month_end(year, 12, self.request.local_zone))
+            dt_from=dtaware_year_start(year, self.request.local_zone)
+            dt_to=dtaware_year_end(year, self.request.local_zone)
+            dividends=Dividends.net_gains_baduser_between_datetimes(dt_from, dt_to)
+            incomes=0
+            gains=0
+            expenses=0
             self.append({
                 "year": str(year), 
                 "balance_start": tb[year-1]["total_user"], 
                 "balance_end": tb[year]["total_user"],  
                 "diff": tb[year]["total_user"]-tb[year-1]["total_user"], 
-                "percentage":0, 
-                "incomes":0, 
-                "gains_net":0, 
-                "dividends_net":0, 
-                "expenses":0, 
-                "total":0, 
+                "incomes":incomes, 
+                "gains_net":gains, 
+                "dividends_net":dividends, 
+                "expenses":expenses, 
+                "total":incomes+gains+dividends+expenses, 
                 
             })
-            
-    def tabulator(self):
-        c=self.request.local_currency
-        r=TabulatorFromListDict(f"{self.name}_table")
-        r.setDestinyUrl(None)
-        r.setLocalZone(self.request.local_zone)
-        r.setListDict(self.ld)
-        r.setFields("year", "balance_start","balance_end","diff", "incomes", "gains_net", "dividends_net", "expenses", "total")
-        r.setHeaders(_("Year"), _("Initial balance"), _("Final balance"),  _("Difference"),  _("Incomes"), _("Net gains"), _("Net dividends"), _("Expenses"), _("I+G+D-E"))
-        r.setTypes("str", c, c, c, c, c, c, c, c)
-        r.showLastRecord(False)
-        return r
 
 #GOOD JOB
 ## Currency used to compare is product worse currency
@@ -879,19 +871,6 @@ class LdoAssetsEvolutionInvested(LdoDjangoMoney):
             d['taxes']=0 if taxes is None else taxes
             d['investment_commissions']=iom.o_commissions_account_between_dt(dt_from, dt_to)
             self.append(d)
-            
-    def tabulator(self):
-        c=self.request.local_currency
-        r=TabulatorFromListDict(f"{self.name}_table2")
-        r.setDestinyUrl(None)
-        r.setLocalZone(self.request.local_zone)
-        r.setListDict(self.ld)
-        r.setFields("year", "invested","balance","diff", "percentage", "net_gains_plus_dividends", "custody_commissions", "taxes", "investment_commissions")
-        r.setHeaders(_("Year"), _("Invested"), _("Balance with futures"),  _("Difference"),  _("Percentage"), _("Net gains + Dividends"), _("Custody commissions"), _("Taxes"), _("Investment commissions"))
-        r.setTypes("str", c, c, c, "percentage", c, c, c, c)
-        r.showLastRecord(False)
-        return r
-
         
 #GOOD JOB
 ## Currency used to compare is product worse currency
