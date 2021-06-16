@@ -109,21 +109,24 @@ class InvestingCom:
         quotes_count = 0
         for row in self.get_csv_object_seeking():
             if line_count >0:#Ignores headers line
-                ## Casos especiales por ticker repetido se compara con más información.
-                if row[1]=="DE30" and row[2]=="DE":
-                    products=[Products.objects.get(id=78094),]#DAX 30
-                elif row [1]=="DE30" and row[2]=="Eurex":
-                    products=(Products.objects.get(id=81752),)#CFD DAX 30
-                elif row[1]=="US2000" and row[2]=="P":
-                    products=[Products.objects.get(id=81745),]#RUSELL 2000
-                elif row [1]=="US2000" and row[2]=="ICE":
-                    products=(Products.objects.get(id=81760),)#CFD RUSELL 2000
-                elif "EUR/USD" in row [1]:
-                    products=(Products.objects.get(id=74747),)#EUR/USD
-                elif "Oro al " in row [1]:
-                    products=(Products.objects.get(id=81758), Products.objects.get(id=81757))#CFD ORO
+#                ## Casos especiales por ticker repetido se compara con más información.
+#                if row[1]=="DE30" and row[2]=="DE":
+#                    products=[Products.objects.get(id=78094),]#DAX 30
+#                elif row [1]=="DE30" and row[2]=="Eurex":
+#                    products=(Products.objects.get(id=81752),)#CFD DAX 30
+#                elif row[1]=="US2000" and row[2]=="P":
+#                    products=[Products.objects.get(id=81745),]#RUSELL 2000
+#                elif row [1]=="US2000" and row[2]=="ICE":
+#                    products=(Products.objects.get(id=81760),)#CFD RUSELL 2000
+#                elif "EUR/USD" in row [1]:
+#                    products=(Products.objects.get(id=74747),)#EUR/USD
+#                elif "Oro al " in row [1]:
+#                    products=(Products.objects.get(id=81758), Products.objects.get(id=81757))#CFD ORO
+#                else:
+                if row[2]=="":
+                    products=Products.objects.raw('SELECT products.* FROM products where tickers[5]=%s', (f"{row[1]}", ))
                 else:
-                    products=Products.objects.raw('SELECT products.* FROM products where tickers[5]=%s', (row[1], ))
+                    products=Products.objects.raw('SELECT products.* FROM products where tickers[5]=%s', (f"{row[1]}#{row[2]}", ))
 
                 if len(products)==0:
                     self.log.append(_(f"Product with InvestingCom ticker {row[1]} wasn't found"))
