@@ -36,18 +36,34 @@ Vue.component('table-investmentoperations', {
             <template v-slot:[\`item.price\`]="{ item }">
             {{ currency_string(item.price, currency_investment)}}
             </template>
+            
+            <template v-slot:[\`item.gross_account\`]="{ item }">
+            {{ currency_string(item.gross_account, currency_account)}}
+            </template>
             <template v-slot:[\`item.gross_investment\`]="{ item }">
             {{ currency_string(item.gross_investment, currency_investment)}}
             </template>
+            <template v-slot:[\`item.gross_user\`]="{ item }">
+            {{ currency_string(item.gross_user, currency_user)}}
+            </template>
+            
             <template v-slot:[\`item.commission\`]="{ item }">
             {{ currency_string(item.commission, currency_investment)}}
             </template>
             <template v-slot:[\`item.taxes\`]="{ item }">
             {{ currency_string(item.taxes, currency_investment)}}
             </template>
+            
+            <template v-slot:[\`item.net_account\`]="{ item }">
+            {{ currency_string(item.net_account, currency_account)}}
+            </template>
             <template v-slot:[\`item.net_investment\`]="{ item }">
             {{ currency_string(item.net_investment, currency_investment)}}
             </template>
+            <template v-slot:[\`item.net_user\`]="{ item }">
+            {{ currency_string(item.net_user, currency_user)}}
+            </template>
+            
             <template v-slot:[\`item.actions\`]="{ item }">
                 <v-icon small class="mr-2" @click="editIO(item)">mdi-pencil</v-icon>
             </template>
