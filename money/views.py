@@ -1647,7 +1647,7 @@ class strategy_update(UpdateView):
     template_name="strategy_update.html"
 
     def get_success_url(self):
-        return reverse_lazy('strategy_list_active')
+        return reverse_lazy('strategy_view',  args=(self.object.id, ))
 
     def get_form(self, form_class=None): 
         if form_class is None: 
