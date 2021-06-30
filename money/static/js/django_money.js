@@ -114,7 +114,7 @@ function my_round(num, decimals = 2) {
 
 function percentage_string(num, decimals=2){
     if (isNaN(num)) return "- - - %"
-    return "{0} %".format(my_round(num*100,decimals).toFixed(decimals));
+    return "{0} %".format(my_round(num*100,decimals).toLocaleString());
 }
 
 function percentage_html(num, decimals=2){
@@ -125,14 +125,14 @@ function percentage_html(num, decimals=2){
     }
 }
 function currency_string(num, currency, decimals=2){
-    return "{0} {1}".format(my_round(num,decimals).toFixed(decimals), currency_symbol(currency));
+    return "{0} {1}".format(my_round(num,decimals).toLocaleString('es',{ minimumFractionDigits: decimals,  }), currency_symbol(currency));
 }
 
 function currency_html(num, currency, decimals=2){
     if (num>=0){
-        return "{0} {1}".format(my_round(num,decimals).toFixed(decimals), currency_symbol(currency));
+        return currency_string(num, currency, decimals)
     } else {
-        return "<span class='vuered'>{0} {1}</span>".format(my_round(num,decimals).toFixed(decimals), currency_symbol(currency));
+        return "<span class='vuered'>{0}</span>".format(currency_string(num, currency, decimals));
     }
 }
 

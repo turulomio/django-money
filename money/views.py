@@ -45,9 +45,6 @@ from money.tables import (
     TabulatorCreditCards, 
     TabulatorProducts, 
     TabulatorOrders, 
-    TabulatorReportIncomeTotal, 
-    TabulatorReportTotal, 
-    TabulatorInvestmentsGainsByProductType, 
     TabulatorInvestmentsOperationsHistoricalHeterogeneus,
     TabulatorProductQuotesMonthPercentages, 
     TabulatorProductQuotesMonthQuotes,  
@@ -1005,9 +1002,10 @@ class bank_delete(DeleteView):
 
 @timeit
 @login_required
-def report_total(request, year=date.today().year):
+def report_total(request):
+    year=int(request.GET.get("year",  date.today().year))
     year_start=1970
-    year_end=date.today().year + 10
+    year_end=year + 10
     last_year=dtaware_month_end(year-1, 12, request.local_zone)
     
     start=timezone.now()
@@ -1016,7 +1014,15 @@ def report_total(request, year=date.today().year):
     
     start=timezone.now()
     list_report=listdict_report_total(year, last_year_balance, request.local_currency, request.local_zone)
-    table_report_total=TabulatorReportTotal("table_report_total", None, list_report, request.local_currency).render()
+    json_list_report=listdict2json(list_report)
+
+    list_report_incomes=listdict_report_total_income(request, Investments.objects.all(), year, request.local_currency, request.local_zone)
+    json_list_report_incomes=listdict2json(list_report_incomes)
+
+
+    list_report_by_type=listdict_investments_gains_by_product_type(year, request.local_currency)
+    json_list_report_by_type=listdict2json(list_report_by_type)
+
     print("Loading list report took {}".format(timezone.now()-start))
     
     return render(request, 'report_total.html', locals())
@@ -1135,24 +1141,7 @@ def ajax_chart_product_quotes_historical(request, pk):
     chart_total=chart_product_quotes_historical(ld_chart_total, request.local_currency)
     return HttpResponse(chart_total)
 
-@timeit
-@login_required
-def ajax_report_total_income(request, year=date.today().year):  
-    qs_investments=Investments.objects.all()
-    list_report2=listdict_report_total_income(request, qs_investments, year, request.local_currency, request.local_zone)
-    table_report_total_income=TabulatorReportIncomeTotal("table_report_total_income", "report_total_income_details", list_report2, request.local_currency).render()
-    return HttpResponse(table_report_total_income)
 
-@timeit
-@login_required
-def ajax_report_gains_by_product_type(request, year=date.today().year):
-    list_report=listdict_investments_gains_by_product_type(year, request.local_currency)
-    table_investments_gains_by_product_type=TabulatorInvestmentsGainsByProductType("table_investments_gains_by_product_type", None, list_report, request.local_currency).render()
-    gross=Currency(listdict_sum(list_report, "dividends_gross")+ listdict_sum(list_report, "gains_gross"), request.local_currency)
-    net=Currency(listdict_sum(list_report, "dividends_net")+ listdict_sum(list_report, "gains_net"), request.local_currency)
-    s=f"<p>Gross gains + Gross dividends = {gross.string()}.</p><p>Net gains + Net dividends = {net.string()}.</p>"
-    return HttpResponse(table_investments_gains_by_product_type+s)
-    
 
 def ajax_modal_button(request):
     return HttpResponse("""<modal-window>
@@ -1162,7 +1151,7 @@ def ajax_modal_button(request):
 
 @timeit
 @login_required
-def report_total_income_details(request, year=date.today().year, month=date.today()):
+def report_total_income_details(request, year, month):
     expenses=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 2,  request.local_currency, request.local_zone)
     table_expenses=TabulatorAccountOperations("table_expenses", None, expenses, request.local_currency,  request.local_zone).render()
     incomes=listdict_accountsoperations_creditcardsoperations_by_operationstypes_and_month(year, month, 1,  request.local_currency, request.local_zone)

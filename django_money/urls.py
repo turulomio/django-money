@@ -136,11 +136,7 @@ urlpatterns=urlpatterns+ i18n_patterns(
     path('report/derivatives/',  money_views.report_derivatives,  name='report_derivatives'), 
     path('report/evolution/', money_views.report_evolution,  name='report_evolution'),
     path('report/total/', money_views.report_total,  name='report_total'),
-    path('report/total/<int:year>/', money_views.report_total,  name='report_total'),
-    path('report/total/div/income/<int:year>/', money_views.ajax_report_total_income,  name='ajax_report_total_income'),
-    path('report/total/income/details/', money_views.report_total_income_details,  name='report_total_income_details'),
     path('report/total/income/details/<int:year>/<int:month>/', money_views.report_total_income_details,  name='report_total_income_details'),
-    path('report/total/gainsbyproducttype/<int:year>/', money_views.ajax_report_gains_by_product_type,  name='ajax_report_gains_by_product_type'),
     
     path('settings/', money_views.settings, name='settings'),
     

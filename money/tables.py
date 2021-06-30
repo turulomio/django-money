@@ -157,39 +157,3 @@ class TabulatorOrders(TabulatorFromListDict):
         self.setHeaders(_("Id"), _("Date"),_("Expiration"), _("Investment"), _("Currency"),   _("Shares"), _("Price"), _("Amount"), _("% from price"), _("Executed"))
         self.setTypes("int", "str", "str", "str",  "str",   "Decimal", "Decimal", "Decimal", "percentage","str")
         self.setBottomCalc(None, None, None, None, None,None,None,"sum", None, None)        
-        
-
-class TabulatorReportTotal(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, investment):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setListDict(listdict)
-#        self.setLayout("fitColumns")
-        self.setFields("month", "account_balance","investment_balance", "total", "diff_lastmonth", "percentage_year")
-        self.setHeaders(_("Month"), _("Account balance"), _("Investment balance"), _("Total balance"), _("Last month diff"), _("% year to date"))
-        self.setTypes("str","EUR", "EUR", "EUR", "EUR","percentage")
-        self.showLastRecord(False)
-        self.setBottomCalc(None, None, None, None, "sum", None)      
-
-class TabulatorReportIncomeTotal(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, local_currency):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url, destiny_type=2, new_tab=True)##Type=2 year, month as parameter in id in the form "year/month/"
-        self.setListDict(listdict)
-#        self.setLayout("fitColumns")
-        self.setFields("id","month", "incomes","expenses", "gains", "dividends", "total")
-        self.setHeaders("Id", _("Month"), _("Incomes"), _("Expenses"), _("Net gains"), _("Net dividends"), _("Total"))
-        self.setTypes("int","str","EUR", "EUR", "EUR", "EUR","EUR")
-        self.setBottomCalc(None, None, "sum", "sum", "sum", "sum", "sum")
-        self.showLastRecord(False)
-
-
-class TabulatorInvestmentsGainsByProductType(TabulatorFromListDict):
-    def __init__(self, name, destiny_url, listdict, local_currency):
-        TabulatorFromListDict.__init__(self, name)
-        self.setDestinyUrl(destiny_url)
-        self.setListDict(listdict)
-        self.setFields("id","name", "gains_gross",  "dividends_gross","gains_net","dividends_net")
-        self.setHeaders("Id", _("Name"), _("Gross gains"), _("Gross dividends"), _("Net gains"), _("Net dividends"))
-        self.setTypes("int","str", local_currency, local_currency, local_currency, local_currency)
-        self.setBottomCalc(None, None, "sum", "sum", "sum", "sum")
