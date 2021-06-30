@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-14 06:35+0000\n"
+"POT-Creation-Date: 2021-06-30 06:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,7 +50,7 @@ msgstr "Renta fija. Cobro del cupón corrido"
 msgid "Bonds. Running coupon payment"
 msgstr "Renta fija. Pago del cupón corrido"
 
-#: money/hardcoded_strings.py:8 money/hardcoded_strings.py:54
+#: money/hardcoded_strings.py:8 money/hardcoded_strings.py:56
 msgid "Credit card billing"
 msgstr "Tarjeta de crédito. Facturación"
 
@@ -77,7 +77,7 @@ msgstr "Derivados. Comisión de la operación"
 #: money/hardcoded_strings.py:14 money/listdict.py:310 money/middleware.py:27
 #: money/templates/investment_view.html:48
 #: money/templates/report_total_income_details.html:19
-#: money/templates/strategy_view.html:38
+#: money/templates/strategy_view.html:40
 msgid "Dividends"
 msgstr "Dividendos"
 
@@ -154,124 +154,136 @@ msgid "Leverage x20"
 msgstr "Apalancamiento x20"
 
 #: money/hardcoded_strings.py:34
+#, fuzzy
+#| msgid "Leverage x20"
+msgid "Leverage x200"
+msgstr "Apalancamiento x20"
+
+#: money/hardcoded_strings.py:35
 msgid "Leverage x25"
 msgstr "Apalancamiento x25"
 
-#: money/hardcoded_strings.py:35
+#: money/hardcoded_strings.py:36
 msgid "Leverage x3"
 msgstr "Apalancamiento x3"
 
-#: money/hardcoded_strings.py:36
+#: money/hardcoded_strings.py:37
 msgid "Leverage x4"
 msgstr "Apalancamiento x4"
 
-#: money/hardcoded_strings.py:37
+#: money/hardcoded_strings.py:38
 msgid "Leverage x5"
 msgstr "Apalancamiento x5"
 
-#: money/hardcoded_strings.py:38
+#: money/hardcoded_strings.py:39
 msgid "Leverage x50"
 msgstr "Apalancamiento x50"
 
-#: money/hardcoded_strings.py:39
+#: money/hardcoded_strings.py:40
+#, fuzzy
+#| msgid "Leverage x50"
+msgid "Leverage x500"
+msgstr "Apalancamiento x50"
+
+#: money/hardcoded_strings.py:41
 msgid "Variable leverage"
 msgstr "Apalancamiento variable"
 
-#: money/hardcoded_strings.py:40
+#: money/hardcoded_strings.py:42
 msgid "Without leverage"
 msgstr "Sin apalancamiento"
 
-#: money/hardcoded_strings.py:41 money/listdict.py:491
+#: money/hardcoded_strings.py:43 money/listdict.py:491
 msgid "Account"
 msgstr "Cuenta"
 
-#: money/hardcoded_strings.py:42
+#: money/hardcoded_strings.py:44
 msgid "CFD"
 msgstr "CFD"
 
-#: money/hardcoded_strings.py:43 money/tables.py:157
+#: money/hardcoded_strings.py:45 money/tables.py:157
 #: money/templates/account_view.html:21 money/templates/investment_view.html:38
 #: money/templates/product_view.html:9
 msgid "Currency"
 msgstr "Divisa"
 
-#: money/hardcoded_strings.py:44
+#: money/hardcoded_strings.py:46
 msgid "Deposit"
 msgstr "Depósito"
 
-#: money/hardcoded_strings.py:45
+#: money/hardcoded_strings.py:47
 msgid "ETF"
 msgstr "ETF"
 
-#: money/hardcoded_strings.py:46
+#: money/hardcoded_strings.py:48
 msgid "Fund"
 msgstr "Fondo de inversión"
 
-#: money/hardcoded_strings.py:47
+#: money/hardcoded_strings.py:49
 msgid "Future"
 msgstr "Futuro"
 
-#: money/hardcoded_strings.py:48
+#: money/hardcoded_strings.py:50
 msgid "Index"
 msgstr "Índice"
 
-#: money/hardcoded_strings.py:49
+#: money/hardcoded_strings.py:51
 msgid "Pension plan"
 msgstr "Plan de pensiones"
 
-#: money/hardcoded_strings.py:50
+#: money/hardcoded_strings.py:52
 msgid "Private bond"
 msgstr "Renta fija privada"
 
-#: money/hardcoded_strings.py:51
+#: money/hardcoded_strings.py:53
 msgid "Public bond"
 msgstr "Renta fija pública"
 
-#: money/hardcoded_strings.py:52
+#: money/hardcoded_strings.py:54
 msgid "Share"
 msgstr "Acción"
 
-#: money/hardcoded_strings.py:53
+#: money/hardcoded_strings.py:55
 msgid "Warrant"
 msgstr "Warrant"
 
-#: money/hardcoded_strings.py:55
+#: money/hardcoded_strings.py:57
 msgid "Derivative management"
 msgstr "Gestión de derivados"
 
-#: money/hardcoded_strings.py:56
+#: money/hardcoded_strings.py:58
 msgid "Expense"
 msgstr "Gasto"
 
-#: money/hardcoded_strings.py:57
+#: money/hardcoded_strings.py:59
 msgid "Income"
 msgstr "Ingreso"
 
-#: money/hardcoded_strings.py:58
+#: money/hardcoded_strings.py:60
 msgid "Purchase of shares"
 msgstr "Compra de acciones"
 
-#: money/hardcoded_strings.py:59
+#: money/hardcoded_strings.py:61
 msgid "Sale of shares"
 msgstr "Venta de acciones"
 
-#: money/hardcoded_strings.py:60
+#: money/hardcoded_strings.py:62
 msgid "Shares addition"
 msgstr "Añadido de acciones"
 
-#: money/hardcoded_strings.py:61
+#: money/hardcoded_strings.py:63
 msgid "Transfer"
 msgstr "Transferencia"
 
-#: money/hardcoded_strings.py:62
+#: money/hardcoded_strings.py:64
 msgid "Transfer of funds"
 msgstr "Transferencia de fondos"
 
-#: money/hardcoded_strings.py:63
+#: money/hardcoded_strings.py:65
 msgid "Transfer of shares destiny"
 msgstr "Transferencia de acciones. Destino"
 
-#: money/hardcoded_strings.py:64
+#: money/hardcoded_strings.py:66
 msgid "Transfer of shares origin"
 msgstr "Transferencia de acciones. Origen"
 
@@ -279,7 +291,7 @@ msgstr "Transferencia de acciones. Origen"
 msgid "Adding quotes from Investing.com portfolio"
 msgstr "Añadiendo cotizaciones desde la cartera de Investing.com"
 
-#: money/investing_com.py:64 money/investing_com.py:129
+#: money/investing_com.py:64 money/investing_com.py:132
 #, python-brace-format
 msgid "Product with InvestingCom ticker {row[1]} wasn't found"
 msgstr ""
@@ -340,7 +352,6 @@ msgstr "Saldo actual"
 #: money/investmentsoperations.py:272 money/investmentsoperations.py:285
 #: money/listdict.py:231 money/listdict.py:329 money/listdict.py:387
 #: money/tables.py:13 money/tables.py:97 money/tables.py:123
-#: money/tables.py:193
 msgid "Gross gains"
 msgstr "Ganancias brutas"
 
@@ -367,9 +378,9 @@ msgstr "% Total"
 #: money/listdict.py:655 money/listdict.py:704 money/tables.py:13
 #: money/tables.py:24 money/tables.py:65 money/tables.py:75 money/tables.py:97
 #: money/tables.py:109 money/tables.py:134 money/tables.py:143
-#: money/tables.py:193 money/templates/investment_view.html:24
+#: money/templates/investment_view.html:24
 #: money/templates/investments_same_product_change_selling_price.html:67
-#: money/templates/product_view.html:7 money/templates/strategy_view.html:23
+#: money/templates/product_view.html:7 money/templates/strategy_view.html:25
 msgid "Name"
 msgstr "Nombre"
 
@@ -405,7 +416,7 @@ msgstr "Conversión de divisa"
 
 #: money/investmentsoperations.py:259 money/listdict.py:211
 #: money/listdict.py:426 money/listdict.py:439 money/listdict.py:491
-#: money/tables.py:55 money/templates/strategy_view.html:28
+#: money/tables.py:55 money/templates/strategy_view.html:30
 msgid "Comment"
 msgstr "Comentario"
 
@@ -430,8 +441,7 @@ msgid "Commissions"
 msgstr "Comisiones"
 
 #: money/investmentsoperations.py:272 money/investmentsoperations.py:285
-#: money/listdict.py:329 money/tables.py:123 money/tables.py:181
-#: money/tables.py:193
+#: money/listdict.py:329 money/tables.py:123
 msgid "Net gains"
 msgstr "Ganancias netas"
 
@@ -507,7 +517,6 @@ msgstr "Diciembre"
 
 #: money/listdict.py:263 money/listdict.py:310 money/middleware.py:20
 #: money/middleware.py:26 money/tables.py:35 money/tables.py:143
-#: money/tables.py:181
 msgid "Total"
 msgstr "Total"
 
@@ -577,15 +586,15 @@ msgstr "% Invertido"
 msgid "% selling point"
 msgstr "% punto de venta"
 
-#: money/listdict.py:704 money/templates/strategy_view.html:24
+#: money/listdict.py:704 money/templates/strategy_view.html:26
 msgid "From"
 msgstr "De"
 
-#: money/listdict.py:704 money/templates/strategy_view.html:25
+#: money/listdict.py:704 money/templates/strategy_view.html:27
 msgid "To"
 msgstr "A"
 
-#: money/listdict.py:704 money/tables.py:181 money/tables.py:193
+#: money/listdict.py:704
 msgid "Net dividends"
 msgstr "Dividendos netos"
 
@@ -643,7 +652,7 @@ msgid "Accounts"
 msgstr "Cuentas"
 
 #: money/middleware.py:16 money/templates/bank_view.html:20
-#: money/templates/strategy_view.html:26
+#: money/templates/strategy_view.html:28
 msgid "Investments"
 msgstr "Inversiones"
 
@@ -835,39 +844,39 @@ msgstr "Pares en la misma cuenta"
 msgid "Product ranges"
 msgstr "Rangos de productos"
 
-#: money/models.py:1095
+#: money/models.py:1097
 msgid "{}: {} shares. Amount: {}. Comission: {}. Taxes: {}"
 msgstr ""
 
-#: money/models.py:1102
+#: money/models.py:1104
 msgid "Transfer to {}"
 msgstr "Transferencia a {}"
 
-#: money/models.py:1108
+#: money/models.py:1110
 msgid "Transfer received from {}"
 msgstr "Transferencia recibida de {}"
 
-#: money/models.py:1114
+#: money/models.py:1116
 msgid "Comission transfering {} from {} to {}"
 msgstr "Comisión al transferir {} de {} a {}"
 
-#: money/models.py:1119
+#: money/models.py:1121
 msgid "From {}. Gross {}. Net {}."
 msgstr ""
 
-#: money/models.py:1120
+#: money/models.py:1122
 msgid "Error decoding dividend comment"
 msgstr ""
 
-#: money/models.py:1126
+#: money/models.py:1128
 msgid "Billing {} movements of {}"
 msgstr "Facturando {} movimientos de {}"
 
-#: money/models.py:1127
+#: money/models.py:1129
 msgid "Error decoding credit card billing comment"
 msgstr ""
 
-#: money/models.py:1133 money/models.py:1175
+#: money/models.py:1135 money/models.py:1177
 msgid "Refund of {} payment of which had an amount of {}"
 msgstr ""
 
@@ -914,7 +923,7 @@ msgstr "Saldo de las cuentas"
 msgid "Investments balance"
 msgstr "Saldo de las inversiones"
 
-#: money/tables.py:65 money/tables.py:169
+#: money/tables.py:65
 msgid "Total balance"
 msgstr "Saldo total"
 
@@ -992,44 +1001,14 @@ msgid "Expiration"
 msgstr "Expiración"
 
 #: money/tables.py:157
+#, fuzzy, python-format
+#| msgid "% from price"
 msgid "% from price"
 msgstr "% desde el precio"
 
 #: money/tables.py:157
 msgid "Executed"
 msgstr "Ejecutada"
-
-#: money/tables.py:169 money/tables.py:181
-msgid "Month"
-msgstr "Mes"
-
-#: money/tables.py:169
-msgid "Account balance"
-msgstr "Saldo de la cuenta"
-
-#: money/tables.py:169
-msgid "Investment balance"
-msgstr "Saldo de la inversión"
-
-#: money/tables.py:169
-msgid "Last month diff"
-msgstr "Diferencia del último mes"
-
-#: money/tables.py:169
-msgid "% year to date"
-msgstr "% anual hasta la fecha"
-
-#: money/tables.py:181 money/templates/report_total_income_details.html:17
-msgid "Incomes"
-msgstr "Ingresos"
-
-#: money/tables.py:181 money/templates/report_total_income_details.html:18
-msgid "Expenses"
-msgstr "Gastos"
-
-#: money/tables.py:193
-msgid "Gross dividends"
-msgstr "Dividendos brutos"
 
 #: money/templates/403.html:6 money/templates/403.html:10
 msgid "Forbidden page"
@@ -1250,10 +1229,8 @@ msgid "Historical concepts report"
 msgstr "Informe mensual por conceptos"
 
 #: money/templates/bank_delete.html:6
-#, fuzzy
-#| msgid "Edit a bank"
 msgid "Delete a bank"
-msgstr "Modifica un banco"
+msgstr "Borra un banco"
 
 #: money/templates/bank_delete.html:14
 msgid "You can't delete this bank due to it has dependent data"
@@ -1319,7 +1296,6 @@ msgid "Close"
 msgstr "Cerrar"
 
 #: money/templates/chart_total.html:7 money/templates/order_list.html:16
-#: money/templates/report_total.html:9
 msgid "Select a year"
 msgstr "Selecciona un año"
 
@@ -1463,10 +1439,8 @@ msgid "By variable percentage"
 msgstr "Apalancamiento variable"
 
 #: money/templates/investment_classes.html:23
-#, fuzzy
-#| msgid "Investment name"
 msgid "By investment type"
-msgstr "Nombre de la inversión"
+msgstr "Por tipo de inversión"
 
 #: money/templates/investment_classes.html:24
 msgid "By leverage"
@@ -1530,7 +1504,7 @@ msgid "Investments pairs"
 msgstr "Pares de inversiones"
 
 #: money/templates/investment_pairs.html:8
-#: money/templates/strategy_view.html:21
+#: money/templates/strategy_view.html:23
 msgid "Information"
 msgstr "Información"
 
@@ -1582,7 +1556,7 @@ msgstr "Por favor establece la cantidad a invertir "
 msgid "Calculate"
 msgstr "Calcular"
 
-#: money/templates/investment_pairs.html:62 money/views.py:2015
+#: money/templates/investment_pairs.html:62 money/views.py:2004
 msgid "Something is wrong"
 msgstr "Algo está mal"
 
@@ -1693,17 +1667,17 @@ msgid "Leverage"
 msgstr "Apalancamiento"
 
 #: money/templates/investment_view.html:45
-#: money/templates/strategy_view.html:35
+#: money/templates/strategy_view.html:37
 msgid "Current investment operations"
 msgstr "Operaciones de inversión actuales"
 
 #: money/templates/investment_view.html:46
-#: money/templates/strategy_view.html:36
+#: money/templates/strategy_view.html:38
 msgid "Investment operations"
 msgstr "Operaciones de inversión"
 
 #: money/templates/investment_view.html:47
-#: money/templates/strategy_view.html:37
+#: money/templates/strategy_view.html:39
 msgid "Historical investment operations"
 msgstr "Operaciones de inversión históricas"
 
@@ -1718,10 +1692,8 @@ msgid "Account currrency"
 msgstr "Divisa de la cuenta"
 
 #: money/templates/investment_view.html:122
-#, fuzzy
-#| msgid "Investment operations"
 msgid "Investment orders"
-msgstr "Operaciones de inversión"
+msgstr "Órdenes de inversión"
 
 #: money/templates/investment_view.html:125
 #, fuzzy
@@ -1760,10 +1732,8 @@ msgid "Add a quote to product"
 msgstr "Añadir una nueva cotización a '%(product_name)s'"
 
 #: money/templates/investment_view.html:166
-#, fuzzy
-#| msgid "Last quote"
 msgid "Delete last quote"
-msgstr "Última cotización"
+msgstr "Borrar última cotización"
 
 #: money/templates/investment_view.html:174
 #, fuzzy
@@ -1844,7 +1814,7 @@ msgstr "Apalancamiento de la inversión seleccionada"
 
 #: money/templates/investments_same_product_change_selling_price.html:20
 msgid "Number of shares selected"
-msgstr ""
+msgstr "Número de acciones seleccionadas"
 
 #: money/templates/investments_same_product_change_selling_price.html:21
 msgid "Average price of selected shares"
@@ -1869,10 +1839,8 @@ msgstr "Establecer el precio de venta por porcentaje"
 
 #: money/templates/investments_same_product_change_selling_price.html:28
 #: money/templates/investments_same_product_change_selling_price.html:40
-#, fuzzy
-#| msgid "Net gains"
 msgid "Set a gain"
-msgstr "Ganancias netas"
+msgstr "Establece una ganancia"
 
 #: money/templates/investments_same_product_change_selling_price.html:29
 #: money/templates/investments_same_product_change_selling_price.html:45
@@ -1880,10 +1848,8 @@ msgid "Set a price"
 msgstr "Establece un precio"
 
 #: money/templates/investments_same_product_change_selling_price.html:69
-#, fuzzy
-#| msgid "Selling point"
 msgid "Selling price"
-msgstr "Punto de venta"
+msgstr "Precio de venta"
 
 #: money/templates/order_delete.html:6
 msgid "Confirm order delete"
@@ -1938,10 +1904,8 @@ msgid "Products search"
 msgstr "Búsqueda de productos"
 
 #: money/templates/product_list_search.html:17
-#, fuzzy
-#| msgid "Search a product:"
 msgid "Search products"
-msgstr "Busca un producto:"
+msgstr "Buscar productos"
 
 #: money/templates/product_list_search.html:75
 #: money/templates/product_new_update.html:33
@@ -1973,10 +1937,8 @@ msgid "Product ranges chart"
 msgstr "Rangos de productos"
 
 #: money/templates/product_ranges.html:33
-#, fuzzy
-#| msgid "Current balance"
 msgid "Current price: "
-msgstr "Saldo actual"
+msgstr "Saldo actual: "
 
 #: money/templates/product_update.html:5
 msgid "Product update"
@@ -1999,10 +1961,8 @@ msgid "Obsolete"
 msgstr ""
 
 #: money/templates/product_view.html:17
-#, fuzzy
-#| msgid "Concept list"
 msgid "Quote list"
-msgstr "Listado de conceptos"
+msgstr "Listado de cotizaciones"
 
 #: money/templates/product_view.html:20
 #, fuzzy
@@ -2054,7 +2014,7 @@ msgstr "Busca un producto:"
 
 #: money/templates/products_comparation.html:22
 msgid "Switch"
-msgstr ""
+msgstr "Intercambiar"
 
 #: money/templates/products_comparation.html:23
 #, fuzzy
@@ -2083,10 +2043,8 @@ msgid "Data"
 msgstr "Datos"
 
 #: money/templates/quote_list.html:5
-#, fuzzy
-#| msgid "Quotes chart"
 msgid "Quotes list"
-msgstr "Gráfico de cotizaciones"
+msgstr "Listado de cotizaciones"
 
 #: money/templates/quote_new.html:5
 #, python-format
@@ -2094,10 +2052,8 @@ msgid " Add a new quote to '%(product_name)s'"
 msgstr "Añadir una nueva cotización a '%(product_name)s'"
 
 #: money/templates/quote_update.html:5
-#, fuzzy
-#| msgid "Update quotes"
 msgid "Update a quote"
-msgstr "Actualizar cotizaciones"
+msgstr "Actualiza una cotización"
 
 #: money/templates/report_concepts.html:12
 msgid "Monthly report concepts"
@@ -2122,22 +2078,16 @@ msgid " Historical concept report of '%(concept_name)s'"
 msgstr "Detalles de la cuenta '%(investment)s'"
 
 #: money/templates/report_concepts_historical.html:58
-#, fuzzy
-#| msgid "Total balance"
 msgid "Total balance is: "
-msgstr "Saldo total"
+msgstr "Saldo total es: "
 
 #: money/templates/report_concepts_historical.html:59
-#, fuzzy
-#| msgid "Average price"
 msgid "Average balance is: "
-msgstr "Precio medio"
+msgstr "El saldo medio es: "
 
 #: money/templates/report_concepts_historical.html:60
-#, fuzzy
-#| msgid "Final balance"
 msgid "Median balance is: "
-msgstr "Saldo final"
+msgstr "El saldo mediano es: "
 
 #: money/templates/report_derivatives.html:6
 #, python-format
@@ -2145,10 +2095,8 @@ msgid "Derivatives report of year '%(year)s'"
 msgstr ""
 
 #: money/templates/report_derivatives.html:8
-#, fuzzy
-#| msgid "Editable"
 msgid "Table"
-msgstr "Modificable"
+msgstr "Tabla"
 
 #: money/templates/report_derivatives.html:13
 #, fuzzy
@@ -2157,22 +2105,16 @@ msgid "Historical values"
 msgstr "Ganancias netas históricas"
 
 #: money/templates/report_derivatives.html:18
-#, fuzzy
-#| msgid "Daily adjustment"
 msgid "Total adjustments"
-msgstr "Ajuste diario"
+msgstr "Ajustes totales"
 
 #: money/templates/report_derivatives.html:19
-#, fuzzy
-#| msgid "Total balance"
 msgid "Total guarantees"
-msgstr "Saldo total"
+msgstr "Garantías totales"
 
 #: money/templates/report_derivatives.html:20
-#, fuzzy
-#| msgid "Bank commissions"
 msgid "Total commissions"
-msgstr "Comisiones bancarias"
+msgstr "Comisiones totales"
 
 #: money/templates/report_derivatives.html:21
 #, fuzzy
@@ -2199,10 +2141,8 @@ msgid "Total rollover received"
 msgstr "Rollover recibido"
 
 #: money/templates/report_dividends.html:12
-#, fuzzy
-#| msgid "Dividends"
 msgid "Dividends report"
-msgstr "Dividendos"
+msgstr "Informe de dividendos"
 
 #: money/templates/report_dividends.html:16
 msgid "Max days to update dividends alert"
@@ -2216,34 +2156,24 @@ msgid "Post an estimation"
 msgstr "Transferencia. Destino"
 
 #: money/templates/report_dividends.html:38
-#, fuzzy
-#| msgid "Enter a string"
 msgid "Enter a year"
-msgstr "Introduce una cadena"
+msgstr "Introduce un año"
 
 #: money/templates/report_dividends.html:39
-#, fuzzy
-#| msgid "Expiration"
 msgid "Estimation"
-msgstr "Expiración"
+msgstr "Estimación"
 
 #: money/templates/report_dividends.html:39
-#, fuzzy
-#| msgid "Enter a string"
 msgid "Enter a estimation"
-msgstr "Introduce una cadena"
+msgstr "Introduce una estimación"
 
 #: money/templates/report_dividends.html:44
-#, fuzzy
-#| msgid "Balance"
 msgid "Cancel"
-msgstr "Saldo"
+msgstr "Cancelar"
 
 #: money/templates/report_dividends.html:56
-#, fuzzy
-#| msgid "Current balance"
 msgid "Current price"
-msgstr "Saldo actual"
+msgstr "Precio actual"
 
 #: money/templates/report_dividends.html:57
 #, fuzzy
@@ -2252,20 +2182,16 @@ msgid "DPS"
 msgstr "% DPS"
 
 #: money/templates/report_dividends.html:59
-#, fuzzy
-#| msgid "Total balance"
 msgid "Estimated balance"
-msgstr "Saldo total"
+msgstr "Saldo estimado"
 
 #: money/templates/report_dividends.html:60
 msgid "Percentage"
-msgstr ""
+msgstr "Porcentaje"
 
 #: money/templates/report_dividends.html:61
-#, fuzzy
-#| msgid "Active"
 msgid "Actions"
-msgstr "Activa"
+msgstr "Acciones"
 
 #: money/templates/report_dividends.html:72
 #: money/templates/report_dividends.html:77 money/templates/settings.html:27
@@ -2309,25 +2235,35 @@ msgstr "Obtener el informe de ingresos"
 msgid "Invested assets evolution report"
 msgstr ""
 
-#: money/templates/report_total.html:7
+#: money/templates/report_total.html:9
 msgid "Total report"
 msgstr "Informe total"
 
-#: money/templates/report_total.html:17
-msgid "Get income report"
-msgstr "Obtener el informe de ingresos"
-
 #: money/templates/report_total.html:19
-msgid "Show gains by product type"
-msgstr "Mostrar ganancias por tipo de producto"
+msgid "Month evolution"
+msgstr "Evolución mensual"
+
+#: money/templates/report_total.html:20
+msgid "Income report"
+msgstr "Informe de ingresos"
 
 #: money/templates/report_total.html:21
-msgid "Gains by product type report"
+#, fuzzy
+#| msgid "Gains by product type report"
+msgid "Gains by product type"
 msgstr "Informe de ganancias por tipo de producto"
 
 #: money/templates/report_total_income_details.html:6
 msgid "Total details"
 msgstr "Detalles del total"
+
+#: money/templates/report_total_income_details.html:17
+msgid "Incomes"
+msgstr "Ingresos"
+
+#: money/templates/report_total_income_details.html:18
+msgid "Expenses"
+msgstr "Gastos"
 
 #: money/templates/settings.html:10
 msgid "Personal preferences"
@@ -2339,7 +2275,7 @@ msgstr "Guardar preferencias"
 
 #: money/templates/settings.html:29
 msgid "Must be a integer number"
-msgstr ""
+msgstr "Debe ser un número entero"
 
 #: money/templates/strategy_delete.html:6
 #, fuzzy
@@ -2358,22 +2294,16 @@ msgid "Check to show old strategies"
 msgstr "Marca para mostrar las cuentas inactivas"
 
 #: money/templates/strategy_list.html:17 money/templates/strategy_new.html:5
-#, fuzzy
-#| msgid "Add a new credit card"
 msgid "Add a new strategy"
-msgstr "Añade una nueva tarjeta de crédito"
+msgstr "Añade una nueva estrategia"
 
-#: money/templates/strategy_update.html:5
-#, fuzzy
-#| msgid "Update quotes"
+#: money/templates/strategy_update.html:5 money/templates/strategy_view.html:83
 msgid "Update strategy"
-msgstr "Actualizar cotizaciones"
+msgstr "Actualizar estrategia"
 
 #: money/templates/strategy_update.html:14
-#, fuzzy
-#| msgid "Delete this transfer"
 msgid "Delete this strategy"
-msgstr "Borrar esta transferencia"
+msgstr "Borrar esta estrategia"
 
 #: money/templates/strategy_view.html:20
 #, fuzzy, python-format
@@ -2381,21 +2311,21 @@ msgstr "Borrar esta transferencia"
 msgid "Strategy details of '%(strategy)s'"
 msgstr "Detalles de la inversión '%(investment)s'"
 
-#: money/templates/strategy_view.html:29
+#: money/templates/strategy_view.html:31
 msgid "Types"
 msgstr "Tipos"
 
-#: money/templates/strategy_view.html:64
-#, fuzzy
-#| msgid "Update this credit card"
-msgid "Update this strategy"
-msgstr "Modificar esta tarjeta de crédito"
-
-#: money/templates/strategy_view.html:66
-#, fuzzy
-#| msgid "Total report"
+#: money/templates/strategy_view.html:67
 msgid "Show detailed report"
-msgstr "Informe total"
+msgstr "Mostrar informe detallado"
+
+#: money/templates/strategy_view.html:82
+msgid "Strategy orders"
+msgstr "Órdenes de estrategia"
+
+#: money/templates/strategy_view.html:84
+msgid "Delete strategy"
+msgstr "Borrar estrategia"
 
 #: money/templates/widget_modal_window.html:13
 msgid "Show"
@@ -2405,119 +2335,139 @@ msgstr "Mostrar"
 msgid "Modal ajax button"
 msgstr ""
 
-#: money/views.py:198
+#: money/views.py:195
 msgid "Searching products that contain '{}' in database"
 msgstr ""
 
-#: money/views.py:214
+#: money/views.py:211
 msgid "Favorites product list"
 msgstr "Listado de productos favoritos"
 
-#: money/views.py:223
+#: money/views.py:220
 msgid "Indexes product list"
 msgstr "Listado de productos índices"
 
-#: money/views.py:236
+#: money/views.py:233
 #, fuzzy
 #| msgid "Products list"
 msgid "CFD product list"
 msgstr "Listado de productos"
 
-#: money/views.py:363
+#: money/views.py:360
 msgid "You must upload a file"
 msgstr "Debe subir un fichero"
 
-#: money/views.py:369
+#: money/views.py:366
 msgid "File is not CSV type"
 msgstr "El fichero no es del tipo CSV"
 
-#: money/views.py:374
+#: money/views.py:371
 msgid "Uploaded file is too big ({} MB)."
 msgstr ""
 
-#: money/views.py:421
+#: money/views.py:418
 msgid "Account created successfully"
 msgstr ""
 
-#: money/views.py:438
+#: money/views.py:435
 msgid "Account updated successfully"
 msgstr ""
 
-#: money/views.py:449
+#: money/views.py:446
 msgid "Account was successfully deleted"
 msgstr ""
 
-#: money/views.py:599 money/views.py:653
+#: money/views.py:596 money/views.py:650
 msgid "Amount must be negative"
 msgstr ""
 
-#: money/views.py:601 money/views.py:655
+#: money/views.py:598 money/views.py:652
 msgid "Amount must be positive"
 msgstr ""
 
-#: money/views.py:610
+#: money/views.py:607
 #, python-brace-format
 msgid "Searching accounts operations that contain '{search}'"
 msgstr ""
 
-#: money/views.py:679
+#: money/views.py:676
 msgid ""
 "Positive gains - Negative gains = {positives} {negatives} = {positives"
 "+negatives}"
 msgstr ""
 
-#: money/views.py:680
+#: money/views.py:677
 msgid ""
 "Investments balance with futures is {Currency(qso.iotm."
 "current_balance_futures_user(), request.local_currency)}"
 msgstr ""
 
-#: money/views.py:954
+#: money/views.py:951
 msgid "Bank created successfully"
 msgstr ""
 
-#: money/views.py:978
+#: money/views.py:975
 msgid "Bank updated successfully"
-msgstr ""
+msgstr "Banco actualizado con éxito"
 
-#: money/views.py:1000
+#: money/views.py:997
 msgid "Bank was successfully deleted"
-msgstr ""
+msgstr "Banco borrado con éxito"
 
-#: money/views.py:1245
+#: money/views.py:1234
 msgid "Quote was updated successfully"
 msgstr ""
 
-#: money/views.py:1388
-#, fuzzy
-#| msgid "Credit card refund"
+#: money/views.py:1377
 msgid "Credit card payed."
-msgstr "Tarjeta de crédito. Devolución"
+msgstr "Tarjeta de crédito. Pagado"
 
-#: money/views.py:1457
-#, fuzzy
-#| msgid "Credit card refund"
+#: money/views.py:1446
 msgid "Credit card bill refunded"
 msgstr "Tarjeta de crédito. Devolución"
 
-#: money/views.py:1851
+#: money/views.py:1840
 msgid ""
 "Order was successfully deleted. Please delete it from your bank if necessary."
 msgstr ""
 
-#: money/views.py:1992
+#: money/views.py:1981
 msgid "Settings saved successfully"
-msgstr ""
+msgstr "Preferencias guardadas con éxito"
 
-#: money/views.py:1994
-#, fuzzy
-#| msgid "Something is wrong"
+#: money/views.py:1983
 msgid "Something wrong"
 msgstr "Algo está mal"
 
-#: money/views.py:2013
+#: money/views.py:2002
 msgid "Investments updated saved successfully"
 msgstr ""
+
+#~ msgid "Month"
+#~ msgstr "Mes"
+
+#~ msgid "Account balance"
+#~ msgstr "Saldo de la cuenta"
+
+#~ msgid "Investment balance"
+#~ msgstr "Saldo de la inversión"
+
+#~ msgid "Last month diff"
+#~ msgstr "Diferencia del último mes"
+
+#~ msgid "% year to date"
+#~ msgstr "% anual hasta la fecha"
+
+#~ msgid "Gross dividends"
+#~ msgstr "Dividendos brutos"
+
+#~ msgid "Show gains by product type"
+#~ msgstr "Mostrar ganancias por tipo de producto"
+
+#, fuzzy
+#~| msgid "Update this credit card"
+#~ msgid "Update this strategy"
+#~ msgstr "Modificar esta tarjeta de crédito"
 
 #~ msgid "Initial balance"
 #~ msgstr "Saldo inicial"

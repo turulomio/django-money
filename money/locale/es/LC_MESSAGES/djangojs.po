@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-14 06:30+0000\n"
+"POT-Creation-Date: 2021-06-30 06:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: money/templates/account_view.html:74
-#: money/templates/vuecomponents/TableInvestmentOperations.js:113
+#: money/templates/account_view.html:74 money/templates/report_total.html:177
+#: money/templates/vuecomponents/TableInvestmentOperations.js:129
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:197
 #: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:197
 msgid "Name"
@@ -46,12 +46,12 @@ msgstr "Saldo máximo"
 msgid "Balance"
 msgstr "Saldo"
 
-#: money/templates/account_view.html:79
+#: money/templates/account_view.html:79 money/templates/report_total.html:173
 #: money/templates/vuecomponents/TableAccountOperations.js:67
 #: money/templates/vuecomponents/TableDividends.js:84
-#: money/templates/vuecomponents/TableInvestmentOperations.js:77
-#: money/templates/vuecomponents/TableInvestmentOperations.js:91
-#: money/templates/vuecomponents/TableInvestmentOperations.js:105
+#: money/templates/vuecomponents/TableInvestmentOperations.js:93
+#: money/templates/vuecomponents/TableInvestmentOperations.js:107
+#: money/templates/vuecomponents/TableInvestmentOperations.js:121
 msgid "Actions"
 msgstr "Acciones"
 
@@ -95,23 +95,23 @@ msgstr "Febrero"
 
 #: money/templates/report_concepts_historical.html:72
 msgid "March"
-msgstr ""
+msgstr "Marzo"
 
 #: money/templates/report_concepts_historical.html:73
 msgid "April"
-msgstr ""
+msgstr "Abril"
 
 #: money/templates/report_concepts_historical.html:74
 msgid "May"
-msgstr ""
+msgstr "Mayo"
 
 #: money/templates/report_concepts_historical.html:75
 msgid "June"
-msgstr ""
+msgstr "Junio"
 
 #: money/templates/report_concepts_historical.html:76
 msgid "July"
-msgstr ""
+msgstr "Julio"
 
 #: money/templates/report_concepts_historical.html:77
 msgid "August"
@@ -135,6 +135,7 @@ msgstr ""
 
 #: money/templates/report_concepts_historical.html:82
 #: money/templates/report_evolution.html:148
+#: money/templates/report_total.html:172
 msgid "Total"
 msgstr "Total"
 
@@ -152,18 +153,22 @@ msgid "Difference"
 msgstr "Diferencia"
 
 #: money/templates/report_evolution.html:144
+#: money/templates/report_total.html:168
 msgid "Incomes"
 msgstr "Ingresos"
 
 #: money/templates/report_evolution.html:145
+#: money/templates/report_total.html:180
 msgid "Net gains"
 msgstr "Ganancias netas"
 
 #: money/templates/report_evolution.html:146
+#: money/templates/report_total.html:181
 msgid "Net dividends"
 msgstr "Dividendos netos"
 
 #: money/templates/report_evolution.html:147
+#: money/templates/report_total.html:169
 msgid "Expenses"
 msgstr "Gastos"
 
@@ -177,17 +182,17 @@ msgstr "Porcentaje"
 
 #: money/templates/report_evolution.html:157
 msgid "Net gains + Dividends"
-msgstr ""
+msgstr "Ganancias netas + Dividendos"
 
 #: money/templates/report_evolution.html:158
 msgid "Custody commissions"
-msgstr ""
+msgstr "Comisiones de custodia"
 
 #: money/templates/report_evolution.html:159
 #: money/templates/vuecomponents/TableDividends.js:82
-#: money/templates/vuecomponents/TableInvestmentOperations.js:73
-#: money/templates/vuecomponents/TableInvestmentOperations.js:87
-#: money/templates/vuecomponents/TableInvestmentOperations.js:101
+#: money/templates/vuecomponents/TableInvestmentOperations.js:89
+#: money/templates/vuecomponents/TableInvestmentOperations.js:103
+#: money/templates/vuecomponents/TableInvestmentOperations.js:117
 #: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:166
 #: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:179
 #: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:192
@@ -223,11 +228,57 @@ msgstr "Por lo que estoy ganando {0} que representa {1} por año."
 msgid "So I'm losing {0} which is {1} per year."
 msgstr "Por lo que estoy perdiendo {0} que representa {1} por año."
 
+#: money/templates/report_total.html:158 money/templates/report_total.html:167
+msgid "Month"
+msgstr "Mes"
+
+#: money/templates/report_total.html:159
+msgid "Account balance"
+msgstr "Saldo en cuentas"
+
+#: money/templates/report_total.html:160
+msgid "Investment balance"
+msgstr "Saldo en inversiones"
+
+#: money/templates/report_total.html:161
+msgid "Total balance"
+msgstr "Saldo total"
+
+#: money/templates/report_total.html:162
+msgid "Last month difference"
+msgstr "Diferencia con último mes"
+
+#: money/templates/report_total.html:163
+msgid "% year to date"
+msgstr ""
+
+#: money/templates/report_total.html:170
+#: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:167
+#: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:180
+#: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:193
+msgid "Gains"
+msgstr "Ganancias"
+
+#: money/templates/report_total.html:171
+msgid "Dividends"
+msgstr "Dividendos"
+
+#: money/templates/report_total.html:178
+#: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:164
+#: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:177
+#: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:190
+msgid "Gross gains"
+msgstr "Ganancias brutas"
+
+#: money/templates/report_total.html:179
+msgid "Gross dividends"
+msgstr "Dividendos brutos"
+
 #: money/templates/vuecomponents/TableAccountOperations.js:62
 #: money/templates/vuecomponents/TableDividends.js:77
-#: money/templates/vuecomponents/TableInvestmentOperations.js:67
-#: money/templates/vuecomponents/TableInvestmentOperations.js:81
-#: money/templates/vuecomponents/TableInvestmentOperations.js:95
+#: money/templates/vuecomponents/TableInvestmentOperations.js:83
+#: money/templates/vuecomponents/TableInvestmentOperations.js:97
+#: money/templates/vuecomponents/TableInvestmentOperations.js:111
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:158
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:171
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:184
@@ -247,30 +298,30 @@ msgid "Amount"
 msgstr "Cantidad"
 
 #: money/templates/vuecomponents/TableAccountOperations.js:66
-#: money/templates/vuecomponents/TableInvestmentOperations.js:76
-#: money/templates/vuecomponents/TableInvestmentOperations.js:90
-#: money/templates/vuecomponents/TableInvestmentOperations.js:104
+#: money/templates/vuecomponents/TableInvestmentOperations.js:92
+#: money/templates/vuecomponents/TableInvestmentOperations.js:106
+#: money/templates/vuecomponents/TableInvestmentOperations.js:120
 msgid "Comment"
 msgstr "Comentario"
 
 #: money/templates/vuecomponents/TableDividends.js:79
-#: money/templates/vuecomponents/TableInvestmentOperations.js:71
-#: money/templates/vuecomponents/TableInvestmentOperations.js:85
-#: money/templates/vuecomponents/TableInvestmentOperations.js:99
+#: money/templates/vuecomponents/TableInvestmentOperations.js:87
+#: money/templates/vuecomponents/TableInvestmentOperations.js:101
+#: money/templates/vuecomponents/TableInvestmentOperations.js:115
 msgid "Gross"
 msgstr "Bruto"
 
 #: money/templates/vuecomponents/TableDividends.js:80
-#: money/templates/vuecomponents/TableInvestmentOperations.js:74
-#: money/templates/vuecomponents/TableInvestmentOperations.js:88
-#: money/templates/vuecomponents/TableInvestmentOperations.js:102
+#: money/templates/vuecomponents/TableInvestmentOperations.js:90
+#: money/templates/vuecomponents/TableInvestmentOperations.js:104
+#: money/templates/vuecomponents/TableInvestmentOperations.js:118
 msgid "Net"
 msgstr "Neto"
 
 #: money/templates/vuecomponents/TableDividends.js:81
-#: money/templates/vuecomponents/TableInvestmentOperations.js:72
-#: money/templates/vuecomponents/TableInvestmentOperations.js:86
-#: money/templates/vuecomponents/TableInvestmentOperations.js:100
+#: money/templates/vuecomponents/TableInvestmentOperations.js:88
+#: money/templates/vuecomponents/TableInvestmentOperations.js:102
+#: money/templates/vuecomponents/TableInvestmentOperations.js:116
 #: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:165
 #: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:178
 #: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:191
@@ -285,9 +336,9 @@ msgstr "DPA"
 msgid "Account"
 msgstr "Cuenta"
 
-#: money/templates/vuecomponents/TableInvestmentOperations.js:68
-#: money/templates/vuecomponents/TableInvestmentOperations.js:82
-#: money/templates/vuecomponents/TableInvestmentOperations.js:96
+#: money/templates/vuecomponents/TableInvestmentOperations.js:84
+#: money/templates/vuecomponents/TableInvestmentOperations.js:98
+#: money/templates/vuecomponents/TableInvestmentOperations.js:112
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:159
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:172
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:185
@@ -297,9 +348,9 @@ msgstr "Cuenta"
 msgid "Operation"
 msgstr "Operación"
 
-#: money/templates/vuecomponents/TableInvestmentOperations.js:69
-#: money/templates/vuecomponents/TableInvestmentOperations.js:83
-#: money/templates/vuecomponents/TableInvestmentOperations.js:97
+#: money/templates/vuecomponents/TableInvestmentOperations.js:85
+#: money/templates/vuecomponents/TableInvestmentOperations.js:99
+#: money/templates/vuecomponents/TableInvestmentOperations.js:113
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:160
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:173
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:186
@@ -309,32 +360,26 @@ msgstr "Operación"
 msgid "Shares"
 msgstr "Acciones"
 
-#: money/templates/vuecomponents/TableInvestmentOperations.js:70
-#: money/templates/vuecomponents/TableInvestmentOperations.js:84
-#: money/templates/vuecomponents/TableInvestmentOperations.js:98
+#: money/templates/vuecomponents/TableInvestmentOperations.js:86
+#: money/templates/vuecomponents/TableInvestmentOperations.js:100
+#: money/templates/vuecomponents/TableInvestmentOperations.js:114
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:161
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:174
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:187
 msgid "Price"
 msgstr "Precio"
 
-#: money/templates/vuecomponents/TableInvestmentOperations.js:75
-#: money/templates/vuecomponents/TableInvestmentOperations.js:89
-#: money/templates/vuecomponents/TableInvestmentOperations.js:103
+#: money/templates/vuecomponents/TableInvestmentOperations.js:91
+#: money/templates/vuecomponents/TableInvestmentOperations.js:105
+#: money/templates/vuecomponents/TableInvestmentOperations.js:119
 msgid "Currency factor"
-msgstr ""
+msgstr "Factor de divisa"
 
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:162
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:175
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:188
 msgid "Invested"
 msgstr "Invertido"
-
-#: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:164
-#: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:177
-#: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:190
-msgid "Gross gains"
-msgstr "Ganancias brutas"
 
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:165
 #: money/templates/vuecomponents/TableInvestmentOperationsCurrent.js:178
@@ -380,9 +425,3 @@ msgstr "Bruto al final"
 #: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:190
 msgid "Gains gross"
 msgstr "Ganancias brutas"
-
-#: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:167
-#: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:180
-#: money/templates/vuecomponents/TableInvestmentOperationsHistorical.js:193
-msgid "Gains"
-msgstr "Ganancias"
