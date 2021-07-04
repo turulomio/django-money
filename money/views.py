@@ -1027,6 +1027,33 @@ def report_total(request):
     
     return render(request, 'report_total.html', locals())
     
+    
+
+@timeit
+@login_required
+def report_export(request):
+    start=timezone.now()
+    year=date.today().year
+    last_year_datetime=dtaware_month_end(year-1, 12, request.local_zone)
+    
+    last_year_balance=Currency(total_balance(last_year_datetime, request.local_currency)['total_user'], request.local_currency)
+    print("Loading alltotals last_year took {}".format(timezone.now()-start))
+    
+    list_report=listdict_report_total(year, last_year_balance, request.local_currency, request.local_zone)
+    json_list_report=listdict2json(list_report)
+
+    list_report_incomes=listdict_report_total_income(request, Investments.objects.all(), year, request.local_currency, request.local_zone)
+    json_list_report_incomes=listdict2json(list_report_incomes)
+
+
+    list_report_by_type=listdict_investments_gains_by_product_type(year, request.local_currency)
+    json_list_report_by_type=listdict2json(list_report_by_type)
+
+    print("Loading export report took {}".format(timezone.now()-start))
+    
+    return render(request, 'report_export.html', locals())
+    
+    
 @timeit
 @login_required
 def report_evolution(request):

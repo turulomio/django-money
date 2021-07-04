@@ -29,6 +29,7 @@ class MoneyMiddleware:
         grReport.append(Action(_("Evolution"), None, "report_evolution", True))
         grReport.append(Action(_("Ranges"), None, "product_ranges", True))
         grReport.append(Action(_("Investments ranking"), None, "investment_ranking", True))
+        grReport.append(Action(_("Export"), None, "report_export", True))
         grReport.append(grCharts)
 
         grAdministration=Group(1, _("Management"), "20",  True)
