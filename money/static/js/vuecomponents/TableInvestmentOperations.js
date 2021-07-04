@@ -26,6 +26,10 @@ Vue.component('table-investmentoperations', {
         output:{
             required:true,
             default: "investment",
+        },
+        locale:{
+            required:true,
+            default: "es",
         }
     },
     template: `
@@ -77,6 +81,19 @@ Vue.component('table-investmentoperations', {
     computed:{
     },
     methods: {
+        // HASN'T MIXIN VIXIBILITY
+        currency_string(num, currency, decimals=2){
+            return currency_generic_string(num, currency, this.locale,decimals )
+        },
+        currency_html(num, currency, decimals=2){
+            return currency_generic_html(num, currency, this.locale,decimals )
+        },
+        percentage_string(num, decimals=2){
+            return percentage_generic_string(num,this.locale,decimals )
+        },
+        percentage_html(num, decimals=2){
+            return percentage_generic_html(num,this.locale,decimals )
+        },
         table_headers(){
             if (this.output=="account"){
                 var r= [

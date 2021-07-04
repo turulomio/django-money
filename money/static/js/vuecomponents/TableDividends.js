@@ -13,6 +13,10 @@ Vue.component('table-dividends', {
             required:true,
             default:true,
         },
+        locale:{
+            required:true,
+            default: "es",
+        }
     },
     template: `
         <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header :height="$attrs.height" :ref="$vnode.tag">
@@ -64,7 +68,7 @@ Vue.component('table-dividends', {
     },
     methods: {
         currency(value){
-            return currency_html(value, this.currency_account)
+            return currency_generic_html(value, this.currency_account, this.locale)
         },
         editDividend(item){
             window.location.href=`${this.url_root}dividend/update/${item.id}`

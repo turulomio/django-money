@@ -5,6 +5,7 @@
 {% load mymenu %}
 {% load random_numbers %}
 
+
 {# Make modifiable head elements #}
 <head>
     <title>{% block title %}{% mypagetitle %}{% endblock title %}</title>
@@ -119,11 +120,26 @@
                         data: function () {
                             return {
                                 snackbar:true,
+                                locale: '{{ LANGUAGE_CODE }}',
                                 {% autoescape off %}
                                 {% mymenuvuetree %}
                                 {% endautoescape%}
                             }
-                        }
+                        },
+                        methods: {
+                            currency_string(num, currency, decimals=2){
+                                return currency_generic_string(num, currency, '{{ LANGUAGE_CODE }}',decimals )
+                            },
+                            currency_html(num, currency, decimals=2){
+                                return currency_generic_html(num, currency, '{{ LANGUAGE_CODE }}',decimals )
+                            },
+                            percentage_string(num, decimals=2){
+                                return percentage_generic_string(num,'{{ LANGUAGE_CODE }}',decimals )
+                            },
+                            percentage_html(num, decimals=2){
+                                return percentage_generic_html(num,'{{ LANGUAGE_CODE }}',decimals )
+                            },
+                        },
                     }
                 </script>
                 {% block content %}

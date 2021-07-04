@@ -27,6 +27,10 @@ Vue.component('table-investmentoperationshistorical', {
             required:true,
             default:"account",
         },
+        locale:{
+            required:true,
+            default: "es",
+        }
     },
     template: `
         <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="dt_end" fixed-header :height="$attrs.height"  :key="$attrs.key" ref="table">
@@ -145,11 +149,11 @@ Vue.component('table-investmentoperationshistorical', {
     methods: {
         currency(value){
             if (this.output=="account"){
-                return currency_html(value, this.currency_account)
+                return currency_generic_html(value, this.currency_account,this.locale)
             } else if (this.output=="investment"){
-                return currency_html(value, this.currency_investment)
+                return currency_generic_html(value, this.currency_investment,this.locale)
             } else if (this.output=="user"){
-                return currency_html(value, this.currency_user)
+                return currency_generic_html(value, this.currency_user,this.locale)
             }
         },
         table_headers(){

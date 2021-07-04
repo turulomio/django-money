@@ -112,27 +112,27 @@ function my_round(num, decimals = 2) {
     return Math.round(num*Math.pow(10, decimals))/Math.pow(10, decimals)
 }
 
-function percentage_string(num, decimals=2){
+function percentage_generic_string(num, locale, decimals=2){
     if (isNaN(num)) return "- - - %"
-    return "{0} %".format(my_round(num*100,decimals).toLocaleString());
+    return "{0} %".format(my_round(num*100,decimals).toLocaleString(locale,{ minimumFractionDigits: decimals,  }));
 }
 
-function percentage_html(num, decimals=2){
+function percentage_generic_html(num, locale, decimals=2){
     if (num>=0 || isNaN(num)){
-        return "<span>{0}</span>".format(percentage_string(num, decimals))
+        return "<span>{0}</span>".format(percentage_generic_string(num, locale, decimals))
     } else {
-        return "<span class='vuered'>{0}</span>".format(percentage_string(num, decimals));
+        return "<span class='vuered'>{0}</span>".format(percentage_generic_string(num, locale, decimals));
     }
 }
-function currency_string(num, currency, decimals=2){
-    return "{0} {1}".format(my_round(num,decimals).toLocaleString('es',{ minimumFractionDigits: decimals,  }), currency_symbol(currency));
+function currency_generic_string(num, currency, locale, decimals=2){
+    return "{0} {1}".format(my_round(num,decimals).toLocaleString(locale, { minimumFractionDigits: decimals,  }), currency_symbol(currency));
 }
 
-function currency_html(num, currency, decimals=2){
+function currency_generic_html(num, currency, locale, decimals=2){
     if (num>=0){
-        return currency_string(num, currency, decimals)
+        return currency_generic_string(num, currency, locale, decimals)
     } else {
-        return "<span class='vuered'>{0}</span>".format(currency_string(num, currency, decimals));
+        return "<span class='vuered'>{0}</span>".format(currency_generic_string(num, currency, locale, decimals));
     }
 }
 

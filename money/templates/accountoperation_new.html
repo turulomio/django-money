@@ -5,6 +5,7 @@
 
 {% load static %}
 {% load random_numbers %}
+{% get_current_language as LANGUAGE_CODE %}
 
 {% block head_js_section %}
     <script type="text/javascript" src='{% static "js/vue.min.js" %}'></script>
@@ -48,7 +49,7 @@
         style="min-width: 100px; max-width: 100%;">
             <v-date-picker dense no-title class="mymonthpicker " ref="monthpicker" v-model="monthpicker" type="month"></v-date-picker>
             <v-divider class="mx-2" vertical ></v-divider>
-            <table-accountoperations :items="items_ao" currency_account="{{view.account.currency}}" height="300" url_root="{% url 'home' %}" ref="table_ao" class=" flex-grow-1 flex-shrink-0"></table-accountoperations>
+            <table-accountoperations :items="items_ao" currency_account="{{view.account.currency}}" height="300" url_root="{% url 'home' %}" ref="table_ao" class=" flex-grow-1 flex-shrink-0" locale='{{ LANGUAGE_CODE }}'></table-accountoperations>
         </v-card>
     </div>
 <script>

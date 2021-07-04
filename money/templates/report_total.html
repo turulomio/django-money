@@ -192,7 +192,7 @@
                 return Array(end - start + 1).fill().map((_, idx) => start + idx)
             },
             currency(value){
-                return currency_html(value, this.local_currency)
+                return this.currency_html(value, this.local_currency)
             },
             change_year(){
                 window.location.href='{% url "report_total" %}' + `?year=${this.year}`

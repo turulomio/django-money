@@ -13,6 +13,10 @@ Vue.component('table-accountoperations', {
             required:true,
             default:true,
         },
+        locale:{
+            required:true,
+            default: "es",
+        }
     },
     template: `
         <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header v-bind="$attrs"  :ref="$vnode.tag">
@@ -49,7 +53,7 @@ Vue.component('table-accountoperations', {
     },
     methods: {
         currency(value){
-            return currency_html(value, this.currency_account)
+            return currency_generic_html(value, this.currency_account, this.locale)
         },
         editAO(item){
             window.location.href=`${this.url_root}accountoperation/update/${item.id}`

@@ -27,6 +27,10 @@ Vue.component('table-investmentoperationscurrent', {
             required:true,
             default:"account",
         },
+        locale:{
+            required:true,
+            default: "es",
+        }
     },
     template: `
         <v-data-table dense :headers="table_headers()" :items="items" class="elevation-1" disable-pagination  hide-default-footer sort-by="datetime" fixed-header :height="$attrs.height" :key="$attrs.key">
@@ -143,13 +147,26 @@ Vue.component('table-investmentoperationscurrent', {
         }
     },
     methods: {
+        // HASN'T MIXIN VIXIBILITY
+//         currency_string(num, currency, decimals=2){
+//             return currency_generic_string(num, currency, this.locale,decimals )
+//         },
+//         currency_html(num, currency, decimals=2){
+//             return currency_generic_html(num, currency, this.locale,decimals )
+//         },
+        percentage_string(num, decimals=2){
+            return percentage_generic_string(num,this.locale,decimals )
+        },
+        percentage_html(num, decimals=2){
+            return percentage_generic_html(num,this.locale,decimals )
+        },
         currency(value){
             if (this.output=="account"){
-                return currency_html(value, this.currency_account)
+                return currency_generic_html(value, this.currency_account, this.locale)
             } else if (this.output=="investment"){
-                return currency_html(value, this.currency_investment)
+                return currency_generic_html(value, this.currency_investment, this.locale)
             } else if (this.output=="user"){
-                return currency_html(value, this.currency_user)
+                return currency_generic_html(value, this.currency_user, this.locale)
             }
         },
         table_headers(){
