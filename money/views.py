@@ -693,7 +693,10 @@ def investment_list_last_operation_method(request, method):
         iom=InvestmentsOperationsManager_from_investment_queryset(investments, datetime.now(), request)
         
         for io in iom:
-            ioc_last=IOC(io.investment, io.current_last_operation_excluding_additions())
+            last=io.current_last_operation_excluding_additions()
+            if last is None:
+                continue
+            ioc_last=IOC(io.investment, last )
             ld.append({
                 "id": io.investment.id, 
                 "name": io.investment.fullName(), 
