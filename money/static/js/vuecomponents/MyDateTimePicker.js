@@ -16,7 +16,7 @@ Vue.component('my-datetimepicker', {
             <v-date-picker v-model="date" @change="on_change()"></v-date-picker>
             <v-time-picker  format="24hr" v-model="time" use-seconds @change="on_change()"></v-date-picker>
 
-            <v-btn class="ml-4" color="error" @click="menu=false" >"Close"</v-btn>
+            <v-btn class="ml-4" color="error" @click="menu=false" >{{buttonCloseText}}</v-btn>
         </v-menu>
     </div>
     `,
@@ -26,6 +26,7 @@ Vue.component('my-datetimepicker', {
             date: "",
             time: "",
             localValue: "",
+            buttonCloseText: gettext("Close")
         }
     },
     watch: {
