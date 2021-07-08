@@ -126,6 +126,7 @@ class Stockmarkets(models.Model):
         
     ## Returns the close time of a given date
     def dtaware_closes(self, date):
+
         return dtaware(date, self.closes, self.zone)
     
     def dtaware_closes_futures(self, date):
@@ -141,6 +142,7 @@ class Stockmarkets(models.Model):
     ## Returns a datetime with timezone with the todays stockmarket closes
     def dtaware_today_starts(self):
         return dtaware(date.today(), self.starts, self.zone)
+
 
     ## When we don't know the datetime of a quote because the webpage we are scrapping doesn't gives us, we can use this functions
     ## - If it's saturday or sunday it returns last friday at close time
@@ -795,6 +797,15 @@ class Products(models.Model):
         if self.productstypes.id in (eProductType.CFD, eProductType.Future):
             return self.leverages.multiplier
         return 1
+        
+    def stockmarket_close_time(self):
+        if self.productstypes.id==eProductType.CFD or self.productstypes.id==eProductType.Future:
+            return self.stockmarkets.closes_futures
+        return self.stockmarkets.closes
+    def stockmarket_start_time(self):
+        if self.productstypes.id==eProductType.CFD or self.productstypes.id==eProductType.Future:
+            return self.stockmarkets.starts_futures
+        return self.stockmarkets.starts
 
     def quote(self, dt):
         return cursor_one_row("select * from quote(%s,%s)", (self.id, dt ))

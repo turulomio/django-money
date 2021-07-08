@@ -1223,6 +1223,11 @@ class quote_new(CreateView):
         return reverse_lazy('investment_list_active')
           
     def form_valid(self, form):
+        form.instance.products= Products.objects.get(pk=self.kwargs['products_id'])
+        print(form.data)
+        if form.is_valid():
+            print(form.instance)
+            print(form.cleaned_data)
         return super().form_valid(form)
 
 @login_required
