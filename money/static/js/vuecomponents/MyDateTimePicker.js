@@ -3,20 +3,25 @@ Vue.component('my-datetimepicker', {
         value: {
             required: true
         },
+        locale:  {
+            required:true,
+            default: 'en',
+        }
     },
     template: `
     <div>
         <v-menu v-model="menu" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="auto">
             <template v-slot:activator="{ on, attrs }">
                 <v-row justify="center" align="center">
-                    <v-text-field v-model="localValue" :name="$attrs.name" :label="$attrs.label" prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on"></v-text-field>
-                    <v-icon x-small @click="localValue=''">mdi-backspace</v-icon>
+                    <v-text-field v-model="localValue" v-bind="$attrs" prepend-icon="mdi-calendar" readonly v-on="on"  @click="on_text_click"></v-text-field>
+                    <v-icon class="ml-1" x-small @click="localValue=''">mdi-backspace</v-icon>
                 </v-row>
             </template>
-            <v-date-picker v-model="date" @change="on_change()"></v-date-picker>
-            <v-time-picker  format="24hr" v-model="time" use-seconds @change="on_change()"></v-date-picker>
-
-            <v-btn class="ml-4" color="error" @click="menu=false" >{{buttonCloseText}}</v-btn>
+            <v-row>
+            <v-date-picker no-title v-model="date" @change="on_date_change()" locale="locale" first-day-of-week="1"></v-date-picker>
+            <v-time-picker ref="time" no-title scrollable  format="24hr" v-model="time" use-seconds @click:hour="on_time_click()" @click:minute="on_time_click()" @click:second="on_time_click()" locale="locale"></v-date-picker>
+            </v-row>
+            <v-btn class="ml-4" color="error" @click="on_close()" >{{buttonCloseText}}</v-btn>
         </v-menu>
     </div>
     `,
@@ -31,13 +36,9 @@ Vue.component('my-datetimepicker', {
     },
     watch: {
         localValue (newValue) {
-            console.log("Setting localValue")
-            console.log(newValue)
             this.$emit('input', newValue)
         },
         value (newValue) {
-            console.log("Setting value")
-            console.log(newValue)
             this.localValue = newValue
             if (newValue==""){
                 this.date=new Date().toISOString().substring(0,10)
@@ -50,9 +51,21 @@ Vue.component('my-datetimepicker', {
         }
     },
     methods: {
-        on_change(){
+        on_text_click(){
+            // Changes to hour selection mode
+            if (this.$refs.time) this.$refs.time.selecting=1
+        },
+        on_close(){
+            this.menu=false
+        },
+        on_date_change(){
             this.localValue=this.valuestrings2datetimestring(this.date,this.time)
-            
+        },
+        on_time_click(){
+            if (this.$refs.time.selecting == 3) {
+                this.on_close()
+            }
+            this.localValue=this.valuestrings2datetimestring(this.date,this.time)
         },
         datetimestring2valuestrings(s){
             return new Array(
@@ -69,8 +82,6 @@ Vue.component('my-datetimepicker', {
             
         },
         setWithJsDate(jsdate){
-            console.log(jsdate)
-            console.log(jsdate.toISOString())
             this.localValue=moment(jsdate).format().replace("T", " ")
         },
         setWithStrings(date_str, time_str){
@@ -80,7 +91,6 @@ Vue.component('my-datetimepicker', {
         
     },
     mounted(){
-        console.log("MONTANDO")
         if (this.value==""){
             this.localValue=this.valuestrings2datetimestring("","")
         }
