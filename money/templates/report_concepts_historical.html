@@ -92,7 +92,7 @@ new Vue({
     methods: {
         myheaders,        
         currency(value){
-            return currency_html(value, this.local_currency)
+            return currency_generic_html(value,  this.local_currency, this.locale)
         },
     },
     mounted(){

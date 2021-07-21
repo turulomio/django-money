@@ -702,6 +702,8 @@ def investment_list_last_operation_method(request, method):
                 "name": io.investment.fullName(), 
                 "datetime": ioc_last.d["datetime"], 
                 "last_shares": ioc_last.d['shares'], 
+                "last_price": ioc_last.d['price_investment'], 
+                "decimals": io.investment.products.decimals, 
                 "shares": io.current_shares(),  
                 "balance": io.current_balance_futures_user(),  
                 "gains": io.current_gains_gross_user(),  
@@ -1826,10 +1828,18 @@ class order_new(SuccessMessageMixin, CreateView):
         return form
     
     def get_initial(self):
+        investment_id=self.request.GET.get("investment", None)
+        if  investment_id is not None:
+            investment_id=int(investment_id)
+            investments=Investments.objects.get(pk=investment_id)
+        else:
+            investments=None
+        
         return {
             'date': str(date.today()), 
             'price': self.request.GET.get("price", 0),
             'shares': self.request.GET.get("shares", 0),
+            'investments': investments, 
         }
 
     def get_success_url(self):
